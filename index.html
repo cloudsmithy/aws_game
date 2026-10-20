@@ -117,9 +117,6 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:#fafafa}
 .lvb.reg{color:#00a4a6;border-color:#00a4a6}
 .own{position:absolute;top:0;right:0;min-width:1.55cqw;height:1.55cqw;background:var(--oc);color:#fff;font-size:.85cqw;font-weight:700;display:flex;align-items:center;justify-content:center}
 .sq.owned{background:color-mix(in srgb,var(--oc) 6%,#fff)}
-.sq.stopped .art img{filter:grayscale(1);opacity:.4}
-.sq.stopped .nm{color:var(--mut2)}
-.stp-pill{font-size:.75cqw;color:var(--mut2);font-weight:700}
 .sq.last{box-shadow:inset 0 0 0 .3cqw var(--orange)}
 .toks{position:absolute;left:0;right:0;bottom:.35cqw;display:flex;justify-content:center;gap:.15cqw;z-index:2}
 .art .toks{left:auto;right:-1.1cqw;bottom:-.5cqw;flex-direction:column-reverse;gap:.1cqw}
@@ -272,7 +269,6 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:#fafafa}
 .lvb img.awsi{width:1.15cqw;height:1.15cqw}
 .lvb.asg,.lvb.reg{border:0;padding:0}
 .lvb.asg span,.lvb.reg span{display:none}
-.stp-pill{font-size:.9cqw}
 .sq.last{box-shadow:inset 0 0 0 .3cqw var(--orange)}
 .sq.owned.last{box-shadow:inset 0 0 0 .28cqw var(--oc),0 0 0 .3cqw var(--orange);z-index:2}
 .art .toks{right:-1.3cqw;bottom:-.6cqw}
@@ -361,7 +357,7 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:#fafafa}
 .ownr{font-size:.8cqw}
 .ownr .pawn{width:1.15cqw;height:1.15cqw;font-size:.62cqw}
 .sq .pawn{width:1.75cqw;height:1.75cqw;font-size:.9cqw}
-.imp-pill,.stp-pill{font-size:.8cqw}
+.imp-pill{font-size:.8cqw}
 .sq.g.b::before,.sq.g.t::before{height:.42cqw}
 .sq.g.l::before,.sq.g.r::before{width:.42cqw}
 .flow{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
@@ -398,7 +394,6 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:#fafafa}
 .tile.fixed{cursor:default;background:#fafafa}
 .tile.fixed::before{border-radius:3px;border:2px solid #879596;background:#879596;box-shadow:inset 0 0 0 2px #fff}
 .decks .dk.pot b{color:#d13212}
-.sq.stopped .ownr{color:var(--mut2)}
 .sq.impaired .ownr{color:#8d6605}
 .pillar{cursor:help}
 /* 日志放右侧；中间留给骰子和图例；格子图标放大 */
@@ -436,7 +431,7 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:#fafafa}
 .corner .nm{font-size:1.05cqw}
 .corner .pr{font-size:.74cqw}
 .sq .pawn{width:1.5cqw;height:1.5cqw;font-size:.78cqw}
-.imp-pill,.stp-pill{font-size:.7cqw}
+.imp-pill{font-size:.7cqw}
 .sq.g.b::before,.sq.g.t::before{height:.38cqw}
 .sq.g.l::before,.sq.g.r::before{width:.38cqw}
 .c-head .gtitle h1{font-size:1.9cqw}
@@ -512,7 +507,7 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:#fafafa}
     <div class="sec">
       <h5>难度</h5>
       <div class="tiles">
-        <label class="tile"><input type="radio" name="diff" value="basic"><b>入门局</b><span>基础规则、Stop/下线、运行费与请求费、维护窗口与复盘、Spot 竞价</span></label>
+        <label class="tile"><input type="radio" name="diff" value="basic"><b>入门局</b><span>基础规则、释放服务、运行费与请求费、维护窗口与复盘、Spot 购买</span></label>
         <label class="tile"><input type="radio" name="diff" value="std" checked><b>标准局</b><span>再加升级附加费、技术债、新账号保护期、季度财报、服务停止支持</span></label>
         <label class="tile"><input type="radio" name="diff" value="full"><b>完整局</b><span>再加主动行动、完整交易、Savings Plans / RI、托管</span></label>
       </div>
@@ -630,7 +625,7 @@ const UTIL = {
 const UPGRADES = {
   s3: [['版本控制', '版本控制', 'backup', '保留每个对象的历史版本，误删、误改都能找回'], ['智能分层', '智能分层', 'cost', '按访问频率自动把数据挪到便宜的存储层'], ['跨区域复制', 'Region', 'mr', '自动把对象复制到另一个 Region']],
   efs: [['生命周期管理', '生命周期', 'cost', '不常用的文件自动转到低频访问存储，更便宜'], ['自动备份', '自动备份', 'backup', '用 AWS Backup 每天自动备份文件系统'], ['跨区域复制', 'Region', 'mr', '把文件系统复制到另一个 Region']],
-  backup: [['备份计划', '备份计划', 'backup', '按计划统一备份 EBS、RDS、DynamoDB、EFS 等'], ['跨账号备份', '跨账号', 'dataprot', '备份放进另一个账号，主账号被攻破也删不掉'], ['跨区域备份', 'Region', 'mr', '备份副本放到另一个 Region']],
+  backup: [['备份计划', '备份计划', 'backup', '按计划统一备份 EBS、RDS、DynamoDB、EFS 等'], ['跨账号备份', '跨账号', 'boost', '备份放进另一个账号，主账号被攻破也删不掉'], ['跨区域备份', 'Region', 'mr', '备份副本放到另一个 Region']],
   lightsail: [['负载均衡 + 多实例', '2 AZ', 'maz', '流量分给不同 AZ 里的多台实例'], ['自动快照', '自动快照', 'backup', '每天自动给实例拍快照'], ['托管数据库', '托管数据库', 'boost', '把数据库交给 Lightsail 托管，网站更完整']],
   ec2: [['多 AZ', '2 AZ', 'maz', '在两个 AZ 各跑一份，一个 AZ 出问题另一个顶上'], ['Auto Scaling', 'ASG', 'scale', '按 CPU 或请求数自动加减实例'], ['Graviton', 'Graviton', 'cost', '换成 Arm 架构实例，同样性能更便宜']],
   ebs: [['快照跨 AZ 恢复', '2 AZ', 'maz', '定期快照，卷所在的 AZ 出问题时可以在别的 AZ 恢复'], ['gp3 卷', 'gp3', 'cost', '性能和容量分开计费，比 gp2 便宜'], ['跨区域快照复制', 'Region', 'mr', '把快照复制到另一个 Region']],
@@ -638,8 +633,8 @@ const UPGRADES = {
   elb: [['HTTPS + ACM', 'HTTPS', 'tls', '用 ACM 免费证书开 HTTPS，证书自动续期'], ['预置容量', '预置容量', 'scale', '提前准备好容量，接得住突发流量'], ['多区域（配合 Route 53）', 'Region', 'mr', '在多个 Region 各放一套，用 Route 53 分流']],
   route53: [['健康检查', '健康检查', 'boost', '定期探测后端是否健康，不健康的不再分流量'], ['故障转移路由', '故障转移', 'mr', '主站挂了自动把域名切到备用站'], ['延迟路由', '延迟路由', 'boost', '把用户导到延迟最低的 Region']],
   ecr: [['基础扫描', '基础扫描', '', '推送镜像时扫一遍已知漏洞'], ['增强扫描', '增强扫描', 'scan', '用 Inspector 持续扫描镜像里的系统包和语言包'], ['跨区域复制', 'Region', 'mr', '镜像自动复制到别的 Region，就近拉取']],
-  ecs: [['多 AZ', '2 AZ', 'maz', '任务分散到多个 AZ'], ['Fargate', 'Fargate', 'scan', '不用管服务器，底层由亚马逊云科技打补丁'], ['服务自动扩缩', 'ASG', 'scale', '按 CPU 或请求数自动加减任务']],
-  eks: [['多 AZ', '2 AZ', 'maz', '工作节点分散到多个 AZ'], ['Karpenter 自动扩缩', 'Karpenter', 'scale', '按需快速拉起最合适的节点'], ['托管节点组', '托管节点组', 'scan', '节点自动更新镜像、打补丁']],
+  ecs: [['多 AZ', '2 AZ', 'maz', '任务分散到多个 AZ'], ['Fargate', 'Fargate', 'scan', '不用管服务器，底层主机由亚马逊云科技打补丁'], ['服务自动扩缩', 'ASG', 'scale', '按 CPU 或请求数自动加减任务']],
+  eks: [['多 AZ', '2 AZ', 'maz', '工作节点分散到多个 AZ'], ['Karpenter 自动扩缩', 'Karpenter', 'scale', '按需快速拉起最合适的节点'], ['EKS Auto Mode', 'Auto Mode', 'scan', '节点交给亚马逊云科技管理：自动打补丁，最长 21 天自动换一批新节点']],
   lambda: [['提高并发配额', '并发配额', 'scale', '申请更高的并发上限，流量大也不被限流'], ['预置并发', '预置并发', 'boost', '提前准备好执行环境，消除冷启动'], ['多区域', 'Region', 'mr', '在多个 Region 部署同一套函数']],
   apigw: [['使用计划限流', '限流', 'ddos', '按 API 密钥限制请求速率，恶意刷接口也打不垮后端'], ['缓存', '缓存', 'boost', '把响应缓存起来，少调后端，响应更快'], ['多区域', 'Region', 'mr', '在多个 Region 部署 API']],
   dynamodb: [['按需容量', '按需容量', 'scale', '按请求量自动扩缩，不用提前估容量'], ['时间点恢复', 'PITR', 'backup', '可以把表恢复到最近 35 天内任意一秒'], ['全局表', 'Region', 'mr', '多个 Region 同时读写、自动同步']],
@@ -653,9 +648,9 @@ const UPGRADES = {
   glue: [['数据目录', '数据目录', 'boost', '统一管理所有表的结构，Athena、Redshift 都能直接用'], ['作业书签', '作业书签', 'cost', '只处理新增的数据，不重复跑'], ['数据质量', '数据质量', 'audit', '自动检查数据是否符合规则']],
   athena: [['分区投影', '分区投影', 'cost', '查询时只扫需要的分区，扫得少花得少'], ['查询结果复用', '结果复用', 'boost', '同样的查询直接用上次的结果'], ['联合查询', '联合查询', 'boost', '一条 SQL 同时查 S3、数据库、日志等多个数据源']],
   redshift: [['多 AZ', '2 AZ', 'maz', '集群部署在两个 AZ'], ['并发扩展', '并发扩展', 'scale', '查询多的时候自动加临时集群'], ['跨区域快照', 'Region', 'mr', '自动把快照复制到另一个 Region']],
-  emr: [['多主节点', '2 AZ', 'maz', '有 3 个主节点，坏一个集群照常跑'], ['Spot 实例', 'Spot', 'cost', '任务节点用便宜的 Spot 实例'], ['托管扩缩', 'ASG', 'scale', '按负载自动调整节点数']],
+  emr: [['多主节点', '多主节点', 'spof', '有 3 个主节点，坏一个集群照常跑；但整个集群还是在一个 AZ 里'], ['Spot 实例', 'Spot', 'cost', '任务节点用便宜的 Spot 实例'], ['托管扩缩', 'ASG', 'scale', '按负载自动调整节点数']],
   opensearch: [['多 AZ（含备用）', '2 AZ', 'maz', '数据节点分布在多个 AZ，还有一个 AZ 专门备用'], ['UltraWarm', 'UltraWarm', 'cost', '旧数据放到便宜的温存储'], ['跨集群复制', 'Region', 'mr', '把索引复制到另一个 Region 的集群']],
-  guardduty: [['S3 保护', 'S3 保护', 'dataprot', '监控 S3 里的可疑访问和数据外泄'], ['运行时监控', '运行时监控', 'ssh', '盯 EC2、ECS、EKS 里的可疑进程和暴力破解'], ['所有区域开启', 'Region', 'mr', '所有 Region 都开启威胁检测']],
+  guardduty: [['S3 保护', 'S3 保护', 'dataprot', '监控 S3 里的可疑访问和数据外泄'], ['运行时监控', '运行时监控', 'ssh', '盯 EC2、ECS、EKS 里的可疑进程和暴力破解'], ['所有区域开启', '全区域', 'audit', '没在用的 Region 也开启威胁检测，攻击者在偏僻 Region 开机器也能发现；满足合规要求']],
   inspector: [['EC2 扫描', 'EC2 扫描', 'scan', '持续扫描 EC2 上的软件漏洞'], ['ECR 镜像扫描', '镜像扫描', 'scanimg', '持续扫描容器镜像里的漏洞'], ['Lambda 扫描', 'Lambda 扫描', 'audit', '扫描函数代码和依赖包里的漏洞，出合规报告']],
   kms: [['客户托管密钥', 'CMK', 'dataprot', '自己管理加密密钥，数据泄露了也读不出来'], ['自动轮换', '自动轮换', 'audit', '每年自动更换密钥材料，满足合规要求'], ['多区域密钥', 'Region', 'mr', '同一把密钥在多个 Region 都能用']],
   cloudfront: [['HTTPS（ACM）', 'HTTPS', 'tls', '用 ACM 免费证书开 HTTPS'], ['源站访问控制', 'OAC', 'dataprot', '只允许 CloudFront 访问 S3 源站，桶不用公开'], ['源站故障转移', '故障转移', 'mr', '主源站挂了自动切到备用源站']],
@@ -692,21 +687,22 @@ const GRP = g => SQ.map((s, i) => s.g === g ? i : -1).filter(i => i >= 0);
 const UTILS = SQ.map((s, i) => s.t === 'util' ? i : -1).filter(i => i >= 0);
 const OWNABLE = SQ.map((s, i) => ['prop', 'util'].includes(s.t) ? i : -1).filter(i => i >= 0);
 const sideCost = i => [50, 100, 150, 200][sideIdx(i)];
-const startCost = i => Math.round(SQ[i].p / 2 * 1.1);
 const isInst = i => ['iaas', 'paas', 'ctr'].includes(SQ[i].type);
+// EMR 集群只能建在一个 AZ 里，升级了也还是单 AZ
+const singleAZ = i => isInst(i) && (S.props[i].level === 0 || SQ[i].k === 'emr');
 const haOf = i => isInst(i) ? 'inst' : SQ[i].type === 'glb' ? 'global' : 'region';
 const HA_N = { inst: '实例型', region: '托管服务', global: '全局服务' };
 const TYPE_N = { util: '按用量', iaas: 'IaaS', paas: 'PaaS', ctr: '容器', sls: 'Serverless', mgd: '托管服务', glb: '全局服务', token: '按 token 计费' };
 const BILL_N = { hour: '按小时', req: '按请求', sub: '订阅', token: '按 token', free: '免费', bundle: '打包价' };
-const stopN = i => SQ[i].t === 'prop' && isInst(i) ? 'Stop' : '下线';
-const stoppedN = i => SQ[i].t === 'prop' && isInst(i) ? 'Stopped' : '已下线';
+// 释放：服务退回银行，回到谁都能买的状态；退一半（Spot 退出价的一半）
+const releaseValue = i => Math.round((S.props[i].spot ? S.props[i].spotPaid : SQ[i].p) / 2);
 const lvName = (i, l) => l ? SQ[i].upg[l - 1][0] : (SQ[i].k === 'bedrock' ? 'Nova Micro' : isInst(i) ? '单 AZ' : '基础版');
 const EFF_N = {
   maz: '扛住 AZ 断电和单点故障', mr: '扛住整个 Region 出问题', scale: '扛住流量暴增', backup: '免疫误删数据',
   cost: '运行费或请求费减半', scan: '免疫高危 CVE', scanimg: '你的容器免疫高危 CVE', tls: '免疫证书过期',
   priv: '实例放进私有子网（要开 NAT 网关，多交钱）', bastion: '配合私有子网，免疫 SSH 暴力破解',
   retry: '免疫「依赖的第三方 API 挂了」', dataprot: '免疫「S3 桶被设成公开」', ddos: '免疫两张 DDoS 相关的卡', audit: '免疫「安全审计没过」',
-  logret: '免疫「日志打太多了」', boost: '这块过路费再 +20%', ssh: '免疫「SSH 暴力破解」', nat: 'NAT Gateway 账单格减半',
+  logret: '免疫「日志打太多了」', spof: '免疫「单点故障」（还是单 AZ，挡不住 AZ 断电）', boost: '这块过路费再 +20%', ssh: '免疫「SSH 暴力破解」', nat: 'NAT Gateway 账单格减半',
 };
 const TOKEN = [4, 8, 14, 20];
 const BAL = Object.assign({ salary: 200, cashMul: 1, hourLow: [5, 10, 20, 30], hourHigh: [10, 20, 30, 40], capLow: 5, capHigh: 10, req: 0.15, token: 0.25, rentBase: 0.15, protect: 2 },
@@ -738,27 +734,27 @@ const COMBOS = [
 COMBOS.forEach(c => { c.ix = c.need.map(n => Array.isArray(n) ? n.map(k => IX[k]) : IX[n]); });
 const CATS = { sec: '安全', avail: '可用性', cost: '成本', ops: '运维' };
 const INC = [null,
-  { n: '服务配额用完了', c: 'avail', e: '新请求全被拒绝：停一轮', im: '你有一处服务带弹性扩展功能（Auto Scaling、提高并发配额、按需容量等）', tip: '用 Service Quotas 提前查看和申请提高配额', art: 'cloudwatch' },
+  { n: '服务配额用完了', c: 'avail', e: '新请求全被拒绝：停一轮', im: 'Lambda 升了「提高并发配额」，或者 CloudWatch 开了「告警与仪表板」（配额用量快满就告警）', tip: '自动扩缩也会撞上配额；用 Service Quotas 提前申请提高，并给配额用量设 CloudWatch 告警', art: 'cloudwatch' },
   { n: 'us-east-1 大面积故障', c: 'avail', e: '停一轮', im: '你有一处服务升到了多区域功能（格子右上角有 Region 标）', tip: '关键业务要能切到另一个 Region', art: 'region' },
   { n: '实习生误删了生产数据', c: 'ops', e: '拆掉你数据库组的 1 级升级（不退钱）；没有可拆的就交 $100 进奖池', im: '持有 AWS Backup，或你有带备份功能的升级（版本控制、时间点恢复、自动快照等）', tip: '开启删除保护和自动备份，备份要定期演练恢复', art: 'rds' },
   { n: '流量暴增', c: 'avail', e: '你名下没有弹性扩展功能的实例型服务变成 Impaired；要是全都扛住了（而且你有服务），从银行领 $100', im: '持有「异步解耦」架构：直接领 $100', tip: 'Auto Scaling 按负载加减实例，队列能削峰', art: 'ec2' },
   { n: '月底账单爆了', c: 'cost', e: '你每级升级交 $25（第 3 级交 $100），每份容量交 $10，全部进奖池', im: '用掉 Cost Explorer 卡', tip: '用 AWS Budgets 设账单告警', art: 'budgets' },
-  { n: 'Root 密钥被推到了 GitHub', c: 'sec', e: '直接进维护窗口，不经过 Startup 扶持', im: '持有 GuardDuty：改为交 $50 进奖池', tip: '日常别用 root，开启 MFA', art: 'iam' },
-  { n: 'S3 桶被设成了公开', c: 'sec', e: '赔给每位其他玩家 $50', im: '持有任意安全组或边缘防护组服务', tip: '新建的桶默认开启 Block Public Access', art: 's3' },
+  { n: 'Root 密钥被推到了 GitHub', c: 'sec', e: '直接进维护窗口，不经过 Startup 扶持', im: '持有 GuardDuty：改为交 $50 进奖池', tip: '别给 root 创建访问密钥，开启 MFA；亚马逊云科技会扫描公开的 GitHub，发现泄露的密钥会通知你并限制它', art: 'iam' },
+  { n: 'S3 桶被设成了公开', c: 'sec', e: '赔给每位其他玩家 $50', im: '你有数据保护类功能：GuardDuty 的 S3 保护、KMS 客户托管密钥（没有密钥权限读不出来）、CloudFront 源站访问控制', tip: '新建的桶默认开启 Block Public Access；WAF、Shield 管不到桶的权限', art: 's3' },
   { n: '有人手动改了生产配置', c: 'ops', e: '后退 3 格，结算落点', im: '无', tip: '用 CloudFormation 或 CDK 管理基础设施', art: 'cloudformation' },
   { n: '依赖的第三方 API 挂了', c: 'avail', e: '停一轮', im: '持有 SQS 或 Step Functions（排队 + 重试）', tip: '重试加指数退避，失败的消息进死信队列', art: 'sqs' },
   { n: '证书过期，网站打不开', c: 'ops', e: '交 $100 进奖池', im: '你的 ELB 或 CloudFront 升到了 HTTPS（ACM 自动续期）', tip: 'ACM 签发的公有证书免费且自动续期', art: 'elb' },
-  { n: '单点故障', c: 'avail', e: '你名下最贵的实例型服务如果还是单 AZ，强制 Stop，拿回 50%', im: '持有「高可用入口」架构', tip: '生产环境至少跨两个 AZ', art: 'ec2' },
+  { n: '单点故障', c: 'avail', e: '你名下最贵的实例型服务如果还是单 AZ：变成 Impaired，并交价格的 10% 做紧急恢复，进奖池', im: '持有「高可用入口」架构', tip: '生产环境至少跨两个 AZ', art: 'ec2' },
   { n: '凌晨 3 点被告警叫醒', c: 'ops', e: '停一轮，从银行领 $50 加班费', im: '无（不算罚）', tip: '告警要配好处理手册，能自动处理的就自动化', art: 'cloudwatch' },
   { n: '日志打太多了', c: 'cost', e: '付 $100 给 CloudWatch 的主人；没人买就进奖池；主人是你自己就免付', im: '无', tip: '给日志组设置保留期', art: 'cloudwatch' },
   { n: '回滚后重新发布', c: 'ops', e: '前进到 Startup 扶持', im: '—（不算罚）', tip: '蓝绿部署，随时能回滚', art: 'codedeploy' },
   { n: '安全审计没过', c: 'sec', e: '停一轮', im: '持有 2 个以上安全组服务（金融合规公司免疫）', tip: '用 Security Hub 持续检查合规', art: 'securityhub' },
   { n: '一个 AZ 断电了', c: 'avail', e: '你名下还是单 AZ 的实例型服务（IaaS、PaaS、ECS、EKS）变成 Impaired', im: '托管服务和全局服务本来就跨多个 AZ，不受影响；持有「高可用入口」架构也免疫', tip: '多 AZ 部署让一个 AZ 出问题时服务照常运行', art: 'region' },
-  { n: 'EC2 实例硬件退役', c: 'ops', e: '你的 EC2 如果还是单 AZ，强制 Stop', im: 'EC2 已升多 AZ', tip: '亚马逊云科技会提前通知计划内的实例退役，Auto Scaling 能自动换掉', art: 'ec2' },
+  { n: 'EC2 实例硬件退役', c: 'ops', e: '你的 EC2 如果还是单 AZ：变成 Impaired，交 $50 把实例重新启动到新的硬件上，进奖池', im: 'EC2 已升多 AZ（另一个 AZ 的实例顶上）', tip: '亚马逊云科技会提前通知计划内的实例退役；Auto Scaling 会自动换掉不健康的实例', art: 'ec2' },
   { n: '某个服务在一个 Region 里宕机了', c: 'avail', e: '从你现在的位置往前数，第一块有主的服务所在的色组宕机：组里没有多区域功能的服务都变成 Impaired', im: '有多区域功能的服务不受影响；多 AZ 挡不住整个服务出问题', tip: 'AWS Health Dashboard 会显示影响你账号的服务事件', art: 'health' },
-  { n: '暴露在公网的实例被 SSH 暴力破解', c: 'sec', e: '你有 IaaS 或 ECS、EKS 服务：交 $100，其中最贵的一块变成 Impaired', im: 'VPC 是你的而且升到了跳板机；VPC 主人有跳板机时可以付 $50 借用；你没有这类服务也不受影响', tip: '实例放私有子网，只通过跳板机或 Session Manager 登录，安全组不对公网开 22 端口', art: 'vpc' },
+  { n: '暴露在公网的实例被 SSH 暴力破解', c: 'sec', e: '你有 EC2、Lightsail、ECS 或 EKS：交 $100，其中最贵的一块变成 Impaired', im: 'VPC 是你的而且升到了跳板机；VPC 主人有跳板机时可以付 $50 借用；你没有这类服务也不受影响', tip: '实例放私有子网，只通过跳板机或 Session Manager 登录，安全组不对公网开 22 端口', art: 'vpc' },
   { n: 'DDoS 打满了入口', c: 'sec', e: '交 $150 进奖池', im: '持有 Shield Advanced、WAF 或 CloudFront，或你的 ELB 升到了预置容量', tip: '入口能扩容、前面有 CDN 和 Shield，才扛得住大流量攻击', art: 'shield' },
-  { n: '高危 CVE 爆出', c: 'sec', e: '你名下每块没被漏洞扫描保护的 IaaS 和容器服务：交 $30，并变成 Impaired', im: 'Inspector 的 EC2 扫描保护你的 IaaS；ECR 增强扫描或 Inspector 镜像扫描保护你的容器；ECS 用 Fargate、EKS 用托管节点组也算。PaaS 和 Serverless 由亚马逊云科技打补丁，不受影响', tip: 'Amazon Inspector 会持续扫描 EC2、ECR 镜像和 Lambda 里的已知漏洞', art: 'inspector' },
+  { n: '高危 CVE 爆出', c: 'sec', e: '你名下每块没被漏洞扫描保护的 EC2、Lightsail 和容器服务：交 $30，并变成 Impaired', im: 'Inspector 的 EC2 扫描保护你的 IaaS；ECR 增强扫描或 Inspector 镜像扫描保护你的容器；ECS 用 Fargate、EKS 开了 Auto Mode 也算。PaaS 和 Serverless 由亚马逊云科技打补丁，不受影响', tip: 'Amazon Inspector 会持续扫描 EC2、ECR 镜像和 Lambda 里的已知漏洞', art: 'inspector' },
 ];
 const REI = [null,
   { n: '拿到 Activate 创业扶持 Credits', e: '从银行领 $200', tip: '初创公司可以申请 AWS Activate 抵扣额度', art: 'activate' },
@@ -772,7 +768,7 @@ const REI = [null,
   { n: 'Trusted Advisor 找到闲置资源', e: '从银行领 $100', tip: '定期检查闲置的 EBS 卷和弹性 IP', art: 'trustedadvisor' },
   { n: '用上了 Cost Explorer', keep: 'CE', e: '保留：用掉后可以免一次账单格，或抵消一次「月底账单爆了」', tip: '按标签做成本分析', art: 'costexplorer' },
   { n: '亚马逊云科技宣布降价', e: '从银行领 $50', tip: '亚马逊云科技有长期降价的传统', art: 'billing' },
-  { n: '领到 Free Tier 额度', e: '直接拿走奖池里所有的钱', tip: '新账号有免费额度可以试用部分服务，具体以官网为准', art: 'activate' },
+  { n: '领到 Free Tier 额度', e: '直接拿走奖池里所有的钱', tip: '2025 年 7 月起，新账号的 Free Tier 改成抵扣额度：注册送 $100，完成入门任务最多再送 $100，具体以官网为准', art: 'activate' },
   { n: '加入迁移加速计划 MAP', keep: 'MAP', e: '保留：下次买 IaaS、PaaS 或容器服务时用掉，打 7 折', tip: '上云迁移有资金和专家支持', art: 'mgn' },
   { n: 'Hackathon 拿了奖', e: '从银行领 $150', tip: '动手做出来，比幻灯片更有说服力', art: 'codecatalyst' },
   { n: '业务扩张', e: '掷一颗骰子，前进相应的格数', tip: '选 Region 看延迟、合规和价格', art: 'region' },
@@ -790,7 +786,7 @@ const CARDE = { ES: '免费离开维护窗口，或抵消一张任意 Health 事
 const QUIZ = {
   storage: [
     { q: 'S3 标准存储的设计耐久性是多少？', o: ['99.999999999%（11 个 9）', '99.99%（4 个 9）', '99.9999%（6 个 9）', '100%'], a: '耐久性 11 个 9；可用性是另一回事' },
-    { q: '单个 S3 对象最大可以多大？', o: ['5 TB', '5 GB', '500 GB', '没有上限'], a: '单次 PUT 最大 5 GB，更大要用分段上传' },
+    { q: '单个 S3 对象最大可以多大？', o: ['50 TB', '5 GB', '500 GB', '没有上限'], a: '2025 年 12 月从 5 TB 提到 50 TB；单次 PUT 最大 5 GB，更大要用分段上传' },
     { q: 'EFS 是什么类型的存储？', o: ['可以被多台实例同时挂载的共享文件系统', '块存储，只能挂一台实例', '对象存储', '数据库'], a: 'EFS 用 NFS 协议，按用量自动伸缩' },
     { q: 'AWS Backup 主要用来做什么？', o: ['集中管理多个服务的备份策略', '把数据迁到亚马逊云科技', '加速网站访问', '扫描漏洞'], a: '能统一管 EBS、RDS、DynamoDB、EFS 等的备份' },
   ],
@@ -887,21 +883,20 @@ const nm = p => `<b style="color:${p.color}">${p.name}</b>`;
 const sqn = i => `<b>${SQ[i].n}</b>`;
 function log(html) { S.log.unshift(html); if (S.log.length > 300) S.log.length = 300; }
 const owns = (p, i) => S.props[i] && S.props[i].owner === p.id;
-const active = (p, i) => owns(p, i) && !S.props[i].stopped;
+const active = (p, i) => owns(p, i);
 const ownedBy = p => OWNABLE.filter(i => owns(p, i));
 const ownsGroup = (p, g) => GRP(g).every(i => owns(p, i));
-const groupHasStopped = g => GRP(g).some(i => S.props[i].stopped);
 const availCard = (p, k) => p.cards.find(c => c.id === k && !c.used);
 const debtOf = p => p.debt.reduce((a, d) => a + d.amt, 0);
 // 某块服务当前生效的功能
-const effActive = (i, eff) => { const pr = S.props[i]; return !!SQ[i].upg && pr && !pr.stopped && SQ[i].upg.slice(0, pr.level).some(u => u[2] === eff); };
+const effActive = (i, eff) => { const pr = S.props[i]; return !!SQ[i].upg && pr && SQ[i].upg.slice(0, pr.level).some(u => u[2] === eff); };
 const hasEff = (p, eff) => ownedBy(p).some(i => effActive(i, eff));
 function hasCombo(p, id) {
   const c = COMBOS.find(x => x.id === id);
   return c.ix.every(n => Array.isArray(n) ? n.some(i => active(p, i)) : active(p, n));
 }
 const comboOn = (p, i) => COMBOS.filter(c => c.ix.flat().includes(i) && hasCombo(p, c.id));
-function resetProp(i) { S.props[i] = { owner: null, level: 0, cap: 0, stopped: false, forced: false, spot: false, spotPaid: 0, impaired: false }; }
+function resetProp(i) { S.props[i] = { owner: null, level: 0, cap: 0, spot: false, spotPaid: 0, impaired: false }; }
 
 // ================= 金钱 =================
 function giveTo(to, amt) { if (amt <= 0) return; if (to === 'pot') S.pot += amt; else if (to !== 'bank') credit(P(to), amt); }
@@ -923,25 +918,27 @@ function settle(p) {
 }
 function netWorth(p) {
   let v = p.cash - debtOf(p);
-  ownedBy(p).forEach(i => { const pr = S.props[i]; v += pr.stopped ? SQ[i].p / 2 : SQ[i].p; v += pr.level * sideCost(i) + (pr.cap || 0) * capCost(i); });
+  ownedBy(p).forEach(i => { const pr = S.props[i]; v += SQ[i].p; v += pr.level * sideCost(i) + (pr.cap || 0) * capCost(i); });
   return Math.round(v);
 }
 function valuation(p) {
   let v = p.cash - debtOf(p);
-  ownedBy(p).forEach(i => { const pr = S.props[i]; v += pr.stopped ? SQ[i].p / 2 : SQ[i].p; v += (pr.level * sideCost(i) + (pr.cap || 0) * capCost(i)) * 2; });
+  ownedBy(p).forEach(i => { const pr = S.props[i]; v += SQ[i].p; v += (pr.level * sideCost(i) + (pr.cap || 0) * capCost(i)) * 2; });
   v += COMBOS.filter(c => hasCombo(p, c.id)).length * 200 - p.techDebt * 100 + p.coe.length * 50;
   return Math.round(v);
 }
 // 运行费：按小时计费的服务空着也要交；订阅按圈交；VPC 开了私有子网要交 NAT 网关的钱
 function runCost(i) {
   const s = SQ[i], pr = S.props[i];
-  if (pr.stopped || s.t !== 'prop') return 0;
+  if (s.t !== 'prop') return 0;
   let c = 0;
   if (s.bill === 'hour') c = (s.type === 'paas' || s.k === 'eks' ? BAL.hourHigh : BAL.hourLow)[pr.level];
   else if (s.bill === 'sub') c = 40;
+  else if (s.bill === 'bundle') c = 5 + (pr.level >= 1 ? 10 : 0) + (pr.level >= 3 ? 10 : 0);   // Lightsail 套餐按月固定价；负载均衡、托管数据库另外按月收费
   const cap = pr.cap || 0;
   if (s.bill === 'hour') c += cap * (s.type === 'paas' || s.k === 'eks' ? BAL.capHigh : BAL.capLow);
   if (s.bill === 'token') c += cap * 20;   // 预置吞吐量按小时计费
+  if (s.bill === 'bundle') c += cap * 5;   // 每多一台实例多一份套餐
   if (s.k === 'vpc' && pr.level >= 1) c += 20;
   if (effActive(i, 'cost') && s.bill === 'hour') c = Math.round(c / 2);
   return c;
@@ -950,6 +947,13 @@ function runCost(i) {
 const SP_OK = new Set(['ec2', 'ecs', 'eks', 'sagemaker', 'rds', 'aurora', 'elasticache']);   // Compute / SageMaker / Database Savings Plans
 const RI_OK = new Set(['ec2', 'rds', 'aurora', 'elasticache', 'redshift', 'opensearch', 'emr']);   // EMR 用底层 EC2 的 RI
 const SP_PLANS = { 2: 0.25, 4: 0.45 }, RI_PLANS = { 2: 0.35, 4: 0.55 };
+// Database Savings Plans 最多省约 35%、只有 1 年期：数据库那部分不管签几圈都只打 75 折
+const SP_DB = new Set(['rds', 'aurora', 'elasticache']), SP_DB_MAX = 0.25;
+function spDisc(p, n) {
+  let cb = 0, db = 0;
+  ownedBy(p).forEach(i => { if (!SP_OK.has(SQ[i].k)) return; const ri = riActive(p, i); const c = Math.max(0, runCost(i) - (ri ? ri.amt : 0)); if (SP_DB.has(SQ[i].k)) db += c; else cb += c; });
+  return cb + db ? (cb * SP_PLANS[n] + db * Math.min(SP_PLANS[n], SP_DB_MAX)) / (cb + db) : SP_PLANS[n];
+}
 const commitsOf = p => (p.commits || []).filter(c => c.laps > 0);
 const spActive = p => commitsOf(p).find(c => c.type === 'sp');
 const riActive = (p, i) => commitsOf(p).find(c => c.type === 'ri' && c.svc === i);
@@ -970,7 +974,6 @@ const reqRate = i => SQ[i].bill === 'token' ? BAL.token : SQ[i].bill === 'req' ?
 // ================= 过路费与升级 =================
 function baseRent(i, dice) {
   const s = SQ[i], pr = S.props[i], o = P(pr.owner);
-  if (pr.stopped) return 0;
   if (s.t === 'util') return Math.round(dice * ([0, 4, 10, 20][UTILS.filter(u => active(o, u)).length] + 3 * pr.level) * (effActive(i, 'boost') ? 1.2 : 1));
   if (s.bill === 'token') return Math.round(dice * TOKEN[pr.level] * (ownsGroup(o, s.g) ? 1.5 : 1) * (1 + 0.25 * (pr.cap || 0)) * (effActive(i, 'boost') ? 1.2 : 1));
   const b = s.p * BAL.rentBase;
@@ -994,7 +997,7 @@ function jointRent(i, dice) {
 const capCost = i => sideCost(i) / 2;
 function capInfo(p, i) {
   const s = SQ[i], pr = S.props[i];
-  if (s.t !== 'prop' || pr.owner !== p.id || pr.stopped || pr.spot) return { ok: false };
+  if (s.t !== 'prop' || pr.owner !== p.id || pr.spot) return { ok: false };
   if ((pr.cap || 0) >= CAP_MAX) return { ok: false, why: '容量已满' };
   return { ok: true, cost: capCost(i) };
 }
@@ -1013,11 +1016,9 @@ function upgradeInfo(p, i, viaLanding = false) {
   const s = SQ[i], pr = S.props[i];
   if (!s.upg || pr.owner !== p.id) return { ok: false, why: '' };
   if (pr.level >= 3) return { ok: false, why: '已经升满' };
-  if (pr.stopped) return { ok: false, why: '先 Start 才能升级' };
   if (pr.spot) return { ok: false, why: 'Spot 服务要先转成按需才能升级' };
   if (!viaLanding) {
     if (!ownsGroup(p, s.g)) return { ok: false, why: '集齐整组后才能随时升级；落在这块上也能升' };
-    if (groupHasStopped(s.g)) return { ok: false, why: '组内有 Stop 的服务' };
   }
   const next = pr.level + 1, eff = s.upg[next - 1][2];
   let cost = sideCost(i);
@@ -1048,15 +1049,10 @@ function sellUpgrade(p, i) {
   log(`🔻 ${nm(p)} 去掉 ${sqn(i)} 的「${lvName(i, pr.level)}」，拿回 $${sideCost(i) / 2}`);
   pr.level--; credit(p, sideCost(i) / 2);
 }
-function stopProp(p, i, forced = false) {
-  const pr = S.props[i]; if (!owns(p, i) || pr.stopped || pr.level > 0 || pr.cap) return;
-  pr.stopped = true; pr.forced = forced; pr.impaired = false; credit(p, SQ[i].p / 2);
-  log(`⏸ ${nm(p)} ${forced ? '被强制' : ''}${stopN(i) === 'Stop' ? ' Stop 了 ' : '下线了 '}${sqn(i)}，拿回 $${SQ[i].p / 2}`);
-}
-function startProp(p, i) {
-  const pr = S.props[i]; if (!owns(p, i) || !pr.stopped || p.cash < startCost(i)) return;
-  pay(p, 'bank', startCost(i)); pr.stopped = false; pr.forced = false;
-  log(`▶️ ${nm(p)} 重新${stopN(i) === 'Stop' ? ' Start 了 ' : '上线了 '}${sqn(i)}（$${startCost(i)}）`);
+function releaseProp(p, i) {
+  const pr = S.props[i]; if (!owns(p, i) || pr.level > 0 || pr.cap) return;
+  const v = releaseValue(i); resetProp(i); credit(p, v); p.released = (p.released || 0) + 1;
+  log(`🗑️ ${nm(p)} 释放了 ${sqn(i)}，拿回 $${v}；这块回到银行，谁落上来都能买`);
 }
 function roleDisc(p, i) {
   if (p.role === 'legacy' && (i === IX.ec2 || i === IX.rds)) return 0.8;
@@ -1130,7 +1126,7 @@ function propInfoHtml(i) {
     if (!pr) return '';
     if (pr.owner === null) return '<div class="ow muted">无主，可以购买</div>';
     const o = P(pr.owner);
-    return `<div class="ow">${PAWN(o.color)}${nm(o)}${s.upg ? ` · ${lvName(i, pr.level)}` : ''}${pr.stopped ? ' · ' + stoppedN(i) + (pr.forced ? '（强制）' : '') : ''}${pr.impaired ? ' · Impaired' : ''}${pr.spot ? ` · Spot 出价 $${pr.spotPaid}（出更高价可以抢走）` : ''}${pr.cap ? ` · ${pr.cap} 个${CAP[s.k]}` : ''}</div>`;
+    return `<div class="ow">${PAWN(o.color)}${nm(o)}${s.upg ? ` · ${lvName(i, pr.level)}` : ''}${pr.impaired ? ' · Impaired' : ''}${pr.spot ? ` · Spot 出价 $${pr.spotPaid}（出更高价可以抢走）` : ''}${pr.cap ? ` · ${pr.cap} 个${CAP[s.k]}` : ''}</div>`;
   };
   const head = `<div class="bh">${awsImg(s.icon)}<div><b>${s.n}</b><span>价格 $${s.p}${s.t === 'prop' ? ` · ${TYPE_N[s.type]} · ${BILL_N[s.bill]}` : ' · 按用量收费'}</span></div></div>`;
   if (s.t === 'util') {
@@ -1145,12 +1141,12 @@ function propInfoHtml(i) {
   const rentOf = l => s.bill === 'token' ? `点数 × ${TOKEN[l]}` : s.bill === 'req' ? `点数 × ${(fixedOf(l) / 7).toFixed(1)}` : `$${Math.round(fixedOf(l))}`;
   const rows = [0, 1, 2, 3].map(l => `<tr class="${lv === l ? 'hi' : ''}"><td>${l ? `第 ${l} 级 · ` : ''}<b>${lvName(i, l)}</b>${l && s.upg[l - 1][3] ? `<br><span class="muted" style="font-size:12px">${s.upg[l - 1][3]}</span>` : ''}</td><td>${l && s.upg[l - 1][2] ? EFF_N[s.upg[l - 1][2]] : l ? '过路费提高' : ''}</td><td>${rentOf(l)}</td></tr>`).join('');
   const ha = haOf(i);
-  const haLine = ha === 'inst' ? '买下时是单 AZ，一个 AZ 断电就会受影响；第 1 级升多 AZ' : ha === 'global' ? '全局服务，不在任何一个 AZ 或 Region 里' : '托管服务，天生跨多个 AZ；想扛住整个 Region 出问题要升多区域';
-  const billLine = (s.bill === 'req' ? '过路费按对方掷出的点数浮动（流量越大收得越多），平均和固定价差不多。<br>' : '') + (s.bill === 'hour' ? `按小时计费：每次经过 Startup 扶持交运行费（${pr && pr.owner !== null ? `现在每圈 $${runCost(i)}` : `未升级时每圈 $${s.type === 'paas' || s.k === 'eks' ? 20 : 10}`}），空着也要交` : s.bill === 'req' ? `按请求计费：经过 Startup 扶持不交运行费；每次收到过路费，交 ${Math.round(reqRate(i) * 100)}% 请求费` : s.bill === 'token' ? '按 token 计费：过路费 = 对方掷出的点数 × 模型档位单价，集齐 AI 组再 × 1.5；每次收到过路费交 ' + Math.round(BAL.token * 100) + '% token 成本' : s.bill === 'sub' ? '订阅：每次经过 Startup 扶持交固定 $40' : s.bill === 'bundle' ? '打包价：实例、存储、流量都算在买下的价格里，经过 Startup 扶持不交运行费；也用不了 Savings Plans 和 RI' : '免费；开了私有子网要交 NAT 网关的钱（每圈 $20，NAT 账单格交双倍）');
+  const haLine = s.k === 'emr' ? 'EMR 集群只能建在一个 AZ 里，升级了也还是单 AZ；第 1 级多主节点只防单点故障' : ha === 'inst' ? '买下时是单 AZ，一个 AZ 断电就会受影响；第 1 级升多 AZ' : ha === 'global' ? '全局服务，不在任何一个 AZ 或 Region 里' : '托管服务，天生跨多个 AZ；想扛住整个 Region 出问题要升多区域';
+  const billLine = (s.bill === 'req' ? '过路费按对方掷出的点数浮动（流量越大收得越多），平均和固定价差不多。<br>' : '') + (s.bill === 'hour' ? `按小时计费：每次经过 Startup 扶持交运行费（${pr && pr.owner !== null ? `现在每圈 $${runCost(i)}` : `未升级时每圈 $${(s.type === 'paas' || s.k === 'eks' ? BAL.hourHigh : BAL.hourLow)[0]}`}），空着也要交` : s.bill === 'req' ? `按请求计费：经过 Startup 扶持不交运行费；每次收到过路费，交 ${Math.round(reqRate(i) * 100)}% 请求费` : s.bill === 'token' ? '按 token 计费：过路费 = 对方掷出的点数 × 模型档位单价，集齐 AI 组再 × 1.5；每次收到过路费交 ' + Math.round(BAL.token * 100) + '% token 成本' : s.bill === 'sub' ? '订阅：每次经过 Startup 扶持交固定 $40' : s.bill === 'bundle' ? `打包价：实例、存储、流量打成一个固定套餐，每次经过 Startup 扶持交套餐费（${pr && pr.owner !== null ? `现在每圈 $${runCost(i)}` : '未升级时每圈 $5'}），不随流量浮动；负载均衡（第 1 级）和托管数据库（第 3 级）各另加每圈 $10；用不了 Savings Plans 和 RI` : '免费；开了私有子网要交 NAT 网关的钱（每圈 $20，NAT 账单格交双倍）');
   const cb = COMBOS.filter(c => c.ix.flat().includes(i));
   return `<div class="grp bcard" style="--gc:${g.color}"><div class="gt t" style="color:${labColor(s.g)}">${g.name}组</div><div class="gb">${head}
     <table><tr><th>级别</th><th>效果</th><th style="text-align:right">过路费</th></tr>${rows}</table>
-    <div class="df">${HA_N[ha]}：${haLine}<br>${billLine}<br>每份${CAP[s.k]} $${capCost(i)}：过路费 +25%，最多 ${CAP_MAX} 份${s.bill === 'hour' ? '，每份每圈运行费 +$' + (s.type === 'paas' || s.k === 'eks' ? 15 : 10) : s.bill === 'token' ? '，每份每圈运行费 +$20' : '，不增加运行费'}<br>每级升级 $${sideCost(i)}；落在自己的服务上就能升一级，集齐整组后可以随时升；${stopN(i)} 拿回 $${s.p / 2}${cb.length ? `<br>能组成的架构：${cb.map(c => c.n).join('、')}` : ''}</div>${ownLine()}</div></div>`;
+    <div class="df">${HA_N[ha]}：${haLine}<br>${billLine}<br>每份${CAP[s.k]} $${capCost(i)}：过路费 +25%，最多 ${CAP_MAX} 份${s.bill === 'hour' ? '，每份每圈运行费 +$' + (s.type === 'paas' || s.k === 'eks' ? BAL.capHigh : BAL.capLow) : s.bill === 'bundle' ? '，每台每圈套餐费 +$5' : s.bill === 'token' ? '，每份每圈运行费 +$20' : '，不增加运行费'}<br>每级升级 $${sideCost(i)}；落在自己的服务上就能升一级，集齐整组后可以随时升；${stopN(i)} 拿回 $${s.p / 2}${cb.length ? `<br>能组成的架构：${cb.map(c => c.n).join('、')}` : ''}</div>${ownLine()}</div></div>`;
 }
 
 // ================= 答题 =================
@@ -1332,7 +1328,7 @@ async function offerLandingUpgrade(p, i) {
     b.push({ label: `加「${next[0]}」$${u.total}`, value: 'up', cls: 'pri', disabled: p.cash < u.total });
   } else if (u.why) html += `<p class="muted">· 不能加功能：${u.why}</p>`;
   if (c.ok) {
-    html += `<p>· 加 1 个${CAP[s.k]}：过路费 +25%${s.bill === 'hour' || s.bill === 'token' ? '，每圈运行费也会增加' : '，不增加运行费'}。$${c.cost}（现在 ${S.props[i].cap || 0}/${CAP_MAX}）</p>`;
+    html += `<p>· 加 1 个${CAP[s.k]}：过路费 +25%${s.bill === 'hour' || s.bill === 'token' || s.bill === 'bundle' ? '，每圈运行费也会增加' : '，不增加运行费'}。$${c.cost}（现在 ${S.props[i].cap || 0}/${CAP_MAX}）</p>`;
     b.push({ label: `加 1 个${CAP[s.k]} $${c.cost}`, value: 'cap', disabled: p.cash < c.cost });
   }
   if (foes.length) {
@@ -1364,7 +1360,7 @@ async function offerBuy(p, i, opts = {}) {
         else if (quizOk) { const x = Math.round(s.p * rd * 0.8); b.push({ label: `答对 8 折 $${x}`, value: { k: 'q', price: x }, cls: 'pri', disabled: p.cash < x }); }
       }
     }
-    if (p.cash < base && ownedBy(p).some(j => !S.props[j].stopped)) b.push({ label: '先去资产管理凑钱', value: { k: 'raise' } });
+    if (p.cash < base && ownedBy(p).length) b.push({ label: '先去资产管理凑钱', value: { k: 'raise' } });
     b.push({ label: '不买', value: { k: 'no' } });
     const notes = [];
     if (rd < 1) notes.push(`角色折扣 ${rd * 10} 折已计入`);
@@ -1393,7 +1389,7 @@ async function offerBuy(p, i, opts = {}) {
 async function spotTakeover(p, i) {
   const s = SQ[i], pr = S.props[i], o = P(pr.owner);
   const minBid = Math.min(s.p, (pr.spotPaid || 0) + Math.max(10, Math.round(s.p * 0.1)));
-  if (!pr.spot || pr.stopped || p.cash < minBid) return false;
+  if (!pr.spot || p.cash < minBid) return false;
   const rent = baseRent(i, S.lastDice[0] + S.lastDice[1]);
   const r = await modal({ title: `${s.n} 是 ${o.name} 的 Spot 服务（出价 $${pr.spotPaid}）`, html: `<p>你可以照常付过路费（约 $${rent}），也可以出更高的价把它抢过来：至少 $${minBid}；出到全价 $${s.p} 就变成你的按需服务，没人能再抢。</p><p class="muted">被抢的 ${nm(o)} 拿回出价的一半（$${Math.round((pr.spotPaid || 0) / 2)}）作为中断补偿。</p>`,
     inputs: [{ id: 'bid', label: `你的出价 $（$${minBid}–$${Math.min(s.p, p.cash)}）`, type: 'number', min: minBid, max: Math.min(s.p, p.cash), step: 10, value: minBid }],
@@ -1416,7 +1412,6 @@ function convertSpot(p, i) {
 }
 async function payRent(p, i, opts = {}) {
   const pr = S.props[i], o = P(pr.owner), s = SQ[i];
-  if (pr.stopped) { log(`${sqn(i)} 是 Stop 状态，不收过路费`); return 0; }
   if (pr.impaired) { log(`${sqn(i)} 是 Impaired 状态，这次不收过路费`); return 0; }
   const dice = S.lastDice[0] + S.lastDice[1];
   const jr = jointRent(i, dice);
@@ -1464,7 +1459,7 @@ async function drawRei() {
 
 // ================= Health 事件 =================
 const secActive = (o, g) => GRP(g).filter(i => active(o, i)).length;
-const exposedInst = o => ownedBy(o).filter(i => SQ[i].t === 'prop' && (SQ[i].type === 'iaas' || i === IX.ecs || i === IX.eks) && !S.props[i].stopped);
+const exposedInst = o => ownedBy(o).filter(i => SQ[i].t === 'prop' && ((SQ[i].type === 'iaas' && i !== IX.ebs) || i === IX.ecs || i === IX.eks));
 function cveProtected(p, i) {
   if (effActive(i, 'scan')) return true;
   if (SQ[i].type === 'iaas') return owns(p, IX.inspector) && effActive(IX.inspector, 'scan');
@@ -1476,11 +1471,11 @@ function immuneByProp(o, id) {
   if (INC[id].c === 'sec' && hasCombo(o, 'did')) return '有「纵深防御」架构';
   const has = i => active(o, i) ? SQ[i].n : '';
   switch (id) {
-    case 1: return effWhy(o, 'scale');
+    case 1: return active(o, IX.lambda) && S.props[IX.lambda].level >= 1 ? 'Lambda 提高了并发配额' : active(o, IX.cloudwatch) && S.props[IX.cloudwatch].level >= 2 ? 'CloudWatch 有配额用量告警' : '';
     case 2: { const e = ownedBy(o).find(i => effActive(i, 'mr')); return e !== undefined ? `${SQ[e].n} 有多区域功能` : ''; }
     case 3: { if (active(o, IX.backup)) return '有 AWS Backup'; const e = ownedBy(o).find(i => effActive(i, 'backup')); return e !== undefined ? `${SQ[e].n} 有备份功能` : ''; }
     case 4: return hasCombo(o, 'queue') ? '有「异步解耦」架构' : '';
-    case 7: { const e = [...GRP('sec'), ...GRP('edge')].find(i => active(o, i)); return e !== undefined ? `有 ${SQ[e].n}` : effWhy(o, 'dataprot'); }
+    case 7: return effWhy(o, 'dataprot');
     case 9: return has(IX.sqs) ? '有 SQS 排队重试' : has(IX.sfn) ? '有 Step Functions 重试' : effWhy(o, 'retry');
     case 13: return effWhy(o, 'logret');
     case 10: return owns(o, IX.elb) && effActive(IX.elb, 'tls') ? 'ELB 用了 ACM 证书' : owns(o, IX.cloudfront) && effActive(IX.cloudfront, 'tls') ? 'CloudFront 用了 ACM 证书' : '';
@@ -1538,7 +1533,7 @@ function spofTargets(p) {
   if (!mine.length) return null;
   const max = Math.max(...mine.map(i => SQ[i].p));
   const top = mine.filter(i => SQ[i].p === max);
-  return top.every(i => S.props[i].level === 0 && !S.props[i].stopped) ? top : null;
+  return top.every(i => S.props[i].level === 0 && !effActive(i, 'spof')) ? top : null;
 }
 const impair = list => list.forEach(i => { S.props[i].impaired = true; });
 async function incident(p, id) {
@@ -1555,7 +1550,7 @@ async function incident(p, id) {
       break;
     }
     case 4: {
-      const mine = ownedBy(p).filter(i => !S.props[i].stopped);
+      const mine = ownedBy(p);
       const hit = imm ? [] : mine.filter(i => SQ[i].t === 'prop' && isInst(i) && !effActive(i, 'scale') && !S.props[i].impaired);
       if (!hit.length) { if (mine.length) { credit(p, 100); log(`📈 ${nm(p)} 扛住了流量暴增${imm ? '（' + imm + '）' : '（服务都有弹性扩展或不是实例型）'}，领 $100`); } return; }
       if (await tryCancel(p, id)) return;
@@ -1577,10 +1572,12 @@ async function incident(p, id) {
     case 10: if (await tryCancel(p, id)) return; pay(p, 'pot', 100); log(`${nm(p)} 交 $100`); break;
     case 11: case 17: {
       let i;
-      if (id === 11) { const t = spofTargets(p); if (!t) { log(`${nm(p)} 不受单点故障影响`); return; } i = t[0]; if (t.length > 1) i = await ask({ title: '选一块强制 Stop', buttons: t.map(x => ({ label: SQ[x].n, value: x })) }); }
-      else { if (!(owns(p, IX.ec2) && S.props[IX.ec2].level === 0 && !S.props[IX.ec2].stopped)) { log(`${nm(p)} 没有单 AZ 的 EC2，不受影响`); return; } i = IX.ec2; }
+      if (id === 11) { const t = spofTargets(p); if (!t) { log(`${nm(p)} 不受单点故障影响`); return; } i = t[0]; if (t.length > 1) i = await ask({ title: '哪一块挂了？', buttons: t.map(x => ({ label: SQ[x].n, value: x })) }); }
+      else { if (!(owns(p, IX.ec2) && S.props[IX.ec2].level === 0)) { log(`${nm(p)} 没有单 AZ 的 EC2，不受影响`); return; } i = IX.ec2; }
       if (await tryCancel(p, id)) return;
-      stopProp(p, i, true); break;
+      const fee = id === 11 ? Math.round(SQ[i].p * 0.1) : 50;
+      S.props[i].impaired = true; pay(p, 'pot', fee);
+      log(`${nm(p)} 的 ${sqn(i)} 挂了，变成 Impaired，交 $${fee} ${id === 11 ? '紧急恢复' : '重新启动到新的硬件上'}`); break;
     }
     case 12: p.skip++; credit(p, 50); log(`${nm(p)} 下一轮停一轮，领 $50 加班费`); return;
     case 13: {
@@ -1591,7 +1588,7 @@ async function incident(p, id) {
     }
     case 14: await moveTo(p, 0); return;
     case 16: {
-      const hit = ownedBy(p).filter(i => SQ[i].t === 'prop' && isInst(i) && S.props[i].level === 0 && !S.props[i].stopped && !S.props[i].impaired);
+      const hit = ownedBy(p).filter(i => SQ[i].t === 'prop' && singleAZ(i) && !S.props[i].impaired);
       if (!hit.length) { log(`${nm(p)} 没有单 AZ 的实例型服务，没受影响`); return; }
       if (await tryCancel(p, id)) return;
       impair(hit); log(`${nm(p)} 的 ${hit.map(sqn).join('、')} 变成 Impaired`); break;
@@ -1601,7 +1598,7 @@ async function incident(p, id) {
       while (!(SQ[k].t === 'prop' && S.props[k].owner !== null) && guard++ < N) k = (k + 1) % N;
       if (guard >= N) { log('棋盘上还没有有主的服务，没人受影响'); return; }
       const g = SQ[k].g;
-      const hit = GRP(g).filter(i => S.props[i].owner !== null && !S.props[i].stopped && !effActive(i, 'mr'));
+      const hit = GRP(g).filter(i => S.props[i].owner !== null && !effActive(i, 'mr'));
       impair(hit);
       await info('某个服务在一个 Region 里宕机了', `<p>往前数第一块有主的服务是 ${sqn(k)}，<b>${GROUPS[g].name}组</b>宕机。</p><p>${hit.length ? '变成 Impaired：' + hit.map(i => `${sqn(i)}（${nm(P(S.props[i].owner))}）`).join('、') : '这个组里的服务都有多区域功能，没受影响。'}</p>`);
       log(`${GROUPS[g].name}组宕机${hit.length ? '：' + hit.map(sqn).join('、') + ' 变成 Impaired' : '，没人受影响'}`);
@@ -1610,7 +1607,7 @@ async function incident(p, id) {
     }
     case 19: {
       const vo = S.props[IX.vpc].owner;
-      if (vo !== null && vo !== p.id && S.props[IX.vpc].level >= 2 && !S.props[IX.vpc].stopped && p.cash >= 50) {
+      if (vo !== null && vo !== p.id && S.props[IX.vpc].level >= 2 && p.cash >= 50) {
         const rent = await ask({ title: '借用跳板机？', html: `<p>${nm(P(vo))} 的 VPC 已经有跳板机。付 $50 给对方，就能把实例放进私有子网，躲过这次攻击。</p>`, buttons: [{ label: '付 $50 借用', value: true, cls: 'pri' }, { label: '不借', value: false }] });
         if (rent) { pay(p, P(vo), 50); log(`${nm(p)} 付 $50 借用 ${nm(P(vo))} 的跳板机，躲过了 SSH 暴力破解`); return; }
       }
@@ -1621,7 +1618,7 @@ async function incident(p, id) {
       log(`${nm(p)} 交 $100${t !== undefined ? '，' + sqn(t) + ' 变成 Impaired' : ''}`); break;
     }
     case 21: {
-      const hit = ownedBy(p).filter(i => SQ[i].t === 'prop' && (SQ[i].type === 'iaas' || i === IX.ecs || i === IX.eks) && !S.props[i].stopped && !cveProtected(p, i));
+      const hit = ownedBy(p).filter(i => SQ[i].t === 'prop' && ((SQ[i].type === 'iaas' && i !== IX.ebs) || i === IX.ecs || i === IX.eks) && !cveProtected(p, i));
       if (!hit.length) { log(`${nm(p)} 的服务都有漏洞扫描保护，或由亚马逊云科技打补丁，没受影响`); return; }
       if (await tryCancel(p, id)) return;
       impair(hit); pay(p, 'pot', 30 * hit.length);
@@ -1656,7 +1653,7 @@ async function drawReinvent(p) {
   const others = S.players.filter(o => o.alive && o.id !== p.id);
   switch (id) {
     case 1: credit(p, 200); break;
-    case 3: { const b = runAfterRI(p).spBase; if (!b || spActive(p)) { log(`${nm(p)} ${b ? '已经有 Savings Plans 了' : '还没有能用 Savings Plans 的服务'}，这张卡没有效果`); break; } const amt = Math.round(b * (1 - SP_PLANS[2])); p.commits = commitsOf(p); p.commits.push({ type: 'sp', laps: 2, d: SP_PLANS[2], amt }); p.usedCommit = true; log(`${nm(p)} 签了 2 圈 Savings Plans：每圈承诺 $${amt}，抵扣原价 $${b} 的运行费`); break; }
+    case 3: { const b = runAfterRI(p).spBase; if (!b || spActive(p)) { log(`${nm(p)} ${b ? '已经有 Savings Plans 了' : '还没有能用 Savings Plans 的服务'}，这张卡没有效果`); break; } const d = spDisc(p, 2), amt = Math.round(b * (1 - d)); p.commits = commitsOf(p); p.commits.push({ type: 'sp', laps: 2, d, amt }); p.usedCommit = true; log(`${nm(p)} 签了 2 圈 Savings Plans：每圈承诺 $${amt}，抵扣原价 $${b} 的运行费`); break; }
     case 5: await moveTo(p, IX.bedrock); await land(p, { discount: 0.8 }); break;
     case 6: others.forEach(o => pay(o, p, 50)); log(`每位其他玩家付给 ${nm(p)} $50`); break;
     case 7: case 9: credit(p, 100); break;
@@ -1708,7 +1705,7 @@ async function eol() {
   const rolls = S.players.filter(q => q.alive).map(q => ({ q, d: 1 + rnd(6) }));
   const min = Math.min(...rolls.map(r => r.d)), lines = [];
   for (const r of rolls.filter(r => r.d === min)) {
-    const c = ownedBy(r.q).filter(i => SQ[i].t === 'prop' && S.props[i].level === 0 && !S.props[i].cap && !S.props[i].stopped).sort((a, b) => SQ[a].p - SQ[b].p);
+    const c = ownedBy(r.q).filter(i => SQ[i].t === 'prop' && S.props[i].level === 0 && !S.props[i].cap).sort((a, b) => SQ[a].p - SQ[b].p);
     if (c.length) { const i = c[0]; resetProp(i); credit(r.q, SQ[i].p / 2); lines.push(`${nm(r.q)} 的 ${sqn(i)} 停止支持，退回银行，拿 $${SQ[i].p / 2}`); }
     else lines.push(`${nm(r.q)} 没有符合条件的服务，不受影响`);
   }
@@ -1724,8 +1721,8 @@ function autoLiquidate(p) {
     if (cp.length) { sellCap(p, cp[0]); continue; }
     const up = ownedBy(p).filter(i => S.props[i].level > 0).sort((a, b) => S.props[b].level - S.props[a].level);
     if (up.length) { sellUpgrade(p, up[0]); continue; }
-    const st = ownedBy(p).filter(i => !S.props[i].stopped).sort((a, b) => SQ[a].p - SQ[b].p);
-    if (st.length) { stopProp(p, st[0]); continue; }
+    const st = ownedBy(p).sort((a, b) => SQ[a].p - SQ[b].p);
+    if (st.length) { releaseProp(p, st[0]); continue; }
     return;
   }
 }
@@ -1733,7 +1730,7 @@ async function resolveDebts() {
   for (let guard = 0; guard < 50; guard++) {
     const p = S.players.find(q => q.alive && q.debt.length);
     if (!p) return;
-    const v = await ask({ title: `${p.name} 欠款 $${debtOf(p)}`, html: '<p>现金不够付。可以去掉升级、Stop 服务来凑钱；也可以直接宣告破产：账号被暂停、出局，名下服务连同升级和容量整个归债主（欠银行的就回到银行）。</p>', buttons: [{ label: '管理资产', value: 'm' }, { label: '自动变卖', value: 'a', cls: 'pri' }, { label: '宣告破产，直接出局', value: 'b', cls: 'danger', botW: 0 }] });
+    const v = await ask({ title: `${p.name} 欠款 $${debtOf(p)}`, html: '<p>现金不够付。可以去掉升级和容量、释放服务来凑钱；也可以直接宣告破产：账号被暂停、出局，名下服务连同升级和容量整个归债主（欠银行的就回到银行）。</p>', buttons: [{ label: '管理资产', value: 'm' }, { label: '自动变卖', value: 'a', cls: 'pri' }, { label: '宣告破产，直接出局', value: 'b', cls: 'danger', botW: 0 }] });
     if (v === 'm') await manage(p, true);
     else if (v === 'a') { autoLiquidate(p); if (p.debt.length) await info('还是不够', `${nm(p)} 已经全部变卖，还欠 $${debtOf(p)}，只能宣告破产。`); }
     else await bankrupt(p);
@@ -1759,21 +1756,12 @@ async function bankrupt(p) {
     if (p.cash > 0) credit(c, p.cash);
     c.cards.push(...p.cards); c.coe.push(...p.coe); c.drill.push(...p.drill);
     p.cards = []; p.coe = []; p.drill = []; p.cash = 0;
-    await handleStoppedReceived(c, props.filter(i => S.props[i].stopped));
   } else {
-    log(`💀 ${nm(p)} 账号被暂停，服务回到银行重新竞价`);
+    log(`💀 ${nm(p)} 账号被暂停，服务回到银行重新出售`);
     p.cash = 0; props.forEach(resetProp);
 
   }
   render();
-}
-async function handleStoppedReceived(q, list) {
-  for (const i of list) {
-    const sc = startCost(i), ten = Math.round(SQ[i].p / 2 * 0.1);
-    const v = await ask({ title: `${q.name} 接手了 Stop 状态的 ${SQ[i].n}`, html: '<p>二选一：</p>', buttons: [{ label: `立即 Start（付 $${sc}）`, value: 's', cls: 'pri' }, { label: `先付 10%（$${ten}）保持 Stop`, value: 'k' }] });
-    if (v === 's') { pay(q, 'bank', sc); S.props[i].stopped = false; S.props[i].forced = false; log(`${nm(q)} Start 了接手的 ${sqn(i)}`); }
-    else { pay(q, 'bank', ten); S.props[i].forced = false; log(`${nm(q)} 付 $${ten}，${sqn(i)} 保持 Stop`); }
-  }
 }
 
 // ================= 资产管理 =================
@@ -1791,14 +1779,13 @@ async function manage(p, debtMode = false) {
       if (pr.spot && !debtMode) { const c = Math.max(0, s.p - (pr.spotPaid || 0)); acts.push(`<button class="sm pri" data-v="conv:${i}" data-bw="0.4" ${p.cash < c ? 'disabled' : ''}>补 $${c} 转成按需</button>`); }
       if (s.t === 'prop' && pr.cap > 0) acts.push(`<button class="sm" data-v="uncap:${i}" data-bw="0.2">减 1 个${CAP[s.k]} +$${capCost(i) / 2}</button>`);
       if (s.upg && pr.level > 0 && !pr.cap) acts.push(`<button class="sm" data-v="sell:${i}" data-bw="0.2">去掉一级 +$${sideCost(i) / 2}</button>`);
-      if (!pr.stopped && pr.level === 0 && !pr.cap) acts.push(`<button class="sm" data-v="stop:${i}" data-bw="0.15">${stopN(i)} +$${s.p / 2}</button>`);
-      if (pr.stopped && !debtMode) acts.push(`<button class="sm" data-v="start:${i}" data-bw="0.3" ${p.cash < startCost(i) ? 'disabled' : ''}>${stopN(i) === 'Stop' ? 'Start' : '重新上线'} $${startCost(i)}</button>`);
-      return `<tr><td><img src="${AWSI[s.icon]}" alt="" style="width:18px;height:18px;vertical-align:-4px;margin-right:6px">${s.n}</td><td>${s.upg ? lvName(i, pr.level) + (pr.cap ? ` · ${pr.cap} 个${CAP[s.k]}` : '') : '—'}${pr.stopped ? ' · ' + stoppedN(i) : ''}${pr.impaired ? ' · Impaired' : ''}</td><td>${runCost(i) ? '$' + runCost(i) + '/圈' : ''}</td><td>${acts.join(' ')}</td></tr>`;
+      if (pr.level === 0 && !pr.cap) acts.push(`<button class="sm" data-v="rel:${i}" data-bw="0.15">释放 +$${releaseValue(i)}</button>`);
+      return `<tr><td><img src="${AWSI[s.icon]}" alt="" style="width:18px;height:18px;vertical-align:-4px;margin-right:6px">${s.n}</td><td>${s.upg ? lvName(i, pr.level) + (pr.cap ? ` · ${pr.cap} 个${CAP[s.k]}` : '') : '—'}${pr.impaired ? ' · Impaired' : ''}</td><td>${runCost(i) ? '$' + runCost(i) + '/圈' : ''}</td><td>${acts.join(' ')}</td></tr>`;
     });
     let extra = '';
     if (F.debt() && !F.actions() && !debtMode && p.techDebt > 0) extra += `<p>技术债 ${p.techDebt} 个 <button class="sm" data-v="refactor" data-bw="0.3" ${p.cash < 50 ? 'disabled' : ''}>重构 $50（清掉 1 个）</button></p>`;
     const html = `${own.length ? `<table><tr><th>服务</th><th>当前级别</th><th>运行费</th><th>操作</th></tr>${rows.join('')}</table>` : '<p class="muted">还没有服务</p>'}${extra}
-      <p class="muted">每次经过 Startup 扶持 一共交运行费 $${opCost(p)}。集齐整组可以在这里随时升级；没集齐的，落在那块服务上时也能升。实例型服务可以 Stop，其他服务叫下线，效果一样：拿回一半钱，暂时不收过路费。有升级的要先去掉升级。</p>`;
+      <p class="muted">每次经过 Startup 扶持 一共交运行费 $${opCost(p)}。集齐整组可以在这里随时升级；没集齐的，落在那块服务上时也能升。不用的服务可以释放：退回银行、拿回一半（Spot 拿回出价的一半），这块重新变成谁都能买的状态。有升级或容量的要先去掉。</p>`;
     const v = await ask({ title: `${p.name} 的资产 · 现金 $${p.cash}${p.debt.length ? ` · 欠款 $${debtOf(p)}` : ''}`, html, buttons: [{ label: '关闭', value: 'close', botW: 3 }], cls: 'wide' });
     if (v === 'close') return;
     const [k, a] = String(v).split(':'); const i = +a;
@@ -1807,8 +1794,7 @@ async function manage(p, debtMode = false) {
     else if (k === 'cap') addCap(p, i);
     else if (k === 'conv') convertSpot(p, i);
     else if (k === 'uncap') sellCap(p, i);
-    else if (k === 'stop') stopProp(p, i);
-    else if (k === 'start') startProp(p, i);
+    else if (k === 'rel') releaseProp(p, i);
     else if (k === 'refactor' && p.cash >= 50 && p.techDebt > 0) { pay(p, 'bank', 50); p.techDebt--; log(`${nm(p)} 重构，清掉 1 个技术债`); }
     render();
     if (debtMode && !p.debt.length) return;
@@ -1882,7 +1868,7 @@ async function trade() {
   const full = F.full();
   const side = (q, x) => {
     const inps = [{ type: 'header', label: `${q.name} 交出` }];
-    ownedBy(q).forEach(i => { const pr = S.props[i]; inps.push({ id: `${x}p${i}`, type: 'checkbox', label: `${SQ[i].n}${pr.stopped ? '（Stop）' : ''}${pr.level || pr.cap ? '（有升级或容量，要先去掉）' : ''}`, disabled: pr.level > 0 || pr.cap > 0 }); });
+    ownedBy(q).forEach(i => { const pr = S.props[i]; inps.push({ id: `${x}p${i}`, type: 'checkbox', label: `${SQ[i].n}${pr.level || pr.cap ? '（有升级或容量，要先去掉）' : ''}`, disabled: pr.level > 0 || pr.cap > 0 }); });
     inps.push({ id: x + 'cash', type: 'number', label: `现金 $（最多 ${Math.max(q.cash, 0)}）`, min: 0, max: Math.max(q.cash, 0), step: 10, value: 0 });
     if (full) {
       q.cards.forEach((c, k) => { if (!c.used) inps.push({ id: `${x}c${k}`, type: 'checkbox', label: `保留卡：${CARDN[c.id]}` }); });
@@ -1914,26 +1900,24 @@ async function trade() {
   };
   move(a, b, A); move(b, a, B);
   log(`🤝 交易达成：${summary.replace(/<\/?p>/g, ' ')}`);
-  await handleStoppedReceived(b, A.props.filter(i => S.props[i].stopped));
-  await handleStoppedReceived(a, B.props.filter(i => S.props[i].stopped));
 }
 // Savings Plans / RI：跟亚马逊云科技承诺用量换折扣，期限按圈算（运行费每圈交一次）
 async function edpDialog() {
   const p = cur();
   const { spBase } = runAfterRI(p), sp = spActive(p);
-  const riCand = ownedBy(p).filter(i => RI_OK.has(SQ[i].k) && !S.props[i].stopped && runCost(i) > 0 && !riActive(p, i));
-  const spAmt = n => Math.round(spBase * (1 - SP_PLANS[n]));
-  const rows = [2, 4].map(n => `<tr><td><b>Savings Plans</b>（${n} 圈）</td><td>每圈 $${spAmt(n)}，不预付</td><td>能抵扣的运行费打 ${Math.round((1 - SP_PLANS[n]) * 100) / 10} 折：现在每圈 $${spBase} → $${spAmt(n)}</td></tr>`).join('')
+  const riCand = ownedBy(p).filter(i => RI_OK.has(SQ[i].k) && runCost(i) > 0 && !riActive(p, i));
+  const spAmt = n => Math.round(spBase * (1 - spDisc(p, n)));
+  const rows = [2, 4].map(n => `<tr><td><b>Savings Plans</b>（${n} 圈）</td><td>每圈 $${spAmt(n)}，不预付</td><td>能抵扣的运行费平均打 ${Math.round((1 - spDisc(p, n)) * 100) / 10} 折：现在每圈 $${spBase} → $${spAmt(n)}</td></tr>`).join('')
     + [2, 4].map(n => `<tr><td><b>预留实例 RI</b>（${n} 圈）</td><td>全额预付这块 ${n} 圈运行费的 ${Math.round((1 - RI_PLANS[n]) * 100)}%</td><td>挑一块服务，${n} 圈内它现有的运行费全免</td></tr>`).join('');
-  const v = await ask({ title: 'Savings Plans / 预留实例（RI）', html: `<p>跟亚马逊云科技承诺用量，换运行费折扣。承诺期按<b>圈</b>算（每经过一次 Startup 扶持算一圈）；期内服务卖掉、Stop 或下线，承诺也照付、预付不退。</p>
+  const v = await ask({ title: 'Savings Plans / 预留实例（RI）', html: `<p>跟亚马逊云科技承诺用量，换运行费折扣。承诺期按<b>圈</b>算（每经过一次 Startup 扶持算一圈）；期内服务卖掉或释放，承诺也照付、预付不退。</p>
     <table><tr><th>方案</th><th>怎么付</th><th>换来什么</th></tr>${rows}</table>
-    <p class="muted">Savings Plans 能抵扣：EC2、ECS、EKS（Compute Savings Plans）、SageMaker、RDS、Aurora、ElastiCache；你现在这部分每圈 $${spBase}。承诺额按现在的用量算，之后用多了超出部分按原价，用少了承诺额照付。<br>RI 能买：EC2、RDS、Aurora、ElastiCache、Redshift、OpenSearch、EMR（底层 EC2）。RI 只覆盖买的时候的规模，之后加的容量按原价。<br>ELB、EBS、Lightsail（打包价）两种都用不了。</p>`,
+    <p class="muted">Savings Plans 能抵扣：EC2、ECS、EKS（Compute Savings Plans，2 圈 75 折、4 圈 55 折）、SageMaker（SageMaker Savings Plans，同上）、RDS、Aurora、ElastiCache（Database Savings Plans，最多约省 35%、只有 1 年期，所以不管签几圈都只打 75 折）；你现在这部分每圈 $${spBase}。承诺额按现在的用量算，之后用多了超出部分按原价，用少了承诺额照付。<br>RI 能买：EC2、RDS、Aurora、ElastiCache、Redshift、OpenSearch、EMR（底层 EC2）。RI 只覆盖买的时候的规模，之后加的容量按原价。<br>ELB、EBS、Lightsail（打包价）两种都用不了。</p>`,
     buttons: [{ label: 'Savings Plans 2 圈', value: 'sp2', cls: 'pri', disabled: !spBase || !!sp }, { label: 'Savings Plans 4 圈', value: 'sp4', disabled: !spBase || !!sp }, { label: '买 RI', value: 'ri', disabled: !riCand.length }, { label: '取消', value: 'x', botW: 2 }] });
   if (v === 'x') return;
   p.commits = commitsOf(p);
   if (v === 'sp2' || v === 'sp4') {
     const n = v === 'sp2' ? 2 : 4, amt = spAmt(n);
-    p.commits.push({ type: 'sp', laps: n, d: SP_PLANS[n], amt }); p.usedCommit = true;
+    p.commits.push({ type: 'sp', laps: n, d: spDisc(p, n), amt }); p.usedCommit = true;
     log(`📄 ${nm(p)} 签了 ${n} 圈 Savings Plans：每圈承诺 $${amt}，抵扣原价 $${spBase} 的运行费`);
     return;
   }
@@ -1948,15 +1932,15 @@ async function edpDialog() {
 
 // ================= 胜利 =================
 const PILLARS = ['卓越运营', '安全', '可靠性', '性能效率', '成本优化', '可持续性'];
-const PILLAR_TIP = ['持有 CloudWatch 或 Step Functions，并且写过复盘', '持有安全组或边缘防护组的服务，并且有复盘或演练标记', '有多 AZ 升级（或持有托管、全局服务），并且有一处多区域功能', '有一处弹性扩展功能（Auto Scaling、按需容量、并发配额等）', '下面 4 条满足 2 条：没有技术债；集齐的色组里有主动 Stop/下线的服务；签过 Savings Plans / RI 或用过 Cost Explorer；有降成本功能', '持有 2 块以上 Serverless 服务，或者 EC2 升到了 Graviton'];
+const PILLAR_TIP = ['持有 CloudWatch 或 Step Functions，并且写过复盘', '持有安全组或边缘防护组的服务，并且有复盘或演练标记', '有多 AZ 升级（或持有托管、全局服务），并且有一处多区域功能', '有一处弹性扩展功能（Auto Scaling、按需容量、并发配额等）', '下面 4 条满足 2 条：没有技术债；主动释放过不用的服务；签过 Savings Plans / RI 或用过 Cost Explorer；有降成本功能', '持有 2 块以上 Serverless 服务，或者 EC2 升到了 Graviton'];
 function pillars(p) {
   const ops = (active(p, IX.cloudwatch) || active(p, IX.sfn)) && p.coe.length > 0;
   const sec = secActive(p, 'sec') + secActive(p, 'edge') > 0 && (p.coe.length + p.drill.length) > 0;
-  const rel = (hasEff(p, 'maz') || ownedBy(p).some(i => SQ[i].t === 'prop' && !isInst(i) && !S.props[i].stopped)) && hasEff(p, 'mr');
+  const rel = (hasEff(p, 'maz') || ownedBy(p).some(i => SQ[i].t === 'prop' && !isInst(i))) && hasEff(p, 'mr');
   const perf = hasEff(p, 'scale');
-  const c = [p.techDebt === 0, ownedBy(p).some(i => { const pr = S.props[i]; return SQ[i].t === 'prop' && pr.stopped && !pr.forced && ownsGroup(p, SQ[i].g); }), (p.usedCommit || p.cards.some(x => x.used && (x.id === 'SP' || x.id === 'CE'))), hasEff(p, 'cost')];
+  const c = [p.techDebt === 0, !!p.released, (p.usedCommit || p.cards.some(x => x.used && (x.id === 'SP' || x.id === 'CE'))), hasEff(p, 'cost')];
   const cost = c.filter(Boolean).length >= 2;
-  const sus = ownedBy(p).filter(i => SQ[i].type === 'sls' && !S.props[i].stopped).length >= 2 || effActive(IX.ec2, 'cost') && owns(p, IX.ec2);
+  const sus = ownedBy(p).filter(i => SQ[i].type === 'sls').length >= 2 || effActive(IX.ec2, 'cost') && owns(p, IX.ec2);
   return [ops, sec, rel, perf, cost, sus];
 }
 function pillarWhy(p) {
@@ -1964,9 +1948,9 @@ function pillarWhy(p) {
   const effList = eff => ownedBy(p).filter(i => effActive(i, eff));
   const ops = [IX.cloudwatch, IX.sfn].filter(i => active(p, i));
   const secs = [...GRP('sec'), ...GRP('edge')].filter(i => active(p, i));
-  const sls = ownedBy(p).filter(i => SQ[i].type === 'sls' && !S.props[i].stopped);
-  const maz = effList('maz'), mr = effList('mr'), mgd = ownedBy(p).filter(i => SQ[i].t === 'prop' && !isInst(i) && !S.props[i].stopped), sc = effList('scale'), co = effList('cost');
-  const c = [p.techDebt === 0 ? '没有技术债' : '', ownedBy(p).some(i => { const pr = S.props[i]; return SQ[i].t === 'prop' && pr.stopped && !pr.forced && ownsGroup(p, SQ[i].g); }) ? '集齐的色组里有主动下线的服务' : '', (p.usedCommit || p.cards.some(x => x.used && (x.id === 'SP' || x.id === 'CE'))) ? '签过 Savings Plans / RI 或用过 Cost Explorer' : '', co.length ? `${names(co)} 有降成本功能` : ''].filter(Boolean);
+  const sls = ownedBy(p).filter(i => SQ[i].type === 'sls');
+  const maz = effList('maz'), mr = effList('mr'), mgd = ownedBy(p).filter(i => SQ[i].t === 'prop' && !isInst(i)), sc = effList('scale'), co = effList('cost');
+  const c = [p.techDebt === 0 ? '没有技术债' : '', p.released ? '主动释放过不用的服务' : '', (p.usedCommit || p.cards.some(x => x.used && (x.id === 'SP' || x.id === 'CE'))) ? '签过 Savings Plans / RI 或用过 Cost Explorer' : '', co.length ? `${names(co)} 有降成本功能` : ''].filter(Boolean);
   const ok = pillars(p);
   const why = [
     ok[0] ? `有 ${names(ops)}，写过 ${p.coe.length} 次复盘` : `还差：${ops.length ? '' : '持有 CloudWatch 或 Step Functions；'}${p.coe.length ? '' : '写一次复盘（离开维护窗口时）'}`,
@@ -2031,8 +2015,8 @@ function cellHtml(i) {
     return `<div class="art">${awsImg(s.icon)}${tokH}</div><div class="nm">${s.n}</div><div class="pr">${sub}</div>`;
   }
   const owner = pr && pr.owner !== null ? P(pr.owner) : null;
-  const ownTag = owner ? `<span class="ownr" style="--oc:${owner.color}"><i></i>${owner.name}${pr.stopped ? ' · ' + stoppedN(i) : pr.impaired ? ' · Impaired' : pr.spot ? ' · Spot' : ''}</span>` : '';
-  const price = owner ? ownTag : pr && pr.stopped ? `<span class="stp-pill">${stoppedN(i)}</span>` : pr && pr.impaired ? '<span class="imp-pill">Impaired</span>' : s.p ? `<span class="pr">$${s.p}</span>` : s.t === 'tax' ? '<span class="pr neg">−$200</span>' : s.t === 'tax2' ? '<span class="pr neg">−$100</span>' : '';
+  const ownTag = owner ? `<span class="ownr" style="--oc:${owner.color}"><i></i>${owner.name}${pr.impaired ? ' · Impaired' : pr.spot ? ' · Spot' : ''}</span>` : '';
+  const price = owner ? ownTag : pr && pr.impaired ? '<span class="imp-pill">Impaired</span>' : s.p ? `<span class="pr">$${s.p}</span>` : s.t === 'tax' ? '<span class="pr neg">−$200</span>' : s.t === 'tax2' ? '<span class="pr neg">−$100</span>' : '';
   const capH = pr && pr.cap ? `<span class="cap">+${pr.cap} ${CAP[s.k]}</span>` : '';
   const lv = pr && pr.level ? `<span class="lv" title="${lvName(i, pr.level)}">${lvBadge(pr.level, i)}</span>` : '';
   const bill = s.t === 'prop' ? `<span class="bill">${s.bill === 'token' ? '按 token' : TYPE_N[s.type]}</span>` : s.t === 'util' ? '<span class="bill">按用量</span>' : '';
@@ -2042,7 +2026,7 @@ function renderBoard() {
   SQ.forEach((s, i) => {
     const d = $('#sq' + i), pr = S.props[i];
     const owned = pr && pr.owner !== null, gc = cellGc(s);
-    d.className = ['sq', isCorner(i) ? 'corner' : sideOf(i), gc ? 'g' : '', owned ? 'owned' : '', pr && pr.stopped ? 'stopped' : '', pr && pr.impaired ? 'impaired' : '', S.lastSq === i ? 'last' : ''].join(' ');
+    d.className = ['sq', isCorner(i) ? 'corner' : sideOf(i), gc ? 'g' : '', owned ? 'owned' : '', pr && pr.impaired ? 'impaired' : '', S.lastSq === i ? 'last' : ''].join(' ');
     d.style.setProperty('--gc', gc || 'transparent');
     d.style.setProperty('--oc', owned ? P(pr.owner).color : 'transparent');
     d.title = `${s.n}${s.t === 'prop' ? ' · ' + GROUPS[s.g].name + '组 · ' + TYPE_N[s.type] : ''}${owned ? ' · 主人：' + P(pr.owner).name : ''}`;
@@ -2069,7 +2053,7 @@ function renderCenter() {
   let more = '';
   if (!over) {
     const dis = idle ? '' : 'disabled';
-    more += `<button ${dis} onclick="uiAction(()=>manage(cur()))" title="给自己的服务升级、加容量；钱不够时 Stop/下线换钱，钱够了再重新上线">资产管理</button>`;
+    more += `<button ${dis} onclick="uiAction(()=>manage(cur()))" title="给自己的服务升级、加容量；不用的服务可以释放，退回银行拿回一半">资产管理</button>`;
     more += `<button ${dis} onclick="uiAction(trade)" title="和别的玩家换服务、换现金（完整局还能换保留卡和标记）">交易</button>`;
     if (F.full()) more += `<button ${dis} onclick="uiAction(edpDialog)" title="跟亚马逊云科技承诺用量：预付一笔钱，换运行费折扣">Savings Plans / RI</button>`;
     more += `<button ${dis} onclick="uiAction(declareBankrupt)" title="主动认输：账号被暂停出局，资产交给一位玩家或交回银行">宣告破产</button>`;
@@ -2153,7 +2137,7 @@ function renderSide() {
     const r = roleOf(p), isCur = p.id === S.cur && S.phase !== 'over';
     const svcs = ownedBy(p).map(i => {
       const pr = S.props[i];
-      return `<span class="svc ${pr.stopped ? 'stp' : ''} ${pr.impaired ? 'imp' : ''}" title="${SQ[i].n}${SQ[i].t === 'prop' ? ' · ' + lvName(i, pr.level) : ''}${pr.stopped ? ' · ' + stoppedN(i) : ''}${pr.impaired ? ' · Impaired' : ''}">${awsImg(SQ[i].icon)}${pr.level ? `<span class="lvn">${pr.level}</span>` : ''}${pr.cap ? `<span class="cpn">+${pr.cap}</span>` : ''}</span>`;
+      return `<span class="svc ${pr.impaired ? 'imp' : ''}" title="${SQ[i].n}${SQ[i].t === 'prop' ? ' · ' + lvName(i, pr.level) : ''}${pr.impaired ? ' · Impaired' : ''}">${awsImg(SQ[i].icon)}${pr.level ? `<span class="lvn">${pr.level}</span>` : ''}${pr.cap ? `<span class="cpn">+${pr.cap}</span>` : ''}</span>`;
     }).join('');
     const res = [];
     res.push(`运行费 $${opCost(p)}/圈`);
@@ -2251,6 +2235,7 @@ function startFromSetup() {
 function resumeGame() {
   try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) { S = null; }
   if (!S) return;
+  Object.entries(S.props).forEach(([i, pr]) => { if (pr && pr.stopped) resetProp(+i); });   // 旧存档：Stop/下线的服务退回银行
   if (S.phase !== 'roll' && S.phase !== 'post') S.phase = 'post';
   enterGame();
 }
@@ -2302,10 +2287,9 @@ function invariants() {
   OWNABLE.forEach(i => {
     const pr = S.props[i];
     if (pr.level < 0 || pr.level > 3) errs.push(`level ${i}`);
-    if (pr.stopped && pr.level > 0) errs.push(`stopped+level ${i}`);
-    if (pr.owner === null && (pr.level || pr.stopped || pr.impaired)) errs.push(`unowned dirty ${i}`);
+    if (pr.owner === null && (pr.level || pr.cap || pr.impaired)) errs.push(`unowned dirty ${i}`);
     if (!SQ[i].upg && pr.level) errs.push(`nonupg level ${i}`);
-    if ((pr.cap || 0) < 0 || (pr.cap || 0) > CAP_MAX || (pr.stopped && pr.cap)) errs.push(`cap ${i}`);
+    if ((pr.cap || 0) < 0 || (pr.cap || 0) > CAP_MAX) errs.push(`cap ${i}`);
   });
   if (!Number.isFinite(S.pot) || S.pot < 0) errs.push('pot');
   return errs;
@@ -2386,14 +2370,13 @@ async function simGame(n, diff) {
     if (g.firstBust === null && S.players.some(q => !q.alive)) g.firstBust = S.round;
     if (S.phase === 'roll') {
       const p = cur();
-      // 像真人一样：钱宽裕就把下线的服务重新上线，集齐整组就升级
-      ownedBy(p).filter(i => S.props[i].stopped).forEach(i => { if (p.cash - startCost(i) >= simReserve * 2) startProp(p, i); });
+      // 像真人一样：集齐整组就升级
       ownedBy(p).forEach(i => { const u = upgradeInfo(p, i); if (u.ok && p.cash - u.total >= simReserve * 2) doUpgrade(p, i); });
       if (p.jail !== null) await jailAct(p.cash > 600 ? 'pay' : 'roll'); else await doRoll();
     }
     else if (S.phase === 'post') await endTurn();
   }
-  g.stats = S.stats; g.stopped = OWNABLE.filter(i => S.props[i].stopped).length; g.levels = OWNABLE.reduce((a, i) => a + S.props[i].level, 0);
+  g.stats = S.stats; g.released = S.players.reduce((a, q) => a + (q.released || 0), 0); g.levels = OWNABLE.reduce((a, i) => a + S.props[i].level, 0);
   g.rounds = S.round; g.over = S.over; g.alive = S.players.filter(q => q.alive).length;
   SIMOUT.games.push(g);
 }
@@ -2412,7 +2395,7 @@ function demo(kind) {
   S.props[IX.route53].owner = null;
   Object.entries(own).forEach(([pid, list]) => list.forEach(k => { S.props[IX[k]].owner = +pid; }));
   [['ec2', 2], ['vpc', 1], ['elb', 1], ['lambda', 1], ['dynamodb', 3], ['rds', 1], ['aurora', 1], ['bedrock', 1]].forEach(([k, l]) => S.props[IX[k]].level = l);
-  S.props[IX.kinesis].stopped = true; S.props[IX.elasticache].impaired = true;
+  S.props[IX.elasticache].impaired = true;
   S.players[0].pos = IX.elb; S.players[1].pos = IX.sfn; S.players[2].pos = IX.aurora; S.players[3].pos = IX.jail; S.players[3].jail = 1;
   S.players[0].cash = 1640; S.players[1].cash = 1180; S.players[2].cash = 2010; S.players[3].cash = 420;
   S.players[1].cards.push({ id: 'CE', used: false }, { id: 'ES', used: true }); S.players[0].coe.push({ cat: 'sec', used: false });
