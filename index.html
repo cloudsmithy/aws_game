@@ -113,6 +113,7 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:#fafafa}
 .toks{position:absolute;left:0;right:0;bottom:.35cqw;display:flex;justify-content:center;gap:.15cqw;z-index:2}
 .art .toks{left:auto;flex-direction:column-reverse;gap:.1cqw}
 .sq .pawn{box-shadow:0 0 0 .15cqw #fff}
+.pawn.ghost{visibility:hidden}
 .sq.corner{gap:.3cqw;padding:.6cqw}
 
 .corner .nm{font-weight:700}
@@ -136,7 +137,7 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:#fafafa}
 @keyframes roll{0%{transform:rotate(-120deg)}100%{transform:none}}
 /* 掷骰子：原地的 3D 六面体（位置和角度每一帧由 FX.dice 按物理算），带地面影子；落定后换回平面骰子 */
 .dice{perspective:1100px}
-.dice.hid3d{visibility:hidden}
+.dice.hid3d,.dice.hid3d *{visibility:hidden!important}   /* 点子单独设了 visibility:visible，不连子元素一起藏，会从 3D 骰子底下漏出来 */
 .dwrap{position:relative;width:var(--ds);height:var(--ds);flex:none;transform-style:preserve-3d}
 .dwrap.rolling3d{z-index:5}   /* 滚动时盖在下面的文字上，像从桌面上滚过 */
 .dshadow{position:absolute;inset:6%;border-radius:8px;background:rgba(22,25,31,.5);opacity:.25;filter:blur(3px);pointer-events:none}
@@ -401,6 +402,7 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:#fafafa}
 @media (prefers-reduced-motion:reduce){.flip .face.back{display:none}}
 .tile>input[type=checkbox]{position:absolute;opacity:0;pointer-events:none}
 .tile.ck::before{border-radius:3px}
+.tile.lock{cursor:default}.tile.lock::after{content:'地狱模式必开';position:absolute;top:10px;right:12px;font-size:11px;color:var(--mut2)}
 .tile.ck:has(>input:checked)::before{border:2px solid var(--blue);background:var(--blue);box-shadow:inset 0 0 0 2px #fff}
 .tile.fixed{cursor:default;background:#fafafa}
 .tile.fixed::before{border-radius:3px;border:2px solid #879596;background:#879596;box-shadow:inset 0 0 0 2px #fff}
@@ -591,6 +593,10 @@ button.off .why{display:block;font-size:11px;font-weight:400;color:#687078;margi
 #sqpop{position:fixed;right:16px;top:16px;z-index:9;width:min(380px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 40px rgba(22,25,31,.22)}
 #sqpop .sp-h{position:sticky;top:0;display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line2)}#sqpop .sp-h b{flex:1;font-size:15px}#sqpop .sp-h .awsi{width:26px;height:26px;margin:0}
 #sqpop .sp-b{padding:10px 12px 14px;font-size:13px}#sqpop h5{margin:12px 0 6px;font-size:13px}
+#sqpop .sp-sub{color:var(--mut2);font-size:12.5px}#sqpop .sp-sub+.pstat{margin-top:8px}
+#sqpop .lvt{width:100%;border-collapse:collapse;font-size:12.5px}#sqpop .lvt th,#sqpop .lvt td{padding:5px 6px;border-bottom:1px solid var(--line2);text-align:left;vertical-align:top}#sqpop .lvt th{color:var(--mut2);font-weight:600;background:#fafafa}
+#sqpop .lvt td:nth-child(2){min-width:5em}
+#sqpop .sp-n{margin:8px 0 0;color:var(--mut);font-size:12px;line-height:1.6}
 #sqpop .sp-l{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-direction:column;gap:6px}#sqpop .sp-l li{line-height:1.5;padding:6px 8px;border-radius:6px;background:#f7f8f8}#sqpop .sp-l em{font-style:normal;color:var(--mut2);margin-right:6px;font-size:12px}
 @media (max-width:900px){#sqpop{left:8px;right:8px;top:auto;bottom:76px;width:auto;max-height:60vh}}
 /* 照宣传片搬进来的格子小动画 */
@@ -1221,6 +1227,11 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 .pstat th{width:96px;text-align:left;font-weight:600;color:var(--mut2);background:#fafafa;padding:6px 10px;vertical-align:top;white-space:nowrap}
 .pstat td{padding:6px 10px;border-bottom:1px solid var(--line2);text-align:left!important}
 .pstat tr:last-child td{border-bottom:0}
+.pstat .runc .lvr{white-space:nowrap}.pstat .runc .cur{font-weight:700;color:var(--ink)}
+.lvt th{white-space:nowrap}
+.lvt td:nth-child(n+3){text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.lvt td:nth-child(3){font-weight:700}.lvt td:last-child{font-weight:400}
+.lvt tr.hi td{background:#f1faff}
 .pscb{padding:2px 0;cursor:help}.pscb.done{color:#1d8102}.pscb.done b{color:#1d8102}
 
 /* 结束复盘 */
@@ -1250,6 +1261,36 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 @media (min-width:1800px){
   .sq.l .art img.awsi,.sq.r .art img.awsi{width:2.2cqw!important;height:2.2cqw!important}
   .sq.l .txt .nm,.sq.r .txt .nm{font-size:.9em}
+}
+/* ===== 第七轮：布局 ===== */
+/* 格子上的过路费标签：再长也不许压到隔壁格子 */
+.rent{max-width:100%;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box}
+/* 中间右栏「这回合还能做什么」放不下时可以滚，底部淡出提示下面还有 */
+@media (min-width:901px){
+  #center .cright:has(.todo){-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);padding-bottom:18px;scrollbar-width:thin}
+}
+/* 矮屏（1280×720 这类笔记本、投影）：中间区收紧上下留白，右栏少截断 */
+@media (min-width:1201px) and (max-height:800px){
+  #center .stage{gap:6px!important}
+  #center .stage .row.more button{min-height:38px;padding-top:4px;padding-bottom:4px}
+  #center .stage .row.more button small.why{display:none}   /* 原因点按钮会弹出来，悬停也看得到 */
+  #center .stage .who{font-size:16px}
+  .todo{padding:3px 0;font-size:12px;line-height:1.35}
+  .briefline{font-size:12px}
+}
+/* 宽屏：玩家卡整整齐齐排成两列（当前玩家用边框标出来，不再单独占一整行） */
+@media (min-width:1800px){
+  #side .plist .pl.cur{grid-column:auto}
+  #side .plist{grid-auto-rows:min-content;align-items:stretch}
+}
+/* 竖着的平板、折叠屏内屏：棋盘中间够大，回合条和「你在哪一格」放进去，骰子小一点，不用往下翻 */
+@media (min-width:600px) and (max-width:900px) and (orientation:portrait){
+  #center .stage>.dice{grid-row:2/5}
+  #center .stage>.dice .die{width:calc(var(--cw) * 1.9);height:calc(var(--cw) * 1.9)}
+  #center .stage>.who{grid-row:5/6}
+  #center .stage>.st{grid-row:6/7}
+  #center>.turnbar{grid-row:7/9;grid-column:2/15;align-self:center;justify-self:center;justify-content:center;margin:0 10px;max-width:calc(var(--cw) * 12.4)}
+  #center .stage>.here{grid-row:9/11;grid-column:2/15;align-self:center;justify-self:stretch;margin:0 14px}
 }
 </style>
 </head>
@@ -1964,16 +2005,16 @@ const DLC_QUIZ = {
 // ---------- 飞行：不按骰子走，直接飞到某一格 ----------
 async function flyTo(p, target, why = '', { passGo = true, backward = false } = {}) {
   const from = p.pos, fwd = (target - from + N) % N;
-  const hop = !SIM && FX.pawnStart(p);
-  if (hop) { S.moving = p.id; render(); }
+  const hop = !SIM && FX.pawnStart(p), mt0 = MOVE_TO;
+  if (hop) { S.moving = p.id; MOVE_TO = target; render(); }
   sfx('fly');
   let sat = null;
   if (hop) sat = FX.satellite(p.color);
   try {
-    if (hop) await FX.pawnHop(target, 950, 6);
+    if (hop) await FX.pawnFly(target);
     p.pos = target; S.lastSq = target;
     if (passGo && !backward && fwd > 0 && from + fwd >= N) await passLaunch(p);
-  } finally { if (sat) FX.clear([sat]); if (hop) { FX.pawnEnd(); S.moving = null; } render(); }
+  } finally { if (sat) FX.clear([sat]); if (hop) { await FX.pawnEnd(); S.moving = null; MOVE_TO = mt0; } render(); }
   log(`🛰 ${nm(p)} ${why}${backward ? '退回' : '飞到'} ${sqn(target)}`);
 }
 // 选一格飞过去（列出候选）
@@ -2472,9 +2513,11 @@ function propStatusHtml(i) {
   let rent = '—';
   if (o) {
     if (pr.offline || pr.ddos != null || pr.impaired) rent = '$0（暂停收费）';
-    else { const jr = jointRent(i, 7); rent = s.bill === 'token' ? `点数 × ${TOKEN[pr.level]}` : `${s.bill === 'req' || s.t === 'util' ? '≈' : ''}$${jr ? jr.tot : baseRent(i, 7)}${jr ? `（${jr.cs.map(c => `「${c.n}」`).join('')}${jr.cs.length > 1 ? '串联' : ''}联合收费）` : ''}`; }
+    else { const jr = jointRent(i, 7); rent = s.bill === 'token' ? `点数 × ${+(baseRent(i, 100) / 100).toFixed(1)}` : `${s.bill === 'req' || s.t === 'util' ? '≈' : ''}$${jr ? jr.tot : baseRent(i, 7)}${jr ? `（${jr.cs.map(c => `「${c.n}」`).join('')}${jr.cs.length > 1 ? '串联' : ''}联合收费）` : ''}`; }
   }
-  const run = runCost(i);
+  const run = runCost(i), runs = s.t === 'prop' && s.upg ? [0, 1, 2, 3].map(l => runAt(i, l)) : null;
+  const runUp = !runs ? '' : runs.every(x => x === runs[0]) ? '<br><span class="muted">升级不加运行费</span>'
+    : `<br><span class="muted">升级后：</span>${[1, 2, 3].map(l => `<span class="lvr${pr.level === l ? ' cur' : ''}">第 ${l} 级 $${runs[l]}</span>`).join('<span class="muted"> · </span>')}`;
   const cbs = COMBOS.filter(c => c.ix.flat().includes(i)).map(c => {
     const have = c.ix.filter(n => (Array.isArray(n) ? n : [n]).some(k => active(who, k))), miss = c.ix.filter(n => !have.includes(n));
     const done = !miss.length;
@@ -2484,9 +2527,23 @@ function propStatusHtml(i) {
     <tr><th>谁拥有</th><td>${o ? `${PAWN(o.color)}${nm(o)}` : '<span class="muted">没人买，落上来可以买</span>'}</td></tr>
     ${s.upg ? `<tr><th>当前级别</th><td>${lvTxt}${st ? `<br><span class="muted">${st}</span>` : ''}</td></tr>` : (st ? `<tr><th>状态</th><td>${st}</td></tr>` : '')}
     <tr><th>现在的过路费</th><td>${o ? rent : '<span class="muted">没人买，不收</span>'}${o && (s.bill === 'req' || s.t === 'util') ? ' <span class="muted">（按 7 点估，随点数浮动）</span>' : ''}</td></tr>
-    <tr><th>每圈运行费</th><td>${run ? `$${run}` : '$0'}${o ? '' : ' <span class="muted">（买下后，没升级时）</span>'}</td></tr>
+    <tr><th>每圈运行费</th><td class="runc">${run ? `$${run}` : '$0'}${o ? (pr.offline ? ' <span class="muted">（下线期间）</span>' : pr.level ? ' <span class="muted">（现在）</span>' : '') : ' <span class="muted">（买下后，没升级时）</span>'}${runUp}</td></tr>
     ${cbs ? `<tr><th>关联的有效架构</th><td>${cbs}<span class="muted" style="font-size:12px">按${o ? ` ${o.name} ` : '你'}现在持有的算</span></td></tr>` : ''}
   </table>`;
+}
+// 某一级的每圈运行费：按这一格现在的容量、主人算（没人买就按刚买下算），下线的按上线算
+function atLevel(i, l, f) { const pr = S.props[i], l0 = pr.level, off = pr.offline; pr.level = l; pr.offline = false; try { return f(); } finally { pr.level = l0; pr.offline = off; } }
+const runAt = (i, l) => atLevel(i, l, () => runCost(i));
+// 各级一览：效果、过路费、每圈运行费（点格子的小面板和完整介绍共用）
+function lvTableHtml(i) {
+  const s = SQ[i], pr = S.props[i], lv = pr ? pr.level : -1, b = s.p * BAL.rentBase;
+  const full = pr && pr.owner !== null && ownsGroup(P(pr.owner), s.g);
+  const fixedOf = l => (l === 0 ? b * (full ? 2 : 1) : b * [1, 5, 12, 20][l]) * (1 + 0.25 * ((pr && pr.cap) || 0));
+  // 和实际收的一致：算上流量增长、DLC 加成、升到「扛住流量暴增」那级的 ×1.2
+  const mulAt = l => pr ? atLevel(i, l, () => trafficMul() * dlcRentMul(i) * (effActive(i, 'boost') ? 1.2 : 1)) : 1, tm = trafficMul();
+  const rentOf = l => s.bill === 'token' ? `点数 × ${+(TOKEN[l] * (full ? 1.5 : 1) * (1 + 0.25 * ((pr && pr.cap) || 0)) * mulAt(l)).toFixed(1)}` : s.bill === 'req' ? `点数 × ${(fixedOf(l) * mulAt(l) / 7).toFixed(1)}` : `$${Math.round(fixedOf(l) * mulAt(l))}`;
+  const rows = [0, 1, 2, 3].map(l => `<tr class="${lv === l ? 'hi' : ''}"><td>${l ? `第 ${l} 级 · ` : ''}<b>${lvName(i, l)}</b>${l && s.upg[l - 1][3] ? `<br><span class="muted" style="font-size:12px">${s.upg[l - 1][3]}</span>` : ''}</td><td>${l && s.upg[l - 1][2] ? EFF_N[s.upg[l - 1][2]] : l ? '过路费提高' : ''}</td><td>${rentOf(l)}</td><td>${pr ? `$${runAt(i, l)}` : ''}</td></tr>`).join('');
+  return `<table class="lvt"><tr><th>级别</th><th>效果</th><th style="text-align:right">过路费</th><th style="text-align:right">运行费/圈</th></tr>${rows}</table>${tm !== 1 ? `<div class="muted" style="font-size:12px;margin-top:4px">过路费已按现在的流量 ×${tm} 算</div>` : ''}`;
 }
 function propInfoHtml(i) {
   const s = SQ[i], pr = S.props[i];
@@ -2503,18 +2560,14 @@ function propInfoHtml(i) {
       <table style="margin-top:8px"><tr><th>级别</th><th style="text-align:right">倍数再加</th></tr>${[0, 1, 2, 3].map(l => `<tr class="${pr && pr.level === l ? 'hi' : ''}"><td>${l ? `第 ${l} 级 · ` : ''}${lvName(i, l)}</td><td>+${3 * l}</td></tr>`).join('')}</table>
       <div class="df">CloudWatch、CloudTrail、Data Transfer 三格算在一起；过路费 = 点数 ×（基础倍数 + 3 × 级别）。按用量计费：收到过路费交 ${Math.round(BAL.req * 100)}% 请求费。每级升级 $${sideCost(i)}；落在自己这格就能升，三格都有后可以随时升。</div></div></div>`;
   }
-  const g = GROUPS[s.g], lv = pr ? pr.level : -1, b = s.p * BAL.rentBase;
-  const full = pr && pr.owner !== null && ownsGroup(P(pr.owner), s.g);
-  const fixedOf = l => (l === 0 ? b * (full ? 2 : 1) : b * [1, 5, 12, 20][l]) * (1 + 0.25 * ((pr && pr.cap) || 0));
-  const rentOf = l => s.bill === 'token' ? `点数 × ${TOKEN[l]}` : s.bill === 'req' ? `点数 × ${(fixedOf(l) / 7).toFixed(1)}` : `$${Math.round(fixedOf(l))}`;
-  const rows = [0, 1, 2, 3].map(l => `<tr class="${lv === l ? 'hi' : ''}"><td>${l ? `第 ${l} 级 · ` : ''}<b>${lvName(i, l)}</b>${l && s.upg[l - 1][3] ? `<br><span class="muted" style="font-size:12px">${s.upg[l - 1][3]}</span>` : ''}</td><td>${l && s.upg[l - 1][2] ? EFF_N[s.upg[l - 1][2]] : l ? '过路费提高' : ''}</td><td>${rentOf(l)}</td></tr>`).join('');
+  const g = GROUPS[s.g];
   const ha = haOf(i);
   const haLine = s.k === 'ecs' ? 'ECS 服务默认就把任务尽量分散到多个 AZ（Fargate 也是），一个 AZ 出问题不受影响' : s.k === 'ebs' ? 'EBS 卷只存在于一个 AZ 里，升级了也一样；快照能帮你在别处恢复数据' : s.k === 'emr' ? 'EMR 集群只能建在一个 AZ 里，升级了也还是单 AZ；第 1 级多主节点只防单点故障' : ha === 'inst' ? '买下时是单 AZ，一个 AZ 断电就会受影响；第 1 级升多 AZ' : ha === 'global' ? '全局服务，不在任何一个 AZ 或 Region 里' : '托管服务，天生跨多个 AZ；想扛住整个 Region 出问题要升多区域';
   const billLine = (s.bill === 'req' ? '过路费按对方掷出的点数浮动（流量越大收得越多），平均和固定价差不多。<br>' : '') + (s.bill === 'hour' ? `按小时计费：每次经过 Startup 扶持交运行费（${pr && pr.owner !== null ? `现在每圈 $${runCost(i)}` : `未升级时每圈 $${(s.type === 'paas' || s.k === 'eks' ? BAL.hourHigh : BAL.hourLow)[0]}`}），空着也要交` : s.bill === 'req' ? `按用量计费：每次收到过路费，交 ${Math.round(reqRate(i) * 100)}% 请求费；${FIXED_FEE[s.k] ? `另外有固定月费（${FIXED_FEE[s.k][1]}），每圈交 $${FIXED_FEE[s.k][0]}` : '没人用就不花钱，经过 Startup 扶持不交运行费'}${s.k === 'lambda' ? '；升到预置并发后每圈 +$10（预置并发按小时收费）' : s.k === 'apigw' ? '；开了缓存后每圈 +$10（缓存按小时收费）' : ''}` : s.bill === 'token' ? '按 token 计费：过路费 = 对方掷出的点数 × 模型档位单价，集齐 AI 组再 × 1.5；每次收到过路费交 ' + Math.round(BAL.token * 100) + '% token 成本' : s.bill === 'sub' ? '订阅：每次经过 Startup 扶持交固定 $40' : s.bill === 'bundle' ? `打包价：实例、存储、流量打成一个固定套餐，每次经过 Startup 扶持交套餐费（${pr && pr.owner !== null ? `现在每圈 $${runCost(i)}` : '未升级时每圈 $5'}），不随流量浮动；负载均衡（第 1 级）和托管数据库（第 3 级）各另加每圈 $10；用不了 Savings Plans 和 RI` : '免费；开了私有子网要交 NAT 网关的钱（每圈 $20，NAT 账单格交双倍）');
   const cb = COMBOS.filter(c => c.ix.flat().includes(i));
   return `<div class="grp bcard" style="--gc:${g.color}"><div class="gt t" style="color:${labColor(s.g)}">${g.name}组</div><div class="gb">${head}${propStatusHtml(i)}
     ${haTag(i) ? `<div class="hatag ${haTag(i).k}"><b>${haTag(i).t}</b><span>${haTag(i).d}</span></div>` : ''}
-    <table><tr><th>级别</th><th>效果</th><th style="text-align:right">过路费</th></tr>${rows}</table>
+    ${lvTableHtml(i)}
     <div class="df">${HA_N[ha]}：${haLine}<br>${billLine}<br>每份${CAP[s.k]} $${capCost(i)}：过路费 +25%，最多 ${CAP_MAX} 份${s.bill === 'hour' ? '，每份每圈运行费 +$' + (s.type === 'paas' || s.k === 'eks' ? BAL.capHigh : BAL.capLow) : s.bill === 'bundle' ? '，每台每圈套餐费 +$5' : s.bill === 'token' ? '，每份每圈运行费 +$20' : '，不增加运行费'}<br>每级升级 $${sideCost(i)}；落在自己的服务上就能升一级，集齐整组后可以随时升；${OFFLINE_OK.has(s.k) ? `缺钱时可以下线，先拿回 $${pr && pr.spot ? Math.round(pr.spotPaid / 2) : s.p / 2} 周转；` : '这类服务现实里不能停机，不能下线；'}彻底不要可以按实付 ${sellZhe()}卖回亚马逊云科技</div></div></div>`;
 }
 
@@ -2530,8 +2583,8 @@ async function quiz(g, why) {
 // ================= 移动 =================
 async function moveSteps(p, n) {
   const dir = n > 0 ? 1 : -1;
-  const hop = !SIM && n !== 0 && FX.pawnStart(p);
-  if (hop) { S.moving = p.id; render(); }
+  const hop = !SIM && n !== 0 && FX.pawnStart(p), mt0 = MOVE_TO;
+  if (hop) { S.moving = p.id; MOVE_TO = ((p.pos + n) % N + N) % N; render(); }
   try {
   for (let k = 0; k < Math.abs(n); k++) {
     p.pos = (p.pos + dir + N) % N;
@@ -2542,7 +2595,7 @@ async function moveSteps(p, n) {
     if (dir > 0 && SQ[p.pos].t === 'free' && k < Math.abs(n) - 1) { credit(p, 50); log(`👥 ${nm(p)} 经过 UG 活动，领取 $50`); }
     render(); if (!hop) await sleep(SIM ? 0 : 70); if (!SIM) sfx('step');
   }
-  } finally { if (hop) { FX.pawnEnd(); S.moving = null; render(); } }
+  } finally { if (hop) { await FX.pawnEnd(); S.moving = null; MOVE_TO = mt0; render(); } }
 }
 async function moveTo(p, target) { await moveSteps(p, (target - p.pos + N) % N); }
 function sendToJail(p, cat) { p.pos = IX.jail; p.jail = 0; p.jailCat = cat; S.lastSq = IX.jail; S.again = false; log(`🚨 ${nm(p)} 进了维护窗口`); speedLose(p, 4, '进维护窗口'); }
@@ -2610,6 +2663,7 @@ async function jailAct(kind) {
     if (kind === 'pay') { pay(p, 'pot', 50); await leaveJail(p, '付 $50 开 Support Case'); await resolveDebts(); if (checkOver()) return; if (!cur().alive) return nextTurn(); S.phase = 'roll'; save(); render(); return; }
     if (kind === 'es') { const c = availCard(p, 'ES'); if (c) { c.used = true; await leaveJail(p, '用掉 Enterprise Support'); } S.phase = 'roll'; save(); render(); return; }
     const d = rollDice(p);
+    render(); await FX.dice(d);
     if (d[0] === d[1]) { await leaveJail(p, '掷出对子'); await moveSteps(p, d[0] + d[1]); await land(p); }
     else {
       p.jail++;
@@ -3951,11 +4005,15 @@ function buildBoard() {
   const c = document.createElement('div'); c.id = 'center'; b.appendChild(c);
 }
 const cellGc = s => s.t === 'prop' ? GROUPS[s.g].color : s.t === 'util' ? '#545b64' : '';
+// 正在走的棋子由 3D 棋子代替，只在终点格留一个看不见的占位：3D 棋子落在占位上，落地后换回 DOM 棋子不跳
+let MOVE_TO = null;
+const toksAt = i => S.players.filter(q => q.alive && (MP.role !== 'client' && q.id === S.moving ? MOVE_TO === i : q.pos === i));
+const tokHtml = q => MP.role !== 'client' && q.id === S.moving ? PAWN(q.color).replace('class="pawn"', 'class="pawn ghost"') : PAWN(q.color);
 function cellHtml(i) {
   const s = SQ[i], pr = S.props[i];
-  if (isHidden(i)) { const toks0 = S.players.filter(q => q.alive && q.pos === i && (MP.role === 'client' || q.id !== S.moving)); return `<div class="art">${awsImg('reinvent')}${toks0.length ? `<div class="toks">${toks0.map(q => PAWN(q.color)).join('')}</div>` : ''}</div><div class="txt"><span class="nm">盲盒</span><span class="bill">随机抽卡 · 效果翻倍</span></div>`; }
-  const toks = S.players.filter(q => q.alive && q.pos === i && (MP.role === 'client' || q.id !== S.moving));
-  const tokH = toks.length ? `<div class="toks">${toks.map(q => PAWN(q.color)).join('')}</div>` : '';
+  if (isHidden(i)) { const toks0 = toksAt(i); return `<div class="art">${awsImg('reinvent')}${toks0.length ? `<div class="toks">${toks0.map(tokHtml).join('')}</div>` : ''}</div><div class="txt"><span class="nm">盲盒</span><span class="bill">随机抽卡 · 效果翻倍</span></div>`; }
+  const toks = toksAt(i);
+  const tokH = toks.length ? `<div class="toks">${toks.map(tokHtml).join('')}</div>` : '';
   if (isCorner(i)) {
     let sub = CORNER_SUB[s.k];
     if (s.k === 'jail') { const j = S.players.filter(q => q.alive && q.jail !== null).length; if (j) sub = `${j} 人在里面`; }
@@ -3966,7 +4024,7 @@ function cellHtml(i) {
   const price = owner ? ownTag : pr && pr.impaired ? '<span class="imp-pill">Impaired</span>' : s.p ? `<span class="pr">$${s.p}</span>` : s.t === 'tax' ? '<span class="pr neg">−$200</span>' : s.t === 'tax2' ? '<span class="pr neg">−$100</span>' : '';
   const capH = pr && pr.cap ? `<span class="cap">+${pr.cap} ${CAP[s.k]}</span>` : '';
   // 有主的格子显示过路费：按小时和订阅的是固定价，按用量的按平均点数 7 估，token 按点数 × 单价
-  const rentH = owner && (s.t === 'prop' || s.t === 'util') ? (pr.offline ? '<span class="rent off">已下线 · 不收费</span>' : pr.ddos != null ? '<span class="rent off">DDoS 下线 · 不收费</span>' : pr.impaired ? '' : s.bill === 'token' ? `<span class="rent" title="过路费：点数 × ${TOKEN[pr.level]}"><i class="rk">过路费 </i>点数×${TOKEN[pr.level]}</span>` : `<span class="rent" title="${s.bill === 'req' || s.t === 'util' ? '过路费按用量计费：随对方点数浮动，这里按平均 7 点估' : '固定过路费'}"><i class="rk">过路费 </i>${s.bill === 'req' || s.t === 'util' ? '≈' : ''}$${baseRent(i, 7)}</span>`) : '';
+  const rentH = owner && (s.t === 'prop' || s.t === 'util') ? (pr.offline ? '<span class="rent off">已下线 · 不收费</span>' : pr.ddos != null ? '<span class="rent off">DDoS 下线 · 不收费</span>' : pr.impaired ? '' : s.bill === 'token' ? `<span class="rent" title="过路费：点数 × ${TOKEN[pr.level]}">点数×${TOKEN[pr.level]}</span>` : `<span class="rent" title="${s.bill === 'req' || s.t === 'util' ? '过路费按用量计费：随对方点数浮动，这里按平均 7 点估' : '固定过路费'}"><i class="rk">过路费 </i>${s.bill === 'req' || s.t === 'util' ? '≈' : ''}$${baseRent(i, 7)}</span>`) : '';
   const dm = (s.t === 'prop' || s.t === 'util') ? dlcRentMul(i) : 1;
   const dlcH = dm > 1 ? `<span class="dlcm" title="DLC 加成：过路费 ×${Math.round(dm * 100) / 100}">DLC ×${Math.round(dm * 100) / 100}</span>` : '';
   const lv = pr && pr.level ? `<span class="lv" title="${lvName(i, pr.level)}">${lvBadge(pr.level, i)}</span>` : '';
@@ -4243,7 +4301,12 @@ function showSquare(i) {
   if (!S) return;
   const s = SQ[i], h = ((S.hist || {})[i] || []).slice().reverse();
   let el = $('#sqpop'); if (!el) { el = document.createElement('div'); el.id = 'sqpop'; el.setAttribute('role', 'dialog'); document.body.appendChild(el); }
-  const status = isHidden(i) ? '<p>娱乐模式里，不常用的服务格变成盲盒：落上去随机抽一张 Health 或 re:Invent 卡，效果翻倍。</p>' : ['prop', 'util'].includes(s.t) ? propStatusHtml(i) : `<p>${sqTip(i).split('\n').slice(1, -1).join('<br>')}</p>`;
+  // 服务格：价格和计费方式、现在的状态、各级一览（效果、过路费、每圈运行费）、升级和加容量的价格
+  const svc = s.t === 'prop' && s.upg && !isHidden(i), pr = S.props[i];
+  const billTxt = { hour: '按小时计费', req: '按用量计费', sub: '订阅', token: '按 token 计费', free: '免费', bundle: '打包价' }[s.bill] || '';
+  const svcHtml = svc ? `<div class="sp-sub">价格 $${s.p} · ${GROUPS[s.g].name}组${s.type !== 'token' ? ` · ${TYPE_N[s.type]}` : ''} · ${billTxt}</div>${propStatusHtml(i)}<h5>各级一览</h5>${lvTableHtml(i)}
+    <p class="sp-n">每级升级 $${sideCost(i)}，落在自己的服务上升一级，集齐整组可以随时升；每份${CAP[s.k] || '容量'} $${capCost(i)}，过路费 +25%，最多 ${CAP_MAX} 份${pr && pr.cap ? `（现在 ${pr.cap} 份）` : ''}</p>` : '';
+  const status = isHidden(i) ? '<p>娱乐模式里，不常用的服务格变成盲盒：落上去随机抽一张 Health 或 re:Invent 卡，效果翻倍。</p>' : svc ? svcHtml : ['prop', 'util'].includes(s.t) ? propStatusHtml(i) : `<p>${sqTip(i).split('\n').slice(1, -1).join('<br>')}</p>`;
   el.setAttribute('aria-label', `${s.n} 的历史记录`);
   el.innerHTML = `<div class="sp-h">${awsImg(isHidden(i) ? 'reinvent' : s.icon)}<b>${isHidden(i) ? '盲盒格' : s.n}</b><button type="button" class="sm" onclick="closeSqPop()" aria-label="关闭">关闭</button></div>
     <div class="sp-b">${status}<h5>这一格的记录${h.length ? `（${h.length} 条，新的在上面）` : ''}</h5>${h.length ? `<ol class="sp-l">${h.map(x => `<li><em>第 ${x.r} 轮</em>${logBody(x.t)}</li>`).join('')}</ol>` : '<p class="muted">还没有发生过什么。</p>'}
@@ -4759,10 +4822,11 @@ const FX = {
           g.fillStyle = v === 1 ? '#d13212' : '#16191f'; P.forEach(([x, y]) => { g.beginPath(); g.arc(x * S, y * S, v === 1 ? 30 : 22, 0, Math.PI * 2); g.fill(); });
           const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
         const mats = [1, 6, 2, 5, 3, 4].map(v => new THREE.MeshStandardMaterial({ map: face(v), roughness: 0.35 }));   // +x -x +y -y +z -z
-        const dice = [0, 1].map(() => { const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mats); m.castShadow = true; sc.add(m); return m; });
+        // 先转出朝上的面、最后绕竖轴歪一点（YXZ）；默认的 XYZ 会让 3、4 点那一面斜着插进桌面
+        const dice = [0, 1].map(() => { const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mats); m.rotation.order = 'YXZ'; m.castShadow = true; sc.add(m); return m; });
         this.dz = { c, R, sc, cam, dice };
       }
-      const { c, R, sc, cam, dice } = this.dz;
+      const { c, R, sc, cam, dice } = this.dz, gen = this.diceGen = (this.diceGen || 0) + 1;   // 上一次还没收尾就又掷了（联机收到新一掷），旧的收尾不能把这次的画面藏掉
       c.style.cssText = `position:fixed;left:${Math.round(r.left + r.width / 2 - W / 2)}px;top:${Math.round(r.top + r.height / 2 - H / 2)}px;width:${W}px;height:${H}px;z-index:9;pointer-events:none;opacity:1;transition:none`;
       R.setSize(W, H, false); cam.aspect = W / H;
       // 镜头距离按骰子在屏幕上的大小算：落定时一颗骰子大约和平面骰子一样大
@@ -4793,8 +4857,9 @@ const FX = {
         requestAnimationFrame(tick);
       });
       await new Promise(res => setTimeout(res, 260));
+      if (gen !== this.diceGen) return;
       this.diceOn = false; document.querySelectorAll('#center .dice.hid3d').forEach(e => e.classList.remove('hid3d')); c.style.transition = 'opacity .22s'; c.style.opacity = '0';
-      setTimeout(() => { c.style.left = '-9999px'; }, 260);
+      setTimeout(() => { if (gen === this.diceGen) c.style.left = '-9999px'; }, 260);
     } catch (e) { this.diceOn = false; document.querySelectorAll('#center .dice.hid3d').forEach(el => el.classList.remove('hid3d')); this.dz = null; return this.diceCss(d); }
   },
   async diceCss(d) {
@@ -4871,28 +4936,67 @@ const FX = {
 Object.assign(FX, {
   rectOf(el) { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height }; },
   unit() { const a = this.world(0, 0), b = this.world(100, 0); return (b.x - a.x) / 100; },   // 每个屏幕像素是多少世界单位
-  // 棋子：开始移动时生成，每走一格跳一下，走完消失，DOM 棋子再出现
+  // 棋子：开始移动时生成，每走一格跳一下，走完消失，DOM 棋子再出现。
+  // 起点和终点都对准 DOM 棋子（格子左上角那颗圆点）的位置：起步时从圆点大小长出来，落地后缩回圆点大小再换回去，两头都不跳
   pawnStart(p) {
     if (!this.ok() || !this.init()) return false;
     const cell = $('#sq' + p.pos); if (!cell) return false;
     const u = this.unit(), r = this.rectOf(cell), h = Math.min(r.w, r.h) * 0.55 * u;
+    const tokEl = [...cell.querySelectorAll('.toks .pawn')].find(e => e.style.getPropertyValue('--pc').trim() === p.color), tk = tokEl ? this.rectOf(tokEl) : r;
     const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color(p.color), roughness: 0.35, metalness: 0.1 });
     const g = new THREE.Group();
     const base = new THREE.Mesh(new THREE.CylinderGeometry(h * 0.32, h * 0.38, h * 0.16, 24), mat); base.position.y = h * 0.08;
     const body = new THREE.Mesh(new THREE.ConeGeometry(h * 0.26, h * 0.62, 24), mat); body.position.y = h * 0.47;
     const head = new THREE.Mesh(new THREE.SphereGeometry(h * 0.19, 20, 16), mat); head.position.y = h * 0.86;
     g.add(base, body, head); g.rotation.x = 0.5; this.scene.add(g);
-    const w = this.world(r.x, r.y); g.position.set(w.x, w.y - h * 0.3, 0);
-    this.pawn = { g, h }; this.r.render(this.scene, this.cam); return true;
+    const s0 = tokEl ? Math.max(0.25, Math.min(1, tk.h * u / (h * 0.95))) : 1;   // 圆点相对 3D 棋子的大小
+    const w = this.world(tk.x, tk.y); g.position.set(w.x, w.y - h * 0.3 * s0, 0); g.scale.setScalar(s0);   // 棋子的原点在底座，缩小时也要让中心对准圆点
+    this.pawn = { g, h, s0, grow: true, vis: s0, off: { x: tk.x - r.x, y: tk.y - r.y } }; this.r.render(this.scene, this.cam); return true;
+  },
+  // 棋子要落的屏幕位置：终点格里有占位圆点就落在占位上，路过的格子按起点圆点在格子里的位置算
+  slot(pos) {
+    const cell = $('#sq' + pos); if (!cell) return null;
+    const gh = cell.querySelector('.toks .pawn.ghost'); if (gh) return this.rectOf(gh);
+    const r = this.rectOf(cell), o = this.pawn ? this.pawn.off : { x: 0, y: 0 };
+    return { ...r, x: r.x + o.x, y: r.y + o.y };
   },
   async pawnHop(pos, ms, lift = 0.9) {
     if (!this.pawn) return;
-    const cell = $('#sq' + pos); if (!cell) return;
-    const r = this.rectOf(cell), to = this.world(r.x, r.y), g = this.pawn.g, h = this.pawn.h;
+    const sl = this.slot(pos); if (!sl) return;
+    const P = this.pawn, to = this.world(sl.x, sl.y), g = P.g, h = P.h, grow = P.grow; P.grow = false;
     const fx = g.position.x, fy = g.position.y, ty = to.y - h * 0.3;
-    await this.run(ms, k => { const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; g.position.set(fx + (to.x - fx) * e, fy + (ty - fy) * e + Math.sin(k * Math.PI) * h * lift, 0); g.scale.set(1 + Math.sin(k * Math.PI) * 0.08, 1 - Math.sin(k * Math.PI) * 0.05 + (k > 0.9 ? -0.12 * (1 - k) * 10 : 0), 1); });
+    await this.run(ms, k => {
+      const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2, sc = grow ? P.s0 + (1 - P.s0) * Math.min(1, k * 1.6) : 1; P.vis = sc;
+      g.position.set(fx + (to.x - fx) * e, fy + (ty - fy) * e + Math.sin(k * Math.PI) * h * lift, 0);
+      g.scale.set(sc * (1 + Math.sin(k * Math.PI) * 0.08), sc * (1 - Math.sin(k * Math.PI) * 0.05 + (k > 0.9 ? -0.12 * (1 - k) * 10 : 0)), sc);
+    });
   },
-  pawnEnd() { if (this.pawn) { this.clear([this.pawn.g]); this.pawn = null; } },
+  // 飞行（卡牌让你直接飞到某一格）：从圆点长大、离开桌面朝镜头升起（越高越大），走一道弧线，
+  // 往前进方向微微侧倾，下降后贴地轻轻一压。路程越远飞得越久，速度用正弦曲线，起步和落地都是慢慢来
+  async pawnFly(pos) {
+    if (!this.pawn) return;
+    const sl = this.slot(pos); if (!sl) return;
+    const P = this.pawn, g = P.g, h = P.h, u = this.unit(), cz = this.cam.position.z, to = this.world(sl.x, sl.y);
+    const fx = g.position.x, fy = g.position.y, tx = to.x, ty = to.y - h * 0.3;
+    const px = Math.hypot(tx - fx, ty - fy) / u, dur = Math.min(1900, 1050 + px * 0.6);
+    const Z = Math.min(3, 1.2 + px / 450), arc = Math.min(150, 40 + px * 0.1) * u, lean = Math.max(-1, Math.min(1, (tx - fx) / u / 400)) * 0.35;
+    P.grow = false;
+    const ss = t => t * t * (3 - 2 * t);
+    await this.run(dur, k => {
+      const e = (1 - Math.cos(Math.PI * k)) / 2, up = Math.sin(Math.PI * k), z = Z * up * up;
+      const gx = fx + (tx - fx) * e, gy = fy + (ty - fy) * e, f = (cz - z) / cz;   // 乘 f：升高后透视会把它往屏幕外推，拉回到原来的路线上
+      g.position.set(gx * f, (gy + arc * up) * f, z);
+      const sc = P.s0 + (1 - P.s0) * ss(Math.min(1, k / 0.16)), land = k > 0.9 ? Math.sin((k - 0.9) / 0.1 * Math.PI) : 0; P.vis = sc;
+      g.scale.set(sc * (1 + land * 0.07), sc * (1 - land * 0.13), sc);
+      g.rotation.set(0.5 - up * 0.15, 0, -lean * up);
+    });
+  },
+  async pawnEnd() {
+    const P = this.pawn; if (!P) return; this.pawn = null;
+    const s1 = P.g.scale.x, cy = P.g.position.y + P.h * 0.3 * s1;
+    if (s1 > P.s0 + 0.01) await this.run(130, k => { const e = k * k * (3 - 2 * k), sc = s1 + (P.s0 - s1) * e; P.g.scale.set(sc, sc, sc); P.g.position.y = cy - P.h * 0.3 * sc; });   // 缩回圆点大小再换成 DOM 棋子
+    this.clear([P.g]);
+  },
   // 金币：从付钱的人飞到收钱的人（玩家卡片或棋盘中间）
   // 付钱（照宣传片的金币）：一枚接一枚从付钱的一方飞到收钱的一方，走一道弧线、边飞边翻；距离越远弧越高
   coins(fromEl, toEl, n = 6, spread = 0) {
@@ -4992,7 +5096,8 @@ Object.assign(FX, {
     const l = new THREE.Mesh(new THREE.BoxGeometry(h * 0.7, h * 0.03, h * 0.28), pm), r2 = l.clone(); l.position.x = -h * 0.55; r2.position.x = h * 0.55;
     g.add(body, l, r2); this.scene.add(g);
     const pawn = this.pawn.g, t0 = performance.now();
-    const follow = () => { if (!g.parent) return; const k = (performance.now() - t0) / 1000; g.position.set(pawn.position.x + Math.cos(k * 6) * h * 0.9, pawn.position.y + h * 1.3 + Math.sin(k * 6) * h * 0.25, 0.5); g.rotation.set(k * 2, k * 3, 0); requestAnimationFrame(follow); };
+    // 太阳能板要转到正对镜头（绕 x 转 90°），一直翻滚的话大部分时间只看得到板子的侧边，像一根棍
+    const P = this.pawn, follow = () => { if (!g.parent) return; const k = (performance.now() - t0) / 1000; g.position.set(pawn.position.x + Math.cos(k * 4.5) * h * 0.95, pawn.position.y + h * 1.35 + Math.sin(k * 4.5) * h * 0.22, pawn.position.z + 0.5); g.rotation.set(1.25 + Math.sin(k * 2.2) * 0.18, Math.sin(k * 1.7) * 0.35, Math.sin(k * 3) * 0.12); g.scale.setScalar(P.vis || 1); requestAnimationFrame(follow); };
     follow(); return g;
   },
   // 抽卡（three.js）：读出窗口里那张卡的文字和图标画成贴图，卡背从牌堆飞到那张卡的位置、翻面、迸光点，落定后换成网页里的真卡
@@ -5393,7 +5498,26 @@ function ugPreset(start = true) {
   if (typeof setupSum === 'function') setupSum();
   if (start) startFromSetup();
 }
-document.querySelectorAll('input[name=diff]').forEach(r => r.addEventListener('change', () => { const v = r.value; if (!r.checked) return; $('#rounds').value = v === 'party' ? 10 : 15; if (v === 'party') document.querySelector('input[name=cmul][value="1.5"]').checked = true; }));
+// 选地狱模式：规则里必开的 4 个玩法 DLC 和高速部署勾上并锁住，代理商默认也勾上（可以取消）；换回别的模式时，把自动勾上的取消、解锁
+let HELL_AUTO = null;
+function hellTiles(on) {
+  const tiles = [...document.querySelectorAll('#dlcTiles input')], fire = x => x.dispatchEvent(new Event('change', { bubbles: true }));
+  if (on && !HELL_AUTO) {
+    HELL_AUTO = [];
+    tiles.forEach(x => {
+      if (![...HELL_DLC, 'reseller'].includes(x.value)) return;
+      if (!x.checked) { x.checked = true; HELL_AUTO.push(x.value); fire(x); }
+      if (HELL_DLC.includes(x.value)) { x.disabled = true; x.parentElement.classList.add('lock'); }
+    });
+  } else if (!on && HELL_AUTO) {
+    tiles.forEach(x => {
+      if (HELL_DLC.includes(x.value)) { x.disabled = false; x.parentElement.classList.remove('lock'); }
+      if (HELL_AUTO.includes(x.value)) { x.checked = false; fire(x); }
+    });
+    HELL_AUTO = null;
+  }
+}
+document.querySelectorAll('input[name=diff]').forEach(r => r.addEventListener('change', () => { const v = r.value; if (!r.checked) return; hellTiles(v === 'hell'); $('#rounds').value = v === 'party' ? 10 : 15; if (v === 'party') document.querySelector('input[name=cmul][value="1.5"]').checked = true; }));
 function setupSum() {
   const rsOn = !!(document.querySelector('#dlcTiles input[value=reseller]') || {}).checked;
   document.querySelectorAll('.rsopt').forEach(e => { e.hidden = !rsOn; });
