@@ -28,6 +28,20 @@
 
 ## 改了规则之后
 
+开发检查使用 Node.js 24 或更新版本；游戏本身仍可直接打开 HTML，无需安装依赖。
+
+```bash
+npm ci
+npx playwright install chromium
+npm run check
+```
+
+- `npm run lint`：检查自有内联 JavaScript 和 CSS 的语法、重复分支、未知属性等错误，跳过内嵌第三方库。
+- `npm run test:layout`：用 Chromium 检查 15 种窗口尺寸的棋盘，确认没有页面横向溢出、棋盘格出屏或操作区被裁切，并验证按钮能滚动到可视区域且可点击。
+- GitHub Actions 在 push 和 PR 时执行以上检查；失败时保留截图和 trace，可用 `npx playwright show-trace <trace.zip>` 查看。
+
+布局约定：棋盘格保持在左右边界内；矮窗口中央操作区可滚动，手机页面允许纵向滚动。不要用整页 `overflow:hidden` 掩盖溢出。增加布局或内容时，扩充 `tests/layout.spec.mjs` 的代表性场景。
+
 规则和数据只有一个来源：`index.html` 里的数据表，包括 `SVC`、`UPGRADES`、`INC`、`REI`、`COMBOS`、`ROLES`、`QUIZ`、`BAL`。改完按下面的顺序同步：
 
 1. **跑机器人自测**，确认改动没有引入错误：
