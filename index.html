@@ -5472,11 +5472,11 @@ Object.assign(FX, {
   streak(color = 0xffc46b) { const geo = new THREE.PlaneGeometry(1, 1); geo.translate(-0.5, 0, 0); const m = new THREE.Mesh(geo, this.glowMat(this.streakTex(), color)); this.scene.add(m); return m; },
   // 删掉特效物体：几何体和材质释放掉，共用的贴图留着下次用
   drop(objs) { objs.forEach(o => { if (!o) return; this.scene.remove(o); o.traverse(m => { if (m.geometry) m.geometry.dispose(); if (m.material && !m.isSprite) [].concat(m.material).forEach(x => x.dispose()); }); }); },
-  // 星火：一个 Points 池子，按生命周期变暗（叠加混合下颜色变黑就等于变透明）
+  // 星火：一个 Points 池子，RGBA 顶点颜色让透明度随生命周期归零；透明画布上只把 RGB 变黑仍会留下黑点
   sparks() {
     if (this._sp) return this._sp;
     const n = 900, geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3)); geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3)); geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(n * 4), 4));
     const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.13, map: this.dotTex(), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
     pts.frustumCulled = false; pts.renderOrder = 4; this.scene.add(pts);
     return (this._sp = { pts, P: Array.from({ length: n }, () => ({ life: 0 })), k: 0, on: false });
@@ -5492,8 +5492,8 @@ Object.assign(FX, {
       const dt = Math.min(0.05, (now - last) / 1000); last = now; let alive = 0;
       const pa = S.pts.geometry.attributes.position, ca = S.pts.geometry.attributes.color;
       S.P.forEach((q, i) => {
-        if (q.life > 0) { q.life -= dt; q.vy += q.grav * dt; q.x += q.vx * dt; q.y += q.vy * dt; q.z += q.vz * dt; const a = Math.max(0, q.life / q.max); pa.setXYZ(i, q.x, q.y, q.z); ca.setXYZ(i, q.c.r * a, q.c.g * a, q.c.b * a); alive++; }
-        else ca.setXYZ(i, 0, 0, 0);
+        if (q.life > 0) { q.life -= dt; q.vy += q.grav * dt; q.x += q.vx * dt; q.y += q.vy * dt; q.z += q.vz * dt; const a = Math.max(0, q.life / q.max); pa.setXYZ(i, q.x, q.y, q.z); ca.setXYZW(i, q.c.r, q.c.g, q.c.b, a); alive++; }
+        else ca.setXYZW(i, 0, 0, 0, 0);
       });
       pa.needsUpdate = ca.needsUpdate = true;
       this.tickers = this.tickers.filter(f => f(dt) !== false);
