@@ -1,0 +1,6 @@
+tools/out/
+tools/promo/
+宣传片/
+.claude/
+.DS_Store
+build.log
