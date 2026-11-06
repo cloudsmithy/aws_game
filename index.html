@@ -205,6 +205,15 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:#fafafa}
 .pillar::before{content:'○ '}
 .pillar.on{color:var(--green);font-weight:700}
 .pillar.on::before{content:'● '}
+/* 支柱分数和进度条：玩家卡上一眼看出每条差多少 */
+.pillar small{font-weight:400;color:var(--mut)}.pillar .pb{display:block;height:3px;margin:1px 0 2px;background:#e6e9ec;border-radius:2px;overflow:hidden}.pillar .pb i{display:block;height:100%;background:#879596}.pillar.on .pb i{background:var(--green)}
+.ppop{width:340px;font-size:13px;line-height:1.45}
+.pillar.hot{background:#eef3ff;outline:1px solid #8fb2ff;border-radius:3px}
+.ppop .pph{display:flex;align-items:baseline;gap:8px}.ppop .pph b{font-size:15px}.ppop .pps{font-variant-numeric:tabular-nums;font-weight:700}.ppop .ppst{margin-left:auto;font-size:12px;font-weight:700;color:#d13212}.ppop .ppst.ok{color:var(--green)}
+.ppbar{height:6px;background:#e6e9ec;border-radius:3px;overflow:hidden;margin:6px 0}.ppbar i{display:block;height:100%;background:#d13212}.ppbar.on i{background:var(--green)}
+.pprule{margin:0;color:var(--mut);font-size:12px}.ppsec{margin:10px 0 4px;font-size:12px;font-weight:700;color:var(--mut)}.ppmore{margin:4px 0 0;font-size:12px;color:var(--mut)}
+.ppl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}.ppl li{display:flex;align-items:center;gap:8px}.ppl img{width:22px;height:22px;flex:none}.ppl .ppdot{width:22px;height:22px;flex:none;border:1px dashed #aab4be;border-radius:4px}
+.ppl .pt{flex:1;min-width:0}.ppl .pt small{display:block;color:var(--mut);font-size:11.5px}.ppl .pg{flex:none;font-variant-numeric:tabular-nums;color:var(--green);font-size:13px}.ppl.have .pt{font-size:12.5px}
 .pillar svg{display:none}
 .pchip{display:inline-block;padding:0 6px;font-size:11px;margin-right:4px;font-weight:700;border:1px solid var(--gc);color:var(--gc)}
 
@@ -465,6 +474,9 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:#fafafa}
 .arch{display:flex;flex-direction:column;gap:2px;margin-top:2px}
 .ap{font-size:12px;color:var(--mut)}
 .ap.done{color:#1d8102;font-weight:700}
+/* 图鉴、明细里服务名下面的「现在归谁」 */
+.af .aow{display:block;font-size:11px;font-weight:700;line-height:1.2;margin-top:1px}.af .aow.none{color:var(--mut);font-weight:400}
+.ledger .archl td{vertical-align:top}.ledger .archl tr.done td{background:#f4faf2}.ledger .archl .flow{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}.ledger .pg td:first-child,.ledger .pg td:nth-child(2){white-space:nowrap}.ledger .archl .ok{color:#1d8102;font-weight:700}.ledger .archall{margin:4px 0 0;padding-left:18px;line-height:1.8}
 /* 横向长方形棋盘 */
 #board{grid-template-columns:1.3fr repeat(13,1fr) 1.3fr;grid-template-rows:1.3fr repeat(9,1fr) 1.3fr;aspect-ratio:15.6/11.6;width:min(calc((100vh - 88px) * 1.345),calc(100vw - 460px));min-width:760px}
 #center{grid-row:2/11;grid-column:2/15}
@@ -627,7 +639,8 @@ html:has(#setup:not([hidden])){scroll-padding-bottom:80px}
 .logpanel .log{max-height:170px}
 /* 只在有悬停的设备上折：触屏没有悬停，展开了也看不到对手的弱点和差哪块；键盘 Tab 到卡上也不算悬停，有焦点时不折 */
 @media (hover:hover){.pl:not(.cur):not(:hover):not(:has(:focus-visible)) .role,.pl:not(.cur):not(:hover):not(:has(:focus-visible)) .arch .ap:not(.done){display:none}}
-.pl.cur .arch{display:none}
+/* 当前玩家「只差一块」的架构在中间右栏「这回合还能做什么」里写了，玩家卡上只留已经生效的，不然凑成以后在哪都看不到 */
+.pl.cur .arch .ap:not(.done){display:none}
 .pl .now{color:#c45500}
 /* 中间操作区 */
 .stage .row.more{display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:8px;width:min(100%,320px)}
@@ -3171,7 +3184,49 @@ function showLedger(id) {
     ${rows ? `<table><tr><th>服务</th><th>买价</th><th>级别</th><th>升级和容量投入</th><th>本局收过路费</th><th>运行费</th><th>现在的过路费（7 点）</th></tr>${rows}</table>` : '<p class="muted">还没有服务。</p>'}
     ${sold.length ? `<p class="muted">已经不在手上的服务也收过：${sold.map(i => `${SQ[i].n} $${t.earnBy[i]}`).join('、')}</p>` : ''}
     <p class="muted">${valTip(p)}</p>
+    <h4>架构</h4>${archLedger(p)}
+    <h4>六大支柱</h4>${pillarGuide(p)}
     <h4>和 ${p.name} 有关的动态（最近 120 条，时间是你电脑的时区）</h4><div class="log llog">${logs || '<span class="muted">还没有</span>'}</div></div>`, buttons: [{ label: '关闭', value: true, cls: 'pri' }] });
+}
+// 明细里的「架构」一节：这个人凑成的、只差几块的（缺的那块现在在谁手上：在别人手上要靠交易，没人买的落上去就能买），再列全场谁凑成了什么
+// 每条支柱「怎么拿分」：按这个人手上的服务和这局的设置给具体做法（明细和支柱悬停共用）
+function pillarTips(p) {
+  const x = pillarParts(p);
+  const owned = ownedBy(p).filter(i => active(p, i) && SQ[i].upg);
+  // 手上的服务往上升能拿到某种效果的那一级：写「EC2 升到第 1 级「多 AZ」（还要升 1 级，每级 $100）」
+  const upTo = eff => owned.map(i => { const pr = S.props[i], k = SQ[i].upg.findIndex((u, l) => l >= pr.level && u[2] === eff); return k < 0 ? null : `${SQ[i].n} 升到第 ${k + 1} 级「${SQ[i].upg[k][0]}」（还要升 ${k + 1 - pr.level} 级，每级 $${sideCost(i)}）`; }).filter(Boolean);
+  const buy = list => list.filter(i => S.props[i].owner == null && !isHidden(i)).map(i => `${SQ[i].n} $${SQ[i].p}`);
+  const others = list => list.filter(i => S.props[i].owner != null && S.props[i].owner !== p.id).map(i => `${SQ[i].n}（在 ${S.players[S.props[i].owner].name} 手上）`);
+  const near = COMBOS.filter(comboOpen).filter(c => !hasCombo(p, c.id)).map(c => ({ c, miss: c.ix.filter(n => !(Array.isArray(n) ? n : [n]).some(i => active(p, i))) })).filter(y => y.miss.length === 1).map(y => `「${y.c.n}」再买 ${slotOpen(y.miss[0]).map(i => SQ[i].n).join(' 或 ')}`);
+  const canSP = (F.full() || dlcOn('finops')) && p.role !== 'indie';
+  const lim = (a, n = 4) => a.length > n ? a.slice(0, n).join('、') + ` 等 ${a.length} 处` : a.join('、');
+  const tips = [
+    [buy([IX.cloudwatch, IX.cloudtrail, IX.sfn, IX.eventbridge]).length && `买 ${lim(buy([IX.cloudwatch, IX.cloudtrail, IX.sfn, IX.eventbridge]))}（每块 +1）`, others([IX.cloudwatch, IX.cloudtrail, IX.sfn, IX.eventbridge]).length && `交易 ${lim(others([IX.cloudwatch, IX.cloudtrail, IX.sfn, IX.eventbridge]))}`, !p.coe.length && '进一次维护窗口、出来时写复盘（+1）'],
+    [buy([...GRP('sec'), ...GRP('edge')]).length && `买安全合规组或边缘防护组的服务：${lim(buy([...GRP('sec'), ...GRP('edge')]))}（每块 +1）`, F.actions() && '主动行动里做 GameDay 演练，每个演练标记 +1'],
+    [upTo('maz').length && `${lim(upTo('maz'))}（每处 +1）`, upTo('mr').length && `${lim(upTo('mr'))}（每处 +2）`, !owned.some(i => SQ[i].upg.some(u => u[2] === 'maz' || u[2] === 'mr')) && '手上没有能升多 AZ 或多区域的服务：买 EC2、RDS、Aurora 这类实例型服务再升第 1 级'],
+    [upTo('scale').length && `${lim(upTo('scale'))}（每处 +1）`, near.length && `凑成一个有效架构也算 1 分：${lim(near, 3)}`],
+    [upTo('cost').length && `${lim(upTo('cost'))}（每处 +1）`, !x.commit && (canSP ? '签一次 Savings Plans / RI，或者用掉 Cost Explorer 卡（+1）' : '用掉 Cost Explorer 卡（+1）'), F.debt() && !p.refactored && (p.techDebt ? `花 $${refactorCost(p)} 重构清掉 1 个技术债（+1）` : '以后欠了技术债就重构清掉（+1）')],
+    [buy(OWNABLE.filter(i => SQ[i].type === 'sls')).length && `买 Serverless 服务：${lim(buy(OWNABLE.filter(i => SQ[i].type === 'sls')))}（每块 +1）`, !x.grav && owns(p, IX.ec2) && 'EC2 升到 Graviton（+1）', upTo('ssh').length && `${lim(upTo('ssh'))}（交给亚马逊云科技管底层机器，+1）`],
+  ];
+  return tips;
+}
+function pillarGuide(p) {
+  const x = pillarParts(p), need = pillarNeed(), tot = pillarTotal(p), totNeed = waTotalNeed(), ok = pillars(p), tips = pillarTips(p);
+  const rows = PILLARS.map((n, k) => { const it = ok[k] ? [] : pillarItems(p, k); return `<tr class="${ok[k] ? 'done' : ''}"><td><b>${n}</b></td><td>${x.score[k]} 分${ok[k] ? ' <span class="ok">已达成</span>' : ` <span class="warn">还差 ${need - x.score[k]} 分</span>`}</td><td>${ok[k] ? `<span class="muted">${PILLAR_SHORT[k]}</span>` : it.length ? `<ul class="ppl">${it.slice(0, 6).map(ppRow).join('')}</ul>${it.length > 6 ? `<p class="ppmore">还有 ${it.length - 6} 种做法</p>` : ''}` : `<span class="muted">${PILLAR_SHORT[k]}</span>`}</td></tr>`; }).join('');
+  const head = `<p>${winWA() ? '这局开了六大支柱胜利：' : '这局没开六大支柱胜利，支柱分只算进复盘和估值参考：'}要求${waRuleText()}。${p.name} 现在 ${ok.filter(Boolean).length}/6 条达标，总分 ${tot}${totNeed ? `/${totNeed}` : ''}${ok.every(Boolean) && tot >= totNeed ? '，<b class="ok">已经达成</b>' : ''}。</p>`;
+  return head + `<table class="archl pg"><tr><th>支柱</th><th>分数</th><th>怎么拿分</th></tr>${rows}</table>`;
+}
+function archLedger(p) {
+  const slotTxt = n => slotOpen(n).map(i => { const o = S.props[i].owner == null ? null : S.players[S.props[i].owner]; return `<b>${SQ[i].n}</b>（${!o ? '没人买，落上去就能买' : o.id === p.id ? '在你手上' : `在 <span style="color:${o.color}">${o.name}</span> 手上，要靠交易`}）`; }).join(' 或 ');
+  const rows = COMBOS.filter(comboOpen).map(c => {
+    const have = c.ix.filter(n => (Array.isArray(n) ? n : [n]).some(i => active(p, i)));
+    return { c, have: have.length, t: c.ix.length, done: hasCombo(p, c.id), miss: c.ix.filter(n => !have.includes(n)) };
+  }).filter(x => x.have).sort((a, b) => b.done - a.done || b.have / b.t - a.have / a.t);
+  // 只列凑成的和只差一块的；都没有时列进度最高的 5 个，免得一长串 1/3
+  const near = rows.filter(x => x.done || x.have >= x.t - 1), show = near.length ? near : rows.slice(0, 5);
+  const mine = show.length ? `<table class="archl"><tr><th>架构</th><th>组成（每块下面写现在归谁）</th><th>还缺</th></tr>${show.map(x => `<tr class="${x.done ? 'done' : ''}"><td><b>${x.c.n}</b><br>${x.done ? '<span class="ok">已生效，联合收费</span>' : `<small class="muted">${x.have}/${x.t}</small>`}</td><td><div class="flow">${archFlow(x.c, true)}</div></td><td>${x.done ? '—' : x.miss.map(slotTxt).join('；')}</td></tr>`).join('')}</table>` : '<p class="muted">手上的服务还不属于任何有效架构。</p>';
+  const all = S.players.filter(q => q.alive).map(q => { const cs = COMBOS.filter(c => hasCombo(q, c.id)); return cs.length ? `<li>${PAWN(q.color)}<b>${q.name}</b>：${cs.map(c => c.n).join('、')}</li>` : ''; }).join('');
+  return mine + `<p class="muted" style="margin-top:8px">全场已经生效的架构${all ? '：' : '：还没有人凑成'}</p>${all ? `<ul class="archall">${all}</ul>` : ''}<p class="muted">每个架构由哪几块组成、每块现在归谁，看「图鉴」的有效架构表。</p>`;
 }
 function valBreak(p) {
   let svc = 0, inv = 0;
@@ -6169,13 +6224,57 @@ function archMini(c, p) {
   const node = i => `<span class="an ${p && active(p, i) ? 'have' : 'miss'}">${awsImg(SQ[i].icon)}<em>${SQ[i].n}</em></span>`;
   return `<div class="amini"><b>${c.n}</b><div class="aflow">${c.ix.map(n => Array.isArray(n) ? `<span class="aor">${n.map(node).join('<i>或</i>')}</span>` : node(n)).join('<span class="aar">→</span>')}</div><div class="adesc">${c.flow}</div>${c.d !== '—' ? `<div class="adesc">另外：${c.d}</div>` : ''}<div class="adesc">凑齐后别人落在其中任一块，按整套架构联合收费</div></div>`;
 }
+// 支柱的规则缩写（悬停卡第二行）
+const PILLAR_SHORT = ['运维类服务每块 +1 · 写过复盘 +1', '安全或边缘服务每块 +1 · 演练标记每个 +1', '多 AZ 升级 +1 · 多区域功能 +2', '弹性扩展功能 +1 · 生效的架构每个 +1',
+  '降成本功能 +1 · 签 SP/RI 或用 Cost Explorer +1 · 重构技术债 +1', 'Serverless 每块 +1 · Graviton +1 · 数据分层 +1 · Fargate / Auto Mode +1'];
+// 第 k 条支柱还能怎么补：[{ i: 服务格（有图标）, t: 做什么, c: 要花多少, g: 加几分, n: 排序用的花费 }]，便宜的在前
+function pillarItems(p, k) {
+  const out = [], owned = ownedBy(p).filter(i => active(p, i) && SQ[i].upg);
+  const up = (eff, g) => owned.forEach(i => { const pr = S.props[i], l = SQ[i].upg.findIndex((u, n) => n >= pr.level && u[2] === eff); if (l >= 0) { const m = l + 1 - pr.level; out.push({ i, t: `${SQ[i].n} 升「${SQ[i].upg[l][0]}」`, c: `再升 ${m} 级 · $${sideCost(i) * m}`, g, n: sideCost(i) * m }); } });
+  const buy = (list, g = '+1') => list.forEach(i => { const pr = S.props[i]; if (isHidden(i)) return; if (pr.owner == null) out.push({ i, t: `买 ${SQ[i].n}`, c: `$${SQ[i].p}`, g, n: SQ[i].p }); else if (pr.owner !== p.id) out.push({ i, t: `${SQ[i].n}`, c: `在 ${S.players[pr.owner].name} 手上，要交易`, g, n: 9000 + SQ[i].p }); });
+  const x = pillarParts(p), canSP = (F.full() || dlcOn('finops')) && p.role !== 'indie';
+  if (k === 0) { buy([IX.cloudwatch, IX.cloudtrail, IX.sfn, IX.eventbridge].filter(i => !active(p, i))); if (!p.coe.length) out.push({ t: '进一次维护窗口，出来时写复盘', c: '', g: '+1', n: 50 }); }
+  if (k === 1) { buy([...GRP('sec'), ...GRP('edge')].filter(i => !active(p, i))); if (F.actions()) out.push({ t: '主动行动里做 GameDay 演练', c: '每个演练标记', g: '+1', n: 60 }); }
+  if (k === 2) { up('maz', '+1'); up('mr', '+2'); if (!out.length) out.push({ t: '买 EC2、RDS、Aurora 这类实例型服务，再升第 1 级「多 AZ」', c: '', g: '+1', n: 300 }); }
+  if (k === 3) { up('scale', '+1'); COMBOS.filter(comboOpen).filter(c => !hasCombo(p, c.id)).forEach(c => { const miss = c.ix.filter(n => !(Array.isArray(n) ? n : [n]).some(i => active(p, i))); if (miss.length === 1) out.push({ i: slotOpen(miss[0])[0], t: `凑成「${c.n}」`, c: `再买 ${slotOpen(miss[0]).map(i => SQ[i].n).join(' 或 ')}`, g: '+1', n: SQ[slotOpen(miss[0])[0]].p }); }); }
+  if (k === 4) { up('cost', '+1'); if (!x.commit) out.push({ t: canSP ? '签一次 Savings Plans / RI，或用掉 Cost Explorer 卡' : '用掉 Cost Explorer 卡', c: '', g: '+1', n: 100 }); if (F.debt() && !p.refactored && p.techDebt) out.push({ t: '重构清掉 1 个技术债', c: `$${refactorCost(p)}`, g: '+1', n: refactorCost(p) }); }
+  if (k === 5) { buy(OWNABLE.filter(i => SQ[i].type === 'sls' && !active(p, i))); up('ssh', '+1'); if (!x.grav && active(p, IX.ec2)) up('cost', '+1'); }
+  return out.filter((o, n, a) => a.findIndex(y => y.t === o.t) === n).sort((a, b) => a.n - b.n);
+}
+// 第 k 条支柱现在的分是从哪来的：[{ i, t }]
+function pillarHave(p, k) {
+  const x = pillarParts(p), svc = list => list.map(i => ({ i, t: SQ[i].n }));
+  return [
+    [...svc(x.ops), ...(p.coe.length ? [{ t: '写过复盘' }] : [])],
+    [...svc(x.secs), ...(p.drill.length ? [{ t: `演练标记 ×${p.drill.length}` }] : [])],
+    [...x.maz.map(i => ({ i, t: `${SQ[i].n} 多 AZ` })), ...x.mr.map(i => ({ i, t: `${SQ[i].n} 多区域（2 分）` }))],
+    [...x.sc.map(i => ({ i, t: `${SQ[i].n} 弹性扩展` })), ...x.combos.map(c => ({ t: `架构「${c.n}」` }))],
+    [...(p.refactored ? [{ t: '重构过技术债' }] : []), ...(x.commit ? [{ t: '签过 SP/RI 或用过 Cost Explorer' }] : []), ...x.co.map(i => ({ i, t: `${SQ[i].n} 降成本` }))],
+    [...svc(x.sls), ...(x.grav ? [{ i: IX.ec2, t: 'EC2 Graviton' }] : []), ...x.lifecycle.map(i => ({ i, t: `${SQ[i].n} 数据分层` })), ...x.managedCompute.map(i => ({ i, t: `${SQ[i].n} 托管底层机器` }))],
+  ][k];
+}
+const ppRow = o => `<li>${o.i != null ? `<img src="${AWSI[SQ[o.i].icon]}" alt="">` : '<span class="ppdot"></span>'}<span class="pt">${o.t}${o.c ? `<small>${o.c}</small>` : ''}</span>${o.g ? `<b class="pg">${o.g}</b>` : ''}</li>`;
+// 支柱悬停：标题、几分、够不够（要几分）、进度条、规则缩写；没达成的列 3 个最便宜的做法，已有的分是从哪来的
+function pillarPop(p, k) {
+  const need = pillarNeed(), bar = (v, n, ok) => `<div class="ppbar ${ok ? 'on' : ''}"><i style="width:${Math.round(Math.min(1, v / Math.max(1, n)) * 100)}%"></i></div>`;
+  if (k === 'tot') { const t = pillarTotal(p), n = waTotalNeed(), ok = t >= n; return `<div class="ppop"><div class="pph"><b>六条总分</b><span class="pps">${t} 分</span><span class="ppst ${ok ? 'ok' : ''}">要 ${n} 分，${ok ? '已经够了' : `还差 ${n - t} 分`}</span></div>${bar(t, n, ok)}<p class="pprule">本局要求：${waRuleText()}</p></div>`; }
+  const v = pillarScore(p)[k], ok = v >= need, have = pillarHave(p, k), items = ok ? [] : pillarItems(p, k);
+  return `<div class="ppop"><div class="pph"><b>${PILLARS[k]}</b><span class="pps">${v} 分</span><span class="ppst ${ok ? 'ok' : ''}">要 ${need} 分，${ok ? '已达成' : `还差 ${need - v} 分`}</span></div>${bar(v, need, ok)}
+    <p class="pprule">${PILLAR_SHORT[k]}</p>
+    ${have.length ? `<div class="ppsec">已有</div><ul class="ppl have">${have.slice(0, 4).map(ppRow).join('')}</ul>${have.length > 4 ? `<p class="ppmore">还有 ${have.length - 4} 项</p>` : ''}` : ''}
+    ${items.length ? `<div class="ppsec">怎么补（便宜的在前）</div><ul class="ppl">${items.slice(0, 3).map(ppRow).join('')}</ul>${items.length > 3 ? `<p class="ppmore">还有 ${items.length - 3} 种做法，看「明细和日志」</p>` : ''}` : ''}</div>`;
+}
 let tipEl = null;
 document.addEventListener('mouseover', e => {
-  const t = e.target.closest && e.target.closest('[data-arch]');
+  const t = e.target.closest && e.target.closest('[data-arch], [data-pillar]');
+  document.querySelectorAll('.pillar.hot').forEach(x => { if (x !== t) x.classList.remove('hot'); });
+  if (t && t.dataset.pillar != null) t.classList.add('hot');
   if (!t) { if (tipEl) tipEl.hidden = true; return; }
   if (!tipEl) { tipEl = document.createElement('div'); tipEl.id = 'archtip'; document.body.appendChild(tipEl); }
-  const c = COMBOS.find(x => x.id === t.dataset.arch), p = S && S.players[+t.dataset.p];
-  tipEl.innerHTML = archMini(c, p); tipEl.hidden = false; tipEl._at = t;
+  const p = S && S.players[+t.dataset.p];
+  if (t.dataset.pillar != null) { if (!p) return; tipEl.innerHTML = pillarPop(p, t.dataset.pillar === 'tot' ? 'tot' : +t.dataset.pillar); }
+  else { const c = COMBOS.find(x => x.id === t.dataset.arch); tipEl.innerHTML = archMini(c, p); }
+  tipEl.hidden = false; tipEl._at = t;
   const r = t.getBoundingClientRect(), w = tipEl.offsetWidth, h = tipEl.offsetHeight;
   tipEl.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left)) + 'px';
   tipEl.style.top = (r.bottom + h + 12 < window.innerHeight ? r.bottom + 6 : r.top - h - 6) + 'px';
@@ -6283,7 +6382,8 @@ function renderSide(keep = sideScroll()) {
     const cm = commitsOf(p);
     if (cm.length && !mini) lines.push('承诺折扣：' + cm.map(c => c.type === 'sp' ? `Savings Plans 每圈承诺 $${c.amt}（还剩 ${c.laps} 圈）` : `${SQ[c.svc].n} RI 免 $${c.amt} 运行费（还剩 ${c.laps} 圈）`).join('、'));
     let pil = '';
-    { const ps = pillars(p), sc = pillarScore(p); const why = pillarWhy(p); pil = `<div class="pillars">${ps.map((ok, k) => `<span class="pillar ${ok ? 'on' : ''}" title="${PILLARS[k]}${ok ? '（已达成）' : '（未达成）'}\n计分：${PILLAR_TIP[k]}（本局要求：${waRuleText()}）\n${why[k]}">${PILLARS[k]}${pillarNeed() > 1 ? ` <small>${Math.min(sc[k], pillarNeed())}/${pillarNeed()}</small>` : ''}<span class="sr-only">${ok ? '，已达成' : '，未达成'}。${why[k]}</span></span>`).join('')}${waTotalNeed() ? `<span class="pillar ptot ${pillarTotal(p) >= waTotalNeed() ? 'on' : ''}" title="六条支柱的分加起来要 ${waTotalNeed()} 分">总分 ${Math.min(pillarTotal(p), waTotalNeed())}/${waTotalNeed()}</span>` : ''}</div>`; }
+    { const ps = pillars(p), sc = pillarScore(p); const why = pillarWhy(p); const bar = (v, n) => `<span class="pb" aria-hidden="true"><i style="width:${Math.round(Math.min(1, v / Math.max(1, n)) * 100)}%"></i></span>`;
+      pil = `<div class="pillars">${ps.map((ok, k) => `<span class="pillar ${ok ? 'on' : ''}" data-pillar="${k}" data-p="${p.id}">${PILLARS[k]} <small>${sc[k]} 分</small>${bar(sc[k], pillarNeed())}<span class="sr-only">${ok ? '，已达成' : '，未达成'}。${why[k]}</span></span>`).join('')}${waTotalNeed() ? `<span class="pillar ptot ${pillarTotal(p) >= waTotalNeed() ? 'on' : ''}" data-pillar="tot" data-p="${p.id}">总分 <small>${pillarTotal(p)} / ${waTotalNeed()}</small>${bar(pillarTotal(p), waTotalNeed())}</span>` : ''}</div>`; }
     return `<div class="grp pl ${isCur ? 'cur' : ''} ${p.alive ? '' : 'dead'} ${mini ? 'mini' : ''}">
       <div class="pacc" ${fold ? `onclick="togglePl(${p.id})" title="${mini ? '展开看详情' : '收起'}"` : ''}>${PAWN(p.color)}<div class="pn"><b>${fold ? `<button type="button" class="pnm plt" data-fk="pl${p.id}" aria-expanded="${!mini}" aria-controls="plb${p.id}">${p.name}</button>` : `<span class="pnm">${p.name}</span>`}${aiTag}${p.alive ? '' : '（已暂停）'}${isCur ? '<span class="now">当前回合</span>' : ''}</b><small>${r.n}</small></div><span class="cash"><small title="现金">现金</small>$${p.cash}<small class="nw" title="${valTip(p)}"><span>总资产 $${netWorth(p)}</span> · <span>估值 $${valuation(p)}</span></small></span></div>
       <div class="gb" id="plb${p.id}">
@@ -6392,8 +6492,17 @@ function showSquareFull(i) {
   if (['prop', 'util'].includes(s.t)) ask({ local: true, cancelable: true, title: `${s.n} · ${s.t === 'prop' ? grpN(s.g) : '按用量收费'}`, html: propInfoHtml(i), buttons: [{ label: '知道了', value: true, cls: 'pri' }] });
   else ask({ local: true, cancelable: true, title: s.n, html: `<p>${s.d || ''}</p>`, buttons: [{ label: '知道了', value: true, cls: 'pri' }] });
 }
-function archFlow(c) {
-  return c.need.map(n => Array.isArray(n) ? n.map(k => `<span class="af">${awsImg(SQ[IX[k]].icon)}${SQ[IX[k]].n}</span>`).join('<span class="or">或</span>') : `<span class="af">${awsImg(SQ[IX[n]].icon)}${SQ[IX[n]].n}</span>`).join('<span class="arr">→</span>');
+// 某块服务现在在谁手上（对局里才有）：玩家写名字（带他的颜色），没人买写「没人买」；下线、Impaired 的另外标出来
+function ownerOf(i, me) {
+  if (!S || !S.players || !S.props || !S.props[i]) return '';
+  const pr = S.props[i], o = pr.owner == null ? null : S.players[pr.owner];
+  const st = pr.offline ? '·已下线' : pr.impaired ? '·Impaired' : '';
+  if (!o) return '<small class="aow none">没人买</small>';
+  return `<small class="aow" style="color:${o.color}">${me && o.id === me.id ? '你' : o.name}${st}</small>`;
+}
+function archFlow(c, own = false) {
+  const chip = k => `<span class="af">${awsImg(SQ[IX[k]].icon)}${SQ[IX[k]].n}${own ? ownerOf(IX[k]) : ''}</span>`;
+  return c.need.map(n => Array.isArray(n) ? n.map(chip).join('<span class="or">或</span>') : chip(n)).join('<span class="arr">→</span>');
 }
 // 某块服务每一级的过路费（7 点、第 1 轮、不算容量和 DLC，只看服务本身）
 function rentLevels(i) {
@@ -6406,14 +6515,17 @@ function rentLevels(i) {
 function gallery() {
   if (modalBlocks()) return;
   const svcRows = SQ.map((s, i) => s.t === 'prop' ? `<tr><td><img src="${AWSI[s.icon]}" alt="" style="width:18px;height:18px;vertical-align:-4px;margin-right:6px">${s.n}</td><td>${GROUPS[s.g].name}</td><td>${TYPE_N[s.type]}</td><td><span class="hatag-s ${haTag(i).k}">${haTag(i).t}</span></td><td>${BILL_N[s.bill]}</td><td class="rentlv">${rentLevels(i)}</td><td>${s.upg.map((u, k) => `${k + 1}. <b>${u[0]}</b>：${u[3] || ''}${effLabel(i, k + 1) ? `（${effLabel(i, k + 1)}）` : ''}`).join('<br>')}</td></tr>` : '').join('');
-  const archs = COMBOS.map(c => `<tr><td data-arch="${c.id}" style="cursor:help"><b>${c.n}</b></td><td><div class="flow">${archFlow(c)}</div><div class="muted" style="font-size:12px;margin-top:4px">${c.flow}</div></td><td>${c.d}</td></tr>`).join('');
+  // 对局中：每块服务下面写现在归谁，另一列写这个架构谁已经凑成了（开局页、演示里没有对局就不写）
+  const live = !!(S && S.players && S.props);
+  const doneBy = c => live ? S.players.filter(q => q.alive && hasCombo(q, c.id)) : [];
+  const archs = COMBOS.filter(c => !live || comboOpen(c)).map(c => `<tr><td data-arch="${c.id}" style="cursor:help"><b>${c.n}</b></td><td><div class="flow">${archFlow(c, live)}</div><div class="muted" style="font-size:12px;margin-top:4px">${c.flow}</div></td>${live ? `<td style="white-space:nowrap">${doneBy(c).map(q => `${PAWN(q.color)}${q.name}`).join('<br>') || '<span class="muted">还没人</span>'}</td>` : ''}<td>${c.d}</td></tr>`).join('');
   const inc = INC.slice(1).map((c, k) => `<tr><td class="no">${k + 1}</td><td class="cat">${CATS[c.c]}</td><td><b>${c.n}</b></td><td>${c.e}</td><td>${c.im}</td></tr>`).join('');
   const rei = REI.slice(1).map((c, k) => `<tr><td class="no">${k + 1}</td><td><b>${c.n}</b>${c.keep ? '（保留）' : ''}</td><td>${c.e.replace(/^保留：/, '')}</td></tr>`).join('');
   const roles = ROLES.map(r => `<tr><td><b>${r.n}</b>${r.rs ? '（代理商）' : ''}</td><td>$${r.cash}</td><td>${r.ab}</td><td>${r.wk}</td><td>${r.sk ? `「${r.sk.n}」${r.sk.d}` : ''}</td><td>${r.hell || ''}</td></tr>`).join('');
   // 自己查资料：联机时不推给别人，也不算在当前回合的玩家名下（轮到远端时房主自己的图鉴不会被锁）
   modal({
     local: true, cancelable: true, title: '图鉴', cls: 'wide doc', buttons: [{ label: '关闭', value: true, cls: 'pri' }],
-    html: `<h4>有效架构</h4><p class="muted">凑齐一个架构后，别人落在其中任意一块上，按整套架构所有服务的过路费加起来收。下表“加成”是额外效果。</p><table><tr><th>架构</th><th>组成</th><th>加成</th></tr>${archs}</table>
+    html: `<h4>有效架构</h4><p class="muted">凑齐一个架构后，别人落在其中任意一块上，按整套架构所有服务的过路费加起来收。下表“加成”是额外效果。</p><table><tr><th>架构</th><th>组成${live ? '（下面写着现在归谁）' : ''}</th>${live ? '<th>谁已凑成</th>' : ''}<th>加成</th></tr>${archs}</table>
     <h4>服务一览</h4><p class="muted">实例型（IaaS、PaaS、EKS）买下时是单 AZ，第 1 级升多 AZ（EBS 卷、EMR 集群永远单 AZ；ECS 服务默认就跨 AZ 分散任务）；其他服务天生跨多个 AZ，三级都是功能。落在自己的服务上可以升一级。</p>
     <table><tr><th>服务</th><th>色组</th><th>类型</th><th>高可用</th><th>计费</th><th>过路费（未升级 → 1 → 2 → 3 级）</th><th>升级路线</th></tr>${svcRows}</table><p class="muted">过路费按对方掷出 7 点、第 1 轮、没有容量估算；按用量计费的随点数浮动；集齐整组时未升级的过路费翻倍；越往后「流量」越大，过路费会按轮数上涨。</p>
     <h4>Health 事件卡</h4><p class="muted">免疫栏标了「不算罚」的卡，抽到不欠技术债，开了高速部署也不扣部署点数。</p><table><tr><th>#</th><th>类别</th><th>卡面</th><th>效果</th><th>免疫</th></tr>${inc}</table>
