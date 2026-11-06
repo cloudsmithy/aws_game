@@ -1,0 +1,6 @@
+# 镜像里只要网页和 PDF；下面这些不进镜像
+.claude/
+.DS_Store
+tools/
+*.md
+build.log

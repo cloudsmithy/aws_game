@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>亚马逊云科技 User Group 云上大亨 · 更新说明</title>
+<style>
+:root{--ink:#16191f;--ink2:#414d5c;--mut:#5f6b7a;--line:#d5dbdb;--line2:#eaeded;--orange:#ec7211;--blue:#0972d3;--green:#1d8102;--red:#d13212;--bg:#f8f9fa}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.65 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--bg)}
+.wrap{max-width:1040px;margin:0 auto;padding:32px 24px 64px}
+header{background:#fff;border:1px solid var(--line);border-top:3px solid var(--orange);padding:24px 28px;margin-bottom:20px}
+header .k{font-size:12px;letter-spacing:.12em;color:var(--orange);font-weight:700}
+h1{margin:6px 0 6px;font-size:28px}
+header p{margin:0;color:var(--ink2)}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0}
+nav a{font-size:13px;color:var(--ink2);text-decoration:none;border:1px solid var(--line);padding:4px 10px;background:#fff}
+nav a:hover{border-color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;border:1px solid var(--line);background:#fff;margin-bottom:20px}
+.stats div{padding:14px 16px;border-right:1px solid var(--line2)}
+.stats div:last-child{border-right:0}
+.stats b{display:block;font-size:26px;color:var(--orange);font-variant-numeric:tabular-nums;line-height:1.2}
+.stats span{font-size:12.5px;color:var(--mut)}
+section{background:#fff;border:1px solid var(--line);padding:22px 28px;margin-bottom:20px}
+h2{margin:0 0 14px;font-size:20px;display:flex;align-items:center;gap:10px}
+h2 i{font-style:normal;font-size:12px;background:var(--ink);color:#fff;padding:1px 8px;font-weight:700}
+h3{font-size:16px;margin:20px 0 8px;padding-left:10px;border-left:3px solid var(--orange)}
+ul{margin:6px 0;padding-left:22px}
+li{margin:3px 0}
+table{width:100%;border-collapse:collapse;margin:8px 0 4px;font-size:14px}
+th,td{border-bottom:1px solid var(--line2);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--bg);font-weight:600;color:var(--ink2);font-size:13px;white-space:nowrap}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:0 6px;margin-right:6px;color:#fff;vertical-align:1px}
+.bug{background:var(--red)}.new{background:var(--blue)}.chg{background:var(--orange)}.ui{background:#545b64}.doc{background:var(--green)}
+.note{background:#fff8e5;border:1px solid #f2d68b;padding:10px 14px;font-size:14px;margin:10px 0}
+.why{color:var(--mut);font-size:13.5px}
+code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);padding:0 4px;border:1px solid var(--line2)}
+.hi{font-weight:700;color:var(--red)}
+.ok{font-weight:700;color:var(--green)}
+footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="k">CHANGELOG · 2026-10-28</div>
+  <h1>亚马逊云科技 User Group 云上大亨 · 这一轮改了什么</h1>
+  <p>从「破产逻辑是不是有问题」开始，一路改到新角色、两个新开关、地狱模式和全套文档。每条改动后面写了为什么改；平衡数字都是用电脑玩家对打模拟出来的。</p>
+  <nav>
+    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#todo">待定</a>
+  </nav>
+</header>
+
+<div class="stats">
+  <div><b>12</b><span>个 bug 修掉</span></div>
+  <div><b>15</b><span>个角色（原来 9 个）</span></div>
+  <div><b>12</b><span>个部署点数技能</span></div>
+  <div><b>6</b><span>个模式（新增地狱模式）</span></div>
+  <div><b>35–39</b><span>轮：4 人局中位结束轮数</span></div>
+  <div><b>28</b><span>份 PDF（都带书签）</span></div>
+</div>
+
+<section id="bug">
+  <h2><i>01</i>Bug 修复</h2>
+  <table>
+    <tr><th>问题</th><th>后果</th><th>怎么修的</th></tr>
+    <tr><td><span class="tag bug">BUG</span>卡牌倍率下，玩家之间转账被乘了两次</td><td>倍率 ×2 时「B 付 A $20」：B 付 $40，A 收到 $80，钱凭空变出来。卡牌里所有玩家互相付钱的都中招</td><td>转给玩家的钱按实际金额到账；「拿走奖池」也不再乘倍率</td></tr>
+    <tr><td><span class="tag bug">BUG</span>欠款弹窗「最多还能凑 $X」算错</td><td>按标准升级价算，实际按实付退一半：卡牌免费送的升级退 $0，容器组半价升级，提示数偏大，玩家以为够还，结果直接破产</td><td>提示和自动变卖用同一套算法</td></tr>
+    <tr><td><span class="tag bug">BUG</span>最后一轮多打一轮</td><td>打满 N 轮的局，最后一个座位的人在第 N 轮自己回合破产，会多打一整轮</td><td>修正结束判断</td></tr>
+    <tr><td><span class="tag bug">BUG</span>开局页「代理商」勾选误显示</td><td>没开代理商模式也显示，还挤出了框</td><td><code>hidden</code> 被样式盖掉了，补上规则；座位行允许换行</td></tr>
+  </table>
+  <p class="why">为什么「能卖资产却直接破产」：当时规则里根本没有卖服务这一项。35 个服务里只有 5 个能下线拿一半，其余「释放」不退钱，所以服务很多、现金不够的人，一笔小欠款就出局。这一条在下一节改掉了。</p>
+</section>
+
+<section id="rule">
+  <h2><i>02</i>规则改动</h2>
+  <h3>卖回亚马逊云科技（替代原来的「释放」）</h3>
+  <ul>
+    <li><span class="tag chg">改</span>服务随时可以卖回：<b>买价 + 升级 + 容量的实付按 8 折</b>拿回，升级越多卖得越多。只拆升级、容量（服务留着）还是退一半。</li>
+    <li><span class="tag chg">改</span>欠款「自动变卖」：不卖服务就够还的，先拆升级、容量、下线；不够再整块卖，先卖不在架构里、便宜的，凑够就停。</li>
+    <li><span class="tag chg">改</span>全卖了也不够还：直接破产，服务连同升级<b>整块交给债主</b>。<span class="why">不这样的话，赢家拿不到服务、不会越滚越大，残局一直磨。</span></li>
+  </ul>
+  <h3>对局长度</h3>
+  <ul>
+    <li><span class="tag chg">改</span>流量增长从每 5 轮 +0.25 倍改成 <b>+0.75 倍</b>（第 5 轮 ×1.75、第 10 轮 ×2.5……）。</li>
+    <li><span class="tag chg">改</span>不勾轮数上限也<b>最多打 50 轮</b>，打满按估值排名（学习模式不限）。</li>
+    <li><span class="tag chg">改</span>卡牌上的金额跟着流量涨一半，顶栏显示「卡牌金额 ×N」。<span class="why">不然到第 20 轮过路费是开局的 4 倍，卡上还是 $50，抽卡没影响。模拟里不影响对局长度。</span></li>
+  </ul>
+  <h3>六大支柱按难度递进</h3>
+  <table>
+    <tr><th>难度</th><th>Well-Architected 要求</th><th>这一档新用得上的</th></tr>
+    <tr><td>入门 / 娱乐</td><td>每条 1 分</td><td>—</td></tr>
+    <tr><td>标准 / 学习</td><td>每条 1 分，六条共 12 分</td><td>重构清技术债</td></tr>
+    <tr><td>完整</td><td>每条 2 分</td><td>演练标记、Savings Plans / RI</td></tr>
+    <tr><td>地狱</td><td>每条 2 分，六条共 18 分</td><td>—</td></tr>
+  </table>
+  <p class="why">每条支柱改成「有几处算几分」（每块 CloudWatch 算 1 分运营、每处多区域算 2 分可靠性……），鼠标停在支柱上看得到得分。最早试过「标准每条 2 分、完整每条 3 分」，模拟里到第 30 轮几乎没人凑得齐，所以放宽。</p>
+  <h3>卡牌和叫法</h3>
+  <ul>
+    <li><span class="tag chg">改</span>5 张只是「从银行领钱」的 re:Invent 卡改成和架构挂钩：认证（清技术债）、Trusted Advisor（选一块服务全额卖回）、降价（下圈运行费减半）、Hackathon（免费加 1 份容量）、Community Builders（领复盘标记）。Activate Credits 本来就是钱，保留。</li>
+    <li><span class="tag chg">改</span>「银行」全部改叫「<b>亚马逊云科技</b>」（网页、规则书、玩法手册、速查卡、卡牌）。</li>
+    <li><span class="tag chg">改</span>独立开发者「付过路费答对全免」改成「答对只付 25%」。<span class="why">模拟里不开答题时它是唯一能减过路费的人，80 局赢 20 局（平均每个角色 6–7 局）。</span></li>
+  </ul>
+</section>
+
+<section id="role">
+  <h2><i>03</i>角色与专属技能</h2>
+  <ul>
+    <li><span class="tag new">新</span>客户角色从 9 个加到 <b>12 个</b>：数据智能公司、短视频平台、互联网医疗。代理商模式另有 <b>3 个代理商角色</b>：总代理、托管服务商（MSP）、咨询合作伙伴，开局资金 $1200–$1400，比客户少。</li>
+    <li><span class="tag new">新</span>每个角色一个<b>专属技能（数据风暴 · 风暴接入）</b>，借鉴游戏王 VRAINS 的 Storm Access（LP 掉到 1000 以下才能发动的起死回生技能）：总资产低于自己开局资金的一半时发动，一局一次，技能和角色绑定。比如车库创业「Activate 加码」、传统企业「MAP 迁移补贴」、金融合规「监管沙盒」。</li>
+    <li><span class="tag new">新</span>卡牌 PDF 里的角色卡加了身份、技能和地狱限制。</li>
+  </ul>
+</section>
+
+<section id="speed">
+  <h2><i>04</i>高速部署（开关，默认关）</h2>
+  <p>借鉴游戏王 5D's 的 Speed Counter。每人一个部署点数 0–12：每回合 +1，被事件打中 −2，进维护窗口 −4。花点数发动技能，每个点数一个：</p>
+  <table>
+    <tr><th>点数</th><th>技能</th><th>效果</th></tr>
+    <tr><td class="n">1</td><td>灰度发布</td><td>掷完骰子多走或少走 1 步</td></tr>
+    <tr><td class="n">2</td><td>回滚重发</td><td>重掷</td></tr>
+    <tr><td class="n">3</td><td>抽卡</td><td>免费抽一张 re:Invent</td></tr>
+    <tr><td class="n">4</td><td>故障转移</td><td>没做高可用、要被可用性事件打成 Impaired 时扛住</td></tr>
+    <tr><td class="n">5</td><td>混沌注入</td><td>逼对手抽一张 Health 卡</td></tr>
+    <tr><td class="n">6</td><td>DDoS（轻）</td><td>对手一块服务 Impaired 到他下回合</td></tr>
+    <tr><td class="n">7</td><td>蓝绿部署</td><td>抵消一张 Health 卡或一次 DDoS</td></tr>
+    <tr><td class="n">8</td><td>流水线自动化</td><td>免费升一级</td></tr>
+    <tr><td class="n">9</td><td>自动修复</td><td>解除所有 Impaired，清 1 个技术债</td></tr>
+    <tr><td class="n">10</td><td>Global Accelerator</td><td>直接前进 1–12 任意步</td></tr>
+    <tr><td class="n">11</td><td>加开一班</td><td>这回合再走一次</td></tr>
+    <tr><td class="n">12</td><td>DDoS（重）</td><td>对手一块服务<b>下线 2 回合</b>：不收过路费、不算持有</td></tr>
+  </table>
+  <p class="why">DDoS 打不动有 Shield Advanced 或 CloudFront 的人；攻击每回合最多一次，不能连着打同一个人。电脑玩家也会用（每局大约花 14 次点数）。开不开，对局长度一样（中位 36 轮）。卡牌 PDF 里多了 2 张技能参考卡。</p>
+</section>
+
+<section id="reseller">
+  <h2><i>05</i>代理商模式（开关，默认关）</h2>
+  <ul>
+    <li><span class="tag new">新</span>开局页每个座位可以勾「代理商」，<b>不超过一半</b>（2–3 人局 1 个，4 人局 2 个）。</li>
+    <li>代理商按进货价 5 折从亚马逊云科技拿货（总代理 45 折），自己也能买服务做业务，但自己名下的服务只在组成有效架构时收过路费。</li>
+    <li>代理商自己定转售价（不低于拿货价、不高于原价）；客户落在没人买的服务上可以「经代理商购买」，差价归代理商。</li>
+    <li>之后这些服务的运行费客户交给代理商，代理商按拿货价交给亚马逊云科技，赚差价；客户付不起，代理商也得先垫上。</li>
+  </ul>
+  <p class="why">模拟（4 人局 1 个代理商）：代理商拿第一约 30%，略高于公平的 25%，在误差范围内；电脑客户每局经代理商买 23 次。</p>
+</section>
+
+<section id="hell">
+  <h2><i>06</i>地狱模式（新难度）</h2>
+  <ul>
+    <li><span class="tag new">新</span>完整局 + 4 个玩法 DLC + 高速部署，<b>必须边玩边答题</b>，卡牌 ×2 并跟着流量全额涨。</li>
+    <li>过路费每 5 轮 +1.5 倍；没有新账号保护期；起点只领 $150；卖回只有 6 折；答对过路费只减 30%；角色技能金额不随流量涨。</li>
+    <li><b>每个角色一条地狱限制</b>，削掉它在地狱模式里最占便宜的那一点：</li>
+  </ul>
+  <table>
+    <tr><th>角色</th><th>地狱限制</th></tr>
+    <tr><td>车库创业公司</td><td>起点不再多领 $50</td></tr>
+    <tr><td>传统企业上云</td><td>开局资金按 $1500 算</td></tr>
+    <tr><td>独角兽</td><td>开局不送 Route 53，开局资金按 $1400 算</td></tr>
+    <tr><td>金融合规公司</td><td>「监管沙盒」只免疫 2 轮</td></tr>
+    <tr><td>AI 原生公司</td><td>AI 组折扣取消</td></tr>
+    <tr><td>跨境电商</td><td>「黑五网一」只持续 2 个回合</td></tr>
+    <tr><td>SaaS 创业公司</td><td>「上架 Marketplace」只收 3 次</td></tr>
+    <tr><td>游戏工作室</td><td>Spot 最低出价回到原价的 20%</td></tr>
+    <tr><td>独立开发者</td><td>付过路费答对只付 50%（别人 70%）</td></tr>
+    <tr><td>数据智能公司</td><td>分析组和数仓与搜索组只打 9 折，「数据变现」每块只领 $120</td></tr>
+    <tr><td>短视频平台</td><td>存储组只打 9 折，「现象级爆款」每人只付 $200</td></tr>
+    <tr><td>互联网医疗</td><td>不再免疫「实习生误删了生产数据」</td></tr>
+    <tr><td>总代理</td><td>拿货价贵 5%（8 折）</td></tr>
+    <tr><td>托管服务商（MSP）</td><td>拿货价贵 5%（85 折）</td></tr>
+    <tr><td>咨询合作伙伴</td><td>拿货价贵 5%（85 折）</td></tr>
+  </table>
+  <p class="why">为什么不直接禁角色：试过禁掉最强的传统企业上云和独角兽，独立开发者冒到 41%；再禁它，短视频冒到 38%，打地鼠。改成每个角色削一点，又调了三轮。</p>
+</section>
+
+<section id="ui">
+  <h2><i>07</i>界面</h2>
+  <ul>
+    <li><span class="tag ui">UI</span>右侧栏是手动看的：3 人以上时玩家卡默认收起，点名字那一行展开 / 收起；<b>不跟着回合自动开合，重绘时不跳回顶部</b>。日志区 3 人以上时矮一点。</li>
+    <li><span class="tag ui">UI</span>电脑在玩时，主按钮旁边多了「<b>暂停 / 继续</b>」，电脑和它要答的弹窗都停在原地。</li>
+    <li><span class="tag ui">UI</span>对局页：顶部帮助按钮不再被挤成一个字一行；操作按钮重新分组（常用在前，技能、部署点数、转售价在后），间距 8px、高度 36px；灰掉的按钮字加深。</li>
+    <li><span class="tag ui">UI</span>开局页：单选、复选框放大到 18px；地狱模式说明缩短，完整说明放鼠标悬停提示。</li>
+    <li><span class="tag ui">UI</span>玩家卡显示部署点数、代理商标签、技能（已用会标出）、地狱限制；图鉴的角色表加了技能和地狱限制两列。</li>
+  </ul>
+</section>
+
+<section id="doc">
+  <h2><i>08</i>文档</h2>
+  <ul>
+    <li><span class="tag doc">新</span><code>模式手册/</code> 6 本：娱乐、入门、标准、完整、学习、地狱，每本讲适合谁、开局设置、这个模式的规则和数字、怎么赢。</li>
+    <li><span class="tag doc">新</span><code>术语对照.pdf</code>：传统大富翁 ↔ 这个游戏（银行 → 亚马逊云科技、抵押 → 下线、房子 → 升级……）。</li>
+    <li><span class="tag doc">改</span>规则书、玩法手册、速查卡、卡牌、棋盘与配件全部重新生成；README 更新了文件表和测试参数。</li>
+    <li><span class="tag doc">改</span>经济模拟加了 <code>act=ai</code>（电脑玩家策略对打）、<code>diff=hell</code>、<code>dlc</code>、<code>rs</code>、<code>learn</code>、<code>acc</code>（答题正确率实验）参数。</li>
+  </ul>
+</section>
+
+<section id="sim">
+  <h2><i>09</i>模拟数据</h2>
+  <p class="why">都是电脑玩家 4 人对打，每组 40–300 局。电脑不会刻意凑支柱、也不懂交易，数字当趋势看。</p>
+  <h3>对局长度（结束轮数中位）</h3>
+  <table>
+    <tr><th>配置</th><th>中位</th><th>最长 / 超过 50 轮</th></tr>
+    <tr><td>改之前（卖不出钱）</td><td class="n">36–43</td><td class="n">63–77</td></tr>
+    <tr><td>刚加 8 折卖回</td><td class="n hi">43–50</td><td class="n">75–85</td></tr>
+    <tr><td>现在：标准 / 入门 / 完整</td><td class="n ok">35–39</td><td class="n">不到 10% 超过 50 轮（有 50 轮上限兜底）</td></tr>
+    <tr><td>现在：2 人局</td><td class="n ok">37</td><td class="n">原来 55</td></tr>
+    <tr><td>现在：地狱模式</td><td class="n ok">28</td><td class="n">300 局里 3 局</td></tr>
+  </table>
+  <h3>答题正确率和胜率（同一局 4 人分别答对 100% / 75% / 50% / 25%）</h3>
+  <table>
+    <tr><th>答对率</th><th>地狱模式胜率</th><th>标准局（开答题）胜率</th></tr>
+    <tr><td class="n">100%</td><td class="n">39%</td><td class="n">45%</td></tr>
+    <tr><td class="n">75%</td><td class="n">26%</td><td class="n">26%</td></tr>
+    <tr><td class="n">50%</td><td class="n">25%</td><td class="n">19%</td></tr>
+    <tr><td class="n">25%</td><td class="n">11%</td><td class="n">11%</td></tr>
+  </table>
+  <p class="why">学得好更容易赢；全答对的人胜率接近一半。</p>
+  <h3>地狱模式各角色出场胜率（300 局，公平 25%）</h3>
+  <table>
+    <tr><th>调整</th><th>最高</th><th>最低</th></tr>
+    <tr><td>没限制</td><td>传统企业 37%、独角兽 36%</td><td>跨境电商 10%</td></tr>
+    <tr><td>禁掉这两个</td><td>独立开发者 41%</td><td>—</td></tr>
+    <tr><td>再禁独立开发者</td><td>短视频 38%</td><td>—</td></tr>
+    <tr><td>每个角色一条限制</td><td>独立开发者 34%、传统企业 33%</td><td>金融合规 13%</td></tr>
+    <tr><td>现在（加了风暴接入以后）</td><td>游戏工作室 30%</td><td>跨境电商 18%</td></tr>
+  </table>
+  <h3>标准局各角色出场胜率（300 局，现在）</h3>
+  <table>
+    <tr><th>配置</th><th>范围</th></tr>
+    <tr><td>不开边玩边答题</td><td class="n">20–35%</td></tr>
+    <tr><td>开边玩边答题（电脑全答对）</td><td class="n">20–30%</td></tr>
+  </table>
+</section>
+
+<section id="r2">
+  <h2><i>10</i>第二轮：复查和补充</h2>
+  <h3>审查出来的 bug（另开一个代理独立读代码查的）</h3>
+  <ul>
+    <li><span class="tag bug">BUG</span>3 点「抽卡」技能掷骰子前也能用，抽到移动卡等于一回合走两次 → 改成掷完骰子后才能用。</li>
+    <li><span class="tag bug">BUG</span>电脑回合中途关网页再「继续上一局」，会卡在「电脑在玩…」 → 读档时自动接着轮到下一位。</li>
+    <li><span class="tag bug">BUG</span>卡牌把人移过起点时，工资和运行费被卡牌倍率放大 → 经过起点不跟卡牌倍率走。</li>
+    <li><span class="tag bug">BUG</span>原价抢走别人的 Spot 服务，记录的买价还是原主人的低价，卖回只拿到很少 → 记成实际花的钱。</li>
+    <li><span class="tag bug">BUG</span>联机时远端玩家点「技能」「部署点数」「转售价」没反应（不在白名单里）→ 补上。</li>
+    <li><span class="tag bug">BUG</span>2 人局里 DDoS「不能连着打同一个人」等于只能用一次 → 只剩一个对手时不受限；电脑不再 DDoS 打不动的目标，选目标时有防护的排最后并标「打不动」。</li>
+    <li><span class="tag bug">BUG</span>服务通过交易或破产换了主人，代理商关系还挂着 → 换主人就断开。</li>
+    <li><span class="tag bug">BUG</span>地狱模式的提示文字还写「8 折」、还显示新手保护期；代理商转售价少了 85 折一档 → 跟着实际数字走。</li>
+  </ul>
+  <h3>规则和平衡</h3>
+  <ul>
+    <li><span class="tag chg">改</span>专属技能改成真正的起死回生：触发条件是<b>总资产低于自己开局资金的一半</b>（先试过「现金低于四分之一」，模拟里平均第 11 轮人人都会碰到，不算绝境）；15 个技能按角色重新设计、力度翻倍，再加上所有角色共有的「风暴接入」（按卖回价买下总资产最高的对手的一块服务，钱付给他）。快不行的人翻盘率从 0–1% 提到约 12%（标准局 11%、地狱 12%；收购款由亚马逊云科技出时是 18%，只补钱最多 9%，过路费翻倍只有 6%）。</li>
+    <li><span class="tag chg">改</span>开局资金：传统企业上云 $1900→$1700、独角兽 $1600→$1500、数据智能 $1600→$1500、金融合规 $1600→$1800、独立开发者 $1200→$1400、SaaS $1500→$1700。</li>
+    <li><span class="tag chg">改</span>传统企业上云 EC2、RDS 8 折→85 折；金融合规「不能 Spot」放宽成「Spot 最低出价 40%，不能参加竞价」；独立开发者付过路费答题：不开边玩边答题时答对付七成，开了只付 35%。<span class="why">模拟里电脑全答对时，独立开发者一度 61%。</span></li>
+    <li><span class="tag chg">改</span>Spot 说明写清楚：2017 年起不用出价，价格按每种实例在每个可用区的长期供需趋势平缓调整，被中断是因为要收回容量。</li>
+    <li><span class="tag chg">改</span>缺钱时三种凑钱办法分开写清楚：去掉升级退「这一级实付的一半」，下线拿「买价的一半」（以后要还），卖回按实付 8 折。</li>
+  </ul>
+  <h3>文档</h3>
+  <ul>
+    <li><span class="tag doc">新</span><code>简版手册/</code> 10 本（每本 1–3 页）：玩法速览、主持人规则书简版、6 个模式简版、高速部署与技能简版、代理商模式简版。网页里点「玩法」默认先看简版，可以切完整版。</li>
+    <li><span class="tag doc">新</span><code>模式手册/高速部署与技能.pdf</code>、<code>模式手册/代理商模式.pdf</code>；根目录 <code>有效架构图鉴.pdf</code>（18 个架构带图标流程）、<code>服务图鉴.pdf</code>、<code>题库与答案.pdf</code>、<code>更新说明.pdf</code>。</li>
+    <li><span class="tag doc">新</span>所有 PDF 都有<b>书签</b>，章节号和标题之间补了分隔符（「一、适合谁」「8. 每个服务…」）。</li>
+    <li><span class="tag doc">改</span>主持人规则书做成大而全：补了高速部署规则明细（20 条裁定）、代理商规则明细和例子、第 30 节地狱模式、第 31 节六个模式数字对照、第 32 节平衡数据；「网页版小功能」并进第 27 节。</li>
+  </ul>
+</section>
+
+<section id="r3">
+  <h2><i>11</i>第三轮：界面、架构、代理商、复盘</h2>
+  <ul>
+    <li><span class="tag new">新</span><b>点格子看服务现状</b>：弹窗顶部写谁拥有、第几级、现在的过路费（含联合 / 串联收费）、每圈运行费、关联的有效架构和还差哪块。</li>
+    <li><span class="tag new">新</span><b>有效架构 18 → 27 个</b>：新增缓存加速、备份与容灾、数据加密、漏洞管理、大数据处理、私有网络、AI Agent 工作流、实时推荐、全球 API 加速；经典三层 Web（RDS 或 Aurora）、Serverless API（DynamoDB 或 Aurora）等 9 个老架构加了替代选项。</li>
+    <li><span class="tag chg">改</span><b>串联收费</b>：一块服务在几个生效架构里时，几个架构串在一起收，共用的服务只算一次（原来只按其中最高的一个收）。</li>
+    <li><span class="tag chg">改</span><b>代理商</b>：进货价 5 折（总代理 45 折），但自己名下的服务只在组成有效架构时收过路费；多了 2 张 Health 卡（渠道合规审计、代理合同到期没续）和 3 张 re:Invent 卡（升级为高级合作伙伴、Marketplace 联合销售、渠道激励计划）。模拟里代理商拿第一约 21%。</li>
+    <li><span class="tag chg">改</span><b>破产按欠款比例分</b>：原来所有服务都给欠得最多的那个玩家，现在每个债主按欠款占比分服务，欠亚马逊云科技的那份退回；主动宣告破产时资产交回亚马逊云科技，不能再指定送人（防止帮别人赢）。</li>
+    <li><span class="tag new">新</span>代理商又加了 4 张卡：代理商涨价（Health）、Startup 拿到代理商折扣、代理商批量拿地、代理商清仓（re:Invent）。</li>
+    <li><span class="tag ui">UI</span>手机上主按钮固定在屏幕底部；宽屏下两侧格子的长名字不再挤。</li>
+    <li><span class="tag doc">改</span>PDF 统一放进 <code>手册/</code>，按 1-玩家、2-主持人、3-模式、4-专题、5-图鉴、6-打印 分文件夹。</li>
+    <li><span class="tag doc">新</span>所有 PDF（封面、页脚、PDF 属性）、网页首页和网页里的玩法手册都写上作者「亚马逊云科技 User Group」，和提 issue 的地址 <a href="https://github.com/cloudsmithy/aws_game/issues">github.com/cloudsmithy/aws_game/issues</a>。</li>
+    <li><span class="tag bug">BUG</span>请求费按实际收得到的钱算。以前只剩两个人时，一方付不起一笔几万的过路费破产，收钱的一方却要按全额交请求费，跟着破产，一局结束时一个人都不剩（地狱模式约 1–5% 的局）。修完后地狱模式 240 局里一次都没再出现。</li>
+    <li><span class="tag bug">BUG</span>好几个人同时欠钱时，先处理「别人在等他还钱」的那个：A 欠 B、B 欠亚马逊云科技时先让 A 还，B 拿到钱可能就不用变卖了。</li>
+    <li><span class="tag bug">BUG</span>代理商名下的服务按进货价（实付）算总资产和估值，不再按原价：以前 5 折拿货一转手估值就凭空多一半。</li>
+    <li><span class="tag chg">改</span><b>代理商玩法改版：先占地，客户落上来才能买</b>。以前客户落在任何空地上都能「经代理商买」，代理商不用占地就能赚差价；现在：
+      <ul>
+        <li>代理商落在空地上按进货价 5 折（地狱 7 折）买下当库存；客户只有<b>落在代理商的库存上</b>才能按转售价从他手里买走，空地只能直接从亚马逊云科技买。</li>
+        <li>代理商<b>在用的不卖</b>：组成有效架构的、集齐整组的、升过级的库存，客户买不走。</li>
+        <li>代理商的地还是只在组成有效架构时收过路费，但架构过路费 <b>×2</b>（卖的是整套解决方案）。<b>地狱模式例外</b>：代理商的地正常收过路费，架构不翻倍。</li>
+        <li>代理商要先花钱囤货，开局资金 = <b>所有客户开局资金的总和</b>（娱乐、地狱模式按角色卡）。</li>
+      </ul>
+      模拟里代理商拿第一（4 人局 1 个代理商，公平 25%）：标准 23%、入门 21%、完整 22%、学习 18%、娱乐 25%（3 人局 28%，公平 33%）、地狱 28%（按全答对）。改的过程里试过：只保护架构（标准局 4%）、开局 +$1000（12%）、请求费也给代理商（8%）、渠道分成 30%（10%），都不够；关键是「在用的不卖」加「本钱够囤货」。</li>
+    <li><span class="tag doc">改</span>规则书写明：答题 8 折和角色折扣、代理商进货价相乘（折上折），比如代理商 5 折 × 8 折 = 4 折；从代理商手里买的价格是代理商定的，不能再答题打折。</li>
+    <li><span class="tag ui">UI</span><b>结束动画和战报重做</b>：棋盘压暗，皇冠和冠军落下，领奖台按名次升起，估值数字往上跳，彩带最后放；点任意处跳过，系统开了「减少动效」就直接显示结果。战报顶部是冠军横幅，排名改成卡片（带估值条），奖项带图标，明细表收进「详细数据」，多了「再来一局」按钮；手机上排名卡片两列。</li>
+    <li><span class="tag chg">改</span><b>停一轮都有出口</b>：服务配额用完了、依赖的第三方 API 挂了、员工的访问密钥被盗用，可以交 $80 立刻处理、照常走；落在维护窗口格交 $50 换个时间窗口；技术债攒满 3 个要大重构，可以停一轮交 $300，也可以不停交 $400。</li>
+    <li><span class="tag chg">改</span><b>3 张卡改成现场社交</b>：凌晨 3 点被告警叫醒（讲自己被叫醒的经历）、安全审计没过（其他人当审计员投票）、Keynote 现场演示成功（30 秒介绍公司和架构，觉得精彩的人付钱）。</li>
+    <li><span class="tag chg">改</span>证书过期、DDoS 打满了入口两张卡可以二选一：交钱，或者让一块入口服务变成 Impaired。</li>
+    <li><span class="tag chg">改</span><b>托管放开到所有模式</b>（以前只有完整局）：抽到 Health 事件时，可以付钱请一位对这张卡免疫的玩家扛，罚款类的卡默认托管费是罚款的一半。交钱进奖池的卡变成了玩家之间的交易。</li>
+    <li><span class="tag new">新</span><b>6 张新卡</b>，入门局就能抽到：踩坑大会、Office Hours、白板画架构、服务名接龙（re:Invent，现场社交）；这次事故谁背锅（Health，甩锅给别人、大家投票）；根因在上游（re:Invent 保留卡，下次的 Health 事件甩给别人）。</li>
+    <li><span class="tag new">新</span><b>组织者包</b>：开局页最上面「UG 活动局 · 一键开局」（娱乐模式 + 边玩边答题，12 轮或 30 分钟先到为准，4 人一桌），网址加 <code>?ug=1</code> 打开就直接开局；<code>手册/0-组织者/组织者包.pdf</code> 是一页流程单加速查卡，新城市的组织者 15 分钟看完就能办。</li>
+    <li><span class="tag chg">改</span><b>所有答题折扣都能折上折</b>：以前用卡牌折扣买（比如 Startup Showcase 8 折）不能答题、答题价没算 9 折购买券、从代理商手里买不能答题；现在答对的 8 折和所有折扣相乘。</li>
+    <li><span class="tag chg">改</span><b>抽卡掷骰子前就能抽</b>（掷完也还能抽），每回合一次。<b>掷完骰子不再 2 秒自动跳到下一位</b>，真人玩家点「轮到下一位」才结束回合，电脑照旧自动。</li>
+    <li><span class="tag ui">UI</span><b>点不了的按钮写原因</b>：按钮下面一行小字（本回合已经抽过了、现金不够 $110、总资产低于 $850 才能用……），点一下屏幕下方弹提示。</li>
+    <li><span class="tag new">新</span><b>格子的收费和记录</b>：悬停任何一格（包括四个角）看收多少、给多少；点一下弹出这一格的现状和历史记录，面板只在自己设备上，不打断别人的回合。</li>
+    <li><span class="tag new">新</span>「对局」菜单里可以<b>改名字</b>；联机时只能改自己的。</li>
+    <li><span class="tag ui">UI</span><b>动画重做</b>：
+      <ul>
+        <li>抽卡改用 three.js：卡背从牌堆飞到窗口里那张卡的位置、3D 翻面，翻开的就是这张卡真实的内容（标题、效果、免疫、知识点），迸出光点后换成网页里的卡，不再「跳一下」；浏览器跑不了 WebGL 时退回 CSS 3D 翻牌。</li>
+        <li>骰子照宣传片 mp4 里的做：掷骰子时在棋盘中间叠一个小的 three.js 画面，镜头从斜上方往下看桌面，两颗有光照和阴影的骰子从你这边扔出去，弹三下、一下比一下低，三个方向一直翻、越翻越慢，停下时带一点歪；落定后换回平面骰子显示点数。跑不了 WebGL 时退回 CSS 3D 骰子。</li>
+        <li>结束动画的领奖台改成 three.js 立方体，按名次依次升起，有光照和名次贴图。</li>
+        <li>系统开了「减少动效」就都不播，直接显示结果。</li>
+      </ul></li>
+    <li><span class="tag ui">UI</span><b>手机和折叠屏</b>：手机横着（高度不到 500）也走手机布局，棋盘缩到一屏放得下；折叠屏内屏横着时棋盘按高度缩小，下面的操作区第一屏能看到；支持折叠屏半折（Viewport Segments）：桌面模式棋盘在上半屏、操作区在折痕下面，书本模式左边棋盘、右边玩家和日志。</li>
+    <li><span class="tag bug">BUG</span>电脑玩家「甩锅」（这次事故谁背锅、根因在上游）以前总挑现金最多的人，标准局里开局资金是客户总和的代理商总被甩，胜率掉到 14%；改成随机挑，回到 22%。</li>
+    <li><span class="tag chg">改</span>地狱模式代理商进货价从 65 折调到 <b>7 折</b>（总代理 65 折）：加了「停一轮的出口」和托管以后，地狱里的代理商胜率升到 34%，调完回到 28%（按全答对算，公平 25%）。</li>
+    <li><span class="tag chg">改</span>游戏名统一成「<b>亚马逊云科技 User Group 云上大亨</b>」：网页、全部 PDF 手册、卡牌、棋盘、速查卡、README、宣传片和玩法讲解都改了。</li>
+    <li><span class="tag chg">改</span>高速部署 DLC 里的「交付速度」改名「<b>部署点数</b>」：每回合攒 1 点、花点数发动技能，叫点数更直白，也和 DLC 名「高速部署」对上。</li>
+    <li><span class="tag ui">UI</span><b>事件卡改成竖卡</b>，和宣传片、打印的实体卡一样是 63 × 88：彩色标题栏、大图标和标题、效果、免疫框、知识点；Health 粉色、re:Invent 紫色、FIS 红色。three.js 抽卡的卡背也换成宣传片的深色网格卡背。</li>
+    <li><span class="tag ui">UI</span><b>宣传片里的特效搬进游戏</b>：付钱时金币一枚枚从付钱人的格子飞到收钱人的玩家条（走弧线、边飞边翻，到账闪一下）；升级时方块落到格子上；免疫事件时格子上罩蓝色护盾；架构联合收费时橙色光管把架构里的服务连起来；拿奖池时金币炸开；买下时格子边框弹一下玩家颜色，变 Impaired 时闪红往下沉；开新局时格子依次落下。系统开了「减少动效」都不播。</li>
+    <li><span class="tag new">新</span><b>宣传片改成一条大而全的 full 版</b>：主线之后依次播 6 个模式的看点（娱乐模式盲盒格、入门局运行费、标准局技术债、完整局交易、学习模式答题、地狱模式部署点数 DDoS），再接专属技能、DLC 和学习模式介绍。</li>
+    <li><span class="tag new">新</span><b>6 个模式各一条玩法讲解视频</b>（宣传片/玩法讲解_娱乐模式.mp4 等，每条 1 分多钟）：讲这个模式适合谁、怎么开局、这个模式特有的规则和数字、怎么赢、一条建议；右边要点卡跟着念到的句子一行行加，棋盘上同步演示（掷骰子、买服务、架构光管、技术债、交易、答题、部署点数 DDoS 等）。配音用 CosyVoice 2（CosyVoice2-0.5B，Apache-2.0），参考音色是 CosyVoice 官方预置的「中文女」，不用真人录音；语速放慢到 0.88 倍。</li>
+    <li><span class="tag ui">UI</span><b>照 full 宣传片再补 5 项</b>：几个架构串联收费时每个架构一条自己颜色的光管；买下、付过路费（写明哪几个架构串联）、升级、变 Impaired、免疫、被 DDoS 打下线时，格子上方弹出一句说明；升过级的格子左下角留着玩家颜色的小方块，几级就几块；部署点数按钮里多一条 12 格进度条，攒满变红；发动 DDoS 时从攻击者那格拉一条红线打到目标，打不动的罩上护盾。</li>
+    <li><span class="tag doc">改</span>不再写「双击 index.html 就能玩」：网页本来打开就能玩，后面还要做线下版。PDF 封面底部改成「网页版 / 实体版」，组织者流程单、玩法手册、README、Dockerfile 里的说法也改了；玩法讲解的结尾改成「选好〈模式〉，就可以开玩了」。</li>
+    <li><span class="tag ui">UI</span><b>再从宣传片搬 4 个</b>：刚凑成一个有效架构时，那几格亮一圈金光、金色光管连起来、弹出架构名；棋子落到哪一格，那一格亮一下；买下时溅起一小撮玩家颜色的碎块；DDoS 打不动时护盾上撞开一圈红色冲击波。</li>
+    <li><span class="tag bug">BUG</span>宣传片和玩法讲解的 html 实时播放时，画面时间直接取音频的播放位置，浏览器更新这个值是一跳一跳的，骰子这种快动作会一顿一顿；改成自己的时钟均匀走、再慢慢对齐音频。mp4 不受影响。</li>
+    <li><span class="tag doc">改</span>README 里代理商模式的卡牌数量写错了（写的 2 张 Health、3 张 re:Invent），实际是 3 张和 6 张，已改。</li>
+    <li><span class="tag doc">测</span>模拟器支持娱乐、学习模式，每一步检查一遍状态（钱是不是数、服务主人还在不在、破产的人手里还有没有东西、奖池不为负）。12 种模式组合各 40–240 局，没有报错。</li>
+    <li><span class="tag chg">改</span>学习模式恢复<b>不限轮数</b>（答题慢，慢慢学）；「对局」菜单新加「现在结算」，时间到了随时按估值排名收场，所有模式都能用。</li>
+    <li><span class="tag ui">UI</span>新手引导<b>每局开局都弹</b>：以前看过或点过「跳过」就永远不弹，线下活动一台电脑轮流玩等于没了；现在「跳过」只跳这一局，点「不再显示」才不弹。手机上第一步会滚到底部的掷骰子按钮。文案里抽 re:Invent 卡的价格改成现在的「总资产的 4%，最低 $50」。</li>
+    <li><span class="tag bug">BUG</span>和上一版对比找回来的：掷骰子音效（换 3D 骰子时丢了）；联机时远端玩家抽卡看不到卡面；读屏念格子时不念主人和过路费；灰掉的按钮悬停只剩原因，现在原因加功能说明；Spot 的「出更高价可以抢走」提示。</li>
+    <li><span class="tag bug">BUG</span>浏览器切到后台时骰子、棋子动画会停，整局（联机时整桌）卡住，现在最多等一两秒就接着走；键盘焦点在格子或按钮上时按回车会去掷骰子；没人买的格子悬停显示「买下后过路费约 $0」；开局页填的名字没转义。</li>
+    <li><span class="tag ui">UI</span>布局：1280×720 这类矮屏，中间操作区不再被截（按钮里的灰色原因收起，点按钮仍会提示）；右栏「这回合还能做什么」放不下时可以滚、底部淡出；格子上的过路费标签不再压到隔壁格；1920 宽屏玩家卡整齐排成两列；竖着的平板和折叠屏内屏，回合条和「你在哪一格」放进棋盘中间，骰子缩小，不用往下翻。</li>
+    <li><span class="tag doc">改</span>多个架构串联收费：注释写「其他架构折半」，实际一直按全额收（模拟里两种都试过，留的全额），注释和文档改成全额。</li>
+    <li><span class="tag chg">改</span>完整局的专属技能领的钱再 ×1.5：完整局规则多、对手强，翻盘率只有 10%，改完 15%，和标准局差不多。</li>
+    <li><span class="tag ui">UI</span>折扣统一按中文习惯写：45 折、75 折、85 折，不再出现「4.5 折」。卡牌 PDF 封面也写上作者和提 issue 的地址。</li>
+    <li><span class="tag new">新</span><b>结束复盘</b>：战报里每人一张复盘卡：钱花在哪、最赚和最烧钱的服务、差一块就能凑成的架构、想赢可以怎么改。</li>
+    <li><span class="tag ui">UI</span>中间右栏改成「这回合还能做什么」；部署点数改成技能卡片；欠款、资产管理、选目标的弹窗重新排版；宽屏右侧栏两列；技能持续效果挂在玩家卡上。</li>
+    <li><span class="tag doc">新</span><code>分级规则手册.pdf</code>：通用规则 + 入门 → 标准 → 完整 → 地狱一级级叠加，娱乐、学习两个变体；<code>Dockerfile</code>（只发布到本机 127.0.0.1）。</li>
+    <li><span class="tag chg">改</span>风暴接入的收购款改成自己按卖回价出，翻盘率从 18% 调到约 12%。</li>
+  </ul>
+</section>
+
+<section id="r4">
+  <h2><i>12</i>第四轮（10-30 ～ 11-02）</h2>
+  <p class="why">先修骰子和飞行动画，再按宣传片做了飞行和 User Group 的动画；之后做了两轮全量审查（97 条），每条由另一个人复核过再改。</p>
+  <h3>动画</h3>
+  <ul>
+    <li><span class="tag bug">BUG</span>3D 骰子底下漏出平面骰子的点子：点子单独设了 visibility:visible，外层藏不住。掷出 3、4 点时骰子斜着插进桌面（旋转顺序不对）。维护窗口里掷骰子没有动画。</li>
+    <li><span class="tag new">新</span><b>飞到某一格</b>照宣传片「天外流星」那段做：画面压暗成夜空、背景划过流星，上方浮出大字标题；起点亮起金色法阵（一圈写着六大支柱）、光柱冲起，Q 版小人从圆点里长出来，拖着流星尾巴沿弧线飞过去，落地冲击波加星火，再缩回圆点。1 号韩叔、2 号虫虫、3 号 Damo、4 号 Yuki，头顶挂和圆点一样的号码牌。</li>
+    <li><span class="tag new">新</span><b>参加 User Group 活动</b>：四个人从法阵里冒出来站成一道弧欢呼，彩纸往上喷。</li>
+    <li><span class="tag ui">UI</span>一格格走还是圆锥棋子，起点和终点都对准格子里的圆点，两头不再跳；开局后空闲时先把小人和特效传上 GPU，第一次飞不卡；动画某一帧出错也会收尾，不会卡住整局。</li>
+  </ul>
+  <h3>规则</h3>
+  <ul>
+    <li><span class="tag chg">改</span>地狱模式：4 个玩法 DLC、高速部署、全部题库自动勾上并锁住，「边玩边答题」和卡牌倍率两行不再显示；每次掷完骰子有 1/3 概率<b>随机掉题</b>，答对领 $50、答错扣 $50 进奖池。</li>
+    <li><span class="tag chg">改</span>「高可用入口」架构不再让单 AZ 的 EC2 扛住 AZ 断电，改成凑齐后 EC2 升「多 AZ」半价（ELB 只会把流量转给健康的实例，另一个 AZ 里得真有实例）。</li>
+    <li><span class="tag chg">改</span>提示词注入：有 WAF 从全免改成罚款减半（对口的是 Bedrock Guardrails）；跨区流量费：免疫条件改成用过 Cost Explorer 卡（VPC 终端节点省的是 NAT 处理费）；CloudWatch「日志保留期」改成请求费减半（原来的免疫从来不起作用）。</li>
+    <li><span class="tag chg">改</span>「运行费减半」类卡只减按小时计费的部分，Savings Plans 承诺额照付；飞行路过 User Group 活动也领 $50；维护窗口格交的 $50 进奖池；掷出对子落在维护窗口格、交钱继续走的，照样再掷。</li>
+    <li><span class="tag chg">改</span>独立开发者抽到 Savings Plans 卡没有效果；金融合规抢 Spot 也要出到原价 40%；完整局技能金额 ×1.5 写进规则，界面上显示当前倍数。</li>
+    <li><span class="tag chg">改</span>和现实对齐：Inspector 不扫 Lightsail；KMS 只用 AWS 托管密钥时不收月费；Savings Plans 也能抵 OpenSearch（数据库类）和 EMR（计算类）；Snowball 不再向新客户提供，卡换成 DataSync；「服务停止支持」改叫「旧版本停止支持」。</li>
+  </ul>
+  <h3>Bug 修复</h3>
+  <ul>
+    <li><span class="tag bug">BUG</span><b>局里有电脑时整局卡死</b>：电脑结算完停在「结算完了」不交棒（之前去掉自动结束时漏了电脑）。</li>
+    <li><span class="tag bug">BUG</span>电脑什么交易都同意，$10 能换走它全部现金和服务；现在收到的要比交出去的值钱两成以上、交易后现金还有 $250，会让对方集齐整组的服务基本不卖。电脑的服务下线后会重新上线，集齐整组后会自己升级。</li>
+    <li><span class="tag bug">BUG</span>卡牌倍率不是 1 时：卡牌带人飞过起点、走过 UG 的工资和运行费被放大；托管费、旧版本停止支持的退款、代理商卡的买卖被放大；日志写的是原价。现在不该乘的不乘，日志写实际金额。</li>
+    <li><span class="tag bug">BUG</span>娱乐模式经过起点送的卡在半路就抽，卡里又让人移动时会多走、结算两次，还会在棋盘上留一个 3D 棋子；现在落地结算完再抽。</li>
+    <li><span class="tag bug">BUG</span>卡牌：流量劫持能和维护窗口里的人换位置；在维护窗口里被卡牌移动；掷骰前抽卡被送进维护窗口还能马上掷出来；甩锅后弹窗还是抽卡人在选；纵深防御挡不住勒索软件；「数据本地存储」从不生效；Fargate 替整个账号挡 SSH 暴力破解；Region 宕机打到全局服务。</li>
+    <li><span class="tag bug">BUG</span>其他：弹窗里焦点在「不买」上按回车还是会买；欠款弹窗反复点「关闭」能赖账；结算中退出会存下半个回合；名字带 &amp; ' 显示乱码；电脑答错的题记进你的错题本；已下线的服务还能升级；被 DDoS 打下线的服务照算支柱；高速部署 1 号位整局少 1 点；WebGL 失败时页面底部不断多出空 canvas。</li>
+    <li><span class="tag bug">BUG</span>联机：远端看不到结束动画和战报；房主刷新后座位按加入先后分配；改名后用新名字重连被拒；远端的错题记到房主浏览器；房主看图鉴会推给所有人。</li>
+  </ul>
+  <h3>界面</h3>
+  <ul>
+    <li><span class="tag ui">UI</span>点格子的面板：价格、组别、计费方式；「现在的过路费」「每圈运行费」下面列出每一级的数；各级一览（效果、过路费、运行费）；数字和实际结算一致，按 token 计费的写实际每点收多少。</li>
+    <li><span class="tag ui">UI</span>棋盘格子：组成架构的显示整套联合收费（橙底，悬停看是哪几块）；窄屏左右两列能看出主人，Impaired 有标记；没人买的恢复显示价格；加容量写成「+2」，不再挤出格子。</li>
+    <li><span class="tag ui">UI</span>灰掉的按钮只显示标题；中间区去掉重复的「抽卡」按钮；新手引导只自动弹一次；手机上掷骰子前先把棋盘滚回来；「收起看棋盘」的横条不压底排；代理商的过路费面板、悬停、实扣一致。</li>
+  </ul>
+  <h3>文档</h3>
+  <ul>
+    <li><span class="tag doc">改</span>规则书、玩法手册、模式手册、README 跟上面的规则同步；对上了过期的开局资金、运行费、卡号、FIS 牌名、UG 抽卡张数、示例局；对局记录和导出记录去掉 emoji；题库用「责任共担模型」；7 条像格言的卡牌知识点换成能核对的具体知识。</li>
+  </ul>
+</section>
+
+<section id="r5">
+  <h2><i>13</i>第五轮（11-02）</h2>
+  <p class="why">第二轮全量审查：合并进来的改动逐段核对、6 种模式按真人方式各打几局、新玩家第一次上手、性能、键盘和读屏、约 1.3 万局经济模拟、再核一遍真实 AWS。42 条经复核确认的问题都改了。</p>
+  <h3>平衡（都有模拟数字，记在规则书第 32 节）</h3>
+  <ul>
+    <li><span class="tag chg">改</span>开局资金：车库创业公司 $1300→$1500、独立开发者 $1400→$1500、数据智能 $1500→$1600、金融合规 $1800→$1600、SaaS $1700→$1600。默认 15 轮按估值排名时，各角色胜率原来 16–32%，现在回到 20–29% 附近。</li>
+    <li><span class="tag chg">改</span><b>后走补贴</b>：第 2、3、4 个出手的人开局多领 $50、$100、$150（只加现金，不改技能门槛）。原来 1 号位拿第一 28.4%，4 号位只有 21.4%。</li>
+    <li><span class="tag chg">改</span>完整局技能金额 ×1.5 → ×1.2：用过技能的人翻盘率原来 17–32%，比目标 12% 高太多。</li>
+    <li><span class="tag chg">改</span>代理商：有轮数上限的局（不含娱乐、地狱），开局资金改成角色卡 + 每位客户 $300。按客户总和起步时 15 轮局代理商 86% 拿第一，只按角色卡又只有 8%。现在 15 轮标准局约 27%、不限轮数约 21%。</li>
+  </ul>
+  <h3>和真实 AWS 对齐</h3>
+  <ul>
+    <li><span class="tag chg">改</span>「Compute Optimizer 建议降配」只减它真正覆盖的服务（EC2、EBS、Lambda、RDS/Aurora、EMR，ECS 升到 Fargate 才算）。</li>
+    <li><span class="tag bug">BUG</span>re:Invent「迁移到 Graviton」实际给 EC2 加的是「多 AZ」；「Bedrock 上了新模型」第 2 级送的是跨区域推理。都按卡面改对。</li>
+    <li><span class="tag chg">改</span>CloudTrail 第 2 级「CloudTrail Lake」官方已不对新客户开放，换成「日志文件完整性验证」；GuardDuty 运行时监控不再整张免疫 SSH 暴力破解（GuardDuty 只发现、不拦截），改成持有 GuardDuty 交 $50、实例不变 Impaired；ECS Service Connect 不再免疫第三方 API 挂了；Bedrock 跨区域推理不再让 SageMaker 免疫 GPU 不足；「实时日志分析」「审计与合规」两个架构的流程说明按官方写。</li>
+  </ul>
+  <h3>Bug 修复</h3>
+  <ul>
+    <li><span class="tag bug">BUG</span>手机上开 4 个以上 DLC（地狱模式固定 9 个）时，顶部「DLC：…」那行不换行，把页面撑宽、弹窗跑到屏幕外。桌面 DLC 多时改写成「9 个 DLC」，全名在悬停里。</li>
+    <li><span class="tag bug">BUG</span>飞行和 User Group 动画之后，星火粒子变成灰黑小点留在页面上。</li>
+    <li><span class="tag bug">BUG</span>电脑的弹窗在它自己选之前，真人按空格、数字键或点鼠标就替它做了决定；现在电脑的弹窗只能看，旁边可以暂停。</li>
+    <li><span class="tag bug">BUG</span>1 号位是电脑时，角色分配弹窗 0.9 秒就被电脑点掉，新手引导在电脑回合弹出；现在等真人看完、轮到真人再弹。</li>
+    <li><span class="tag bug">BUG</span>托管服务商的托管费，客户这一圈运行费是 $0 时漏收；DDoS 选目标、风暴接入收购的列表按单块过路费标价，和格子上的联合收费对不上；新账号保护期里格子写 ≈$80，实际只收 $50。</li>
+  </ul>
+  <h3>上手、键盘和读屏</h3>
+  <ul>
+    <li><span class="tag ui">UI</span>被送进维护窗口时弹一个说明：为什么进来、下回合怎么出去。新手引导加了「这局怎么赢」一步，手机和电脑分开讲。角色卡上技能和风暴接入合成一条。投票、甩锅弹窗补上正文；奖池不到 $100 时不再写「$100～$100」。</li>
+    <li><span class="tag ui">UI</span>开局页：入门局标「第一次玩选这个」（默认还是标准局）；「边玩边答题」挪到难度下面；学习模式摘要写「不限轮数 · 答题」并锁住答题开关；手机首屏去掉重复的开始按钮。</li>
+    <li><span class="tag ui">UI</span>键盘：弹窗打开时焦点锁在弹窗里、背景不可操作；焦点在菜单或面板上按回车、空格不再触发掷骰子；数字键按看得见的位置选按钮，按到灰的会提示原因；关掉弹窗后焦点回到原处；3–4 人局的玩家卡能用键盘展开；底部固定栏不再盖住获得焦点的按钮。</li>
+    <li><span class="tag ui">UI</span>读屏：新日志会播报（掷了几点、付给谁多少）；答题弹窗会读题目。主按钮文字改成深色，日志里的玩家名、时间戳加深，对比度都过 4.5:1。</li>
+  </ul>
+  <h3>性能</h3>
+  <ul>
+    <li><span class="tag ui">UI</span>走棋时每跳一格只重画棋盘里变了的格子和「当前所在格」，不再整页重画（手机后期每跳原来卡 70–150ms）；格子内容没变就不重写；日志时间只格式化一次；联机时状态按增量发，日志和格子历史不再每次整份发。开局时音频和 3D 预热挪到第一次点击、角色分配之后，不再连着卡。多段 3D 特效同时播时合成一个渲染循环。</li>
+  </ul>
+</section>
+
+<section id="r6">
+  <h2><i>14</i>第六轮（11-02 晚）</h2>
+  <p class="why">第三轮审查：回归、按真人方式打各模式加三台联机、节奏和弹窗、视觉、题库逐题核对官方文档、文档、边角情况。53 条经复核确认，都改了。</p>
+  <h3>节奏</h3>
+  <ul>
+    <li><span class="tag chg">改</span>电脑回合不再固定空等：掷骰前停 0.5 秒、结算后 0.7 秒（原来 1.1 秒），电脑的骰子和走棋也快一些；电脑的买地窗打开就是收起状态，不挡棋盘。电脑抽到的卡等翻牌放完再关（原来 0.9 秒就关，卡还没翻过来）。</li>
+    <li><span class="tag new">新</span>「对局」菜单加了<b>动画速度：标准 / 快</b>（快档约 0.6 倍）；单机时点一下或按键能跳过骰子动画。</li>
+    <li><span class="tag chg">改</span>少弹窗：下线的服务只在第一个付得起的回合问一次要不要上线；Health 卡的发牌和「要抵消吗」合成一个窗；买服务时答题的结果直接显示在买地窗顶上；Spot 竞价结果改成格子上的提示、电脑出价不再各弹一个窗；落在自己的服务上，升级和同色跳合成一个窗；一台设备轮流玩时，踩坑大会、服务名接龙这类现场社交卡合成一个窗。</li>
+    <li><span class="tag bug">BUG</span>电脑从来不会同色跳（判断「要付过路费」时把说明里的固定句子也算进去了）。</li>
+  </ul>
+  <h3>Bug 修复</h3>
+  <ul>
+    <li><span class="tag bug">BUG</span>全是电脑的局卡在角色分配，「开始」是灰的（第二轮改出来的）。联机时房主那台全是电脑，由第一个远端玩家点。</li>
+    <li><span class="tag bug">BUG</span>联机：远端手机锁屏、断网时房主一直以为他在线，整桌卡死，现在十几秒内会算掉线，也能用同一个名字直接顶替回来；房主走后远端界面会解锁、还会改写远端自己的存档；空座位先勾了电脑，朋友坐进来后被电脑代打；同名的两个远端重连会坐反；远端掉线提示在电脑回合一闪就没；远端点「新手引导」没反应。房主刷新后点「继续上一局」会提醒先建房间。</li>
+    <li><span class="tag bug">BUG</span>存档：用 <code>?ug=1</code> 开的活动局刷新一下就被删掉重开；两个标签页互相覆盖存档（现在后打开的接手，旧标签页提示「这局在别处接着打了」）；限时局退出后计时没停，回来一读档就结束。</li>
+    <li><span class="tag bug">BUG</span>用「根因在上游」把 Root 密钥泄露甩给别人，自己这回合掷出的对子不能再掷了；手机上新手引导开着时转屏，说明框跑到屏幕外。</li>
+  </ul>
+  <h3>题库</h3>
+  <ul>
+    <li><span class="tag bug">BUG</span>跨区域推理那道题把一个正确说法当成错项；Deep Archive 取回时间、SageMaker 端点能不能缩到 0、Nova 2 系列那道题的选项，都按官方文档改对。</li>
+    <li><span class="tag chg">改</span>原来基础题 109 道里 81 道、DLC 题 18 道里 17 道「最长的选项就是答案」。改了 134 道题的选项：缩短正确项，或者把干扰项写成长度相近、确实错的相邻服务说法，现在各套题「正确项最长」的比例在 11–28%。GenAI DLC 里和基础题重复考点的 4 道换成批量推理、提示缓存等新考点。</li>
+  </ul>
+  <h3>界面和文档</h3>
+  <ul>
+    <li><span class="tag ui">UI</span>结束动画领奖台的名次数字不再被切；角色卡高度随内容，地狱限制不再被裁；宽屏两列玩家卡、图鉴卡牌表、小屏手机上的 Health 卡、灰掉按钮的两套样式、手机标题栏都理顺了；平板上 DLC 很多时点一下「9 个 DLC」能看全名；「部署点数」按钮改叫「部署 x/12」，不再被裁。</li>
+    <li><span class="tag doc">改</span>速查卡、代理商角色卡、主持人规则书简版、组织者包、分级手册、模式手册里过期的数字和说法都对上了（代理商本钱、后走补贴、地狱随机掉题、技能按总资产判断、KMS 月费、托管所有模式都能用）；所有 PDF 封面的时长改成和正文一致。</li>
+  </ul>
+</section>
+
+<section id="r7">
+  <h2><i>15</i>第七轮（11-03）</h2>
+  <p class="why">第四轮审查：第三轮改动的回归、按真人方式打各模式加三台联机、重写过的题再核一遍、手机和平板触屏、文案通读、用约 6 万局模拟看策略深度。39 条经复核确认，都改了。</p>
+  <h3>平衡（模拟数字记在规则书第 32 节）</h3>
+  <ul>
+    <li><span class="tag chg">改</span>Bedrock 四档单价 ×4/×8/×14/×20 → ×8/×24/×48/×80（乘对方点数）。原来 $500 买下每轮只净赚约 $18，升一级要 20–30 轮回本，模拟里买不买胜率没差别。</li>
+    <li><span class="tag chg">改</span>升级费按色组定，不再按棋盘的边：存储、IaaS、网络、容器、Serverless、应用集成每级 $100，数据库、分析、数仓与搜索、安全合规、边缘防护、AI、按用量收费每级 $150。原来同组同价的服务升满差 3–4 倍。</li>
+    <li><span class="tag chg">改</span>三张省运行费的卡不再是白卡：re:Invent「按 Cost Explorer 推荐签了 Savings Plans」、「亚马逊云科技宣布降价」（改成接下来 2 次经过起点都减半）、FinOps「Compute Optimizer 建议降配」，按现在的用量省不下钱时改领 $50，日志写出能省多少。</li>
+    <li><span class="tag bug">BUG</span>合并后的踩坑大会投票窗默认连成一个环，直接点「投完了」全桌平票、人人领钱；现在默认「（没投）」，没投的不算票。其他合并窗的默认值也改成不动钱的那一项。</li>
+  </ul>
+  <h3>触屏</h3>
+  <ul>
+    <li><span class="tag ui">UI</span>触屏上展开对手玩家卡能看到能力、弱点和在建架构；只放在悬停提示里的说明，点一下会弹出来；玩家卡上的服务能点开看详情。</li>
+    <li><span class="tag ui">UI</span>「卖回亚马逊云科技」先确认（默认「先不卖」），按钮之间留出间距、加高到 40px；输入框 16px，iPhone 上点了不再整页放大；弹窗滑到底不带着背后的页面滚。</li>
+    <li><span class="tag ui">UI</span>手机横屏：按钮栏挪到右边一竖条，棋盘不再缩到 21px 一格；抽卡时卡面改成横卡，免疫和知识点不被按钮挡住；新手引导的说明框不盖高亮；格子详情面板不盖住刚点的格子，并给那一格加蓝框；图鉴的宽表格各自横滑，标题栏不跟着跑。</li>
+  </ul>
+  <h3>其他</h3>
+  <ul>
+    <li><span class="tag bug">BUG</span>高速部署开着时，电脑每掷一次骰子都弹一个全尺寸的部署点数窗；Health 卡合并窗前 1 秒点了没反应、按钮却看着能点（现在先灰着）；Spot 出价低于最低价直接作废、没有提示；联机远端在资产管理里点卖回、下线、升级不生效；选了「不联机，在这台上继续」之后每次读档还问要不要建房间；买地窗里的答题结果读屏不念。</li>
+    <li><span class="tag bug">BUG</span>机器人自测、模拟和无头浏览器里的自动化测试不再往「下载」里写对局记录（你自己点「导出对局记录」照常能导出）。</li>
+    <li><span class="tag chg">改</span>题库：Kinesis「空着要不要付钱」补上 On-demand Advantage 模式；多可用区数据库集群的备用实例能读、NAT 网关能经 Transit Gateway 连本地网络，两道解析按官方改对。</li>
+    <li><span class="tag doc">改</span>文案：导出记录里的难度写中文；Impaired 写成「暂停收费一轮」；风暴接入写「总资产最高的对手」；8 条空话知识点换成具体知识；同一概念统一叫法（起点 / Startup 扶持、NAT 网关等）；容量单位的量词、日志和复盘里的病句。</li>
+  </ul>
+</section>
+
+<section id="r8">
+  <h2><i>16</i>第八轮（11-03）：每块服务的回本</h2>
+  <p class="why">第七轮调了 Bedrock 以后，把 38 块服务挨个算了一遍回本：按每块被持有的轮数，算它收到的过路费（联合收费按各块拆开）减去请求费、运行费，看买价加上平均升级花费要多少轮赚回来。调前 1280 局、调后 2000 局，详细数字在规则书第 32 节。</p>
+  <ul>
+    <li><span class="tag chg">改</span>Bedrock 单价再翻倍：×8/×24/×48/×80 → ×16/×48/×96/×160。上一轮调完，不限轮数的局里它仍要 28 轮才回本，全盘最慢（各服务中位 16 轮）；现在 15–17 轮。</li>
+    <li><span class="tag chg">改</span>Shield Advanced 订阅费每圈 $40 → $20。没升级时收到的过路费基本都交了订阅费，15 轮局里要 120 多轮才回本；现在 30–40 轮，和其他安全、边缘服务差不多。</li>
+    <li><span class="tag chg">改</span>CloudWatch、Data Transfer、CloudTrail 三格的升级费每级 $150 → $50。每级只让倍数 +3，按 $150 收要几十轮才回本，电脑每局在上面白扔 $100 多。</li>
+    <li><span class="tag chg">改</span>EFS 买价 $60 → $100（过路费跟着涨）。原来和 S3 同价，可 S3 在 10 个架构里，EFS 只在 2 个架构里当备选，升满却同样要 $300，是存储组最难回本的（不限轮数 24 轮、15 轮局 50 轮，现在 17–19 / 24–31）。现实里 EFS 每 GB 也比 S3 贵得多。</li>
+    <li><span class="tag doc">没改</span>回本最快的是 Lambda、ELB、S3（10–12 轮），因为它们在很多架构里，靠联合收费；这是架构玩法本身的结果，没动。WAF、GuardDuty、KMS 偏慢一点（20–22 轮），但它们能免疫几张 Health 卡，也没动。</li>
+    <li><span class="tag doc">验</span>对局长度不变（不限轮数中位 34–35 轮），第一个人破产早 1–2 轮；角色胜率的变化都在抽样误差内。机器人自测 12 局、点界面、联机自测都通过。</li>
+  </ul>
+</section>
+
+<section id="r9">
+  <h2><i>17</i>第九轮（11-04）：改名</h2>
+  <ul>
+    <li><span class="tag chg">改</span>游戏改名为「<b>亚马逊云科技 User Group 云上大亨</b>」，避免和已有的游戏系列重名。网页标题、开局页、对局时棋盘中央、导出的对局记录（文件名改成 <code>云上大亨对局记录-日期.txt</code>）、全部 PDF 手册的封面和页脚、卡牌背面和封面、实体棋盘、速查卡、README 都换成了新名字。</li>
+    <li><span class="tag doc">没改</span>只改了名字：游戏规则、数值都没动，浏览器里已有的存档照常能继续。</li>
+  </ul>
+</section>
+
+<section id="r10">
+  <h2><i>18</i>第十轮（11-04 ～ 11-05）：第五轮审查</h2>
+  <p class="why">8 个方向（按真人方式玩完每种模式、联机、平衡、和真实 AWS 对不对得上、文档、界面、动画、存档）找出 75 条问题，每条都有人独立复现、尽力推翻，站得住的才改。下面先是 11-04 先修的 7 条最影响对局的，后面是其余的。</p>
+  <h3>先修的 7 条</h3>
+  <ul>
+    <li><span class="tag bug">BUG</span>掷完骰子刷新页面、点「继续上一局」能重掷：落点、过路费、欠款、Health 卡、高速部署的回滚重发都能刷掉。现在掷骰前就把这一把（连同回滚重发要用的几把）点数存进存档，刷新回来掷出的还是同样的数。落地答题的题目刷新后还是会换。</li>
+    <li><span class="tag bug">BUG</span>结算中途点「对局 → 动画速度」或改名字，会把半个回合写进存档：读档后跳过剩下的结算，卡牌倍率还一直留着，之后卖服务按倍率多给钱。现在结算中途不存档；读到老版本这样存的档，自动把残留的倍率清掉。</li>
+    <li><span class="tag bug">BUG</span>欠款窗里的「宣告破产，直接出局」一点就出局（按数字键 3 也会）。现在变卖就能还清时先确认，默认「回去凑钱」。</li>
+    <li><span class="tag doc">改</span>技术债攒满 3 个的大重构：抽 Health 卡时攒满的，$300 / $400 跟着卡牌倍率涨（第四轮定的），但文档都只写 $300 / $400。现在弹窗金额后面写明倍率，玩家面板悬停写全两个选项，规则书、玩法手册、速查卡、标准局和地狱模式手册都补上这一句。</li>
+    <li><span class="tag bug">BUG</span>联机：房主开着图鉴、玩法、明细、服务大图或改名字的窗口时，远端点掷骰子、资产管理会被悄悄吞掉。现在先替房主把这个窗口关掉再执行，房主那边会提示。</li>
+    <li><span class="tag bug">BUG</span>联机：房主和联机服务器断开一下（Wi-Fi 抖动、换网络）以后不会重连，之后谁掉线都回不来，只看到「找不到这个房间」。现在自动重连（2、4、8 秒……最多 30 秒重试一次），对局里会提示断开和连回来。</li>
+    <li><span class="tag bug">BUG</span>联机：开局后谁知道房间密码、用在线玩家的名字加入，就能把那个人顶下线，还能替他做决定。现在只有同一个浏览器重新打开页面才能直接接回座位；别的设备拿在线玩家的名字会被拒，换设备的先在原来那台关掉页面，或者等十几秒它掉线后再进。</li>
+  </ul>
+  <h3>流程和战报</h3>
+  <ul>
+    <li><span class="tag ui">UI</span>战报点「知道了」后就再也打不开，也导不出对局记录。现在台面中央「再来一局」旁边多了「查看战报」，随时可以再打开、再导出，远端玩家也能在自己设备上看。结束后台面中间显示赢家和他的估值，右栏写「本局结束 · 某某 获胜：原因」，不再停在最后一位行动的玩家和他的「这回合还能做什么」。</li>
+    <li><span class="tag bug">BUG</span>战报复盘「钱花在哪」原来把抽 re:Invent 卡、抢 Spot、补差价转按需、重新上线、主动行动、FIS、RI 预付、请求费都算进「罚款和账单」，还据此建议去升 VPC 终端节点。现在抢 Spot、补差价转按需、把别人下线的服务拉起来算「买服务」；请求费单独一栏；抽卡、重新上线、主动行动、FIS、RI 预付归「抽卡和其他」；「罚款和账单」只剩账单格、卡上的罚款、重构技术债这些。一分钱没花的玩家不再显示「共 $1」。导出的对局记录同样按新分类。</li>
+    <li><span class="tag ui">UI</span>「再来一局」原来回到空白开局页，人数、名字、模式、DLC、电脑座位、轮数都要重填。现在从「再来一局」或「新游戏」回开局页，会填回上一局的开局设置（联机玩家的名字空着，等他们重新加入时自己带），改完再开。直接打开页面、刷新开局页还是默认设置。用 ?peerhost= 指定自建信令服务器的，回开局页时这个参数也带上。</li>
+    <li><span class="tag ui">UI</span>对局结束后点「对局 → 退出到开局页」，弹窗还说「对局已经自动保存，点继续上一局就能接着玩」，其实存档已经删了。现在结束后菜单里不再有这一项，用台面中央的「再来一局」。结束后点「新游戏」也不再问「当前对局会被丢弃」，直接回开局页。</li>
+    <li><span class="tag ui">UI</span>开局页不勾「轮数上限」时，摘要原来写「只看谁没破产」，进了游戏其实最多打 50 轮。现在摘要写「最多 50 轮」。轮数、限时分钟填得超出范围时，摘要按开局实际用的数写，比如填 99 轮显示「50 轮」。</li>
+    <li><span class="tag ui">UI</span>「SP / RI」按钮原来从来不灰：没有能签的也能点开，三个选项全灰，只能点取消。现金不到 $50 时「主动行动」也一样。现在没有能签、能做的时候按钮变灰，悬停写原因（比如「手上没有要交运行费的计算类、数据库类服务…」「现金不够 $50」）。已经签了 Savings Plans、只能买 RI 时，弹窗开头写明签的是几年、每圈承诺多少、还剩几圈。</li>
+    <li><span class="tag chg">改</span>停在「忘关的 EC2」、手上有 Cost Explorer 卡时，原来要先选交 $200 还是 10%，选完才问要不要用卡免掉，前一个窗白选。现在合成一个窗，三选一：「用掉 Cost Explorer，这次不交」「交 $200」「交 10%」。10% 是 $0 时不放用卡的按钮。NAT Gateway 账单格照旧单独问。</li>
+    <li><span class="tag ui">UI</span>导出的对局记录里，复盘段原来文字粘在一起（「1韩叔短视频平台 · 赢家」「买服务$1380」），还带一堆缩进；没有关键时刻时只剩一个空标题。现在名字和角色、类别和金额之间有空格，条目前加「- 」，去掉了缩进；没有关键时刻就不写这一段。</li>
+    <li><span class="tag doc">文档</span>规则书「网页版小功能」：存档一条补上「点数在掷骰子之前就定好，刷新再掷还是同样的点数」，以及结束后存档已删、用「再来一局」；结束复盘一条写全新的花钱分类；战报一条补上「查看战报」和「再来一局沿用这一局的设置」。新手引导「资产管理和更多操作」一步补了一句：「SP / RI」要手上有交运行费的计算类、数据库类服务才能点。</li>
+  </ul>
+  <h3>和真实 AWS 对齐</h3>
+  <ul>
+    <li><span class="tag bug">BUG</span>升级说明对不上实际判定：Lambda「提高并发配额」、API Gateway「使用计划限流」原来写「扛住流量暴增」，可流量暴增只打实例型服务，这句从来用不上；CloudWatch「告警与仪表板」、Route 53「健康检查」、SageMaker AI「多卡训练」、AWS Backup「跨账户备份」、Data Transfer「Global Accelerator」、EC2「Auto Scaling」明明能免疫某张卡，按钮上却没写。现在落地升级按钮、各级一览、图鉴、规则书、打印的服务卡都会写它免疫哪张卡；非实例型服务的弹性扩展改写「性能效率支柱 +1 分」。</li>
+    <li><span class="tag chg">改</span>旧版本停止支持：原来 DynamoDB、S3、SQS、CloudFront 这类根本没有版本的服务，也会被当成「跑在旧版本上」收走。现在只打带版本的服务：RDS、Aurora、ElastiCache、OpenSearch、EKS、Lambda、Glue、EMR、Bedrock。日志写明到期的是数据库引擎大版本、运行时、Kubernetes 版本还是模型；手上没有这类空服务的人不受影响。</li>
+    <li><span class="tag chg">改</span>S3 桶被设成了公开：原来 GuardDuty 升到「S3 保护」就整张免疫。现实里发现桶被公开靠的是 GuardDuty 基础检测（不用开 S3 保护），而且它只告警、不会把桶改回私有。现在只要持有 GuardDuty（不用升级），每人少赔一半、不记技术债；「S3 保护」那一级改为只涨过路费。KMS 客户托管密钥、CloudFront 源访问控制照旧免疫。卡上的知识点改成真实做法：账号级开启 Block Public Access，用 AWS Config 规则 s3-bucket-public-read-prohibited 配自动修正（自动化文档 AWS-DisableS3BucketPublicReadWrite）把桶改回私有。</li>
+    <li><span class="tag doc">文档</span>Inspector「EC2 扫描」和 ECR「增强扫描」原来都写「免疫高危 CVE」，实际各只管一半。现在分别写「你的 EC2、EMR 免疫高危 CVE」和「你的 ECS、EKS、SageMaker AI 免疫高危 CVE」（结算没变）。</li>
+    <li><span class="tag chg">改</span>员工的访问密钥被盗用（安全攻防 DLC）：原来只要持有 CloudTrail 或 GuardDuty 就整张免疫，可 CloudTrail 只记录、GuardDuty 只发现，都不会吊销密钥。现在只认「威胁自动响应」架构；只有 GuardDuty 时和 Root 密钥卡、SSH 暴力破解卡一样减损：交 $50、不用停、不记技术债。</li>
+    <li><span class="tag chg">改</span>当地要求数据本地存储（全球出海 DLC）：原来 KMS 升到「多区域密钥」也照样免疫，而官方文档说多区域密钥会把密钥材料复制到别的 Region，数据驻留合规反而更复杂。现在 KMS 升到第 3 级就不再免疫，会和别的多区域功能一起去掉一级；第 0–2 级（单区域密钥）照旧免疫。</li>
+    <li><span class="tag chg">改</span>Redshift 第 3 级「跨区域快照」原来算「扛住整个 Region 出问题」，和同样是快照复制的 EBS 第 3 级不一致。快照要先在那边恢复成集群才能用，现在不算多区域：us-east-1 故障、Region 宕机会打到它，升这一级也不再收跨区域数据传输费，不挨「跨区流量费暴涨」；格子上的标从「多区域」换成「跨区快照」。</li>
+    <li><span class="tag chg">改</span>实习生误删了生产数据：原来只要持有 0 级 AWS Backup 就免疫，花 $100 升「备份计划」等于白买，可现实里不建备份计划，Backup 什么都不会备份。现在要升了「备份计划」才免疫；下线或被打下线的服务不算。</li>
+    <li><span class="tag doc">文档</span>SQS「死信队列」原来写「免疫依赖的第三方 API 挂了」，可持有 SQS 本身就免疫这张卡。现在这一级只涨过路费，说明改成「反复处理失败的消息转到单独的队列，方便排查原因」。</li>
+    <li><span class="tag chg">改</span>测试环境忘了删（FinOps DLC）：原来签着 Savings Plans 就免疫，可 Savings Plans 只是承诺用量换折扣，发现不了没人管的资源。现在只认用过 Cost Explorer 卡（开了成本异常检测），和「跨区流量费暴涨」一样；卡上知识点补了一句「忘了删的实例照样计费」。</li>
+    <li><span class="tag doc">文档</span>SageMaker 按官方改名叫 SageMaker AI（2024 年 12 月起；现在的 Amazon SageMaker 指的是统一的数据和 AI 平台）。棋盘、卡牌、架构、Savings Plans 说明、规则书和玩法手册都改了；HyperPod、训练计划这些子功能官方没改名，保持原样。3D 翻牌的效果文字上限放宽到 8 行，re:Invent「按 Cost Explorer 推荐签了 Savings Plans」不再丢最后一个字。</li>
+    <li><span class="tag doc">文档</span>Step Functions「Express 工作流」原来写「按次数计费更便宜」，但官方是按执行次数和运行时长（按内存折算）计费，按状态转换次数收费的是标准工作流。现在说明改成「适合 5 分钟内跑完的高频短流程：按执行次数和运行时长（按内存折算）计费，不按状态转换数计，步骤多、跑得快时更便宜」。</li>
+    <li><span class="tag doc">文档</span>功能名按官方中文文档统一：CloudFront「源站访问控制」改「源访问控制」、「源站故障转移」改「源故障转移」，AWS Backup「跨账号备份」改「跨账户备份」，CloudWatch「跨账号可观测」改「跨账户可观测性」，EMR「托管扩缩」改「托管扩展」；OAC 那道题的「源站访问身份（OAI）」改「源访问身份（OAI）」；「凌晨 3 点被告警叫醒」知识点里的「处理手册（Runbook）」改「运行手册（Runbook）」。</li>
+  </ul>
+  <h3>文档和说明</h3>
+  <ul>
+    <li><span class="tag chg">改</span>Shield 第 2 级「Shield 响应团队（SRT）」、Route 53 第 3 级「延迟路由」、Athena 第 3 级「联合查询」原来写着「这块过路费再 +20%」，其实前一级已经加过 20%，不会再叠加。现在这三级改写成「过路费提高」，过路费数字一分没变。实体卡上这三级不再单独列效果。CloudTrail「组织级跟踪」的审计免疫第 2 级就已经有了，这一级也不再重复写。</li>
+    <li><span class="tag doc">文档</span>实体服务卡原来只印加容量的价，没印升级费。现在每张都印「每级升级 $X」，按用量三格写成「每升 1 级（$50）」。速查卡技术债框写上平时的升级价（每级 $100 / $150，按用量三格 $50）；服务图鉴每个服务的标题、主持人规则书简版「钱怎么流」也补上了升级费。</li>
+    <li><span class="tag ui">UI</span>娱乐模式不能下线，可格子详情、资产管理按钮的悬停、资产管理窗、欠款弹窗、新手引导第 5 步原来都说缺钱可以下线。现在娱乐模式里改写成「娱乐模式不能下线」，或者不再提下线。</li>
+    <li><span class="tag ui">UI</span>结束复盘「运行费比过路费还多」那条，原来在什么局都叫人去签 Savings Plans。现在只有这局有「SP / RI」按钮时（完整局或开了 FinOps DLC，独立开发者除外）才提；娱乐模式也不再建议「把用不上的下线」。</li>
+    <li><span class="tag doc">文档</span>#23「DNS 解析配错了」本来就不算罚，免疫栏补上「（不算罚）」。实体卡底栏原来印的是「被罚到又没抵消：领 1 个技术债」，现在改成「这张不算罚」。</li>
+    <li><span class="tag doc">文档</span>高速部署与技能手册和主持人规则书原来写点「技能：xxx」按钮、用过变成「技能已用」，和网页对不上。现在照网页写：点「专属技能」按钮，用过后按钮变灰（悬停或点一下提示「这局已经用过了」），玩家卡上标「（已用）」。「技能已用」是实体版放在角色卡上的标记，规则书配件表也补上了这一项。</li>
+    <li><span class="tag bug">BUG</span>游戏工作室落在 EC2 这类有 Spot 的服务上，按钮写最低 $10（10%），下面的说明却写最低 20%，现在两处一致了。落在 S3、Lambda 这类没有 Spot 的服务上，原来也会显示 Spot 说明，现在不显示。规则书和玩法手册的 Spot 那句也补上了游戏工作室的 10%（地狱模式除外）。</li>
+    <li><span class="tag doc">文档</span>玩法手册防护表里，「流量暴增」原来只写「订单削峰」架构。现在补上：实例型服务升到「扛住流量暴增」那一级也能扛（EC2 Auto Scaling、ECS 服务自动扩缩、EKS Karpenter 自动扩缩、RDS 只读副本这类），Lightsail、EBS、SageMaker、OpenSearch 没有这一级；其他服务不受影响，全都扛住就领 $100。</li>
+    <li><span class="tag doc">文档</span>规则书第 24 节的门槛表和玩法手册第九节原来只写到完整局，现在补上地狱模式：六大支柱每条 2 分，六条加起来 18 分。</li>
+    <li><span class="tag doc">文档</span>几处叫法和界面对齐：组织者流程单原来写房主点「联机」，界面上没有这个按钮，改成在开局页第 04 步点「创建房间」设密码；速查卡上的支柱名「安全」改成「安全性」；规则书欠款那句改用弹窗上的「全卖了最多能凑」；题库里一道题的解析把「安全支柱」改成「安全性支柱」。组织者包让每桌打印「本包第 2 页」，可第 2 页只是流程单的尾巴，娱乐模式规则其实在第 3 页，改成「最后一页」。</li>
+    <li><span class="tag doc">文档</span>完整局手册「关键数字」里 Savings Plans 原来写「1 年 75 折、3 年 55 折（只算计算类）」，读起来像 1 年也只算计算类。现在写成「1 年 75 折（计算类 + 数据库类）、3 年 55 折（只算计算类）」。</li>
+  </ul>
+  <h3>界面、手机和读屏</h3>
+  <ul>
+    <li><span class="tag bug">BUG</span>手机横屏看结束动画时，「查看战报」按钮和「点任意处继续」在屏幕下面看不到，皇冠被顶出屏幕上沿，看着像卡住了。现在高度不到 520 时收紧间距、去掉皇冠、柱子压矮；400 以下再去掉冠军大头像（冠军已经站在第 1 名柱子上）。844×390 到 568×320 的手机横屏上，按钮和提示都在屏幕里，名次头像也不压到「X 获胜」上。</li>
+    <li><span class="tag bug">BUG</span>抽卡窗能被左右拖动：抽到 re:Invent 卡（手机横屏抽 Health 卡也会）后，手指一划或触控板横滑，标题、卡面和「执行」就一起往左滑走，右边露出空白和一道黄光。现在扫光只在卡框里扫，发牌窗不能再横向滚动，卡的阴影还在。</li>
+    <li><span class="tag bug">BUG</span>电脑和手机竖屏默认走 3D 发牌，以前 re:Invent 卡的扫光在卡藏着时就放完了，亮出来后看不到；现在卡亮出来后会扫一遍。</li>
+    <li><span class="tag chg">改</span>弹窗输入框里按回车等于点主按钮，手机键盘上的「完成」也一样。Spot 竞价、Spot 出价、改名字、抢 Spot、Global Accelerator 步数这些窗口输完数直接回车就行，不用再去点按钮。用鼠标键盘时，竞价、Spot 出价、改名字一打开光标就在框里，原来的数已经选中，直接输新数；触屏上不会自动放进去，免得先弹出键盘。交易窗按回车不会成交；拼音输入法选字时按回车，不会把名字一起交掉。</li>
+    <li><span class="tag ui">UI</span>手机竖屏的资产管理表：「当前级别」一列以前被挤成一字一行，表头竖着写，「基础版」拆成三行，现在能正常读。运行费是 $0 的那格以前空着，现在写 $0/圈。</li>
+    <li><span class="tag ui">UI</span>手机上「明细和日志」的收费明细表：以前整个弹窗能横着滑，最右一列被切掉，「本局收过路费」表头一个字一行。现在只有表格自己横滑，第一列「服务」钉住，滑到右边也知道是哪块服务；表头不在字中间断开，运行费也不再折成四行。</li>
+    <li><span class="tag ui">UI</span>手机上的玩法手册、图鉴：章节条排成一行横着划，不再换行排成五排占掉一半阅读区（360 宽下从 291px 降到 61px）。往下读时，当前章节的按钮会自动露出来。</li>
+    <li><span class="tag chg">改</span>读屏：换到真人的回合时会念「轮到 X 掷骰子」，在维护窗口里的念「轮到 X，在维护窗口里」。以前电脑走完，读屏最后念的还是电脑那一步。</li>
+    <li><span class="tag chg">改</span>系统开了「减少动态效果」时，手册和图鉴里点章节、开局页点「自定义设置」都直接跳过去，不再平滑滚动一秒多。</li>
+    <li><span class="tag ui">UI</span>平板竖着拿（744 到 900 宽，iPad mini 到 iPad Air）时，格子上又写上了名字、买价、主人和过路费，以前只有图标，要一格一格点开看。左右两列不写主人，看色条。手机和横屏不变。新手引导第 3 步也按平板的样子另写了一段。</li>
+    <li><span class="tag ui">UI</span>战报卡片右上角的名次 2、3、4 加深了颜色，以前浅灰，几乎看不见。战报抬头和结束动画里，冠军的大圆写成「3号」这样的座位号，免得皇冠下面一个大「3」被看成第 3 名。</li>
+    <li><span class="tag bug">BUG</span>导出的对局记录里，「排名」和「复盘」现在和战报用同一个顺序。以前只按估值排：六大支柱获胜的赢家估值不是最高时，会写着「Yuki 获胜」，Yuki 却排在第 4。</li>
+    <li><span class="tag doc">文档</span>规则书「键盘快捷键」补了输入框里按回车的说明，「键盘和读屏」补了换人时念「轮到 X 掷骰子」，减少动态效果那句补了手册跳章节不再平滑滚动；玩法手册快捷键那段也补了输入框的说明。</li>
+  </ul>
+  <h3>平衡和电脑玩家</h3>
+  <ul>
+    <li><span class="tag bug">BUG</span>电脑买服务从来不点「答题争取」，手上的 MAP 卡也从来不用：独立开发者的答题折扣、开了边玩边答题以后人人都有的 8 折，电脑一次都没拿到过。现在电脑买服务、从代理商手里买之前，只要打完折还能留下 $250 的安全线，就先答题（答错照原价买）；手上有 MAP 卡、买的又是 IaaS、PaaS 或容器服务，就用掉 MAP 卡。学习、地狱模式里电脑每次买服务多一个答题窗，一局会慢一两分钟。</li>
+    <li><span class="tag chg">改</span>独立开发者没开边玩边答题时，买服务答对从 7 折改成 9 折；开了边玩边答题还是 7 折（别人 8 折）。没开答题时只有独立开发者能答，而且什么服务都能打折。电脑开始答买地题以后，7 折让独立开发者在标准 15 轮局的胜率到了 46%（4 人局公平是 25%）；改成 9 折后，全答对 28%，答对六成 30%。</li>
+    <li><span class="tag chg">改</span>高速部署的 3 点「抽卡」每局最多用 2 次。原来每 3 回合就能白抽一张 re:Invent 卡，模拟里 1 号位这么打，标准 15 轮局胜率从 26% 涨到 39%，地狱模式多出 28 个点。电脑以前从不用这个技能，现在有 3 点、这局还没抽满 2 次就先抽。这样一来，15 轮局里电脑基本攒不到 12 点，被电脑重 DDoS 要在更长的局里才常见；开了高速部署的不限轮数局，中位从 33 轮缩短到 30 轮。</li>
+    <li><span class="tag ui">UI</span>高速部署技能面板上，「抽卡」那张卡片还能用时写着「这局还能抽 N 次」，用满 2 次就灰掉，原因写「这局已经抽过 2 次了」；日志也会写「这局第几次，最多 2 次」。</li>
+    <li><span class="tag chg">改</span>传统企业上云、跨境电商、短视频平台的开局资金从 $1700 降到 $1600，独角兽从 $1600 降到 $1500。默认 15 轮按估值排名，估值大头就是开局资金，这四个角色合起来比别的角色多赢 4 个点（3 人局、娱乐模式约 7 个点）；改完差距在 1 个点左右。地狱模式不另外加钱：传统企业上云仍按 $1500、独角兽仍按 $1400 算，跨境电商、短视频平台跟着角色卡变成 $1600。连带的变化：这四个角色专属技能的门槛（开局资金的一半）各降 $50；独角兽「新一轮融资」在同样处境下少领 $100；不限轮数时代理商的本钱（客户开局资金之和）4 人局约 $4700。</li>
+    <li><span class="tag chg">改</span>电脑落在别人的 Spot 服务上，如果按最低价出价后现金还剩 $500 以上，就把它抢过来，钱不够才照常付过路费。原来电脑一律照付，对着电脑用最低价 Spot 买下完全不会被抢，模拟里这样打的人胜率高 3–4 个点。</li>
+    <li><span class="tag bug">BUG</span>抽到 Well-Architected Review、Hackathon，或者用高速部署 8 点「流水线自动化」时，电脑总是挑列表里第一块，也就是棋盘上最靠前、最便宜的那块，过路费涨幅不到最好那块的一半。现在挑升级后每次落地多收得最多的那块。电脑在资产管理里先升哪块也按同一个算法，CloudWatch、CloudTrail、Data Transfer 不再被高估：原来第 6 轮升一级估成多收 $158，实际只多 $37。</li>
+    <li><span class="tag bug">BUG</span>Health 卡「DNS 解析配错了」写着退回 Route 53、不领钱，可从第 12 格或第 31 格退到第 37 格以后，离起点反而更近，走到起点照常领 $200，罚卡变成了快进卡。现在往回绕过了起点就算退回上一圈：下次经过起点不算新的一圈，不领 Credits，也不交运行费。这一次的托管费、代理商分到的运行费、渠道维护费、娱乐模式送的卡都没有；Savings Plans / RI 和技能的「接下来几圈」也不扣这一圈；季度财报照常计数。记下这一笔时日志里会写一句，玩家卡上挂着「退回了上一圈」，资产管理里也有说明，卡面也改成写明这一点。在起点前几格抽到「发布出问题，回滚」、退过了起点的，也按同样规则算。</li>
+    <li><span class="tag doc">文档</span>规则书、玩法手册、高速部署手册、README 都跟着改了：电脑玩家的打法（先答题、用 MAP 卡、抢 Spot、免费升级挑涨得最多的、有 3 点先抽卡）、抽卡每局 2 次、四个角色的开局资金和独角兽融资的例子、代理商本钱约 $4700、往回绕过起点怎么算。规则书第 25、32 节和学习模式手册里的模拟数字按这一版重跑了：同桌 4 人答对率分别是 100%、75%、50%、25% 时，标准 15 轮局胜率 40%、30%、19%、11%，地狱 39%、27%、18%、16%；地狱不限轮数的中位从 28 轮变成 24 轮。已知问题：学习模式里独立开发者全答对时胜率 43%（答对六成 32%），偏高，还没调。</li>
+  </ul>
+  <h3>存档和健壮性</h3>
+  <ul>
+    <li><span class="tag bug">BUG</span>关掉「玩法」「图鉴」时偶尔弹出红色的「出错了：Cannot read properties of null (reading 'offsetHeight')」（按 G 马上按 Esc、点「看完整版」后马上关最容易碰到）。已修，不影响对局。</li>
+    <li><span class="tag bug">BUG</span>资产管理里双击「加一级」「加 1 个容量」会连买两次：第一下点完窗口重画，第二下正好落在下一级的同一个按钮上。现在每做完一项，0.35 秒内按钮变淡、不收点击，双击只算一下；「卖回亚马逊云科技」的确认框刚弹出时也一样，双击「卖回」不会把确认跳过去。</li>
+    <li><span class="tag chg">改</span>「玩法」「图鉴」「明细和日志」这类自己查资料的窗口收起看棋盘后，主按钮看着能点，点了、按空格却没反应。现在直接点「掷骰子」「资产管理」「轮到下一位」（或者焦点不在按钮上时按空格），会先替你关掉收起的窗再接着做；在收起状态下点图鉴、玩法、明细也会直接换成新窗。下一位是电脑时不会再一直卡在「电脑在玩…」。收起的是别的窗时，会提示先展开处理。</li>
+    <li><span class="tag bug">BUG</span>浏览器存储满了或者禁止网站保存数据时，存档悄悄失败，「退出这局」还写着「对局已经自动保存」，刷新后进度全丢。现在第一次存不上就弹提示；退出窗改写「这局最近的进度没存上，退出以后回不到现在这一步」，主按钮换成「取消」；「退出到开局页」的悬停说明和出错提示也跟着改。联机远端的出错提示改成「刷新页面后，用同一个房间号和局里的名字重新加入」。</li>
+    <li><span class="tag doc">文档</span>规则书「网页版小功能」补了收起窗口时直接点按钮会先关掉查资料窗，「按钮点不了时」补了资产管理的防连点；规则书「存档」和 README 补了存储写不进去时会有提示。</li>
+  </ul>
+  <h3>动画</h3>
+  <ul>
+    <li><span class="tag bug">BUG</span>抽卡翻开的 3D 卡面和网页卡面现在一模一样。原来 3D 卡面按固定字号自己断行，英文单词会被拆到两行（比如「Lightsai / l」），单点故障、SSH 暴力破解、高危 CVE 爆出这几张卡的免疫框，以及 Enterprise Support 的知识点，后半截画不出来；翻完换成网页卡的那 0.2 秒，两层字还会错开叠在一起。现在 3D 卡面照网页卡面一个字一个字地画，字体、断行、位置都一样，换卡时不再出现双影。Health 和 FIS 卡换好以后再晃。</li>
+    <li><span class="tag chg">改</span>升级、买下、护盾、彩带和抽卡光点不会再每播一次就卡一下（原来每次都要重新编着色器）。第一次掷骰子也不卡了：开局空闲时会先把 3D 骰子准备好。</li>
+    <li><span class="tag ui">UI</span>3D 骰子停下的位置和平面骰子对齐了。原来左右各偏出去约 20 像素、上下高出 8 到 19 像素，淡出那一下能看到两对骰子错开叠着；现在偏差在 3 像素以内。翻滚途中两颗骰子照样碰不到。</li>
+    <li><span class="tag chg">改</span>结束画面放着不点时，领奖台的柱子升完、彩带放完（大约 5 秒）就停下，不再一直整屏重画、占着显卡。活动大屏上的全电脑观战局常常打完没人去点。拖窗口或者转屏以后，领奖台的柱子照样显示。</li>
+    <li><span class="tag bug">BUG</span>彩带改成按时间下落。原来是按帧走的：120Hz 高刷屏上掉得快一倍，卡顿掉帧时大半彩带根本落不进屏幕。现在不管屏幕刷新率和帧率高低，下落速度都和 60Hz 屏上一样。</li>
+    <li><span class="tag bug">BUG</span>飞行结束时，流星跟着夜空一起淡掉，不再拖到撤掉夜空以后的白棋盘上划过去。快档下流星也跟着变快，路线不变。</li>
+  </ul>
+  <h3>联机</h3>
+  <ul>
+    <li><span class="tag ui">UI</span>远端在别人的回合打开图鉴、玩法、明细或者改名字时，房主、电脑或其他远端一弹窗，就把这个窗口顶掉，关掉后也回不来，翻到一半的图鉴、填了一半的名字都没了。现在别人的只读弹窗先不顶上来，屏幕下方提示「某某 在选：……」（电脑的不提示）；关掉自己的窗口后，那个弹窗要是还开着就补出来。轮到自己选的弹窗照样马上弹出。</li>
+    <li><span class="tag ui">UI</span>加入房间时房间号打错，「加入」按钮会一直是灰的，改对了也点不了；两台设备之间点对点连不通时，一直显示「正在连接房间…」。现在出错后按钮马上恢复，改好直接再点就行。点对点连不通的，大约 20 秒内会提示「连不上房主：两台设备之间的点对点连接没打通。换个网络（比如都连同一个手机热点）再点「加入」」。密码错的提示不会再被随后的断开盖掉。找不到房间时会补一句：房间号没错的话，可能是房主那边网络断了。房主「创建房间」失败后也能再点。</li>
+    <li><span class="tag ui">UI</span>远端中途退出不回来，他之后的买地、抽卡、竞价、投票、交易确认，房主每个窗都要先点一次「对方掉线了，我来替他选」。现在旁边多了一个「他回来之前都由我来选」按钮，点一次以后，他的弹窗都直接在房主这台选；他用同一个名字连回来，就把座位还给他（房主刷新页面后要重新点）。其他远端看到的提示改成「某某 掉线了，房主替他选…」；轮到掉线的人时，中间写「某某 掉线了：等他连回来，或者房主替他操作」，不再写「在自己的设备上操作」。</li>
+    <li><span class="tag bug">BUG</span>有几样状态只在房主那台，没同步给远端：房主暂停电脑后，远端还显示「电脑 3 在玩…」；远端和电脑交易，电脑同不同意只在房主屏幕上提示；限时局的倒计时用的是远端自己设备的时钟，设备时间不准就差几分钟。现在远端也显示「已暂停」，弹窗开着时也会跟着变；交易结果提示在发起交易的那个人屏幕上；倒计时一律按房主那台的时钟算。</li>
+    <li><span class="tag doc">文档</span>规则书第 27 节：改写掉线重进那一条（同一个浏览器可以马上接回座位，换了设备要等原来那台断线）；新增「替掉线的人选」「自己看的窗口」「和信令服务器断开会自动重连」三条；「连不上」分成两种情况写：信令服务器连不上的，换个网络或者用 ?peerhost=（所有人都要用同一个地址）；点对点打不通的，自建信令服务器也没用，只能换个网络；电脑暂停那条去掉「只影响本机」。</li>
+  </ul>
+  <p class="why">模拟（电脑对打，act=ai）：标准局不限轮数中位 33 轮（原来 34–35），地狱模式中位从 28 轮降到约 24 轮，主要因为电脑会答题打折、会抢 Spot、免费升级会挑最好的那块，打得更凶了；机器人自测 12 局、点界面测试都没有报错。联机这几条在公共信令服务器连不上的情况下，用模拟连接测过。</p>
+</section>
+
+<section id="r11">
+  <h2><i>19</i>第十一轮（11-05）：结束画面和战报</h2>
+  <p class="why">用户嫌原来的结束画面和战报「太 AI」。三个方向各做一版，选定沿用棋盘的架构图画法，指标一项不少、只换样子，再加几项新的数。</p>
+  <ul>
+    <li><span class="tag ui">UI</span>结束画面换成「最终架构总览」：深色网格底，每人一条泳道，摆出他手上的服务和凑成的架构（同一个架构里的服务用线连起来），右上写过路费收付、服务数、架构数和支柱；赢家那条亮橙框，标题下一行写领先第 2 名多少、拉开最多的是哪一项。原来的皇冠、「3号」大圆、GAME OVER 小标题、渐变色领奖台和彩带都去掉了。点击和按键 0.6 秒后才算数，免得最后一下连点把它跳过去。</li>
+    <li><span class="tag ui">UI</span>战报换成同一套深色画法，内容和以前一样：排名按估值画成横条，每人一行写名次、角色、在线/已出局、估值、与第 1 名差多少、过路费收付、服务、架构、升级、支柱；本局之最的外号都保留，排成点线对齐的清单；复盘改成玩家档案，点棋子切换看谁（键盘左右键也能切）；凑成的架构画成小架构图，差一块的画成虚线空位，缺的那块在别人手上时写明在谁手上。</li>
+    <li><span class="tag new">新</span>战报新增几项数：估值走势图（每轮记一次，每人一条线，赢家橙色，出局的人线落到 0 打红叉）、对局用时、钱从哪来（实收过路费、起点 Credits、卡牌和技能、卖回和下线、其他）、离破产最近的一刻、手气（平均点数、对子次数），本局之最多了「手气最好」「最赚钱的格子」。导出的对局记录多一段「数据」写这些数。读老存档时从读档那一轮开始记，没有的数不显示。</li>
+    <li><span class="tag bug">BUG</span>在战报正文里按空格会直接关掉战报，现在是往下翻；点「导出对局记录」后战报会跳回第一个人和顶部，现在停在原来看的地方，焦点留在导出按钮上，再按回车不会关掉战报。</li>
+    <li><span class="tag ui">UI</span>手机上战报铺满屏幕，详细数据一列一个玩家，不用横着滑；手机横屏时档案切换条不吸顶，正文能多看一截。</li>
+  </ul>
+</section>
+
+<section id="r12">
+  <h2><i>20</i>第十二轮（11-06）：动画人物和自动变卖</h2>
+  <ul>
+    <li><span class="tag ui">UI</span>飞到对面、参加 User Group 活动这些动画里，原来用几何体捏的小人换成韩叔、虫虫、Damo、Yuki 的设定图立牌。每局开局随机把四个人分给各位玩家，整局不变（存档、读档、联机各台设备一致）；每次播动画从这个人的几张动作图里随机挑一张，连着两次不重复。</li>
+    <li><span class="tag ui">UI</span>人物头顶原来挂座位号圆牌，现在是写玩家名字的名牌，底色是这位玩家的颜色。</li>
+    <li><span class="tag chg">改</span>欠款时点「自动变卖」：原来拆升级、下线凑不够就把整块服务连升级一起卖掉，现在先减容量、去掉升级、下线，还不够才整块卖回；只有先拆再卖凑不够、整块 8 折才够时才直接整块卖。</li>
+  </ul>
+</section>
+
+<section id="todo">
+  <h2><i>21</i>待定 / 已知问题</h2>
+  <ul>
+    <li>代理商在完整局（不限轮数约 16%）和地狱模式 15 轮（约 14%）偏弱，公平是 25%；各模式的数字见规则书第 32 节。</li>
+    <li>模拟里的电脑不会刻意凑六大支柱，所以 Well-Architected 的达成率只能当下限看。</li>
+  </ul>
+  <div class="note">改动前的网页备份在上一级目录：<code>index.before-speed.html</code>（加高速部署前）、<code>index.before-roles.html</code>（加角色和代理商前）。</div>
+</section>
+
+<footer>亚马逊云科技 User Group 云上大亨 · 作者：亚马逊云科技 User Group · 问题和建议：<a href="https://github.com/cloudsmithy/aws_game/issues">提 issue</a> · 2026-11-02</footer>
+</div>
+</body>
+</html>
