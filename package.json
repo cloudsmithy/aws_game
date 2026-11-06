@@ -1,0 +1,20 @@
+{
+  "name": "aws-game",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint . && stylelint index.html",
+    "test:layout": "playwright test",
+    "check": "npm run lint && npm run test:layout"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "eslint": "^10.14.0",
+    "eslint-plugin-html": "^8.2.1",
+    "postcss-html": "^1.8.1",
+    "stylelint": "^17.16.0"
+  }
+}
