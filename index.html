@@ -659,6 +659,11 @@ button.off .why{display:block;font-size:11px;font-weight:400;color:#687078;margi
 @media (max-width:900px){#sqpop{left:8px;right:8px;top:auto;bottom:calc(var(--mbar-h,68px) + 8px);width:auto;max-height:60vh}}
 /* 正在看的那一格：用蓝色描边，免得和橙色的「刚落下的格子」(.last) 混 */
 .sq.sel{outline:2px solid var(--focus);outline-offset:-2px;z-index:3}
+.svc-intro{margin:6px 0 8px;padding:7px 10px;background:#f4f8fb;border-left:3px solid #0972d3;border-radius:2px;font-size:13px;line-height:1.6;color:var(--ink);text-align:left}
+.svc-intro p{margin:0}.svc-intro p+p{margin-top:3px}.svc-intro b{margin-right:6px;color:#0972d3}
+/* 轮到你时，买下 / 拿到就能补齐一个架构的格子：右上角小角标。没人买的绿色，在别人手上的（要靠交易）橙色描边 */
+.sq.need::after{content:'补齐';position:absolute;top:.25cqw;right:.25cqw;padding:0 .3cqw;font-size:max(9px,.85cqw);line-height:1.45;font-weight:700;color:#fff;background:#1d8102;border-radius:.3cqw;pointer-events:none;z-index:2}
+.sq.need.owned::after{color:#b35900;background:#fff;box-shadow:inset 0 0 0 1px #b35900}
 /* 手机横屏：棋盘在中间、两边空着，面板竖着放到格子对面那一侧（at-l 由 placeSqPop 判断），不压住整块棋盘 */
 @media (max-width:900px) and (orientation:landscape),(max-height:500px) and (orientation:landscape){#sqpop{top:8px;bottom:calc(var(--mbar-h,68px) + 8px);left:auto;right:8px;width:min(380px,calc(50vw - 24px));max-height:none}#sqpop.at-l{left:8px;right:auto}}
 /* 高不到 500 的横屏主按钮在右边一竖条（192px）：面板停在它左边，不盖按钮 */
@@ -2144,10 +2149,10 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
       <div class="tiles">
         <label class="tile mode"><input type="radio" name="diff" value="party"><b>娱乐模式</b><span>只留 20 个常用服务，其余变成盲盒格；经过起点、掷出对子都送卡；没有技术债和下线；默认 10 轮</span></label>
         <label class="tile"><input type="radio" name="diff" value="basic"><b>入门局</b><em class="rec">第一次玩选这个</em><span>基础规则、卖回亚马逊云科技、运行费与请求费、维护窗口与复盘、Spot 购买</span></label>
-        <label class="tile"><input type="radio" name="diff" value="std" checked><b>标准局</b><span>再加升级附加费、技术债、新账号保护期（前 2 轮过路费最多 $50）、季度财报、旧版本停止支持</span></label>
+        <label class="tile"><input type="radio" name="diff" value="std" checked><b>标准局</b><span>再加升级附加费、技术债、新账户保护期（前 2 轮过路费最多 $50）、季度财报、旧版本停止支持</span></label>
         <label class="tile"><input type="radio" name="diff" value="full"><b>完整局</b><span>再加主动行动、完整交易、Savings Plans / RI</span></label>
         <label class="tile mode"><input type="radio" name="diff" value="study"><b>学习模式</b><span>标准局规则 + 必答题、错题本；没勾题库 DLC 时自动用云从业者题库；不限轮数</span></label>
-        <label class="tile mode" title="完整局规则，4 个玩法 DLC、高速部署和全部题库都开，必须边玩边答题，卡牌 ×2；过路费每 5 轮 +1.5 倍、卡牌金额跟着全额涨，答对只减 30% 过路费；没有新账号保护期，起点只领 $150，卖回亚马逊云科技只有 6 折；Well-Architected 每条 2 分且共 18 分；每个角色多一条地狱限制"><input type="radio" name="diff" value="hell"><b>地狱模式</b><span>完整局 + 全部玩法 DLC、高速部署和题库，必须答题，卡牌 ×2，过路费涨得最快、没有新账号保护期；每个角色多一条地狱限制</span></label>
+        <label class="tile mode" title="完整局规则，4 个玩法 DLC、高速部署和全部题库都开，必须边玩边答题，卡牌 ×2；过路费每 5 轮 +1.5 倍、卡牌金额跟着全额涨，答对只减 30% 过路费；没有新账户保护期，起点只领 $150，卖回亚马逊云科技只有 6 折；Well-Architected 每条 2 分且共 18 分；每个角色多一条地狱限制"><input type="radio" name="diff" value="hell"><b>地狱模式</b><span>完整局 + 全部玩法 DLC、高速部署和题库，必须答题，卡牌 ×2，过路费涨得最快、没有新账户保护期；每个角色多一条地狱限制</span></label>
       </div>
       <div class="mulrow"><b>卡牌倍率</b><span class="muted">卡牌里的收钱、罚款按倍率算</span>
         <label><input type="radio" name="cmul" value="1" checked> 1 倍</label><label><input type="radio" name="cmul" value="1.5"> 1.5 倍</label><label><input type="radio" name="cmul" value="2"> 2 倍</label><label><input type="radio" name="cmul" value="rand"> 每轮随机（0.5–2 倍）</label>
@@ -2279,7 +2284,7 @@ const SVC = {
 };
 const CAP = { lightsail: '实例', ec2: '实例', ebs: '卷', vpc: '子网', elb: 'LCU', route53: '托管区域', ecr: '仓库', ecs: '任务', eks: '节点',
   lambda: '并发', apigw: '请求配额', dynamodb: '容量单位', sqs: '队列', eventbridge: '规则', sfn: '状态机', rds: '只读节点', aurora: '副本节点', elasticache: '缓存节点',
-  kinesis: '分片', glue: 'DPU', athena: '工作组', redshift: '计算节点', emr: '任务节点', opensearch: '数据节点', guardduty: '受保护账号', inspector: '扫描账号',
+  kinesis: '分片', glue: 'DPU', athena: '工作组', redshift: '计算节点', emr: '任务节点', opensearch: '数据节点', guardduty: '受保护账户', inspector: '扫描账户',
   kms: '密钥', cloudfront: '分配', waf: '规则组', shield: '受保护资源', sagemaker: '实例', bedrock: '模型单元', s3: '存储桶', efs: '吞吐单位', backup: '备份库' };
 const CAP_MAX = 4;
 // 「N 个 + 容量单位」：单位是英文缩写（LCU、DPU）时前面留空格，跟「3 个 AZ」的写法一致
@@ -2335,15 +2340,15 @@ const UPGRADES = {
   // 日志费主要花在摄取上，保留期挡不住「日志打太多了」；它省的是存储费，所以算降成本
   cloudwatch: [['日志保留期', '保留期', 'cost', '给日志组设置保留期，过期自动删除，省存储费'], ['告警与仪表板', '告警', '', '指标超过阈值自动告警'], ['跨账户可观测性', '跨账户', '', '在一个账户里看所有账户的指标和日志']],
   // CloudTrail Lake 从 2026-05-31 起不再接新客户，第 2 级换成仍在提供、又对得上审计的日志文件完整性验证
-  cloudtrail: [['数据事件', '数据事件', '', '记录 S3 对象级、Lambda 调用等细粒度操作'], ['日志文件完整性验证', '完整性验证', 'audit', '每小时生成一份带数字签名的摘要文件，事后能证明日志有没有被改过、删过'], ['组织级跟踪', '组织跟踪', 'audit', '一个跟踪覆盖组织里所有账号']],
+  cloudtrail: [['数据事件', '数据事件', '', '记录 S3 对象级、Lambda 调用等细粒度操作'], ['日志文件完整性验证', '完整性验证', 'audit', '每小时生成一份带数字签名的摘要文件，事后能证明日志有没有被改过、删过'], ['组织级跟踪', '组织跟踪', 'audit', '一个跟踪覆盖组织里所有账户']],
   datatransfer: [['VPC 终端节点', '终端节点', 'nat', '私网直连亚马逊云科技服务，不走 NAT 网关，省流量费'], ['Direct Connect', 'DX', '', '专线连接，流量费更低、更稳定'], ['Global Accelerator', '加速器', '', '走亚马逊云科技全球网络，跨国访问更快']],
 };
 Object.entries(UPGRADES).forEach(([k, v]) => { (SVC[k] || UTIL[k]).upg = v; });
 const SPECIAL = {
   go: { t: 'go', n: 'Startup 扶持', icon: 'activate', d: '经过或停下领 $200 Credits，并交运行费' },
-  jail: { t: 'jail', n: '维护窗口', icon: 'ssm', d: '落在这里：停一轮，或者交 $50 照常走；被送进来的要掷出对子或付钱才能出去' },
+  jail: { t: 'jail', n: '维护窗口', icon: 'ssm', d: '落在这里或被送进来：停一轮，或者交 $50 照常走' },
   free: { t: 'free', n: 'User Group 活动', icon: 'users', d: '经过 UG 活动领取 $50；停在上面二选一：抽奖 $100～奖池全部（不够亚马逊云科技补）/ 抽两张 re:Invent 卡选一张' },
-  gotojail: { t: 'gotojail', n: 'Root 密钥泄露', icon: 'iam', d: '进维护窗口；持有 GuardDuty 改为交 $50' },
+  gotojail: { t: 'gotojail', n: 'Root 密钥泄露', icon: 'iam', d: '直接进维护窗口' },
   inc: { t: 'inc', n: 'Health 事件', icon: 'health', d: '抽一张 Health 事件卡' },
   rei: { t: 'rei', n: 're:Invent', icon: 'reinvent', d: '抽一张 re:Invent 卡' },
   tax: { t: 'tax', n: '忘关的 EC2', icon: 'ec2', d: '交 $200 或总资产 10%（自选），进奖池' },
@@ -2447,9 +2452,9 @@ const hellCfg = cfg => Object.assign(cfg, { mode: 'hell', diff: 'full', cardMul:
 // 合起来比别的角色多赢 4–7 个点，各减 $100。地狱模式按角色卡走（传统企业上云、独角兽、独立开发者另见 HELL_CASH）
 const ROLES = [
   { id: 'garage', hell: '起点不再多领 $50', n: '车库创业公司', cash: 1500, ab: '每次经过或停在 Startup 扶持多领 $50', wk: '钱比较少', sk: { n: 'Activate 加码', d: '领 $1200，接下来 3 圈经过 Startup 扶持时运行费全免' } },
-  { id: 'legacy', hell: '开局资金按 $1500 算', n: '传统企业上云', cash: 1600, ab: '买 EC2、RDS 打 85 折', wk: '在维护窗口最多要停 4 轮', sk: { n: 'MAP 迁移补贴', d: '名下所有实例型服务各免费升一级，再领 $300（一块都升不了就领 $800）；接下来 3 圈运行费减半' } },
+  { id: 'legacy', hell: '开局资金按 $1500 算', n: '传统企业上云', cash: 1600, ab: '买 EC2、RDS 打 85 折', wk: '被送进维护窗口，不交钱要停 2 轮', sk: { n: 'MAP 迁移补贴', d: '名下所有实例型服务各免费升一级，再领 $300（一块都升不了就领 $800）；接下来 3 圈运行费减半' } },
   { id: 'unicorn', hell: '开局不送 Route 53，开局资金按 $1400 算', n: '独角兽', cash: 1500, ab: '开局免费拿到 Route 53', wk: '账单格交双倍', sk: { n: '新一轮融资', d: '领一笔融资：开局资金减现在的总资产再加 $500（最少 $1000，最多 $2000）' } },
-  { id: 'fin', hell: '「监管沙盒」只免疫这一轮和下一轮', n: '金融合规公司', cash: 1600, ab: '买安全合规组服务打 8 折；免疫「安全审计没过」', wk: 'Spot 最低出价要原价的 40%（别人 20%），不能参加 Spot 竞价；抽到「抢到便宜的 Spot 容量」放回牌堆底', sk: { n: '监管沙盒', d: '技术债清零，这一轮和接下来 2 轮免疫所有 Health 事件，领 $800' } },
+  { id: 'fin', hell: '「监管沙盒」只免疫这一轮和下一轮', n: '金融合规公司', cash: 1600, ab: '买安全合规组服务打 8 折；免疫「安全审计没过」', wk: 'Spot 最低出价要原价的 40%（别人 20%）；抽到「抢到便宜的 Spot 容量」放回牌堆底', sk: { n: '监管沙盒', d: '技术债清零，这一轮和接下来 2 轮免疫所有 Health 事件，领 $800' } },
   { id: 'ai', hell: 'AI 组折扣取消', n: 'AI 原生公司', cash: 1600, ab: '买 AI 组服务打 9 折', wk: '付 Data Transfer 过路费时交双倍', sk: { n: '生成式 AI 加速器', d: 'AI 组所有服务各免费升一级，再领 $400（一块都升不了就领 $1000）；这一轮和接下来 2 轮 AI 组过路费 ×2' } },
   { id: 'ecom', hell: '「黑五网一」只持续 2 个回合', n: '跨境电商', cash: 1600, ab: '买网络组和边缘防护组服务打 8 折', wk: '踩到 NAT Gateway 账单格交双倍', sk: { n: '黑五网一', d: '领 $500；接下来 3 个回合，你所有服务的过路费 ×2' } },
   { id: 'saas', hell: '「上架 Marketplace」只收 3 次', n: 'SaaS 创业公司', cash: 1600, ab: '买 Serverless 组和应用集成组服务打 8 折', wk: '每个技术债让运行费多 $30（别人是 $20）', sk: { n: '上架 Marketplace', d: '接下来 4 个自己的回合开始时，每位对手付你 $150 订阅费' } },
@@ -2513,8 +2518,8 @@ const INC = [null,
   { n: '实习生误删了生产数据', c: 'ops', e: '拆掉你数据库组的 1 级升级（不退钱）；没有可拆的就交 $100 进奖池', im: 'AWS Backup 升了「备份计划」，或你有别的带备份功能的升级（版本控制、时间点恢复、自动快照等）', tip: '删除保护只防删掉整个实例或整张表，误删数据要靠时间点恢复和备份；备份要定期演练恢复', art: 'rds' },
   { n: '流量暴增', c: 'avail', e: '你名下没有弹性扩展功能的实例型服务变成 Impaired；要是全都扛住了（而且你有服务），从亚马逊云科技领 $100', im: '持有「订单削峰」架构：直接领 $100', tip: 'Auto Scaling 按负载加减实例；可预期的高峰用预测性扩缩或定时扩缩提前加机器；队列能削峰', art: 'ec2' },
   { n: '月底账单爆了', c: 'cost', e: '你每块服务按升级级别交：1 级 $25、2 级 $50、3 级 $100；每份容量再交 $10，全部进奖池', im: '用掉 Cost Explorer 卡（开了成本异常检测，早发现早处理）', tip: '用 AWS Budgets 设账单告警，用 Cost Anomaly Detection 发现异常支出', art: 'budgets' },
-  { n: 'Root 密钥被推到了 GitHub', c: 'sec', e: '直接进维护窗口，不经过 Startup 扶持', im: '持有「威胁自动响应」架构；只有 GuardDuty 时改为交 $50 进奖池', tip: '别给 root 创建访问密钥，开启 MFA；亚马逊云科技会扫描公开的 GitHub，发现泄露的密钥会通知你并限制它', art: 'iam' },
-  { n: 'S3 桶被设成了公开', c: 'sec', e: '赔给每位其他玩家 $50', im: '你有数据保护类功能：KMS 客户托管密钥（没有密钥权限读不出来）、CloudFront 源访问控制；只有 GuardDuty 时每人少赔一半', tip: '账号级开启 S3 Block Public Access；AWS Config 规则 s3-bucket-public-read-prohibited 发现公开的桶，配自动修正（自动化文档 AWS-DisableS3BucketPublicReadWrite）改回私有；GuardDuty 只告警', art: 's3' },
+  { n: 'Root 密钥被推到了 GitHub', c: 'sec', e: '直接进维护窗口，不经过 Startup 扶持', im: '持有「威胁自动响应」架构', tip: '别给 root 创建访问密钥，开启 MFA；亚马逊云科技会扫描公开的 GitHub，发现泄露的密钥会通知你并限制它', art: 'iam' },
+  { n: 'S3 桶被设成了公开', c: 'sec', e: '赔给每位其他玩家 $50', im: '你有数据保护类功能：KMS 客户托管密钥（没有密钥权限读不出来）、CloudFront 源访问控制；只有 GuardDuty 时每人少赔一半', tip: '账户级开启 S3 Block Public Access；AWS Config 规则 s3-bucket-public-read-prohibited 发现公开的桶，配自动修正（自动化文档 AWS-DisableS3BucketPublicReadWrite）改回私有；GuardDuty 只告警', art: 's3' },
   { n: '有人手动改了生产配置', c: 'ops', e: '后退 3 格，结算落点', im: '无', tip: '用 CloudFormation 或 CDK 管理基础设施，用 AWS Config 或 CloudFormation 漂移检测发现手工改动', art: 'cloudformation' },
   { n: '依赖的第三方 API 挂了', c: 'avail', e: '停一轮，或者交 $80 临时切到备用供应商、继续走', im: '持有 SQS 或 Step Functions（排队 + 重试），或者 EventBridge 开了「事件归档与重放」', tip: '重试加指数退避，失败的消息进死信队列', art: 'sqs' },
   { n: '证书过期，网站打不开', c: 'ops', e: '二选一：交 $100 进奖池紧急换证书；或者你的 ELB / CloudFront 变成 Impaired（暂停收过路费，到你下回合开始自动恢复）', im: '你的 ELB 或 CloudFront 升到了 HTTPS（ACM 自动续期）', tip: '用在 ELB、CloudFront 上的 ACM 公有证书免费，用 DNS 验证就能自动续期', art: 'elb' },
@@ -2522,12 +2527,12 @@ const INC = [null,
   { n: '凌晨 3 点被告警叫醒', c: 'ops', e: '现场讲一次你（或者你同事）半夜被告警叫醒的经历：讲出来了，领 $50 加班费、照常走；讲不出来，停一轮，或者交 $80 请值班同事处理', im: '持有「告警自愈」架构（不算罚）', tip: '告警要配好运行手册（Runbook），能自动处理的用 Systems Manager 自动化文档或 Lambda 自动处理', art: 'cloudwatch' },
   { n: '日志打太多了', c: 'cost', e: '付 $100 给 CloudWatch 的主人；没人买就进奖池；主人是你自己就免付', im: '无', tip: '日志的钱主要花在摄取上：控制日志级别、用低频访问日志类；保留期只省存储那部分', art: 'cloudwatch' },
   { n: '回滚后重新发布', c: 'ops', e: '前进到 Startup 扶持', im: '无（不算罚）', tip: '用 CodeDeploy 做蓝绿或金丝雀部署，配 CloudWatch 告警触发自动回滚', art: 'codedeploy' },
-  { n: '安全审计没过', c: 'sec', e: '其他玩家当审计员，每人问你一个安全问题（比如 Root 账号开 MFA 了吗、S3 桶是公开的吗）；过半的人觉得你答得过关就通过。没通过：停一轮整改，或者交 $80 加急整改', im: '持有 2 个以上安全合规组服务（金融合规公司免疫）', tip: '用 Security Hub CSPM 持续检查安全标准和合规', art: 'securityhub' },
+  { n: '安全审计没过', c: 'sec', e: '其他玩家当审计员，每人问你一个安全问题（比如根用户开 MFA 了吗、S3 桶是公开的吗）；过半的人觉得你答得过关就通过。没通过：停一轮整改，或者交 $80 加急整改', im: '持有 2 个以上安全合规组服务（金融合规公司免疫）', tip: '用 Security Hub CSPM 持续检查安全标准和合规', art: 'securityhub' },
   { n: '一个 AZ 断电了', c: 'avail', e: '你名下还是单 AZ 的实例型服务（IaaS、PaaS、EKS；EBS 卷和 EMR 集群永远是单 AZ）变成 Impaired', im: '大多数托管服务和全局服务本来就跨多个 AZ，不受影响；EC2 这类实例型服务要升了多 AZ 才扛得住，前面只挂 ELB 不够', tip: '多 AZ 部署让一个 AZ 出问题时服务照常运行；可以用 FIS 的「AZ 断电」场景提前演练', art: 'region' },
   { n: 'EC2 实例硬件退役', c: 'ops', e: '你的 EC2 如果没有 Auto Scaling：变成 Impaired，交 $50 把实例重新启动到新的硬件上，进奖池', im: 'EC2 升了 Auto Scaling（自动换掉要退役的实例）；多 AZ 挡不住某一台实例被退役', tip: '亚马逊云科技会提前通知计划内的实例退役；Auto Scaling 会自动换掉不健康的实例', art: 'ec2' },
-  { n: '某个服务在一个 Region 里宕机了', c: 'avail', e: '从你现在的位置往前数，第一块有主的服务所在的色组宕机：组里没有多区域功能的服务都变成 Impaired', im: '有多区域功能的服务不受影响；多 AZ 挡不住整个服务出问题', tip: 'AWS Health Dashboard 会显示影响你账号的服务事件，也可以用 EventBridge 订阅 Health 事件自动通知', art: 'health' },
+  { n: '某个服务在一个 Region 里宕机了', c: 'avail', e: '从你现在的位置往前数，第一块有主的服务所在的色组宕机：组里没有多区域功能的服务都变成 Impaired', im: '有多区域功能的服务不受影响；多 AZ 挡不住整个服务出问题', tip: 'AWS Health Dashboard 会显示影响你账户的服务事件，也可以用 EventBridge 订阅 Health 事件自动通知', art: 'health' },
   { n: '暴露在公网的实例被 SSH 暴力破解', c: 'sec', e: '你有 EC2、Lightsail、ECS 或 EKS：交 $100，其中最贵的一块变成 Impaired', im: '持有「威胁自动响应」架构；VPC 是你的而且升到了 Session Manager；VPC 主人有 Session Manager 时可以付 $50 借用；Fargate、EKS Auto Mode 没有 SSH 可登录；你没有这类服务也不受影响；只有 GuardDuty 时改为交 $50，实例不变 Impaired', tip: '实例放私有子网，用 Session Manager 或 EC2 Instance Connect 端点登录，安全组不对公网开 22 端口', art: 'vpc' },
-  { n: 'DDoS 打满了入口', c: 'sec', e: '二选一：交 $150 进奖池买清洗服务；或者你最贵的一块入口服务（CloudFront、ELB、API Gateway、Route 53）变成 Impaired（暂停收过路费，到你下回合开始自动恢复）', im: '持有 Shield Advanced、WAF 或 CloudFront', tip: '所有账号默认免费开着 Shield Standard，挡常见的网络层攻击；更大的攻击要靠 CloudFront、WAF 和 Shield Advanced', art: 'shield' },
+  { n: 'DDoS 打满了入口', c: 'sec', e: '二选一：交 $150 进奖池买清洗服务；或者你最贵的一块入口服务（CloudFront、ELB、API Gateway、Route 53）变成 Impaired（暂停收过路费，到你下回合开始自动恢复）', im: '持有 Shield Advanced、WAF 或 CloudFront', tip: '所有账户默认免费开着 Shield Standard，挡常见的网络层攻击；更大的攻击要靠 CloudFront、WAF 和 Shield Advanced', art: 'shield' },
   { n: '高危 CVE 爆出', c: 'sec', e: '你名下每块没被漏洞扫描保护的 EC2、Lightsail、ECS、EKS、EMR、SageMaker AI：交 $30，并变成 Impaired', im: 'Inspector 的 EC2 扫描保护 EC2、EMR（Lightsail 不在 Inspector 扫描范围内）；ECR 增强扫描或 Inspector 镜像扫描保护 ECS、EKS、SageMaker AI 的容器。RDS 这类托管数据库和 Serverless 的运行时由亚马逊云科技打补丁，不受影响（Lambda 依赖包里的漏洞还得自己管）', tip: 'Amazon Inspector 会持续扫描 EC2、ECR 镜像和 Lambda 里的已知漏洞', art: 'inspector' },
   { n: '这次事故谁背锅', c: 'ops', e: '开复盘会找背锅的：指一位其他玩家，说出他的服务怎么连累了你；其他人（不算你们俩）投票，过半同意他就交 $100 进奖池，不然你自己交 $100。只有两个人玩时掷骰子，4–6 甩锅成功', im: '—', tip: '好的事故复盘对事不对人（Blameless Postmortem）：找的是流程和系统的漏洞，不是找人背锅', art: 'cloudwatch',
     run: async p => {
@@ -2553,7 +2558,7 @@ const REI = [null,
   { n: 'Trusted Advisor 找到闲置资源', e: '可以选一块服务按实付全额卖回亚马逊云科技（买价、升级、容量都退，不打折）；不卖就领 $50', tip: '定期检查闲置的 EBS 卷和弹性 IP；完整的成本优化检查要 Business Support+ 及以上的支持计划', art: 'trustedadvisor' },
   { n: '用上了 Cost Explorer', keep: 'CE', e: '保留：用掉后可以免一次账单格，或抵消一次「月底账单爆了」', tip: '按标签做成本分析；成本异常检测（Cost Anomaly Detection）免费，开了就能收到异常支出提醒', art: 'costexplorer' },
   { n: '亚马逊云科技宣布降价', e: '接下来 2 次经过 Startup 扶持时，运行费都减半（已经签的 Savings Plans 承诺额照付）；按现在的用量一分钱都省不下的，改领 $50', tip: '降价之外还有阶梯价：S3 存储和 EC2 出网流量用得越多每 GB 越便宜；传进亚马逊云科技的流量一直免费', art: 'billing' },
-  { n: '领到 Free Tier 额度', e: '直接拿走奖池里所有的钱', tip: '2025 年 7 月起，新账号的 Free Tier 改成抵扣额度：注册送 $100，完成入门任务最多再送 $100，具体以官网为准', art: 'activate' },
+  { n: '领到 Free Tier 额度', e: '直接拿走奖池里所有的钱', tip: '2025 年 7 月起，新账户的 Free Tier 改成抵扣额度：注册送 $100，完成入门任务最多再送 $100，具体以官网为准', art: 'activate' },
   { n: '加入迁移加速计划 MAP', keep: 'MAP', e: '保留：下次买 IaaS、PaaS 或容器服务时用掉，打 7 折', tip: 'MAP 分评估、动员、迁移与现代化三个阶段：评估时按云采用框架（CAF）的六个维度找能力差距；计划里还有资金，抵掉一部分前期迁移成本', art: 'mgn' },
   { n: 'Hackathon 拿了奖', e: '选一块服务免费加 1 份容量（不用集齐整组）；没有能加的就领 $100', tip: '比赛环境用 CloudFormation 搭：比完删掉栈，栈里的资源一起删除，不会漏下实例接着扣费；DeletionPolicy 设成 Retain 的会留下，CDK 给 S3 桶、DynamoDB 表这类存数据的资源默认就设成保留', art: 'codecatalyst' },
   { n: '业务扩张', e: '掷一颗骰子，前进相应的格数', tip: '选 Region 看延迟、合规和价格；同一个服务在不同 Region 价格可能不一样', art: 'region' },
@@ -2688,7 +2693,7 @@ const QUIZ = {
     { q: 'Step Functions 有哪两种工作流类型？', o: ['Standard 和 Express', 'Sync 和 Async', 'Basic 和 Pro', 'Batch 和 Stream'], a: 'Standard 最长跑 1 年；Express 适合高频短流程' },
     { q: 'EventBridge 主要用来做什么？', o: ['接收事件并按规则路由给目标', '把消息存进队列，等消费者来拉', '按顺序编排多个 Lambda 步骤', '收集和查询应用日志'], a: '能接亚马逊云科技服务、SaaS 和自己应用发出的事件' },
     { q:  "SQS 标准队列的投递保证是什么？", "o": ["至少一次，可能重复、乱序", "恰好一次，严格按发送顺序", "最多一次，丢了不会重发", "至少一次，严格按顺序"], "a": "要严格顺序和去重用 FIFO 队列，消费端也要做幂等" },
-    { q:  "EventBridge 全局端点（Global Endpoints）用来做什么？", "o": ["主 Region 故障时，事件切到备用 Region", "把事件同时投递到全球所有 Region 的总线", "给事件总线一个全球加速入口，降低延迟", "多个账号共用一条事件总线，省钱"], "a": "配合 Route 53 健康检查自动故障转移" },
+    { q:  "EventBridge 全局端点（Global Endpoints）用来做什么？", "o": ["主 Region 故障时，事件切到备用 Region", "把事件同时投递到全球所有 Region 的总线", "给事件总线一个全球加速入口，降低延迟", "多个账户共用一条事件总线，省钱"], "a": "配合 Route 53 健康检查自动故障转移" },
     { q: "SNS 和 SQS 的区别？", o: ["SNS 一对多推送，SQS 等消费者来拉", "SQS 一对多推送，SNS 等消费者来拉", "SNS 只能发短信，SQS 只能发邮件", "两者完全一样，只是名字不同"], a: "SNS 是发布订阅，SQS 是队列；常见组合是 SNS 扇出到多个 SQS 队列" },
     { q: "Step Functions Standard 工作流最长能跑多久？", o: ["1 年", "5 分钟", "15 分钟", "1 天"], a: "Express 工作流最长 5 分钟" }
   ],
@@ -2728,8 +2733,8 @@ const QUIZ = {
     { q: 'KMS 用来做什么？', o: ['创建和管理加密密钥', '存放数据库密码并自动轮换', '签发和续期 TLS 证书', '管理用户的登录和权限'], a: '很多服务的静态加密都靠 KMS 密钥；存密码用 Secrets Manager，证书用 ACM' },
     { q: 'root 用户的最佳实践是？', o: ['开启 MFA，日常不用 root', '给 root 生成访问密钥写进代码', '和团队共享 root 密码', 'root 只用来部署 Lambda'], a: '日常操作用 IAM Identity Center 或 IAM 角色' },
     { q:  "KMS 客户托管密钥的自动轮换周期可以设多久？", "o": ["90 到 2560 天，默认 1 年", "30 到 365 天，默认 90 天", "固定 1 年，不能改", "只能手动轮换，没有自动"], "a": "轮换后旧数据照样能解密" },
-    { q:  "给员工统一登录多个亚马逊云科技账号，推荐用什么？", "o": ["IAM Identity Center", "每个账号各建一套 IAM 用户和密码", "大家共用一个 root 用户的密码", "共享一组长期访问密钥"], "a": "配合 AWS Organizations 统一管权限" },
-    { q: "IAM 最小权限原则是指？", o: ["只给完成工作所需的最少权限", "先给管理员权限，出了事再收", "所有人共用一个账号，方便审计", "每人一个账号，权限都给全"], a: "可以用 IAM Access Analyzer 找出没用到的权限" },
+    { q:  "给员工统一登录多个亚马逊云科技账户，推荐用什么？", "o": ["IAM Identity Center", "每个账户各建一套 IAM 用户和密码", "大家共用一个 root 用户的密码", "共享一组长期访问密钥"], "a": "配合 AWS Organizations 统一管权限" },
+    { q: "IAM 最小权限原则是指？", o: ["只给完成工作所需的最少权限", "先给管理员权限，出了事再收", "所有人共用一个 IAM 用户，方便审计", "每人一个 IAM 用户，权限都给全"], a: "可以用 IAM Access Analyzer 找出没用到的权限" },
     { q: "Macie 主要做什么？", o: ["发现 S3 里的敏感数据，比如个人信息", "扫描 EC2 和容器镜像里的软件漏洞", "分析 CloudTrail 日志，发现异常登录", "集中管理加密 S3 用的密钥"], a: "用机器学习和规则识别敏感数据" }
   ],
   edge: [
@@ -2747,7 +2752,7 @@ const QUIZ = {
     { q: 'Amazon Nova 是什么？', o: ['亚马逊云科技自己的基础模型系列', '一种搭载自研芯片的 EC2 实例', '开源社区的大模型，只能本地跑', '新开的一个 Region 的名字'], a: '有 Micro、Lite、Pro 等档位，新一代是 Nova 2' },
     { q: 'Bedrock Knowledge Bases 主要用于？', o: ['检索增强生成（RAG）', '微调模型（Fine-tuning）', '给模型的输出打水印', '统计 token 用量和费用'], a: '把你的资料接到模型上做检索增强' },
     { q: 'SageMaker AI 把模型部署成实时推理服务，叫什么？', o: ['终端节点（Endpoint）', '训练作业（Training job）', '流水线（Pipeline）', '笔记本实例（Notebook）'], a: '也支持异步推理和批量转换' },
-    { q:  "Bedrock 的跨区域推理是做什么的？", "o": ["把请求分到多个 Region 处理，扛住突发流量", "把模型权重复制一份到你自己的账号里", "调用前先过滤输入输出里的有害内容", "本 Region 整体故障时，自动把调用切到别的 Region"], "a": "地理跨区域推理只在美国、欧盟这类范围内分流，全球跨区域推理分到全球、约省 10%；本 Region 出问题照样调不通" },
+    { q:  "Bedrock 的跨区域推理是做什么的？", "o": ["把请求分到多个 Region 处理，扛住突发流量", "把模型权重复制一份到你自己的账户里", "调用前先过滤输入输出里的有害内容", "本 Region 整体故障时，自动把调用切到别的 Region"], "a": "地理跨区域推理只在美国、欧盟这类范围内分流，全球跨区域推理分到全球、约省 10%；本 Region 出问题照样调不通" },
     { q:  "Bedrock Guardrails 用来做什么？", "o": ["过滤有害内容、屏蔽敏感信息", "自动挑最便宜的模型来回答", "把模型的上下文窗口加长", "记录每次调用用了多少 token"], "a": "可以挂在不同模型前面统一使用" },
     { q: "用自己的数据让模型更懂行业术语，比 RAG 更进一步的做法是？", o: ["微调（Fine-tuning）", "调高温度（Temperature）", "把提示词写得更长一些", "换到离用户近的 Region"], a: "微调成本更高，资料常变时 RAG 更合适" },
     { q: "默认配置下，SageMaker AI 实时推理端点没流量时也收钱吗？", o: ["收，实例一直开着", "不收，没请求就不计费", "只收模型存储的钱", "只按请求次数收费"], a: "按实例小时计费。流量少可以用 Serverless 或异步推理；托管推理组件的端点也能缩到 0 个实例" }
@@ -2756,14 +2761,14 @@ const QUIZ = {
     { q: '一个亚马逊云科技 Region 至少有几个 AZ？', o: ['3 个', '1 个', '2 个', '10 个'], a: '每个 Region 由至少 3 个物理隔离的 AZ 组成' },
     { q: '数据从公网传入亚马逊云科技收费吗？', o: ['通常免费', '和传出一样贵', '按包数收费', '只有 us-east-1 免费'], a: '贵的通常是传出和跨区' },
     { q: 'CloudWatch Logs 日志组默认保留多久？', o: ['永不过期', '7 天后自动删除', '30 天后自动删除', '1 年后自动归档到 S3'], a: '所以要记得自己设保留期' },
-    { q: 'CloudTrail 记录的是什么？', o: ['账号里的 API 调用', '实例的 CPU 和内存指标', '网站的访问日志和 PV', 'VPC 里的网络流量记录'], a: '谁在什么时候调了什么 API' },
+    { q: 'CloudTrail 记录的是什么？', o: ['账户里的 API 调用', '实例的 CPU 和内存指标', '网站的访问日志和 PV', 'VPC 里的网络流量记录'], a: '谁在什么时候调了什么 API' },
     { q: '同一个 AZ 内的 EC2 用私有 IP 互传数据，收费吗？', o: ['免费', '按 GB 收费', '按小时收费', '需要买 Direct Connect'], a: '跨 AZ 才开始收数据传输费；走公网 IP 或弹性 IP 互传也要收费' },
     { q: 'AWS Well-Architected 框架有几大支柱？', o: ['6', '4', '5', '7'], a: '卓越运营、安全性、可靠性、性能效率、成本优化、可持续性' },
-    { q:  "2025 年 7 月起，新注册账号的 Free Tier 变成了什么？", "o": ["注册送 $100 额度，做任务最多再送 $100", "注册送 $300 额度，12 个月内用完", "12 个月免费试用，每月 750 小时，跟以前一样", "取消了，新账号一律按量付费"], "a": "具体以官网为准" },
+    { q:  "2025 年 7 月起，新注册账户的 Free Tier 变成了什么？", "o": ["注册送 $100 额度，做任务最多再送 $100", "注册送 $300 额度，12 个月内用完", "12 个月免费试用，每月 750 小时，跟以前一样", "取消了，新账户一律按量付费"], "a": "具体以官网为准" },
     { q:  "亚马逊云科技支持计划 2027 年起有哪几档？", "o": ["Basic、Business Support+、Enterprise Support、Unified Operations", "Basic、Developer、Business、Enterprise On-Ramp、Enterprise", "Basic、Developer、Business Support+、Enterprise Support、Unified Operations", "免费和付费两档"], "a": "Developer、Business、Enterprise On-Ramp 2027 年 1 月 1 日停用" },
     { q:  "「托管服务天生跨多个 AZ」，那 Region 级故障呢？", "o": ["要自己做多区域部署", "托管服务也会自动切到别的 Region", "买了 Enterprise Support 就有人帮你扛", "换成 Serverless 就自动扛住"], "a": "托管服务不会自动帮你跨 Region；多 AZ 扛 AZ 故障，多区域才扛 Region 故障" },
     { q: "责任共担模型里，客户负责什么？", o: ["自己的数据和权限，用 EC2 时的系统补丁", "机房的物理安全和门禁", "虚拟化层（Hypervisor）的安全补丁", "全球骨干网和海底光缆"], a: "服务越托管，客户要管的越少" },
-    { q: "一个账号里资源的默认配额（Service Quotas）可以调吗？", o: ["大多数可以申请提高", "都不能调", "只有企业支持才能调", "要换账号"], a: "可以设 CloudWatch 告警，快到上限时提醒" },
+    { q: "一个账户里资源的默认配额（Service Quotas）可以调吗？", o: ["大多数可以申请提高", "都不能调", "只有企业支持才能调", "要换账户"], a: "可以设 CloudWatch 告警，快到上限时提醒" },
     { q: "Well-Architected Tool 是什么？", o: ["对照六大支柱自查架构的工具", "按小时收费的架构咨询服务", "自动修好架构问题的托管服务", "实时监控资源健康的仪表板"], a: "免费，会列出高风险问题和改进建议" },
     { q: "用 CloudFormation 的好处不包括？", o: ["自动让应用代码没有 bug", "基础设施可以版本管理", "可以重复部署多套环境", "改动可以先预览变更集"], a: "基础设施即代码管的是资源，不管业务逻辑" }
   ],
@@ -2893,13 +2898,13 @@ const DLC_REI = [
     // 减半卡不叠加：手上已经有一张没用上的，或者按现在的用量省不下钱（名下没有它能降配的服务、技能让下一圈本来就全免），就改领 $50
     run: async p => { const s = p.halfRun ? 0 : halfSave(p, 'hour'); if (!s) { log(`${nm(p)} ${p.halfRun ? '已经有一张运行费减半还没用上' : '按现在的用量，降配也省不下钱'}，改领 $${credit(p, 50)}`); return; }
       p.halfRun = 'hour'; p.halfLaps = 1; log(`${nm(p)} 下次经过 Startup 扶持时，${CO_SVCS} 运行费减半：按现在的用量大约少交 $${s}`); } },
-  { dlc: 'global', n: '新 Region 开服', e: '你有多区域功能的服务每块领 $60；一块都没有就领 $50', tip: '2019 年 3 月 20 日以后上线的 Region 默认是关着的（选择加入区域），要先在账号里启用，才能在里面建资源', art: 'region', run: async p => { const n = ownedBy(p).filter(i => effActive(i, 'mr')).length; log(`${nm(p)} ${n ? `有 ${n} 块多区域服务，` : ''}领 $${credit(p, n ? 60 * n : 50)}`); } },
+  { dlc: 'global', n: '新 Region 开服', e: '你有多区域功能的服务每块领 $60；一块都没有就领 $50', tip: '2019 年 3 月 20 日以后上线的 Region 默认是关着的（选择加入区域），要先在账户里启用，才能在里面建资源', art: 'region', run: async p => { const n = ownedBy(p).filter(i => effActive(i, 'mr')).length; log(`${nm(p)} ${n ? `有 ${n} 块多区域服务，` : ''}领 $${credit(p, n ? 60 * n : 50)}`); } },
   { dlc: 'global', n: '入选海外市场加速计划', e: '前进到 CloudFront；没人买可以打 8 折买', tip: 'CloudFront 的价格等级（Price Class）可以只用一部分地区的边缘站点来省钱，被排除地区的用户访问会变慢；出海前先看目标市场在不在里面', art: 'cloudfront', run: async p => { await moveTo(p, IX.cloudfront); await land(p, { discount: 0.8 }); } },
 ];
 const DLC_QUIZ = {
   genai: [
     { q: 'Bedrock Knowledge Bases 用户上传的资料存在哪里检索？', o: ['向量数据库，比如 OpenSearch Serverless', '写进模型参数，相当于做了一次微调', '每次调用都把整份资料塞进提示词', '存在 DynamoDB 表里，提问时按关键词匹配'], a: '资料切块后转成向量存起来，提问时先检索再生成' },
-    { q: '有几十万条商品描述要让模型改写，几天内出结果就行。Bedrock 用哪种方式最合适？', o: ['批量推理：提交作业，结果写进 S3', '买预置吞吐，按小时包下整个模型单元', '一条条按需调用，失败了就自动重试', '开多个账号同时并发调用，赶快跑完'], a: '比按需便宜 50%，但不保证完成时间；作业默认 24 小时超时，最长可设 168 小时' },
+    { q: '有几十万条商品描述要让模型改写，几天内出结果就行。Bedrock 用哪种方式最合适？', o: ['批量推理：提交作业，结果写进 S3', '买预置吞吐，按小时包下整个模型单元', '一条条按需调用，失败了就自动重试', '开多个账户同时并发调用，赶快跑完'], a: '比按需便宜 50%，但不保证完成时间；作业默认 24 小时超时，最长可设 168 小时' },
     { q: '每次调用都带着同一大段系统提示词和参考文档，Bedrock 用什么功能能省输入费、又能降延迟？', o: ['提示缓存（Prompt caching）', '调低温度参数（Temperature）', '提高最大输出 token 数', '每次调用换一个 Region'], a: '重复的长上下文缓存起来，后面的请求不用重新处理；支持哪些模型要看文档' },
     { q: '想让一个更小、更便宜的模型在自己的业务场景里接近大模型的效果，Bedrock 用什么？', o: ['模型蒸馏：大模型当老师教小模型', '把小模型的温度调到 0', '给小模型加长上下文窗口', '每次同时调大小两个模型取平均'], a: '大模型生成合成数据，再拿来微调小模型；之后调用小模型，更快也更便宜' },
     { q: 'SageMaker HyperPod 主要用来做什么？', o: ['大规模分布式训练，节点坏了自动换', '用 API 调用现成的基础模型', '给模型输入输出加安全护栏', '托管 Jupyter 笔记本，给数据科学家用'], a: '训练基础模型动辄几周，节点故障自动恢复很重要' },
@@ -2909,7 +2914,7 @@ const DLC_QUIZ = {
     { q: '想让备份连 root 用户都删不掉，用什么？', o: ['AWS Backup Vault Lock', 'S3 版本控制加 MFA Delete', 'IAM 权限边界（Permissions boundary）', 'CloudTrail 日志文件完整性验证'], a: '合规模式锁定后谁都不能提前删' },
     { q: '应用要用数据库密码，最好放在哪？', o: ['Secrets Manager，开启自动轮换', '写进代码，编译后别人看不到', '放进环境变量，再跟代码一起提交到 Git 仓库', '存在 S3 桶里，设成公开读方便取'], a: '应用运行时去取，泄露面最小' },
     { q: 'GuardDuty 发现异常后，想自动隔离实例，常见做法是？', o: ['EventBridge 规则触发 Lambda 处置', 'GuardDuty 默认就会自动隔离，不用管', '每天导出发现结果，人工逐条看', '在 CloudWatch 设告警，等值班的人处理'], a: '也可以触发 Step Functions 编排多步处置，这就是「威胁自动响应」架构' },
-    { q: '多账号环境下统一限制「谁都不能关 CloudTrail」，用什么？', o: ['Organizations 的服务控制策略（SCP）', '每个账号各写一份 IAM 策略，挂给所有用户', '给存日志的 S3 桶加存储桶策略', 'IAM 权限边界，挂在每个角色上'], a: 'SCP 在组织层面兜底，账号管理员也绕不过' },
+    { q: '多账户环境下统一限制「谁都不能关 CloudTrail」，用什么？', o: ['Organizations 的服务控制策略（SCP）', '每个账户各写一份 IAM 策略，挂给所有用户', '给存日志的 S3 桶加存储桶策略', 'IAM 权限边界，挂在每个角色上'], a: 'SCP 在组织层面兜底，账户管理员也绕不过' },
   ],
   finops: [
     { q: '想按部门分摊云账单，第一步通常是？', o: ['给资源打成本分配标签', '每个部门各用一个 Region', '先给所有部门统一买 RI', '按部门人数平摊总账单'], a: '标签在账单里激活后，Cost Explorer 就能按标签分组' },
@@ -3086,7 +3091,7 @@ const F = {
 const winWA = () => !!(S.cfg.wa || S.cfg.win === 'wa');
 const winTimed = () => !!(S.cfg.timed || S.cfg.win === 'timed');
 // 这局怎么赢：[标题行上的名字, 一句话说明]；标题行悬停和新手引导用同一套说法
-const winParts = () => [['经典', '别人都破产（账号被暂停），只剩你一家就赢'], winWA() && ['Well-Architected', '谁先把六大支柱都做到本局要求，直接赢'], winTimed() && ['限时', `${S.cfg.minutes} 分钟到了按估值排名`], S.cfg.roundLimit && [`${S.cfg.roundLimit} 轮上限`, `打满 ${S.cfg.roundLimit} 轮按估值排名`]].filter(Boolean);
+const winParts = () => [['经典', '别人都破产（账户被暂停），只剩你一家就赢'], winWA() && ['Well-Architected', '谁先把六大支柱都做到本局要求，直接赢'], winTimed() && ['限时', `${S.cfg.minutes} 分钟到了按估值排名`], S.cfg.roundLimit && [`${S.cfg.roundLimit} 轮上限`, `打满 ${S.cfg.roundLimit} 轮按估值排名`]].filter(Boolean);
 // 玩家名的字色：棋子颜色在白底上只有 3.5–4:1，名字用同色系深一档的（都在 5:1 以上）；棋子、色条还用原色
 const INK = { '#e5484d': '#c62a2f', '#2f7cf6': '#1a62d6', '#1f9d55': '#15763f', '#9b5cf6': '#7c3aed' };
 const nm = p => `<b style="color:${INK[p.color] || p.color}">${p.name}</b>`;
@@ -3217,7 +3222,9 @@ function pillarGuide(p) {
   return head + `<table class="archl pg"><tr><th>支柱</th><th>分数</th><th>怎么拿分</th></tr>${rows}</table>`;
 }
 function archLedger(p) {
-  const slotTxt = n => slotOpen(n).map(i => { const o = S.props[i].owner == null ? null : S.players[S.props[i].owner]; return `<b>${SQ[i].n}</b>（${!o ? '没人买，落上去就能买' : o.id === p.id ? '在你手上' : `在 <span style="color:${o.color}">${o.name}</span> 手上，要靠交易`}）`; }).join(' 或 ');
+  // 只有轮到这个人、他是真人、在这台设备上操作、不在结算中时才放「找他交易」按钮（交易本来就只能在自己回合里发起）
+  const canTrade = !S.over && p.id === S.cur && !isAI(p.id) && (S.phase === 'roll' || S.phase === 'post') && MP.role !== 'client' && !(MP.role === 'host' && MP.isRemote(p.id));
+  const slotTxt = n => slotOpen(n).map(i => { const o = S.props[i].owner == null ? null : S.players[S.props[i].owner]; return `<b>${SQ[i].n}</b>（${!o ? '没人买，落上去就能买' : o.id === p.id ? '在你手上' : `在 <span style="color:${o.color}">${o.name}</span> 手上，要靠交易${canTrade && o.alive ? ` <button class="sm" onclick="tradeFor(${o.id}, ${i})">找 ${o.name} 交易</button>` : ''}`}）`; }).join(' 或 ');
   const rows = COMBOS.filter(comboOpen).map(c => {
     const have = c.ix.filter(n => (Array.isArray(n) ? n : [n]).some(i => active(p, i)));
     return { c, have: have.length, t: c.ix.length, done: hasCombo(p, c.id), miss: c.ix.filter(n => !have.includes(n)) };
@@ -3725,7 +3732,7 @@ function propStatusHtml(i) {
   let rent = '—', rs0 = false, rsLv = '';   // rs0：代理商的库存没组成架构，这次不收；rsLv：代理商的地在「升级后」那排单块数后面补的说明
   if (o) {
     if (pr.offline || pr.ddos != null || pr.impaired) rent = '$0（暂停收费）';
-    else { const { r, jr, txt, rn, cap, fullTxt } = shownRent(i); rs0 = !r; rsLv = rsLvTag(o, jr); rent = !r ? '$0（代理商的库存，没组成架构不收）' : `${txt.replace('点数×', '点数 × ')}${cap ? `（新账号保护期封顶，第 ${BAL.protect + 1} 轮起 ${fullTxt.replace('点数×', '点数 × ')}）` : ''}${jr ? `（${jr.cs.map(c => `「${c.n}」`).join('')}${jr.cs.length > 1 ? '串联' : ''}联合收费${rn ? ` · ${rn}` : ''}）` : rn ? `（${rn}）` : ''}`; }
+    else { const { r, jr, txt, rn, cap, fullTxt } = shownRent(i); rs0 = !r; rsLv = rsLvTag(o, jr); rent = !r ? '$0（代理商的库存，没组成架构不收）' : `${txt.replace('点数×', '点数 × ')}${cap ? `（新账户保护期封顶，第 ${BAL.protect + 1} 轮起 ${fullTxt.replace('点数×', '点数 × ')}）` : ''}${jr ? `（${jr.cs.map(c => `「${c.n}」`).join('')}${jr.cs.length > 1 ? '串联' : ''}联合收费${rn ? ` · ${rn}` : ''}）` : rn ? `（${rn}）` : ''}`; }
   }
   const lvs = s.t === 'prop' && s.upg;
   const joint = o && !pr.offline && pr.ddos == null && !pr.impaired && !!jointRent(i, 7);   // 正在收架构联合收费时，下面列的是单块的数
@@ -3775,7 +3782,7 @@ function propInfoHtml(i) {
     const o = P(pr.owner);
     return `<div class="ow">${PAWN(o.color)}${nm(o)}${s.upg ? ` · ${lvName(i, pr.level)}` : ''}${pr.impaired ? ' · Impaired' : ''}${pr.spot ? ` · Spot 出价 $${pr.spotPaid}（出更高价可以抢走）` : ''}${pr.cap ? ` · ${pr.cap} 个${capU(s.k)}` : ''}</div>`;
   };
-  const head = `<div class="bh">${awsImg(s.icon)}<div><b>${s.n}</b><span>价格 $${s.p}${s.t === 'prop' ? ` · ${TYPE_N[s.type]} · ${BILL_N[s.bill]}` : ' · 按用量收费'}</span></div></div>`;
+  const head = `<div class="bh">${awsImg(s.icon)}<div><b>${s.n}</b><span>价格 $${s.p}${s.t === 'prop' ? ` · ${TYPE_N[s.type]} · ${BILL_N[s.bill]}` : ' · 按用量收费'}</span></div></div>${introHtml(i)}`;
   if (s.t === 'util') {
     return `<div class="grp bcard" style="--gc:#545b64"><div class="gt t">按用量收费</div><div class="gb">${head}${propStatusHtml(i)}
       <table><tr><th>持有几个按用量收费的格子</th><th style="text-align:right">基础倍数</th></tr><tr><td>1 个</td><td>点数 × 4</td></tr><tr><td>2 个</td><td>点数 × 10</td></tr><tr><td>3 个</td><td>点数 × 20</td></tr></table>
@@ -3831,8 +3838,8 @@ async function moveSteps(p, n) {
   } finally { if (hop) { await FX.pawnEnd(); S.moving = null; MOVE_TO = mt0; render(); } }
 }
 async function moveTo(p, target) { await moveSteps(p, (target - p.pos + N) % N); }
-// 被关进维护窗口最多掷几次：传统企业上云 4 次，其他角色 3 次
-const jailMax = p => p.role === 'legacy' ? 4 : 3;
+// 被送进维护窗口、不交钱要停几轮：传统企业上云 2 轮，其他角色 1 轮（11-06 起不再掷对子出狱）
+const jailMax = p => p.role === 'legacy' ? 2 : 1;
 // 被送进来时棋子是直接瞬移过去的，真人玩家弹一次说明：为什么进来、下回合怎么出来；电脑只在格子上方冒一句，不挡着它跑
 async function sendToJail(p, cat, why = '') {
   p.pos = IX.jail; p.jail = 0; p.jailCat = cat;
@@ -3843,7 +3850,7 @@ async function sendToJail(p, cat, why = '') {
   render();
   if (isAI(p.id)) { callout(IX.jail, `<b>${p.name} 进了维护窗口</b><small>${why}</small>`, 'warn', 2800); return; }
   const m = jailMax(p);
-  await ask({ who: p.id, title: `${p.name} 进了维护窗口`, html: `<p>${why}</p><p>${mine ? '这回合不再往前走。从下回合开始' : '从你下回合开始'}，这样出来：</p><ul><li><b>付 $50 开 Support Case</b>：马上出来，当回合照常掷骰子走</li><li><b>掷骰子</b>：掷出对子就出来，按点数走；最多掷 ${m} 次，第 ${m} 次还没对子就强制付 $50，按那一把的点数走</li>${availCard(p, 'ES') ? '<li><b>用掉 Enterprise Support 卡</b>：免费出来，照常掷骰子</li>' : ''}</ul><p class="muted">关在里面照样收过路费。出来时用一句话讲清这次的根因，能领 1 个${CATS[cat]}类复盘标记。</p>`, buttons: [{ label: '知道了', value: true, cls: 'pri' }] });
+  await ask({ who: p.id, title: `${p.name} 进了维护窗口`, html: `<p>${why}</p><p>${mine ? '这回合不再往前走。' : ''}轮到你的下一回合二选一：</p><ul><li><b>付 $50 开 Support Case</b>：马上出来，当回合照常掷骰子走</li><li><b>停${m > 1 ? ` ${m} ` : '一'}轮</b>：${m > 1 ? `接下来 ${m} 个回合都不走（传统企业上云的限制），停完出来` : '那一回合不走，停完出来，再下一回合照常掷骰子'}</li>${availCard(p, 'ES') ? '<li><b>用掉 Enterprise Support 卡</b>：免费出来，照常掷骰子</li>' : ''}</ul><p class="muted">关在里面照样收过路费。出来时用一句话讲清这次的根因，能领 1 个${CATS[cat]}类复盘标记。</p>`, buttons: [{ label: '知道了', value: true, cls: 'pri' }] });
 }
 // debt 是 oc 里的技术债加价：客户自己欠的，直接交亚马逊云科技，不切给代理商。
 // 切给代理商的比例按扣掉 RI 之后的单块运行费算（和 runAfterRI 一个口径），RI 全额抵掉的那块不会分走别的服务的钱
@@ -3960,22 +3967,16 @@ async function hellPopQuiz(p) {
 async function jailAct(kind) {
   if (!S || S.phase !== 'roll' || modalBlocks()) return;
   const p = cur(); if (p.jail === null) return;
-  if (kind === 'roll' && !lockDice()) return;
   S.phase = 'busy'; render();
   try {
     if (kind === 'pay') { pay(p, 'pot', 50); await leaveJail(p, '付 $50 开 Support Case'); await resolveDebts(); if (checkOver()) return; if (!cur().alive) return nextTurn(); S.phase = 'roll'; save(); render(); return; }
     if (kind === 'es') { const c = availCard(p, 'ES'); if (c) { c.used = true; await leaveJail(p, '用掉 Enterprise Support'); } S.phase = 'roll'; save(); render(); return; }
-    const d = rollDice(p);
-    render(); await FX.dice(d);
-    if (d[0] === d[1]) { await leaveJail(p, '掷出对子'); await moveSteps(p, d[0] + d[1]); await land(p); }
-    else {
-      p.jail++;
-      const max = jailMax(p);
-      if (p.jail >= max) { pay(p, 'pot', 50); await leaveJail(p, `停满 ${max} 轮，强制付 $50`); await moveSteps(p, d[0] + d[1]); await land(p); }
-      else log(`${nm(p)} 没掷出对子，还在维护窗口（第 ${p.jail}/${max} 次）`);
-    }
+    // 停一轮：这回合不走；停够了（传统企业上云要 2 轮）就出来，下回合照常掷骰子
+    p.jail++;
+    const max = jailMax(p);
+    if (p.jail >= max) await leaveJail(p, `停了 ${max} 轮`);
+    else log(`${nm(p)} 在维护窗口里停一轮（${p.jail}/${max}），下回合再停一轮或交 $50 出来`);
     S.again = false;
-    await hellPopQuiz(p);
   } catch (e) { reportErr(e); }
   await afterAction();
 }
@@ -4098,8 +4099,7 @@ async function land0(p, opts = {}) {
       break;
     }
     case 'gotojail':
-      if (active(p, IX.guardduty)) { pay(p, 'pot', 50); log(`🔑 Root 密钥泄露，${nm(p)} 的 GuardDuty 及时告警：交 $50，不进维护窗口`); }
-      else { log(`🔑 ${nm(p)} 的 Root 密钥泄露了`); await sendToJail(p, 'sec', 'Root 密钥泄露：Root 用户的访问密钥落到了别人手里，得先停下来删掉密钥、查 CloudTrail 看它被拿去做了什么。下次手上有 GuardDuty，落在这格只交 $50。'); }
+      log(`🔑 ${nm(p)} 的 Root 密钥泄露了`); await sendToJail(p, 'sec', 'Root 密钥泄露：Root 用户的访问密钥落到了别人手里，得先停下来删掉密钥、查 CloudTrail 看它被拿去做了什么。');
       break;
   }
 }
@@ -4165,41 +4165,6 @@ async function offerLandingUpgrade(p, i, canJump = false) {
   }
   return 'did';
 }
-// 电脑竞价：出原价的一半，留够 $250 安全线（aiAct 和 auction 共用，模拟出来的成交价不变）
-const aiBid = (q, p0) => Math.max(0, Math.min(p0, q.cash - 250, Math.round(p0 * 0.5 / 10) * 10));
-// 竞价：只给有 Spot（竞价实例）的服务：EC2、ECS、EKS、EMR、SageMaker AI。落地的人不买，大家暗标出价抢这份空闲容量，价高者得，钱交亚马逊云科技；拿到的是 Spot 状态
-async function auction(i, lander) {
-  const s = SQ[i], order = [], mn = Math.round(s.p * 0.2);
-  for (let k = 1; k <= S.players.length; k++) { const q = S.players[(lander.id + k) % S.players.length]; if (q.alive && q.role !== 'fin' && q.cash >= mn) order.push(q); }
-  if (!order.length) return;
-  const bids = [], bad = [];   // bad：出了价但低于最低价、不算数的，暗标结束后才写进日志，不在别人出价前泄露
-  for (const q of order) {
-    // 电脑出价不开弹窗（和投票一样直接算）：暗标期间窗里什么也看不到，开着只是让大家干等 0.9 秒
-    if (isAI(q.id)) { const b = aiBid(q, s.p); if (b >= mn) bids.push({ q, b }); continue; }
-    // 低于最低价的出价不算数：再问一次，框里改填最低价（以前框的 min 是 0，按上箭头停在 $30 还以为自己出过价）。
-    // 只多问一次：模拟（SIM）每次填同一个数，不限次会一直问下去
-    let b = 0, warn = '';
-    for (let t = 0; t < 2; t++) {
-      const r = await modal({ who: q.id, title: `Spot 竞价：${s.n}（原价 $${s.p}）`, html: `${warn}<p>${nm(lander)} 没买这块服务。它有 Spot 空闲容量，大家暗标出价，价高者得，钱交给亚马逊云科技；拿到的是 Spot 状态，以后别人出更高价还能抢走。不想要点「不要」。</p><p class="muted">轮到 ${nm(q)} 出价（现金 $${q.cash}），别人看不到你的出价。</p>`,
-        inputs: [{ id: 'bid', label: `出价 $（最低 $${mn}，最高 $${Math.min(q.cash, s.p)}；不想要点「不要」）`, type: 'number', min: mn, max: Math.min(q.cash, s.p), step: 10, value: warn ? mn : 0, af: true }],
-        buttons: [{ label: '出价', value: 'ok', cls: 'pri' }, { label: '不要', value: 'no' }] });
-      b = r.v === 'ok' ? Math.max(0, Math.min(r.inp.bid || 0, q.cash, s.p)) : 0;
-      if (!b || b >= mn) break;
-      // 联机时这个窗会广播给所有人（只读），不写刚才出了多少，免得后面还没出价的人看到；具体数目等暗标结束写进日志（bad）
-      warn = `<p class="warnline">刚才的出价低于最低价 $${mn}，不算数。要出价就出 $${mn} 以上，不想要点「不要」。</p>`;
-    }
-    if (b >= mn) bids.push({ q, b }); else if (b) bad.push(`${nm(q)} $${b}`);
-  }
-  const low = bad.length ? `（${bad.join('、')} 低于最低价 $${mn}，不算）` : '';
-  if (!bids.length) { log(`🔨 ${sqn(i)} ${bad.length ? '没有有效出价' : '没人出价'}，留在亚马逊云科技${low}`); return; }
-  const w = bids.reduce((a, x) => x.b > a.b ? x : a);
-  pay(w.q, 'bank', w.b); ST(w.q).spendBuy = (ST(w.q).spendBuy || 0) + w.b; S.props[i].owner = w.q.id; S.props[i].paid = w.b;
-  if (w.b < s.p) { S.props[i].spot = true; S.props[i].spotPaid = w.b; }
-  log(`🔨 ${sqn(i)} 竞价：${bids.map(x => `${nm(x.q)} $${x.b}`).join('、')}；${nm(w.q)} 以 $${w.b} 拿下${low}`);
-  // 不再弹「竞价结果」窗：日志里有这一句，格子上换主时的「拿下」气泡把出价一起亮出来。S.aucFx 随状态同步，联机远端也看得到
-  S.aucFx = { i, o: w.q.id, w: w.b, txt: bids.filter(x => x !== w).map(x => `${x.q.name} $${x.b}`).join('、'), tie: bids.some(x => x !== w && x.b === w.b) };
-  render();
-}
 async function offerBuy(p, i, opts = {}) {
   const s = SQ[i], rd = roleDisc(p, i);
   let quizTried = false, quizOk = false, qres = '';   // qres：刚答完的题的结果，放在买地窗顶上
@@ -4226,7 +4191,7 @@ async function offerBuy(p, i, opts = {}) {
     if (v.k === 'raise') { await manage(p); render(); continue; }
     // 后面紧接着就是买地窗：答题结果放在它顶上，省一个只有「继续」的窗
     if (v.k === 'quiz') { quizTried = true; ({ ok: quizOk, html: qres } = await quiz(s.g || 'general', `答对可以打 ${zhe(qd)}买`, { inline: true })); continue; }
-    if (v.k === 'no') { log(`${nm(p)} 没买 ${sqn(i)}`); if (SPOT_OK.has(s.k)) await auction(i, p); return; }
+    if (v.k === 'no') { log(`${nm(p)} 没买 ${sqn(i)}`); return; }   // 不买就是不买：不再拿出来让别人竞价（11-06 起）
     if (v.k === 'spot') {
       const r = await modal({ title: `Spot 出价：${s.n}（原价 $${s.p}）`, html: `<p>出价越低越便宜，但别人落上来时，只要比你多出原价的 10%（$${Math.round(s.p * 0.1)}）就能抢走；出到全价就等于按需购买，没人能抢。</p><p class="muted">被抢时退回你出价的一半。现实里 Spot 已经不用竞价，被收回前只提前 2 分钟通知；游戏用出价模拟「可能被收回」。</p>`, inputs: [{ id: 'bid', label: `出价 $（$${v.min}–$${Math.min(s.p, p.cash)}）`, type: 'number', min: v.min, max: Math.min(s.p, p.cash), step: 10, value: Math.min(Math.max(v.min, Math.round(s.p * 0.5)), p.cash), af: true }], buttons: [{ label: '出价买下', value: 'ok', cls: 'pri' }, { label: '返回', value: 'x' }] });
       if (r.v !== 'ok') continue;
@@ -4337,12 +4302,12 @@ async function payRent(p, i, opts = {}) {
   if (o.rent3Left > 0 && r > 0) { r *= 3; o.rent3Left--; notes.push(`爆款上线 ×3（还剩 ${o.rent3Left} 笔）`); }
   if (o.role === 'rs_msp' && pr.via == null) { r = Math.round(r * 0.9); notes.push('托管服务商自己的服务 9 折'); }
   if (i === IX.datatransfer && p.role === 'ai') { r *= 2; notes.push('AI 原生双倍'); }
-  // 新账号保护期每笔最多 $50：答对后的数也不低于 $50 时，答不答都一样，就不出这道题
+  // 新账户保护期每笔最多 $50：答对后的数也不低于 $50 时，答不答都一样，就不出这道题
   const protCap = F.balance() && S.round <= BAL.protect ? 50 : Infinity, qRate = p.role === 'indie' ? (!S.cfg.learn ? 0.8 : hx('indie') ? 0.5 : 0.35) : (BAL.quizRent ?? 0.5);
   if (r > 0 && (S.cfg.learn || p.role === 'indie') && Math.min(Math.round(r * qRate), protCap) < Math.min(r, protCap)) {
-    if (await quiz(s.g || 'general', `${o.name} 考你一题：${r > protCap ? `答对付 $${Math.round(r * qRate)}，不答或答错付 $${protCap}（新账号保护期每笔最多 $50）` : `答对过路费`}${r > protCap ? '' : `${p.role === 'indie' ? `只付 ${!S.cfg.learn ? 80 : hx('indie') ? 50 : 35}%` : (BAL.quizRent ?? 0.5) === 0.5 ? '减半' : `只付 ${Math.round(BAL.quizRent * 100)}%`}（当前 $${r}）`}`)) { const qr = BAL.quizRent ?? 0.5, ir = p.role === 'indie' ? (!S.cfg.learn ? 0.8 : hx('indie') ? 0.5 : 0.35) : 0; r = Math.round(r * (ir || qr)); notes.push(ir ? `独立开发者答对只付 ${ir * 100}%` : qr === 0.5 ? '答对减半' : `答对只付 ${Math.round(qr * 100)}%`); }
+    if (await quiz(s.g || 'general', `${o.name} 考你一题：${r > protCap ? `答对付 $${Math.round(r * qRate)}，不答或答错付 $${protCap}（新账户保护期每笔最多 $50）` : `答对过路费`}${r > protCap ? '' : `${p.role === 'indie' ? `只付 ${!S.cfg.learn ? 80 : hx('indie') ? 50 : 35}%` : (BAL.quizRent ?? 0.5) === 0.5 ? '减半' : `只付 ${Math.round(BAL.quizRent * 100)}%`}（当前 $${r}）`}`)) { const qr = BAL.quizRent ?? 0.5, ir = p.role === 'indie' ? (!S.cfg.learn ? 0.8 : hx('indie') ? 0.5 : 0.35) : 0; r = Math.round(r * (ir || qr)); notes.push(ir ? `独立开发者答对只付 ${ir * 100}%` : qr === 0.5 ? '答对减半' : `答对只付 ${Math.round(qr * 100)}%`); }
   }
-  if (F.balance() && S.round <= BAL.protect && r > 50) { r = 50; notes.push('新账号保护期封顶 $50'); }
+  if (F.balance() && S.round <= BAL.protect && r > 50) { r = 50; notes.push('新账户保护期封顶 $50'); }
   if (r > 0) { ST(p).rentOut += r; ST(o).rentIn += r; ST(o).maxRent = Math.max(ST(o).maxRent, r); const eb = ST(o).earnBy, hb = ST(o).hitsBy; eb[i] = (eb[i] || 0) + r; hb[i] = (hb[i] || 0) + 1; }
   if (r >= 100) evt(`${p.name} 付给 ${o.name} 过路费 $${r}（${SQ[i].n}）`, r);
   // 请求费按实际能收到的算：对方全卖了也付不起，就只按他付得起的部分交，免得收过路费的人反倒被请求费拖破产
@@ -4571,7 +4536,7 @@ async function incident(p, id) {
     case 15: {
       if (await tryCancel(p, id)) return;
       const others = S.players.filter(o => o.alive && o.id !== p.id);
-      if (others.length) { const y = await vote(others, `${p.name} 的安全审计过关吗？`, `<p>你是审计员：问 ${nm(p)} 一个安全问题（比如 Root 账号开 MFA 了吗、S3 桶是公开的吗、密钥多久轮换一次），听完判断。</p>`, '过关', '不过关', 0.5); if (y * 2 > others.length) { log(`✅ ${nm(p)} 的安全审计通过了`); return; } }
+      if (others.length) { const y = await vote(others, `${p.name} 的安全审计过关吗？`, `<p>你是审计员：问 ${nm(p)} 一个安全问题（比如根用户开 MFA 了吗、S3 桶是公开的吗、密钥多久轮换一次），听完判断。</p>`, '过关', '不过关', 0.5); if (y * 2 > others.length) { log(`✅ ${nm(p)} 的安全审计通过了`); return; } }
       await skipOrPay(p, '安全审计没过', 80, '加急整改'); break;
     }
     case 3: {
@@ -4596,7 +4561,6 @@ async function incident(p, id) {
       log(`${nm(p)} 交账单 $${pay(p, 'pot', cost)}`); break;
     }
     case 6:
-      if (active(p, IX.guardduty)) { await dealNow(); log(`${nm(p)} 的 GuardDuty 及时告警：交 $${pay(p, 'pot', 50)}，不进维护窗口`); return; }
       if (await tryCancel(p, id)) return;
       await sendToJail(p, 'sec', `Health 事件「${INC[id].n}」：Root 用户的访问密钥进了公开仓库，得先删掉密钥、查清楚有没有被人用过。`); break;
     case 7: {
@@ -4853,13 +4817,13 @@ async function resolveDebts0() {
     if (!p) return;
     MP.actor = p.id;
     const canRaise = raiseValue(p);
-    const v = await ask({ who: p.id, title: `${p.name} 欠款 $${debtOf(p)}`, html: `<div class="debtsum"><div><small>欠款</small><b class="hi">$${debtOf(p)}</b></div><div><small>现金</small><b>$${p.cash}</b></div><div><small>全卖了最多能凑</small><b class="${canRaise < debtOf(p) ? 'hi' : 'ok'}">$${canRaise}</b></div></div>${canRaise < debtOf(p) ? '<p class="warnline">全卖了也不够还：选「自动变卖」会直接破产，服务连同升级按欠款比例分给各个债主（欠亚马逊云科技的那份退回亚马逊云科技）。</p>' : ''}<ul class="ways"><li><b>去掉升级、减容量</b>：退这一级实付的一半，钱归你。</li>${isParty() ? '' : '<li><b>下线</b>（EC2、RDS、Aurora、Redshift、ECS）：先拿回买价一半周转，服务还是你的，以后上线要还这一半加 10%。</li>'}<li><b>卖回亚马逊云科技</b>：买价、升级、容量的实付按 ${sellZhe()}拿回。</li></ul><p class="muted">「自动变卖」先拆升级、容量${isParty() ? '' : '、下线'}，不够才整块卖。宣告破产：账号被暂停出局，服务连同升级按欠款比例分给各个债主（欠亚马逊云科技的那份退回亚马逊云科技）。</p>`, buttons: [{ label: '管理资产', value: 'm' }, { label: '自动变卖', value: 'a', cls: 'pri' }, { label: '宣告破产，直接出局', value: 'b', cls: 'danger', botW: 0 }] });
+    const v = await ask({ who: p.id, title: `${p.name} 欠款 $${debtOf(p)}`, html: `<div class="debtsum"><div><small>欠款</small><b class="hi">$${debtOf(p)}</b></div><div><small>现金</small><b>$${p.cash}</b></div><div><small>全卖了最多能凑</small><b class="${canRaise < debtOf(p) ? 'hi' : 'ok'}">$${canRaise}</b></div></div>${canRaise < debtOf(p) ? '<p class="warnline">全卖了也不够还：选「自动变卖」会直接破产，服务连同升级按欠款比例分给各个债主（欠亚马逊云科技的那份退回亚马逊云科技）。</p>' : ''}<ul class="ways"><li><b>去掉升级、减容量</b>：退这一级实付的一半，钱归你。</li>${isParty() ? '' : '<li><b>下线</b>（EC2、RDS、Aurora、Redshift、ECS）：先拿回买价一半周转，服务还是你的，以后上线要还这一半加 10%。</li>'}<li><b>卖回亚马逊云科技</b>：买价、升级、容量的实付按 ${sellZhe()}拿回。</li></ul><p class="muted">「自动变卖」先拆升级、容量${isParty() ? '' : '、下线'}，不够才整块卖。宣告破产：账户被暂停出局，服务连同升级按欠款比例分给各个债主（欠亚马逊云科技的那份退回亚马逊云科技）。</p>`, buttons: [{ label: '管理资产', value: 'm' }, { label: '自动变卖', value: 'a', cls: 'pri' }, { label: '宣告破产，直接出局', value: 'b', cls: 'danger', botW: 0 }] });
     if (v === 'm') { const d0 = debtOf(p), n0 = ownedBy(p).length; await manage(p, true); if (debtOf(p) !== d0 || ownedBy(p).length !== n0) guard--; }
     // 全卖了也不够还：不变卖，服务连同升级按欠款比例分给各个债主（欠亚马逊云科技的那份退回亚马逊云科技）
-    else if (v === 'a' && canRaise < debtOf(p)) { await info('不够还债', `${nm(p)} 把服务全部卖回亚马逊云科技也只能凑 $${canRaise}，不够还 $${debtOf(p)}，账号被暂停（破产），服务连同升级按欠款比例分给各个债主（欠亚马逊云科技的那份退回亚马逊云科技）。`); await bankrupt(p); }
+    else if (v === 'a' && canRaise < debtOf(p)) { await info('不够还债', `${nm(p)} 把服务全部卖回亚马逊云科技也只能凑 $${canRaise}，不够还 $${debtOf(p)}，账户被暂停（破产），服务连同升级按欠款比例分给各个债主（欠亚马逊云科技的那份退回亚马逊云科技）。`); await bankrupt(p); }
     else if (v === 'a') autoLiquidate(p);
     // 变卖就能还清却点了宣告破产：先确认一次（数字键 3 也会点到它），默认回去凑钱。还不清的时候结果一样，不多问
-    else if (canRaise >= debtOf(p) && !(await ask({ who: p.id, title: `${p.name} 确定宣告破产？`, html: `<p>欠款 $${debtOf(p)}，全卖了能凑 $${canRaise}，够还。宣告后账号被暂停、直接出局，服务连同升级按欠款比例分给各个债主。</p>`, buttons: [{ label: '回去凑钱', value: false, cls: 'pri' }, { label: '宣告破产', value: true, cls: 'danger' }] }))) guard--;
+    else if (canRaise >= debtOf(p) && !(await ask({ who: p.id, title: `${p.name} 确定宣告破产？`, html: `<p>欠款 $${debtOf(p)}，全卖了能凑 $${canRaise}，够还。宣告后账户被暂停、直接出局，服务连同升级按欠款比例分给各个债主。</p>`, buttons: [{ label: '回去凑钱', value: false, cls: 'pri' }, { label: '宣告破产', value: true, cls: 'danger' }] }))) guard--;
     else await bankrupt(p);
     render();
   }
@@ -4870,7 +4834,7 @@ async function resolveDebts0() {
 // 主动宣告破产（认输）：资产一律交回亚马逊云科技，不能指定送给谁（免得多人局里帮别人赢）
 async function declareBankrupt() {
   const p = cur(); if (isAI(p.id)) return toast('电脑的回合不能宣告破产');
-  const ok = await ask({ title: `${p.name} 宣告破产？`, html: '<p>宣告后账号被暂停，你直接出局。名下服务（连同升级和容量）交回亚马逊云科技重新出售，保留卡和标记作废。</p><p class="muted">不能指定把资产送给哪位玩家：多人局里送资产等于帮别人赢。</p>', buttons: [{ label: '宣告破产', value: true, cls: 'danger' }, { label: '取消', value: false, cls: 'pri' }] });
+  const ok = await ask({ title: `${p.name} 宣告破产？`, html: '<p>宣告后账户被暂停，你直接出局。名下服务（连同升级和容量）交回亚马逊云科技重新出售，保留卡和标记作废。</p><p class="muted">不能指定把资产送给哪位玩家：多人局里送资产等于帮别人赢。</p>', buttons: [{ label: '宣告破产', value: true, cls: 'danger' }, { label: '取消', value: false, cls: 'pri' }] });
   if (!ok) return;
   p.debt = [];
   log(`🏳️ ${nm(p)} 宣告破产`);
@@ -4879,7 +4843,7 @@ async function declareBankrupt() {
 // 破产：按欠款比例分资产。每个债主（欠亚马逊云科技、奖池的合成一份）按欠款占比分到对应价值的服务，
 // 服务按价值从高到低一块块分给「还差得最多」的那一份；亚马逊云科技那份的服务退回重新出售；保留卡和标记给欠得最多的玩家
 async function bankrupt(p) {
-  sfx('fail'); evt(`${p.name} 账号被暂停（破产）`, 99999);
+  sfx('fail'); evt(`${p.name} 账户被暂停（破产）`, 99999);
   const owed = {}; let bankOwed = 0;
   p.debt.forEach(d => { if (typeof d.to === 'number' && P(d.to).alive && d.to !== p.id) owed[d.to] = (owed[d.to] || 0) + d.amt; else bankOwed += d.amt; });
   const ids = Object.keys(owed).map(Number).filter(k => owed[k] > 0).sort((a, b) => owed[b] - owed[a]);
@@ -4888,7 +4852,7 @@ async function bankrupt(p) {
   OWNABLE.forEach(i => { if (S.props[i].ddos === p.id) S.props[i].ddos = null; if (S.props[i].via === p.id) S.props[i].via = null; });
   p.alive = false; p.debt = []; p.jail = null; p.skip = 0;
   if (!ids.length || total <= 0) {
-    log(`💀 ${nm(p)} 账号被暂停，服务回到亚马逊云科技重新出售`);
+    log(`💀 ${nm(p)} 账户被暂停，服务回到亚马逊云科技重新出售`);
     p.cash = 0; props.forEach(resetProp); p.cards = []; p.coe = []; p.drill = [];
     render(); return;
   }
@@ -4900,7 +4864,7 @@ async function bankrupt(p) {
   [...props].sort((a, b) => val(b) - val(a)).forEach(i => { const k = keys.reduce((best, x) => (share(x) * assets - got[x]) > (share(best) * assets - got[best]) ? x : best, keys[0]); got[k] += val(i); gotProps[k].push(i); });
   keys.forEach(k => gotProps[k].forEach(i => { if (k === 'bank') resetProp(i); else { const pr = S.props[i]; pr.owner = k; pr.impaired = false; pr.via = null; } }));
   const top = P(ids[0]); top.cards.push(...p.cards); top.coe.push(...p.coe); top.drill.push(...p.drill); p.cards = []; p.coe = []; p.drill = [];
-  log(`💀 ${nm(p)} 账号被暂停，资产按欠款比例分：${keys.map(k => `${k === 'bank' ? '亚马逊云科技收回' : nm(P(k)) + ' 拿到'} ${gotProps[k].length ? gotProps[k].map(sqn).join('、') : '（没分到服务）'}（欠款占 ${Math.round(share(k) * 100)}%）`).join('；')}`);
+  log(`💀 ${nm(p)} 账户被暂停，资产按欠款比例分：${keys.map(k => `${k === 'bank' ? '亚马逊云科技收回' : nm(P(k)) + ' 拿到'} ${gotProps[k].length ? gotProps[k].map(sqn).join('、') : '（没分到服务）'}（欠款占 ${Math.round(share(k) * 100)}%）`).join('；')}`);
   render();
 }
 
@@ -5229,13 +5193,15 @@ async function pickPartner(title) {
   const id = await ask({ title, buttons: [...others.map(q => ({ label: q.name, value: q.id })), { label: '取消', value: -1, botW: 2 }] });
   return id === -1 ? null : P(id);
 }
-async function trade() {
-  const a = cur(), b = await pickPartner('和谁交易？');
+// 明细里点「找他交易」：关掉明细，直接打开和他的交易窗，把想要的那块先勾上
+function tradeFor(to, want) { if (MODAL_CUR && MODAL_CUR.cancelable) MODAL_CUR.cancel(); setTimeout(() => uiAction(() => trade({ to, want })), 0); }
+async function trade(pre) {
+  const a = cur(), b = pre && S.players[pre.to] && S.players[pre.to].alive && pre.to !== a.id ? S.players[pre.to] : await pickPartner('和谁交易？');
   if (!b) return;
   const full = F.full();
   const side = (q, x) => {
     const inps = [{ type: 'header', label: `${q.name} 交出` }];
-    ownedBy(q).forEach(i => { const pr = S.props[i]; inps.push({ id: `${x}p${i}`, type: 'checkbox', label: `${SQ[i].n}${pr.level || pr.cap ? '（有升级或容量，要先去掉）' : ''}`, disabled: pr.level > 0 || pr.cap > 0 }); });
+    ownedBy(q).forEach(i => { const pr = S.props[i]; inps.push({ id: `${x}p${i}`, type: 'checkbox', label: `${SQ[i].n}${pr.level || pr.cap ? '（有升级或容量，要先去掉）' : ''}`, disabled: pr.level > 0 || pr.cap > 0, value: x === 'b' && pre && pre.want === i && !pr.level && !pr.cap }); });
     inps.push({ id: x + 'cash', type: 'number', label: `现金 $（最多 ${Math.max(q.cash, 0)}）`, min: 0, max: Math.max(q.cash, 0), step: 10, value: 0 });
     if (full) {
       q.cards.forEach((c, k) => { if (!c.used) inps.push({ id: `${x}c${k}`, type: 'checkbox', label: `保留卡：${CARDN[c.id]}` }); });
@@ -5325,7 +5291,7 @@ const waTotalNeed = () => WA_RULE().total;
 const PILLAR_TIP = [
   '每持有一块 CloudWatch、CloudTrail、Step Functions、EventBridge 算 1 分；写过复盘再算 1 分',
   '每持有一块安全合规组或边缘防护组服务算 1 分；每个演练标记算 1 分',
-  '每一处多 AZ 升级算 1 分；每一处多区域功能算 2 分',
+  '每持有一块天生跨 AZ 的服务（托管服务、Serverless、全局服务、ECS）算 1 分；实例型每升一处多 AZ 算 1 分；每一处多区域功能算 2 分',
   '每一处弹性扩展功能（Auto Scaling、并发配额等）算 1 分；每个生效的有效架构算 1 分',
   '重构清过技术债算 1 分；签过 Savings Plans / RI 或用过 Cost Explorer 算 1 分；每一处降成本功能算 1 分',
   '每持有一块 Serverless 服务算 1 分；EC2 升到 Graviton 算 1 分；每一处数据分层（S3 智能分层、EFS 生命周期、OpenSearch UltraWarm、EBS gp3）算 1 分；ECS 用 Fargate、EKS 开 Auto Mode 各算 1 分',
@@ -5337,6 +5303,8 @@ function pillarParts(p) {
   const ops = has([IX.cloudwatch, IX.cloudtrail, IX.sfn, IX.eventbridge]);
   const secs = has([...GRP('sec'), ...GRP('edge')]);
   const maz = effList('maz'), mr = effList('mr'), sc = effList('scale'), co = effList('cost');
+  // 天生跨 AZ 的（托管服务、Serverless、全局服务、ECS 默认跨 AZ）每块也算 1 分；实例型要自己升多 AZ，EBS、EMR 永远单 AZ 不算
+  const nat = live.filter(i => { const h = haTag(i); return h && (h.k === 'auto' || h.k === 'glb'); });
   const combos = COMBOS.filter(c => hasCombo(p, c.id));
   const sls = live.filter(i => SQ[i].type === 'sls');
   const grav = active(p, IX.ec2) && effActive(IX.ec2, 'cost');
@@ -5347,12 +5315,12 @@ function pillarParts(p) {
   const score = [
     ops.length + (p.coe.length ? 1 : 0),
     secs.length + p.drill.length,
-    maz.length + mr.length * 2,
+    nat.length + maz.length + mr.length * 2,
     sc.length + combos.length,
     (p.refactored ? 1 : 0) + (commit ? 1 : 0) + co.length,
     sls.length + (grav ? 1 : 0) + lifecycle.length + managedCompute.length,
   ];
-  return { ops, secs, maz, mr, sc, co, combos, sls, grav, commit, lifecycle, managedCompute, score };
+  return { ops, secs, nat, maz, mr, sc, co, combos, sls, grav, commit, lifecycle, managedCompute, score };
 }
 const pillarScore = p => pillarParts(p).score;
 function pillars(p) { const need = pillarNeed(); return pillarScore(p).map(v => v >= need); }
@@ -5365,7 +5333,7 @@ function pillarWhy(p) {
   const got = [
     [x.ops.length && names(x.ops), p.coe.length && `写过 ${p.coe.length} 次复盘`],
     [x.secs.length && names(x.secs), p.drill.length && `${p.drill.length} 个演练标记`],
-    [x.maz.length && `${names(x.maz)} 是多 AZ`, x.mr.length && `${names(x.mr)} 有多区域功能（每处 2 分）`],
+    [x.nat.length && `${names(x.nat)} 天生跨 AZ`, x.maz.length && `${names(x.maz)} 升了多 AZ`, x.mr.length && `${names(x.mr)} 有多区域功能（每处 2 分）`],
     [x.sc.length && `${names(x.sc)} 有弹性扩展功能`, x.combos.length && `生效的架构：${x.combos.map(c => c.n).join('、')}`],
     [p.refactored && '重构清过技术债', x.commit && '签过 Savings Plans / RI 或用过 Cost Explorer', x.co.length && `${names(x.co)} 有降成本功能`],
     [x.sls.length && `Serverless：${names(x.sls)}`, x.grav && 'EC2 用上了 Graviton', x.lifecycle.length && `${names(x.lifecycle)} 开了数据分层或省资源的存储`, x.managedCompute.length && `${names(x.managedCompute)} 交给亚马逊云科技管底层机器`],
@@ -5376,7 +5344,7 @@ function checkOverSilent() { return S.players.filter(q => q.alive).length <= 1; 
 function checkOver() {
   if (S.over) return true;
   const alive = S.players.filter(q => q.alive);
-  if (alive.length <= 1) { gameOver(alive[0], '其他玩家都被暂停了账号'); return true; }
+  if (alive.length <= 1) { gameOver(alive[0], '其他玩家都被暂停了账户'); return true; }
   return false;
 }
 // 每位玩家的战报数据
@@ -5506,7 +5474,7 @@ const modeName = () => isParty() ? '娱乐模式' : isStudy() ? '学习模式' :
 // 金额：负数用真正的减号（U+2212），和加号、数字等宽，列里右对齐不会错位；sign 时正数也带 +（「与第 1 名」那一列）
 const usd = (v, sign = false) => { v = Math.round(v || 0); return (v < 0 ? '−' : sign && v > 0 ? '+' : '') + '$' + Math.abs(v); };
 // 结束方式：none 没有赢家 / wa 六大支柱 / last 撑到最后 / val 按估值。结束画面、战报、台面中央、导出记录用同一套说法
-const finKind = (w, why) => !w ? 'none' : /六大支柱/.test(why) ? 'wa' : /暂停了账号/.test(why) ? 'last' : 'val';
+const finKind = (w, why) => !w ? 'none' : /六大支柱/.test(why) ? 'wa' : /暂停了账[号户]/.test(why) ? 'last' : 'val';
 const finTitle = (w, why) => ({ none: '这一局没有赢家', wa: `${w && w.name} 达成六大支柱，提前胜出`, last: `${w && w.name} 撑到最后，赢下这一局`, val: `${w && w.name} 获胜` })[finKind(w, why)];
 // 标题前面是赢家的棋子（和泳道、棋盘上的对得上），名字本身不上座位色；棋子上的座位号不念
 const finTitleHtml = (w, why) => `${w ? `<span class="pawn" aria-hidden="true" style="--pc:${w.color}">${COLORS.indexOf(w.color) + 1}</span>` : ''}<span>${finTitle(w, why)}</span>`;
@@ -5521,8 +5489,8 @@ function finEdge(w) {
 function finSub(w, why) {
   const k = finKind(w, why), e = finEdge(w), base = String(why || '').replace(/（[−-]?\$-?\d+）$/, '');
   const lead = e => e.lead > 0 ? `领先第 2 名 ${e.r2.name} ${usd(e.lead)}${e.by ? `，拉开最多的是${e.by[0]}（${e.by[2]} ${usd(e.by[1])}）` : ''}` : e.lead === 0 ? `和第 2 名 ${e.r2.name} 估值持平` : `估值上 ${e.r2.name} 高 ${usd(-e.lead)}`;
-  if (k === 'none') return /暂停了账号/.test(base) ? '所有玩家的账号都被暂停了' : base || '没有玩家留在场上';
-  if (k === 'last') return `第 ${S.round} 轮，其他玩家的账号都被暂停了`;
+  if (k === 'none') return /暂停了账[号户]/.test(base) ? '所有玩家的账户都被暂停了' : base || '没有玩家留在场上';
+  if (k === 'last') return `第 ${S.round} 轮，其他玩家的账户都被暂停了`;
   // 六大支柱赢的人估值不一定最高：比他高的写出来，说明这一局不比估值
   if (k === 'wa') { const h = `第 ${S.round} 轮六大支柱 6/6 达成，按胜利条件直接结束`; return !e ? h : e.lead < 0 ? `${h}，不比估值（${e.r2.name} 估值多 ${usd(-e.lead)}）` : e.lead === 0 ? `${h}；和第 2 名 ${e.r2.name} 估值持平` : `${h}；估值也${lead(e)}`; }
   return base + (e ? `。${lead(e)}` : '');
@@ -5533,7 +5501,7 @@ function finLede(w, why) {
   if (topR > 0) s.push(`过路费 ${S.players.filter(q => ST(q).rentIn === topR).map(q => q.name).join('、')} 收得最多（$${topR}）`);
   const big = ev.filter(e => / 付给 .+ 过路费 /.test(e.t)).sort((a, b) => b.w - a.w)[0];
   if (big) s.push(`单笔最大的一笔 $${big.w} 出在第 ${big.r} 轮`);
-  const gone = finalRank(w).filter(q => !q.alive).map(q => { const e = ev.find(x => x.t.startsWith(q.name + ' 账号被暂停')); return e ? `${q.name} 第 ${e.r} 轮出局` : `${q.name} 出局`; });
+  const gone = finalRank(w).filter(q => !q.alive).map(q => { const e = ev.find(x => x.t.startsWith(q.name + ' 账户被暂停')); return e ? `${q.name} 第 ${e.r} 轮出局` : `${q.name} 出局`; });
   if (gone.length) s.push(gone.join('，'));
   return s.filter(Boolean).join('；') + '。';
 }
@@ -5565,10 +5533,10 @@ function repExtra() {
 // 事件立在那一轮的正中，过路费越大越高越亮，出局的是红色、顶到最高；编号对应下面的列表。编号、刻度、出局棋子要按实际像素躲开彼此，在 repLayout 里排。
 // 图只给眼睛看，读屏念一句走势和列表
 function repTimeline(w, rank, X) {
-  const R = Math.max(1, S.round), x1 = R + 1, px = x => ((Math.min(x1, Math.max(1, x)) - 1) / R * 100).toFixed(2), isOut = e => /账号被暂停/.test(e.t), num = y => typeof y === 'number' && isFinite(y);
+  const R = Math.max(1, S.round), x1 = R + 1, px = x => ((Math.min(x1, Math.max(1, x)) - 1) / R * 100).toFixed(2), isOut = e => /账[号户]被暂停/.test(e.t), num = y => typeof y === 'number' && isFinite(y);
   // 取分量最重的 8 件事（和正式版同一个口径），再按轮次排；同一轮里按发生的先后（S.events 里的下标），压垮人的那笔过路费排在破产前面
   const ev = (S.events || []).map((e, i) => ({ r: e.r, t: e.t, w: e.w, i })).sort((a, b) => b.w - a.w).slice(0, 8).sort((a, b) => a.r - b.r || a.i - b.i);
-  const outR = q => { if (q.alive) return null; const e = (S.events || []).find(x => x.t.startsWith(q.name + ' 账号被暂停')); return e ? e.r : null; };
+  const outR = q => { if (q.alive) return null; const e = (S.events || []).find(x => x.t.startsWith(q.name + ' 账户被暂停')); return e ? e.r : null; };
   let chart = '', sr = '';
   if (X.vh.length >= 2) {
     // 每人一条线。出局以后记的是空值：线从最后一个有数的点落到出局那一轮正中（和事件条上的红竖线同一处）的 $0，红叉打在那里
@@ -5815,7 +5783,7 @@ function valSnap() { if (!S || !S.players) return; (S.valHist = S.valHist || [])
 const GAIN_N = { rent: '过路费', salary: '起点 Credits', card: '卡牌和技能', sell: '卖回和下线', other: '其他' };
 function reportStats(w) {
   const rank = finalRank(w), pst = S.pst || {}, T = q => pst[q.id] || {}, full = !(S.mFrom > 1), r1 = v => Math.round(v * 10) / 10;
-  const outAt = q => { if (q.alive) return null; const e = (S.events || []).find(x => x.t.startsWith(q.name + ' 账号被暂停')); return e ? e.r : null; };
+  const outAt = q => { if (q.alive) return null; const e = (S.events || []).find(x => x.t.startsWith(q.name + ' 账户被暂停')); return e ? e.r : null; };
   const minutes = S.t0 && S.t1 ? Math.max(1, Math.round((S.t1 - S.t0 - (S.tOff || 0)) / 60000)) : null;
   // 估值走势：至少两个点才画；最后一项是 gameOver 记的终局值
   const H = (Array.isArray(S.valHist) ? S.valHist : []).filter(h => Array.isArray(h) && h.length > 1);
@@ -5960,8 +5928,8 @@ function endFx(w, why) {
 }
 function timedOver(why = '时间到') { const alive = S.players.filter(q => q.alive).sort((a, b) => valuation(b) - valuation(a)); gameOver(alive[0], `${why}，按估值算分（$${valuation(alive[0])}）`); }
 
-const MANUAL_LITE_HTML = "<h2 style=\"margin:0 0 8px\">亚马逊云科技 User Group 云上大亨 · 玩法速览（简版）</h2><p>三分钟看完就能开局。细节查「玩法手册」，全部规则和数字查「主持人规则书」。</p><h4>一、一句话</h4><p>你是一家在亚马逊云科技上创业的公司：买服务，别人走到你的服务上就付你过路费；把服务升级、组成架构，收得更多；扛住线上事故，控制好账单。最后没破产的人赢，或者打满轮数按估值排名。玩法灵感来自经典的大富翁类桌游。</p><h4>二、开局</h4><ol style=\"padding-left:20px;margin:6px 0\"><li>选人数（2–4 人）、模式、胜利条件，点「开始游戏」。人不够就勾「电脑」。</li><li>每人随机抽一张角色卡：开局资金、能力、弱点、一个专属技能。</li><li>默认是标准局，第一次玩改选<b>入门局</b>，胜利条件保持默认（经典 + 15 轮上限，约 20 分钟）。</li></ol><h4>三、一回合</h4><ol style=\"padding-left:20px;margin:6px 0\"><li>掷两颗骰子往前走；掷出对子再掷一次。</li><li>落到哪格结算哪格：没人买的服务可以买；别人的服务付过路费；自己的服务可以升级、加容量；卡牌格抽卡；账单格交钱。</li><li>每次经过 Startup 扶持领 $200 Credits，同时交这一圈的运行费。</li><li>踩到「Root 密钥泄露」或同一回合连掷 3 次对子，会被直接送进<b>维护窗口</b>：从下回合起掷出对子就出来，也可以付 $50 马上出来、照常掷骰子；最多掷 3 次（传统企业上云 4 次），掷满还没对子就强制付 $50。自己走到维护窗口那格只是停一轮或交 $50。</li></ol><h4>四、赚钱和花钱</h4><ul style=\"padding-left:20px;margin:6px 0\"><li><b>过路费</b>：服务越贵、升级越多、容量越大，收得越多；集齐同色一整组，没升级的也翻倍。标准局、完整局、学习模式开局前 2 轮是<b>新账号保护期</b>：每笔过路费最多 $50。</li><li><b>有效架构</b>：凑齐一套真实架构（比如 ELB → EC2 → RDS），别人落在其中任意一块，按整套收。</li><li><b>运行费</b>：实例型服务空着也要交钱，Serverless 没人用就不花钱。</li><li><b>越往后过路费越高</b>：每 5 轮涨一档，后期一块好地就能把人收破产。</li></ul><h4>五、防事故</h4><p>抽到 Health 事件卡（AZ 断电、DDoS、证书过期……）会被罚。做了对应的高可用和安全功能就免疫，比如多 AZ 扛 AZ 断电、Auto Scaling 扛流量暴增、备份扛误删。</p><h4>六、缺钱和破产</h4><ul style=\"padding-left:20px;margin:6px 0\"><li>去掉升级、减容量：退一半；能停机的服务下线：先拿回买价一半周转。</li><li>不要的服务整块卖回亚马逊云科技：实付按 8 折拿回。</li><li>全卖了也不够还才破产，服务按欠款比例分给各个债主。</li></ul><h4>七、专属技能</h4><p>每个角色一个起死回生的技能，像游戏王里 LP 掉到 1000 以下才能发动的技能：<b>总资产低于自己开局资金的一半</b>时，点「专属技能」发动，<b>一局一次</b>：先按卖回价买下总资产最高的对手的一块服务（钱付给他），再结算角色自己的技能。</p><h4>八、模式和开关</h4><table><tr><th>选什么</th><th>一句话</th></tr><tr><td>娱乐模式</td><td>常用服务 + 盲盒格，抽卡最多，10 轮</td></tr><tr><td>入门局</td><td>只有基础规则，先熟悉</td></tr><tr><td>标准局</td><td>加技术债和季度财报，认真算账</td></tr><tr><td>完整局</td><td>加主动行动、交易、Savings Plans / RI</td></tr><tr><td>学习模式</td><td>必答题、错题本，不限轮数</td></tr><tr><td>地狱模式</td><td>全部加压拉满，必须答题</td></tr><tr><td>高速部署（开关）</td><td>部署点数 0–12，花点数发动 12 个技能，12 点能 DDoS 对手</td></tr><tr><td>代理商模式（开关）</td><td>座位可以当代理商，拿货打折、转售、赚运行费差价</td></tr><tr><td>边玩边答题（开关）</td><td>答对过路费减半、买服务打 8 折</td></tr></table><h4>九、三条建议</h4><ul style=\"padding-left:20px;margin:6px 0\"><li>别把钱花光：每圈都要交运行费，现金太少一次没付上就被迫变卖。</li><li>先做多 AZ：最划算的第一笔防护。</li><li>先凑整组和架构：收得最多的方式。</li></ul>";
-const MANUAL_HTML = "<h2 style=\"margin:0 0 8px\">亚马逊云科技 User Group 云上大亨 · 玩法手册</h2><p class=\"muted\">这本手册讲怎么上手玩，十分钟读完。每条规则的细节和数字查「主持人规则书.pdf」；网页版里点「玩法」也能随时打开这本手册。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>一、一句话玩法</h4><p>你是一家在亚马逊云科技上创业的公司：绕着棋盘走，<b>买亚马逊云科技服务</b>，别人走到你的服务上就<b>付你过路费</b>；把服务<b>升级、扩容、组成完整架构</b>，收得更多；同时要<b>扛住各种线上事故</b>，<b>控制好账单</b>。最后没破产的人赢，或者先做到 Well-Architected 六大支柱的人赢（难度越高，每条支柱要求越高）。玩法灵感来自经典的大富翁类桌游。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>二、开局</h4><ol style=\"padding-left:20px;margin:6px 0\"><li>打开游戏网页，选人数（2–4 人）、难度、胜利条件，点「开始游戏」。1 号位先走；后走的人开局多领一点现金（第 2、3、4 位分别 +$50、+$100、+$150），补回先走先挑地的便宜。</li><li>每人随机抽到一个角色，起始资金、特殊能力和专属技能都不一样，一共 12 个（开了代理商模式还有 3 个代理商角色，见第十节）：</li></ol><table><tr><th>角色</th><th>起始资金</th><th>能力</th><th>弱点</th><th>专属技能</th></tr><tr><td>车库创业公司</td><td>$1500</td><td>每次经过或停在 Startup 扶持多领 $50</td><td>钱比较少</td><td>「Activate 加码」领 $1200，接下来 3 圈经过 Startup 扶持时运行费全免</td></tr><tr><td>传统企业上云</td><td>$1600</td><td>买 EC2、RDS 打 85 折</td><td>在维护窗口最多要停 4 轮</td><td>「MAP 迁移补贴」名下所有实例型服务各免费升一级，再领 $300（一块都升不了就领 $800）；接下来 3 圈运行费减半</td></tr><tr><td>独角兽</td><td>$1500</td><td>开局免费拿到 Route 53</td><td>账单格交双倍</td><td>「新一轮融资」领一笔融资：开局资金减现在的总资产再加 $500（最少 $1000，最多 $2000）</td></tr><tr><td>金融合规公司</td><td>$1600</td><td>买安全合规组服务打 8 折；免疫「安全审计没过」</td><td>Spot 最低出价要原价的 40%（别人 20%），不能参加 Spot 竞价；抽到「抢到便宜的 Spot 容量」放回牌堆底</td><td>「监管沙盒」技术债清零，这一轮和接下来 2 轮免疫所有 Health 事件，领 $800</td></tr><tr><td>AI 原生公司</td><td>$1600</td><td>买 AI 组服务打 9 折</td><td>付 Data Transfer 过路费时交双倍</td><td>「生成式 AI 加速器」AI 组所有服务各免费升一级，再领 $400（一块都升不了就领 $1000）；这一轮和接下来 2 轮 AI 组过路费 ×2</td></tr><tr><td>跨境电商</td><td>$1600</td><td>买网络组和边缘防护组服务打 8 折</td><td>踩到 NAT Gateway 账单格交双倍</td><td>「黑五网一」领 $500；接下来 3 个回合，你所有服务的过路费 ×2</td></tr><tr><td>SaaS 创业公司</td><td>$1600</td><td>买 Serverless 组和应用集成组服务打 8 折</td><td>每个技术债让运行费多 $30（别人是 $20）</td><td>「上架 Marketplace」接下来 4 个自己的回合开始时，每位对手付你 $150 订阅费</td></tr><tr><td>游戏工作室</td><td>$1600</td><td>Spot 最低出价只要原价的 10%</td><td>「流量暴增」没扛住时，每块 Impaired 的服务再交 $30</td><td>「爆款上线」领 $400；接下来 4 笔别人付你的过路费 ×3</td></tr><tr><td>独立开发者</td><td>$1500</td><td>不开「边玩边答题」也能答：买服务答对打 9 折，付过路费答对付八成；开了边玩边答题，买服务答对打 7 折（别人 8 折），付过路费答对只付 35%（别人一半）</td><td>钱比较少；不能签 Savings Plans / RI</td><td>「开源走红」领 $400，再从没人买的服务里自己挑 2 块白拿（没有可拿的再领 $600）</td></tr><tr><td>数据智能公司</td><td>$1600</td><td>买分析组和数仓与搜索组服务打 8 折</td><td>「月底账单爆了」每份容量交 $20（别人 $10）</td><td>「数据变现」每持有一块服务领 $200（不到 4 块按 4 块算）</td></tr><tr><td>短视频平台</td><td>$1600</td><td>买存储组服务打 8 折</td><td>「DDoS 打满了入口」交双倍</td><td>「现象级爆款」每位对手付你 $300</td></tr><tr><td>互联网医疗</td><td>$1600</td><td>买数据库组服务打 8 折；免疫「实习生误删了生产数据」</td><td>「S3 桶被设成了公开」赔双倍</td><td>「紧急救治」所有 Impaired 和被 DDoS 打下线的服务马上恢复，技术债清零，领 $1000</td></tr></table><p>   <b>专属技能</b>：跟游戏王里 LP 掉到 1000 以下才能发动的技能一样，是起死回生用的：总资产（现金 + 服务 + 升级）低于自己开局资金的一半时（开局 $1600 的就是低于 $800），自己回合里点「专属技能」发动一次，一局只能用一次。发动时先按卖回价把全场总资产最高的对手的一块服务买下来（连同升级和容量），钱付给他；现金不够就先欠着，按欠款规则处理，再结算角色自己的技能。技能里写的是基础金额：之后跟着流量涨一半（最多 2.5 倍），完整局再 ×1.2，地狱模式不涨；网页里技能按钮的提示和玩家卡上会写现在的倍数。</p><ol style=\"padding-left:20px;margin:6px 0\"><li><b>选模式</b>：想图热闹选<b>娱乐模式</b>（只有常用服务，到处是盲盒格，抽卡抽到爽，10 轮约 15 分钟）；想认真算账选<b>入门 / 标准 / 完整局</b>；想学东西、备考认证选<b>学习模式</b>（必答题、错题本，不限轮数）。另外可以选<b>卡牌倍率</b>：1 倍、1.5 倍、2 倍，或者每轮随机。</li><li>开局页默认选的是标准局，第一次玩建议改选<b>入门局</b>（标着「第一次玩选这个」），胜利条件保持默认（经典 + 15 轮上限，一局约 20 分钟）；熟悉了再试标准局和完整局。想顺便学亚马逊云科技，就打开开局页第 02 步「难度」下面的<b>边玩边答题</b>开关（选了学习模式难度会自动打开）。</li><li>人不够？名字后面勾「电脑」，那个座位就交给电脑玩，一个人也能开局。</li><li>想每人用自己的电脑或手机玩：开局页第 04 步，房主点「创建房间」设密码，把 6 位房间号和密码发给大家，其他人打开同一个 <code>index.html</code> 点「加入房间」。轮到谁谁在自己的设备上操作，画面实时同步。有人掉线，用局里的名字重新加入就回到原来的座位；房主那台刷新了，房主重新创建房间、点「继续上一局」，大家拿新房间号、用局里的名字加入。</li></ol><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>三、一回合怎么走</h4><ol style=\"padding-left:20px;margin:6px 0\"><li><b>掷骰子</b>，按点数往前走。</li><li><b>看落在哪</b>：<ul style=\"padding-left:20px;margin:6px 0\"><li>没人买的服务 → 可以按需买（全价，稳），EC2、ECS、EKS、EMR、SageMaker AI 还可以 Spot 买（自己出价，最低原价的 20%，但别人出更高的价能抢走）。</li><li>别人的服务 → 付过路费。</li><li>自己的服务 → 可以给它<b>加一个功能</b>、<b>加一份容量</b>，或者用 <b>FIS 抽一张故障牌攻击对手</b>（$40～$100，抽到哪张付哪张；三选一）。</li><li>Health 事件 / re:Invent → 抽一张卡照做。</li><li>账单格、角落格 → 按格子上写的办。</li></ul></li><li><b>做点别的</b>（可选）：资产管理、和别人交易；完整局还能签 Savings Plans / RI、做主动行动。</li><li>结算完点「<b>轮到下一位</b>」结束回合（电脑玩家自动结束）。掷出对子可以再掷一次，但同一回合连掷 3 次对子会\"被限流\"，直接进维护窗口。</li></ol><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>四、怎么赚钱</h4><p>1. 收过路费</p><p>服务越贵、升级越多、容量越大，过路费越高。按用量计费的服务（Serverless 那些）过路费还会随对方掷出的点数浮动：点数大说明流量大，收得多。主人集齐一整组（同色的几块）时，没升级的服务过路费也翻倍。标准局、完整局和学习模式开局前 2 轮是<b>新账号保护期</b>：每笔过路费最多 $50，格子上也按 $50 标，第 3 轮起按原价收。</p><p>2. 组成有效架构，联合收费</p><p>把几块能真正配合工作的服务凑齐，就组成一个架构。<b>别人落在架构里任意一块上，要把整套架构里所有服务的过路费加起来付给你。</b> 这是游戏里最赚钱的玩法。一块服务同时在几个生效架构里时，几个架构<b>串联收费</b>，共用的服务只算一次。一共 27 个架构，写着「A 或 B」的有其中一个就行。棋盘上已经生效的架构，格子上的过路费是橙底，写的就是整套加起来的数，鼠标停在上面能看到每块各多少。</p><table><tr><th>架构</th><th>要哪些服务</th></tr><tr><td>Serverless API</td><td>API Gateway + Lambda + DynamoDB 或 Aurora</td></tr><tr><td>经典三层 Web</td><td>ELB + EC2 + RDS 或 Aurora</td></tr><tr><td>容器平台</td><td>ECR + ECS 或 EKS + ELB</td></tr><tr><td>事件驱动</td><td>EventBridge + Step Functions + Lambda</td></tr><tr><td>订单削峰</td><td>EC2 或 ECS + SQS + Lambda</td></tr><tr><td>图片缩略图</td><td>S3 + Lambda + CloudFront</td></tr><tr><td>GenAI 聊天机器人</td><td>API Gateway + Lambda + Bedrock 或 SageMaker AI</td></tr><tr><td>数仓 ETL</td><td>S3 + Glue 或 EMR + Redshift</td></tr><tr><td>审计与合规</td><td>CloudTrail + S3 + Athena</td></tr><tr><td>告警自愈</td><td>CloudWatch + EventBridge + Lambda</td></tr><tr><td>威胁自动响应</td><td>GuardDuty + EventBridge + Step Functions</td></tr><tr><td>实时日志分析</td><td>Kinesis + Lambda + OpenSearch 或 Redshift</td></tr><tr><td>Serverless 数据湖</td><td>S3 + Glue + Athena</td></tr><tr><td>静态网站</td><td>Route 53 + CloudFront + S3</td></tr><tr><td>GenAI 知识库（RAG）</td><td>S3 + OpenSearch 或 Aurora + Bedrock</td></tr><tr><td>ML 训练与部署</td><td>S3 + ECR 或 EFS + SageMaker AI</td></tr><tr><td>高可用入口</td><td>Route 53 + ELB + EC2</td></tr><tr><td>缓存加速</td><td>ELB + EC2 或 ECS + ElastiCache</td></tr><tr><td>备份与容灾</td><td>AWS Backup + RDS 或 Aurora 或 DynamoDB 或 EFS + S3</td></tr><tr><td>数据加密</td><td>KMS + S3 或 RDS 或 Aurora 或 DynamoDB + CloudTrail</td></tr><tr><td>漏洞管理</td><td>ECR + Inspector + ECS 或 EKS 或 EC2</td></tr><tr><td>大数据处理</td><td>S3 + EMR + Redshift 或 Athena</td></tr><tr><td>私有网络</td><td>VPC + ELB + EC2 或 ECS 或 EKS</td></tr><tr><td>AI Agent 工作流</td><td>Step Functions + Lambda + Bedrock</td></tr><tr><td>实时推荐</td><td>Kinesis + SageMaker AI + DynamoDB 或 ElastiCache</td></tr><tr><td>全球 API 加速</td><td>CloudFront + WAF + API Gateway</td></tr><tr><td>纵深防御</td><td>WAF + Shield Advanced + GuardDuty</td></tr></table><p>有些架构还有额外好处，比如「高可用入口」让 EC2 升多 AZ 半价，「审计与合规」免疫「安全审计没过」，「纵深防御」免疫所有安全类事件。抽到 re:Invent 卡「解决方案架构师的建议」，能直接飞到你架构里缺的那块服务。</p><p>3. 其他进账</p><ul style=\"padding-left:20px;margin:6px 0\"><li>每次经过起点「Startup 扶持」，领 $200 Credits。</li><li>经过「User Group 活动」领取 $50；停在上面二选一：<b>抽奖</b>，随机拿 $100～奖池全部（账单格和罚款都进奖池，不够 $100 亚马逊云科技补上）；或者<b>抽两张 re:Invent 卡选一张</b>。抽到 re:Invent「领到 Free Tier 额度」能把奖池全部拿走。</li><li>re:Invent 卡大多是好事：拿 Credits、考认证、Hackathon 拿奖……</li></ul><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>五、怎么花钱：不同服务的账单不一样</h4><p>普通大富翁买下地皮就只管收租；这里<b>买下服务之后，它还会按自己的计费方式持续花你的钱。</b></p><table><tr><th>服务类型</th><th>例子</th><th>每圈经过起点时</th><th>收到过路费时</th></tr><tr><td>IaaS / 容器</td><td>EC2、EBS、ECS、EKS</td><td>交运行费（空着也要交）</td><td>全归你</td></tr><tr><td>打包价</td><td>Lightsail</td><td>交固定套餐费，不随流量变（负载均衡、托管数据库另算）</td><td>全归你</td></tr><tr><td>PaaS</td><td>RDS、Aurora、Redshift、SageMaker AI</td><td>交运行费，比 IaaS 贵</td><td>全归你</td></tr><tr><td>Serverless</td><td>Lambda、DynamoDB、SQS</td><td>不交钱</td><td>交 15% 请求费</td></tr><tr><td>按存储 / 按个收月费</td><td>S3、EFS、AWS Backup、ECR、KMS、Route 53、WAF</td><td>固定月费 $5（KMS 只用 AWS 托管密钥时不收）</td><td>交 15% 请求费</td></tr><tr><td>按 token</td><td>Bedrock</td><td>不交钱（加了模型单元要交）</td><td>交 25% token 成本</td></tr><tr><td>订阅</td><td>Shield Advanced</td><td>固定 $20</td><td>全归你</td></tr></table><p>所以：</p><ul style=\"padding-left:20px;margin:6px 0\"><li><b>Serverless 前期没负担</b>，没人来就不花钱，适合起步。</li><li><b>实例型服务空着也烧钱</b>，但有人来时收入全归你，适合放在大家常走的位置。</li><li>想省钱可以 Spot 购买（只有 EC2、ECS、EKS、EMR、SageMaker AI 能用，现实里也只有这几类有 Spot 容量）：自己出价，最低原价的 20%（游戏工作室 10%，地狱模式除外）。出得越低越省，但别人落上来只要比你多出原价的 10% 就能抢走（你拿回出价的一半作补偿）；以后补差价就能转成按需，出到全价就没人能抢。金融合规公司 Spot 购买和抢 Spot 都至少要出原价的 40%。</li><li>完整局可以跟亚马逊云科技签 <b>Savings Plans</b> 或买<b>预留实例（RI）</b>，<b>1 圈算 1 年</b>：<ul style=\"padding-left:20px;margin:6px 0\"><li>Savings Plans 1 年：不预付，承诺每圈花一笔固定的钱，EC2、ECS、EKS、EMR、Lambda、SageMaker AI 和 RDS、Aurora、ElastiCache、OpenSearch 的运行费都打 75 折。</li><li>Savings Plans 3 年：只覆盖 EC2、ECS、EKS、EMR、Lambda、SageMaker AI，打 55 折；数据库（含 OpenSearch）照原价，因为现实里 Database Savings Plans 只有 1 年期。</li><li>RI：挑一块 EC2、RDS、Aurora、ElastiCache、Redshift、OpenSearch 或 EMR，全额预付，1 年省 35%、3 年省 55%，期内它的运行费全免。</li><li>服务卖回亚马逊云科技了，承诺也照付。ELB、EBS、Lightsail、Kinesis 都用不了，和现实一样。</li></ul></li><li>缺钱时，EC2、RDS、Aurora、Redshift、ECS 可以<b>下线</b>，相当于大富翁里的抵押：先拿回买价的一半周转，下线期间不收过路费，运行费只剩每圈 $5 的存储费（ECS 不收）；从下一回合起你自己决定什么时候上线（还这一半再加原价的 10%），不会自动扣钱。这期间别人落上来，可以付原价把它拉走。OpenSearch、ElastiCache 这类现实里不能停机的不能下线；Lightsail 停机照样收套餐费，也不让下线。</li><li>EC2 每圈多交 $5 公网 IPv4 地址费（2024 年起真实收费），你的 VPC 开了私有子网就免。</li><li>彻底不要的服务可以<b>卖回亚马逊云科技</b>：买价、升级、容量实际花的钱加起来<b>按 8 折</b>拿回，升级越多卖得越多；以后不用再交它的运行费，这块重新变成谁都能买的状态。只去掉升级或容量、服务留着，是退一半。</li><li>EC2、ECS、EKS、EMR、SageMaker AI 这几块有 Spot（竞价实例）：落地的人不买，大家可以 <b>Spot 竞价</b>，每人暗标出价，价高者得，钱交亚马逊云科技，拿到的是 Spot 状态。其他服务没人买就留在亚马逊云科技。</li><li>自己回合里，掷骰子之前或之后，可以花总资产的 4%（最低 $50）<b>抽一张 re:Invent 卡</b>，每回合一次（在维护窗口里不能抽）。答题的折扣和其他折扣都相乘（折上折）。</li></ul><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>六、怎么变强：升级和扩容</h4><p>落在<b>自己的服务</b>上时，可以加功能、加容量（下面细说），或者用 FIS 攻击一位对手：随机抽一张故障牌，抽到哪张付哪张（注入 API 限流错误 $40、断开依赖服务的网络 $40、停止 EC2 实例 $60、终止实例 $60、模拟 AZ 断电 $100），对手当场承受，三选一：</p><p>加功能（最多 3 级）</p><ul style=\"padding-left:20px;margin:6px 0\"><li><b>实例型服务</b>（EC2、RDS、EKS 等）买下时是<b>单 AZ</b>，第 1 级一般是<b>多 AZ</b>，之后才能加 Auto Scaling 之类的功能。EBS 卷、EMR 集群永远单 AZ；ECS 服务默认就跨 AZ 分散任务。</li><li>其他服务天生跨多个 AZ，三级都是功能，比如：<ul style=\"padding-left:20px;margin:6px 0\"><li>ECR：基础扫描 → 增强扫描 → 跨区域复制</li><li>Lambda：提高并发配额 → 预置并发 → 多区域</li><li>Bedrock：Nova Lite → Nova Pro → 跨区域推理（档位越高，每个 token 越贵，过路费越高；跨区域推理只算一处弹性扩展，不算多区域容灾）</li><li>VPC：私有子网 + NAT（要多交 NAT 的钱）→ Session Manager → Transit Gateway</li></ul></li><li>很多功能自带防护：多 AZ 扛 AZ 断电，Auto Scaling 扛流量暴增，增强扫描扛 CVE，备份扛误删……服务详情里都写着。</li></ul><p>加容量（最多 4 份）</p><p>给服务加节点、加并发：EC2 加实例、EKS 加节点、Lambda 加并发、Kinesis 加分片、SageMaker AI 加实例、Bedrock 加模型单元……每份让过路费 <b>+25%</b>。实例型服务每多一份，每圈运行费也会多一些；Serverless 加并发不增加运行费。</p><p class=\"muted\">集齐一整组之后，不用等落地，在「资产管理」里随时可以升级和扩容。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>七、怎么不被坑：Health 事件和防护</h4><p>Health 事件卡大多是坏事，但几乎每张都有对应的防护。提前做好架构，就能躲过去：</p><table><tr><th>遇到</th><th>怎么防</th></tr><tr><td>一个 AZ 断电 / 单点故障</td><td>实例型服务升多 AZ；托管和全局服务大多本来就跨 AZ；凑齐「高可用入口」的话，EC2 升多 AZ 半价（只挂 ELB 不算多 AZ）</td></tr><tr><td>某个服务在 Region 里宕机</td><td>升到多区域那一级</td></tr><tr><td>us-east-1 大面积故障</td><td>每块服务各自升到多区域那一级（没升的变 Impaired）；Route 53、CloudFront 这类全局服务不受影响</td></tr><tr><td>EC2 实例硬件退役</td><td>EC2 升到 Auto Scaling，自动换实例；多 AZ 挡不住</td></tr><tr><td>流量暴增</td><td>实例型服务升到「扛住流量暴增」那一级（EC2 Auto Scaling、ECS 服务自动扩缩、EKS Karpenter 自动扩缩、RDS 只读副本这类；Lightsail、EBS、SageMaker、OpenSearch 没有这一级），或者凑「订单削峰」架构；其他服务不受影响。全都扛住了就领 $100</td></tr><tr><td>服务配额用完</td><td>Lambda 提高并发配额，或 CloudWatch 告警提前发现</td></tr><tr><td>DDoS</td><td>Shield Advanced、WAF、CloudFront（Shield Standard 默认免费开着）</td></tr><tr><td>SSH 暴力破解</td><td>VPC 升到 Session Manager，或付 $50 借别人的；ECS 用 Fargate、EKS 用 Auto Mode 也不怕；只有 GuardDuty 也能及时发现，改为交 $50、实例不变 Impaired</td></tr><tr><td>高危 CVE</td><td>Inspector 扫描 EC2、EMR（不扫 Lightsail）；ECR 增强扫描或 Inspector 镜像扫描保护容器；托管数据库和 Serverless 的运行时由亚马逊云科技打补丁</td></tr><tr><td>误删数据</td><td>AWS Backup 升「备份计划」，或有别的备份类功能（版本控制、时间点恢复、自动快照……）</td></tr><tr><td>S3 桶被设成公开</td><td>KMS 客户托管密钥、CloudFront 源访问控制；只有 GuardDuty 也能及时发现，改为每人赔一半（现实里靠 AWS Config 规则配自动修正、账号级 Block Public Access 守住）</td></tr><tr><td>Root 密钥泄露</td><td>「威胁自动响应」架构；只有 GuardDuty 能少罚一点</td></tr><tr><td>证书过期</td><td>ELB 或 CloudFront 升到 HTTPS（ACM 自动续期）</td></tr><tr><td>凌晨 3 点被告警叫醒</td><td>「告警自愈」架构</td></tr><tr><td>安全审计没过</td><td>持有 2 个以上安全合规组服务，或「审计与合规」架构</td></tr></table><p>被事件打挂的服务会变成 <b>Impaired</b>，到它主人的下一个回合前收不到过路费。</p><p>实在躲不过，还能用 Enterprise Support 卡、复盘标记、演练标记来抵消，或者把罚款的一半付给一位对这张卡免疫的玩家，请他托管（他同意才行）。要你「停一轮」的卡都能改成交钱立刻处理、照常走。被罚到又没抵消的，标准局起会欠 1 个<b>技术债</b>：每个让每圈运行费多 $20；攒到 2 个升级每级贵 $50；攒到 3 个要\"大重构\"：停一轮交 $300，或者不停交 $400（抽 Health 卡时攒满的，跟着卡牌倍率涨）。重构清掉 1 个：手上有 1 个 $50、2 个 $100，第 10 轮起再加 $30，越拖越贵。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><p><b>同色跳</b>：同色服务打散在棋盘四边。落在自己的服务上（升不升级都行），可以选择飞到前面下一块同色服务（像飞行棋），只跳一次；跳过去的格子没人买的话不能买，别人的要付过路费。</p><p><b>不只靠骰子走</b>：抽到卫星链路、DataSync、跨 Region 扩张、Global Accelerator 快线这类卡会直接飞过去，往前飞和同色跳路过起点、UG 活动照常领钱；抽到 DNS 配错、发布回滚、流量被劫持会被退回去或者跟别人换位置，这些不算经过。往回退时绕过了起点的（比如从 Health 格抽到 DNS 配错），算退回上一圈：下次往前经过起点不领钱、也不交运行费。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>八、角落格</h4><table><tr><th>格子</th><th>发生什么</th></tr><tr><td>Startup 扶持（起点）</td><td>经过领 $200 Credits，同时交这一圈的运行费</td></tr><tr><td>维护窗口</td><td>直接落在这里：停一轮，或者交 $50 换个时间窗口、照常走；被关进来要掷出对子、付 $50 开 Support Case，或用 Enterprise Support 才能出来。出来时讲一句根因，可以领复盘标记</td></tr><tr><td>User Group 活动</td><td>经过 UG 活动领取 $50；停在上面二选一：抽奖 $100～奖池全部（不够亚马逊云科技补）/ 抽两张 re:Invent 卡选一张</td></tr><tr><td>Root 密钥泄露</td><td>进维护窗口；有 GuardDuty 的只交 $50</td></tr></table><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>九、怎么赢</h4><ul style=\"padding-left:20px;margin:6px 0\"><li><b>经典模式</b>：别人都破产了，你就赢了。</li><li><b>越往后过路费越高</b>：从第 5 轮起所有过路费 × 1.75，第 10 轮起 × 2.5，第 15 轮起 × 3.25……业务做大了，流量越来越多，后期一块好地就能把人收破产。</li><li><b>破产</b>：钱不够付时，可以先在资产管理里去掉升级和容量、把能停机的服务下线，或者把服务按实付 8 折卖回亚马逊云科技凑钱，也可以直接宣告破产；全卖了也不够还的会直接破产，服务按欠款比例分给各个债主（欠亚马逊云科技的那份退回亚马逊云科技）；平时自己回合里点「宣告破产」也能主动认输，资产交回亚马逊云科技，不能指定送人。</li><li>胜利条件可以多选，谁先达成谁赢。</li><li><b>Well-Architected 模式</b>：先同时满足卓越运营、安全性、可靠性、性能效率、成本优化、可持续性六个支柱的人赢。网页版会实时显示每个人的支柱进度。每条支柱按「有几处」计分，比如每持有一块 CloudWatch、CloudTrail 各算 1 分卓越运营，每块安全服务算 1 分安全性。入门局每条 1 分就够；标准局每条 1 分、六条加起来 12 分；完整局每条 2 分；地狱模式每条 2 分、六条加起来 18 分。网页上鼠标停在支柱上（手机上点一下）能看到得分和还差什么。</li><li><b>地狱模式</b>：完整局 + 全部玩法 DLC、高速部署和题库，必须答题，掷完骰子还会随机掉题（答对 +$50、答错 −$50），过路费涨得最快，没有新账号保护期，每个角色多一条地狱限制。想挑战再选。</li><li><b>轮数上限</b>（默认开，15 轮，一局约 20 分钟）：打满轮数按资产估值排名，保证一局能打完。不勾也最多打 50 轮（学习模式不限轮数）。</li><li><b>现在结算</b>：时间到了、不想打了，点「对局」菜单里的「现在结算」，按估值排名结束。</li><li><b>限时模式</b>：时间到了按资产估值排名。中途点「对局」菜单的「退出到开局页」，计时会停住，回来「继续上一局」接着计。</li></ul><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>十、DLC 扩展包和开关（开局页第 05 步，可多选，默认都不开）</h4><table><tr><th>扩展包</th><th>加了什么</th></tr><tr><td>GenAI 浪潮</td><td>AI 组过路费 ×1.5；多 2 张 Health 卡、3 张 re:Invent 卡、6 道 AI 题</td></tr><tr><td>安全攻防</td><td>FIS 攻击打 8 折；安全合规组和边缘防护组过路费 ×1.3；多 3 张 Health 卡、2 张 re:Invent 卡、4 道安全题</td></tr><tr><td>FinOps 账单大战</td><td>所有运行费 ×1.5；任何难度都能签 Savings Plans / RI；多 2 张 Health 卡、2 张 re:Invent 卡、4 道成本题</td></tr><tr><td>全球出海</td><td>有多区域功能的服务过路费再 +30%；多 2 张 Health 卡、2 张 re:Invent 卡、4 道全球化题</td></tr><tr><td>高速部署（开关）</td><td>每人一个部署点数 0–12：每回合 +1，被事件打中 −2、进维护窗口 −4；花 1–12 点各发动一个技能，比如 1 点多走或少走一步、4 点故障转移扛住没做高可用的故障、5 点逼对手抽 Health 卡、6 点 DDoS 让对手一块服务 Impaired、12 点 DDoS 让对手一块服务下线 2 回合</td></tr><tr><td>代理商模式（开关）</td><td>座位可以当代理商（不超过一半）：代理商落在没人买的服务上按进货价 5 折（地狱 7 折）占地囤货，自己的地只在组成有效架构时收过路费、架构 ×2（地狱模式正常收）；客户落在代理商的地上可以按转售价从他手里买，在用的（架构、整组、升过级）不卖；之后这块的运行费交给代理商，代理商赚差价。开局资金 = 所有客户开局资金的总和；勾了轮数上限时是角色卡加每位客户 $300（娱乐、地狱模式只按角色卡）。代理商有 3 张自己的角色卡，角色卡上的开局资金是娱乐、地狱模式和有轮数上限时用的：总代理（$1500，技能「年度返点」领「客户经你买的服务总价」的一半（最少 $800））；托管服务商（MSP）（$1400，技能「托管续约」每位客户付你 $400，你再领 $300（没有客户就领 $800））；咨询合作伙伴（$1300，技能「解决方案打包」领 $400，再从没人买、原价不超过 $400 的服务里挑 2 块白拿（没有可拿的再领 $600））</td></tr></table><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><p><b>键盘快捷键</b>：空格掷骰子（单机时骰子还在转，再按一下直接出点数）、回车选主按钮、1–9 按顺序选弹窗里的按钮（从左往右、从上往下，灰的也算一个；竞价、Spot 出价、改名字的窗一打开光标就在输入框里，数字直接输进框，回车提交）、B 资产管理、M 玩法、? 看全部快捷键。弹窗开着时 Tab 只在弹窗里转，关掉后焦点回到原来的按钮；电脑的弹窗只能看，按键不会替它选。嫌动画慢，可以在「对局」菜单里把「动画速度」切到「快」。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><p><b>想顺便备考认证？</b> 勾「题库：云从业者 / 解决方案架构师助理 / AI 从业者」任一个 DLC，游戏里就会出对应考纲的原创练习题，答错进错题本，下次再考。不想玩棋盘，开局页点「刷题模式」直接刷题，刷完按考点给正确率。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>十一、新手建议</h4><ol style=\"padding-left:20px;margin:6px 0\"><li><b>前几圈先买运行费低的服务</b>：Lambda、SQS、DynamoDB 这类 Serverless 没人用就不花钱（Lambda 升到第 2 级预置并发后每圈交 $10）；S3 买价只要 $60、EFS $100，每圈也只交 $5 固定月费。</li><li><b>盯住一个架构去凑</b>：联合收费比单块服务强得多。</li><li><b>买了实例型服务，尽早升多 AZ</b>：AZ 断电、单点故障这几张卡专门坑单 AZ 的实例。</li><li><b>VPC 很关键</b>：没有 VPC 的人给实例升多 AZ 要付钱给 VPC 主人；VPC 升到 Session Manager 还能防 SSH 暴力破解，别人也可以付钱借用。</li><li><b>别一口气把钱花光</b>：每圈都要交运行费，账单格和事件卡也会扣钱。现金太少一次没付上，就可能被迫变卖。</li><li><b>注意 Bedrock</b>：它按 token 收费，对方掷的点数越大，你收得越多；但要交 25% token 成本。它不交运行费，未升级时单次过路费和同价位的服务差不多，升级后涨得慢一些；另一个用处是凑 GenAI 知识库（RAG）、AI Agent 工作流这两个非它不可的架构，还有凑齐 AI 组。</li></ol><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>十二、一局开头示例</h4><p class=\"muted\">韩叔是车库创业公司，起始 $1500。<br>第 1 轮掷出 3，落在 <b>re:Invent</b>，抽到「拿到 Activate 创业扶持 Credits」，领 $200。<br>第 2 轮落在 <b>Lambda</b>，花 $220 买下。Serverless 不交运行费，没人来也不花钱。<br>第 4 轮落在另一格 <b>re:Invent</b>，抽到「走 Global Accelerator 快线」，一路飞回自己的 Lambda，路过起点领了 $250（车库创业公司每次多领 $50）；落地后选「加 1 个并发」，过路费 +25%。<br>后来虫虫落在韩叔的 Lambda 上，付了过路费，韩叔把其中 15% 作为请求费付给亚马逊云科技。<br>韩叔又买到 API Gateway 和 DynamoDB，凑齐「Serverless API」。从此别人落在这三块里任意一块，都要按三块加起来的过路费付给韩叔。<br>有一轮抽到 Health 事件「一个 AZ 断电了」：韩叔的服务全是 Serverless，天生跨多个 AZ，一点事都没有；虫虫的 EC2 还是单 AZ，变成 Impaired。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>十三、常见问题</h4><p><b>Q：哪些服务不用自己做多 AZ？</b></p><p>看格子底部类型字的颜色：绿字（Serverless 和大部分托管服务，比如 S3、Lambda、DynamoDB、SQS，还有 ECS）自带跨 AZ 高可用，AZ 断电卡打不到；橙字（EC2、RDS、Aurora、EKS 这类实例型）买下时是单 AZ，要升第 1 级多 AZ；红字（EBS、EMR）永远单 AZ；蓝字（Route 53、CloudFront、Shield Advanced）是全局服务。想扛整个 Region 出问题，不管哪类都要升多区域。</p><p><b>Q：卖回亚马逊云科技和下线有什么区别？</b></p><p>下线是暂时停机、拿回一半周转，服务还是你的，重新上线要还这一半加 10%，期间别人可以付原价拉走；卖回亚马逊云科技是彻底不要，买价、升级、容量的实付按 8 折拿回，服务回到亚马逊云科技，谁先落上去谁就能买，包括你自己。所以缺钱又还想留着的先下线，确定不要了就卖。</p><p><b>Q：为什么 Route 53 没有\"多 AZ\"？</b></p><p>Route 53 是全局服务，本来就不在某个 AZ 里，它的升级是健康检查、故障转移路由这些功能。</p><p><b>Q：CloudWatch、CloudTrail、Data Transfer 怎么收钱？</b></p><p>这三格算一组按用量收费：过路费 = 对方掷出的点数 × 倍数，三格都有时倍数最高，升级后倍数还会增加。</p><p><b>Q：架构联合收费和单块过路费能叠加吗？</b></p><p>不叠加。落在架构里的服务上，就按整套架构的总额收一次，单块的过路费不另算。一块服务同时在几个生效架构里时，这几个架构串联收费：用到的服务过路费都加起来，共用的服务只算一次。比如你有 ELB、EC2、RDS、Route 53，别人落在 EC2 上，「经典三层 Web」和「高可用入口」一起生效，四块的过路费加起来收。</p><p><b>Q：保留卡都干啥的？</b></p><p>抽到后放在面前，需要时用掉：Enterprise Support 免费离开维护窗口或抵消一张 Health 事件卡；Spot 容量让下次 Spot 最低出价降到 10%；Cost Explorer 免一次账单格或抵消「月底账单爆了」；MAP 让下次买 IaaS、PaaS 或容器服务打 7 折；根因在上游让你把下一张 Health 事件甩给另一位玩家承受（他对这张卡免疫就作废）。网页里鼠标停在玩家面板的卡名上（手机上点一下卡名）能看到说明。</p><p><b>Q：Spot 出多少合适？</b></p><p>出价越低越省钱，但越容易被抢。别人抢的时候最少要比你多出原价的 10%，被抢你拿回出价的一半。想长期留着、要升级的服务，要么直接按需买，要么之后补差价转成按需。</p><p><b>Q：奖池的钱从哪来、到哪去？</b></p><p>两个账单格、Health 事件罚款、维护窗口的 $50 都进奖池。停在 User Group 活动选「抽奖」至少拿 $100，最多把奖池整个拿走；抽到「领到 Free Tier 额度」也拿走全部。经过 UG 活动（没停在上面）领取 $50。</p><p><b>Q：网页版能存档吗？</b></p><p>能。浏览器会自动保存，关掉再打开，点「继续上一局」就行。同一个浏览器只存一局：还有没打完的局时开新局会先问一句；别在两个标签页里同时打，后接着打的那边算数。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>附录：有效架构</h4><p>凑齐后，别人落在其中任意一块上，按整套架构所有服务的过路费加起来收。</p><table><tr><th>架构</th><th>组成</th><th>加成</th></tr><tr><td>Serverless API</td><td>API Gateway 接请求 → Lambda 处理 → DynamoDB 或 Aurora（Serverless v2）存数据</td><td>—</td></tr><tr><td>经典三层 Web</td><td>ELB 分发流量 → EC2 跑应用 → RDS 或 Aurora 存数据</td><td>—</td></tr><tr><td>容器平台</td><td>镜像放 ECR → ECS 或 EKS 运行 → ELB 对外提供服务</td><td>容器组升级费减半</td></tr><tr><td>事件驱动</td><td>EventBridge 收事件 → Step Functions 编排 → Lambda 执行每一步</td><td>—</td></tr><tr><td>订单削峰</td><td>EC2 或 ECS 上的网站收订单 → SQS 排队削峰 → Lambda 按自己的节奏处理，大促时网站不被压垮</td><td>免疫「流量暴增」，扛住了还能领钱</td></tr><tr><td>图片缩略图</td><td>图片上传到 S3 触发事件 → Lambda 生成缩略图写回 S3 → CloudFront 就近分发</td><td>—</td></tr><tr><td>GenAI 聊天机器人</td><td>API Gateway 收消息 → Lambda 组装提示词和上下文 → Bedrock 或 SageMaker AI 上部署的模型生成回答</td><td>—</td></tr><tr><td>数仓 ETL</td><td>原始数据落 S3 → Glue 或 EMR 清洗转换 → Redshift 做报表和 BI 分析</td><td>—</td></tr><tr><td>审计与合规</td><td>CloudTrail 跟踪记下控制台和 API 的管理操作 → 存进 S3 → Athena 用 SQL 查谁在什么时候做了什么</td><td>免疫「安全审计没过」</td></tr><tr><td>告警自愈</td><td>CloudWatch 告警 → EventBridge 路由 → Lambda 自动重启、扩容或回滚</td><td>「凌晨 3 点被告警叫醒」不用停一轮</td></tr><tr><td>威胁自动响应</td><td>GuardDuty 发现异常 → EventBridge 路由 → Step Functions 编排处置：隔离实例、吊销密钥、通知值班</td><td>免疫「暴露在公网的实例被 SSH 暴力破解」和「Root 密钥被推到了 GitHub」</td></tr><tr><td>实时日志分析</td><td>Kinesis 收数据流 → Lambda 处理后写进 OpenSearch 检索；Redshift 也能直接从 Kinesis 流式摄取，用 SQL 分析</td><td>—</td></tr><tr><td>Serverless 数据湖</td><td>S3 存原始数据 → Glue 建数据目录 → Athena 直接查询</td><td>每次经过或停在 Startup 扶持多领 $50</td></tr><tr><td>静态网站</td><td>Route 53 解析域名 → CloudFront 加速 → S3 放网页</td><td>—</td></tr><tr><td>GenAI 知识库（RAG）</td><td>资料放 S3 → 向量存在 OpenSearch 或 Aurora PostgreSQL（pgvector）→ Bedrock 检索后生成回答</td><td>别人落在你的 Bedrock 上，额外付你 $50</td></tr><tr><td>ML 训练与部署</td><td>训练数据放 S3、训练镜像放 ECR（或共享数据放 EFS）→ SageMaker AI 训练并部署</td><td>—</td></tr><tr><td>高可用入口</td><td>Route 53 健康检查 → ELB 跨 AZ 分发 → EC2</td><td>EC2 升「多 AZ」半价：ELB 本来就跨多个 AZ，在另一个 AZ 再起一台实例挂进目标组就行</td></tr><tr><td>缓存加速</td><td>ELB 分发流量 → EC2 或 ECS 跑应用 → 热点数据放 ElastiCache，数据库压力小、响应快</td><td>—</td></tr><tr><td>备份与容灾</td><td>AWS Backup 按备份计划给数据库、文件系统和 S3 桶做备份 → 备份放进备份保管库，再复制到另一个 Region 的保管库，出事能恢复</td><td>免疫「实习生误删了生产数据」</td></tr><tr><td>数据加密</td><td>KMS 管密钥给数据加密 → CloudTrail 记下每一次用密钥，没权限拿到数据也解不开</td><td>免疫「S3 桶被设成了公开」</td></tr><tr><td>漏洞管理</td><td>镜像推到 ECR → Inspector 持续扫描漏洞 → 修好的镜像才部署到 ECS、EKS 或 EC2</td><td>免疫「高危 CVE 爆出」</td></tr><tr><td>大数据处理</td><td>数据放 S3 → EMR 跑 Spark 批处理 → 结果写进 Redshift 或用 Athena 查询</td><td>—</td></tr><tr><td>私有网络</td><td>ELB 统一对外接流量 → 应用实例只对 ELB 开放安全组；VPC 再开私有子网，实例连公网 IP 都不用（免公网 IPv4 费）</td><td>—</td></tr><tr><td>AI Agent 工作流</td><td>Step Functions 编排多步任务 → Lambda 调用工具和接口 → Bedrock 推理决定下一步</td><td>—</td></tr><tr><td>实时推荐</td><td>Kinesis 收用户行为 → SageMaker AI 实时推理 → 推荐结果放 DynamoDB 或 ElastiCache 给前端读</td><td>—</td></tr><tr><td>全球 API 加速</td><td>CloudFront 在边缘接请求、WAF 过滤恶意流量 → API Gateway 处理</td><td>—</td></tr><tr><td>纵深防御</td><td>WAF 挡应用层攻击，Shield Advanced 挡 DDoS，GuardDuty 盯异常行为</td><td>免疫所有安全类 Health 事件</td></tr></table><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>去哪查细节</h4><ul style=\"padding-left:20px;margin:6px 0\"><li><b>每个服务的特性、三级升级、计费方式</b>：网页里点「图鉴」，或者看「主持人规则书.pdf」第 8 节。</li><li><b>全部 Health 事件卡和 re:Invent 卡</b>：「卡牌.pdf」可以直接打印裁开；每张卡的完整效果和免疫条件见「主持人规则书.pdf」第 20、21 节。</li><li><b>题库和答案</b>：题卡在「卡牌.pdf」里，答案倒印在卡底；完整题库见「主持人规则书.pdf」附录。</li><li><b>所有数字</b>（升级费、运行费、Savings Plans / RI、估值公式）：「主持人规则书.pdf」。</li></ul>";
+const MANUAL_LITE_HTML = "<h2 style=\"margin:0 0 8px\">亚马逊云科技 User Group 云上大亨 · 玩法速览（简版）</h2><p>三分钟看完就能开局。细节查「玩法手册」，全部规则和数字查「主持人规则书」。</p><h4>一、一句话</h4><p>你是一家在亚马逊云科技上创业的公司：买服务，别人走到你的服务上就付你过路费；把服务升级、组成架构，收得更多；扛住线上事故，控制好账单。最后没破产的人赢，或者打满轮数按估值排名。玩法灵感来自经典的大富翁类桌游。</p><h4>二、开局</h4><ol style=\"padding-left:20px;margin:6px 0\"><li>选人数（2–4 人）、模式、胜利条件，点「开始游戏」。人不够就勾「电脑」。</li><li>每人随机抽一张角色卡：开局资金、能力、弱点、一个专属技能。</li><li>默认是标准局，第一次玩改选<b>入门局</b>，胜利条件保持默认（经典 + 15 轮上限，约 20 分钟）。</li></ol><h4>三、一回合</h4><ol style=\"padding-left:20px;margin:6px 0\"><li>掷两颗骰子往前走；掷出对子再掷一次。</li><li>落到哪格结算哪格：没人买的服务可以买；别人的服务付过路费；自己的服务可以升级、加容量；卡牌格抽卡；账单格交钱。</li><li>每次经过 Startup 扶持领 $200 Credits，同时交这一圈的运行费。</li><li>踩到「Root 密钥泄露」或同一回合连掷 3 次对子，会被直接送进<b>维护窗口</b>：下回合二选一，付 $50 马上出来、照常掷骰子，或者停一轮再出来（传统企业上云要停 2 轮）。自己走到维护窗口那格也是停一轮或交 $50。</li></ol><h4>四、赚钱和花钱</h4><ul style=\"padding-left:20px;margin:6px 0\"><li><b>过路费</b>：服务越贵、升级越多、容量越大，收得越多；集齐同色一整组，没升级的也翻倍。标准局、完整局、学习模式开局前 2 轮是<b>新账户保护期</b>：每笔过路费最多 $50。</li><li><b>有效架构</b>：凑齐一套真实架构（比如 ELB → EC2 → RDS），别人落在其中任意一块，按整套收。</li><li><b>运行费</b>：实例型服务空着也要交钱，Serverless 没人用就不花钱。</li><li><b>越往后过路费越高</b>：每 5 轮涨一档，后期一块好地就能把人收破产。</li></ul><h4>五、防事故</h4><p>抽到 Health 事件卡（AZ 断电、DDoS、证书过期……）会被罚。做了对应的高可用和安全功能就免疫，比如多 AZ 扛 AZ 断电、Auto Scaling 扛流量暴增、备份扛误删。</p><h4>六、缺钱和破产</h4><ul style=\"padding-left:20px;margin:6px 0\"><li>去掉升级、减容量：退一半；能停机的服务下线：先拿回买价一半周转。</li><li>不要的服务整块卖回亚马逊云科技：实付按 8 折拿回。</li><li>全卖了也不够还才破产，服务按欠款比例分给各个债主。</li></ul><h4>七、专属技能</h4><p>每个角色一个起死回生的技能，像游戏王里 LP 掉到 1000 以下才能发动的技能：<b>总资产低于自己开局资金的一半</b>时，点「专属技能」发动，<b>一局一次</b>：先按卖回价买下总资产最高的对手的一块服务（钱付给他），再结算角色自己的技能。</p><h4>八、模式和开关</h4><table><tr><th>选什么</th><th>一句话</th></tr><tr><td>娱乐模式</td><td>常用服务 + 盲盒格，抽卡最多，10 轮</td></tr><tr><td>入门局</td><td>只有基础规则，先熟悉</td></tr><tr><td>标准局</td><td>加技术债和季度财报，认真算账</td></tr><tr><td>完整局</td><td>加主动行动、交易、Savings Plans / RI</td></tr><tr><td>学习模式</td><td>必答题、错题本，不限轮数</td></tr><tr><td>地狱模式</td><td>全部加压拉满，必须答题</td></tr><tr><td>高速部署（开关）</td><td>部署点数 0–12，花点数发动 12 个技能，12 点能 DDoS 对手</td></tr><tr><td>代理商模式（开关）</td><td>座位可以当代理商，拿货打折、转售、赚运行费差价</td></tr><tr><td>边玩边答题（开关）</td><td>答对过路费减半、买服务打 8 折</td></tr></table><h4>九、三条建议</h4><ul style=\"padding-left:20px;margin:6px 0\"><li>别把钱花光：每圈都要交运行费，现金太少一次没付上就被迫变卖。</li><li>先做多 AZ：最划算的第一笔防护。</li><li>先凑整组和架构：收得最多的方式。</li></ul>";
+const MANUAL_HTML = "<h2 style=\"margin:0 0 8px\">亚马逊云科技 User Group 云上大亨 · 玩法手册</h2><p class=\"muted\">这本手册讲怎么上手玩，十分钟读完。每条规则的细节和数字查「主持人规则书.pdf」；网页版里点「玩法」也能随时打开这本手册。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>一、一句话玩法</h4><p>你是一家在亚马逊云科技上创业的公司：绕着棋盘走，<b>买亚马逊云科技服务</b>，别人走到你的服务上就<b>付你过路费</b>；把服务<b>升级、扩容、组成完整架构</b>，收得更多；同时要<b>扛住各种线上事故</b>，<b>控制好账单</b>。最后没破产的人赢，或者先做到 Well-Architected 六大支柱的人赢（难度越高，每条支柱要求越高）。玩法灵感来自经典的大富翁类桌游。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>二、开局</h4><ol style=\"padding-left:20px;margin:6px 0\"><li>打开游戏网页，选人数（2–4 人）、难度、胜利条件，点「开始游戏」。1 号位先走；后走的人开局多领一点现金（第 2、3、4 位分别 +$50、+$100、+$150），补回先走先挑地的便宜。</li><li>每人随机抽到一个角色，起始资金、特殊能力和专属技能都不一样，一共 12 个（开了代理商模式还有 3 个代理商角色，见第十节）：</li></ol><table><tr><th>角色</th><th>起始资金</th><th>能力</th><th>弱点</th><th>专属技能</th></tr><tr><td>车库创业公司</td><td>$1500</td><td>每次经过或停在 Startup 扶持多领 $50</td><td>钱比较少</td><td>「Activate 加码」领 $1200，接下来 3 圈经过 Startup 扶持时运行费全免</td></tr><tr><td>传统企业上云</td><td>$1600</td><td>买 EC2、RDS 打 85 折</td><td>被送进维护窗口，不交钱要停 2 轮</td><td>「MAP 迁移补贴」名下所有实例型服务各免费升一级，再领 $300（一块都升不了就领 $800）；接下来 3 圈运行费减半</td></tr><tr><td>独角兽</td><td>$1500</td><td>开局免费拿到 Route 53</td><td>账单格交双倍</td><td>「新一轮融资」领一笔融资：开局资金减现在的总资产再加 $500（最少 $1000，最多 $2000）</td></tr><tr><td>金融合规公司</td><td>$1600</td><td>买安全合规组服务打 8 折；免疫「安全审计没过」</td><td>Spot 最低出价要原价的 40%（别人 20%）；抽到「抢到便宜的 Spot 容量」放回牌堆底</td><td>「监管沙盒」技术债清零，这一轮和接下来 2 轮免疫所有 Health 事件，领 $800</td></tr><tr><td>AI 原生公司</td><td>$1600</td><td>买 AI 组服务打 9 折</td><td>付 Data Transfer 过路费时交双倍</td><td>「生成式 AI 加速器」AI 组所有服务各免费升一级，再领 $400（一块都升不了就领 $1000）；这一轮和接下来 2 轮 AI 组过路费 ×2</td></tr><tr><td>跨境电商</td><td>$1600</td><td>买网络组和边缘防护组服务打 8 折</td><td>踩到 NAT Gateway 账单格交双倍</td><td>「黑五网一」领 $500；接下来 3 个回合，你所有服务的过路费 ×2</td></tr><tr><td>SaaS 创业公司</td><td>$1600</td><td>买 Serverless 组和应用集成组服务打 8 折</td><td>每个技术债让运行费多 $30（别人是 $20）</td><td>「上架 Marketplace」接下来 4 个自己的回合开始时，每位对手付你 $150 订阅费</td></tr><tr><td>游戏工作室</td><td>$1600</td><td>Spot 最低出价只要原价的 10%</td><td>「流量暴增」没扛住时，每块 Impaired 的服务再交 $30</td><td>「爆款上线」领 $400；接下来 4 笔别人付你的过路费 ×3</td></tr><tr><td>独立开发者</td><td>$1500</td><td>不开「边玩边答题」也能答：买服务答对打 9 折，付过路费答对付八成；开了边玩边答题，买服务答对打 7 折（别人 8 折），付过路费答对只付 35%（别人一半）</td><td>钱比较少；不能签 Savings Plans / RI</td><td>「开源走红」领 $400，再从没人买的服务里自己挑 2 块白拿（没有可拿的再领 $600）</td></tr><tr><td>数据智能公司</td><td>$1600</td><td>买分析组和数仓与搜索组服务打 8 折</td><td>「月底账单爆了」每份容量交 $20（别人 $10）</td><td>「数据变现」每持有一块服务领 $200（不到 4 块按 4 块算）</td></tr><tr><td>短视频平台</td><td>$1600</td><td>买存储组服务打 8 折</td><td>「DDoS 打满了入口」交双倍</td><td>「现象级爆款」每位对手付你 $300</td></tr><tr><td>互联网医疗</td><td>$1600</td><td>买数据库组服务打 8 折；免疫「实习生误删了生产数据」</td><td>「S3 桶被设成了公开」赔双倍</td><td>「紧急救治」所有 Impaired 和被 DDoS 打下线的服务马上恢复，技术债清零，领 $1000</td></tr></table><p>   <b>专属技能</b>：跟游戏王里 LP 掉到 1000 以下才能发动的技能一样，是起死回生用的：总资产（现金 + 服务 + 升级）低于自己开局资金的一半时（开局 $1600 的就是低于 $800），自己回合里点「专属技能」发动一次，一局只能用一次。发动时先按卖回价把全场总资产最高的对手的一块服务买下来（连同升级和容量），钱付给他；现金不够就先欠着，按欠款规则处理，再结算角色自己的技能。技能里写的是基础金额：之后跟着流量涨一半（最多 2.5 倍），完整局再 ×1.2，地狱模式不涨；网页里技能按钮的提示和玩家卡上会写现在的倍数。</p><ol style=\"padding-left:20px;margin:6px 0\"><li><b>选模式</b>：想图热闹选<b>娱乐模式</b>（只有常用服务，到处是盲盒格，抽卡抽到爽，10 轮约 15 分钟）；想认真算账选<b>入门 / 标准 / 完整局</b>；想学东西、备考认证选<b>学习模式</b>（必答题、错题本，不限轮数）。另外可以选<b>卡牌倍率</b>：1 倍、1.5 倍、2 倍，或者每轮随机。</li><li>开局页默认选的是标准局，第一次玩建议改选<b>入门局</b>（标着「第一次玩选这个」），胜利条件保持默认（经典 + 15 轮上限，一局约 20 分钟）；熟悉了再试标准局和完整局。想顺便学亚马逊云科技，就打开开局页第 02 步「难度」下面的<b>边玩边答题</b>开关（选了学习模式难度会自动打开）。</li><li>人不够？名字后面勾「电脑」，那个座位就交给电脑玩，一个人也能开局。</li><li>想每人用自己的电脑或手机玩：开局页第 04 步，房主点「创建房间」设密码，把 6 位房间号和密码发给大家，其他人打开同一个 <code>index.html</code> 点「加入房间」。轮到谁谁在自己的设备上操作，画面实时同步。有人掉线，用局里的名字重新加入就回到原来的座位；房主那台刷新了，房主重新创建房间、点「继续上一局」，大家拿新房间号、用局里的名字加入。</li></ol><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>三、一回合怎么走</h4><ol style=\"padding-left:20px;margin:6px 0\"><li><b>掷骰子</b>，按点数往前走。</li><li><b>看落在哪</b>：<ul style=\"padding-left:20px;margin:6px 0\"><li>没人买的服务 → 可以按需买（全价，稳），EC2、ECS、EKS、EMR、SageMaker AI 还可以 Spot 买（自己出价，最低原价的 20%，但别人出更高的价能抢走）。</li><li>别人的服务 → 付过路费。</li><li>自己的服务 → 可以给它<b>加一个功能</b>、<b>加一份容量</b>，或者用 <b>FIS 抽一张故障牌攻击对手</b>（$40～$100，抽到哪张付哪张；三选一）。</li><li>Health 事件 / re:Invent → 抽一张卡照做。</li><li>账单格、角落格 → 按格子上写的办。</li></ul></li><li><b>做点别的</b>（可选）：资产管理、和别人交易；完整局还能签 Savings Plans / RI、做主动行动。</li><li>结算完点「<b>轮到下一位</b>」结束回合（电脑玩家自动结束）。掷出对子可以再掷一次，但同一回合连掷 3 次对子会\"被限流\"，直接进维护窗口。</li></ol><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>四、怎么赚钱</h4><p>1. 收过路费</p><p>服务越贵、升级越多、容量越大，过路费越高。按用量计费的服务（Serverless 那些）过路费还会随对方掷出的点数浮动：点数大说明流量大，收得多。主人集齐一整组（同色的几块）时，没升级的服务过路费也翻倍。标准局、完整局和学习模式开局前 2 轮是<b>新账户保护期</b>：每笔过路费最多 $50，格子上也按 $50 标，第 3 轮起按原价收。</p><p>2. 组成有效架构，联合收费</p><p>把几块能真正配合工作的服务凑齐，就组成一个架构。<b>别人落在架构里任意一块上，要把整套架构里所有服务的过路费加起来付给你。</b> 这是游戏里最赚钱的玩法。一块服务同时在几个生效架构里时，几个架构<b>串联收费</b>，共用的服务只算一次。一共 27 个架构，写着「A 或 B」的有其中一个就行。棋盘上已经生效的架构，格子上的过路费是橙底，写的就是整套加起来的数，鼠标停在上面能看到每块各多少。</p><table><tr><th>架构</th><th>要哪些服务</th></tr><tr><td>Serverless API</td><td>API Gateway + Lambda + DynamoDB 或 Aurora</td></tr><tr><td>经典三层 Web</td><td>ELB + EC2 + RDS 或 Aurora</td></tr><tr><td>容器平台</td><td>ECR + ECS 或 EKS + ELB</td></tr><tr><td>事件驱动</td><td>EventBridge + Step Functions + Lambda</td></tr><tr><td>订单削峰</td><td>EC2 或 ECS + SQS + Lambda</td></tr><tr><td>图片缩略图</td><td>S3 + Lambda + CloudFront</td></tr><tr><td>GenAI 聊天机器人</td><td>API Gateway + Lambda + Bedrock 或 SageMaker AI</td></tr><tr><td>数仓 ETL</td><td>S3 + Glue 或 EMR + Redshift</td></tr><tr><td>审计与合规</td><td>CloudTrail + S3 + Athena</td></tr><tr><td>告警自愈</td><td>CloudWatch + EventBridge + Lambda</td></tr><tr><td>威胁自动响应</td><td>GuardDuty + EventBridge + Step Functions</td></tr><tr><td>实时日志分析</td><td>Kinesis + Lambda + OpenSearch 或 Redshift</td></tr><tr><td>Serverless 数据湖</td><td>S3 + Glue + Athena</td></tr><tr><td>静态网站</td><td>Route 53 + CloudFront + S3</td></tr><tr><td>GenAI 知识库（RAG）</td><td>S3 + OpenSearch 或 Aurora + Bedrock</td></tr><tr><td>ML 训练与部署</td><td>S3 + ECR 或 EFS + SageMaker AI</td></tr><tr><td>高可用入口</td><td>Route 53 + ELB + EC2</td></tr><tr><td>缓存加速</td><td>ELB + EC2 或 ECS + ElastiCache</td></tr><tr><td>备份与容灾</td><td>AWS Backup + RDS 或 Aurora 或 DynamoDB 或 EFS + S3</td></tr><tr><td>数据加密</td><td>KMS + S3 或 RDS 或 Aurora 或 DynamoDB + CloudTrail</td></tr><tr><td>漏洞管理</td><td>ECR + Inspector + ECS 或 EKS 或 EC2</td></tr><tr><td>大数据处理</td><td>S3 + EMR + Redshift 或 Athena</td></tr><tr><td>私有网络</td><td>VPC + ELB + EC2 或 ECS 或 EKS</td></tr><tr><td>AI Agent 工作流</td><td>Step Functions + Lambda + Bedrock</td></tr><tr><td>实时推荐</td><td>Kinesis + SageMaker AI + DynamoDB 或 ElastiCache</td></tr><tr><td>全球 API 加速</td><td>CloudFront + WAF + API Gateway</td></tr><tr><td>纵深防御</td><td>WAF + Shield Advanced + GuardDuty</td></tr></table><p>有些架构还有额外好处，比如「高可用入口」让 EC2 升多 AZ 半价，「审计与合规」免疫「安全审计没过」，「纵深防御」免疫所有安全类事件。抽到 re:Invent 卡「解决方案架构师的建议」，能直接飞到你架构里缺的那块服务。</p><p>3. 其他进账</p><ul style=\"padding-left:20px;margin:6px 0\"><li>每次经过起点「Startup 扶持」，领 $200 Credits。</li><li>经过「User Group 活动」领取 $50；停在上面二选一：<b>抽奖</b>，随机拿 $100～奖池全部（账单格和罚款都进奖池，不够 $100 亚马逊云科技补上）；或者<b>抽两张 re:Invent 卡选一张</b>。抽到 re:Invent「领到 Free Tier 额度」能把奖池全部拿走。</li><li>re:Invent 卡大多是好事：拿 Credits、考认证、Hackathon 拿奖……</li></ul><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>五、怎么花钱：不同服务的账单不一样</h4><p>普通大富翁买下地皮就只管收租；这里<b>买下服务之后，它还会按自己的计费方式持续花你的钱。</b></p><table><tr><th>服务类型</th><th>例子</th><th>每圈经过起点时</th><th>收到过路费时</th></tr><tr><td>IaaS / 容器</td><td>EC2、EBS、ECS、EKS</td><td>交运行费（空着也要交）</td><td>全归你</td></tr><tr><td>打包价</td><td>Lightsail</td><td>交固定套餐费，不随流量变（负载均衡、托管数据库另算）</td><td>全归你</td></tr><tr><td>PaaS</td><td>RDS、Aurora、Redshift、SageMaker AI</td><td>交运行费，比 IaaS 贵</td><td>全归你</td></tr><tr><td>Serverless</td><td>Lambda、DynamoDB、SQS</td><td>不交钱</td><td>交 15% 请求费</td></tr><tr><td>按存储 / 按个收月费</td><td>S3、EFS、AWS Backup、ECR、KMS、Route 53、WAF</td><td>固定月费 $5（KMS 只用 AWS 托管密钥时不收）</td><td>交 15% 请求费</td></tr><tr><td>按 token</td><td>Bedrock</td><td>不交钱（加了模型单元要交）</td><td>交 25% token 成本</td></tr><tr><td>订阅</td><td>Shield Advanced</td><td>固定 $20</td><td>全归你</td></tr></table><p>所以：</p><ul style=\"padding-left:20px;margin:6px 0\"><li><b>Serverless 前期没负担</b>，没人来就不花钱，适合起步。</li><li><b>实例型服务空着也烧钱</b>，但有人来时收入全归你，适合放在大家常走的位置。</li><li>想省钱可以 Spot 购买（只有 EC2、ECS、EKS、EMR、SageMaker AI 能用，现实里也只有这几类有 Spot 容量）：自己出价，最低原价的 20%（游戏工作室 10%，地狱模式除外）。出得越低越省，但别人落上来只要比你多出原价的 10% 就能抢走（你拿回出价的一半作补偿）；以后补差价就能转成按需，出到全价就没人能抢。金融合规公司 Spot 购买和抢 Spot 都至少要出原价的 40%。</li><li>完整局可以跟亚马逊云科技签 <b>Savings Plans</b> 或买<b>预留实例（RI）</b>，<b>1 圈算 1 年</b>：<ul style=\"padding-left:20px;margin:6px 0\"><li>Savings Plans 1 年：不预付，承诺每圈花一笔固定的钱，EC2、ECS、EKS、EMR、Lambda、SageMaker AI 和 RDS、Aurora、ElastiCache、OpenSearch 的运行费都打 75 折。</li><li>Savings Plans 3 年：只覆盖 EC2、ECS、EKS、EMR、Lambda、SageMaker AI，打 55 折；数据库（含 OpenSearch）照原价，因为现实里 Database Savings Plans 只有 1 年期。</li><li>RI：挑一块 EC2、RDS、Aurora、ElastiCache、Redshift、OpenSearch 或 EMR，全额预付，1 年省 35%、3 年省 55%，期内它的运行费全免。</li><li>服务卖回亚马逊云科技了，承诺也照付。ELB、EBS、Lightsail、Kinesis 都用不了，和现实一样。</li></ul></li><li>缺钱时，EC2、RDS、Aurora、Redshift、ECS 可以<b>下线</b>，相当于大富翁里的抵押：先拿回买价的一半周转，下线期间不收过路费，运行费只剩每圈 $5 的存储费（ECS 不收）；从下一回合起你自己决定什么时候上线（还这一半再加原价的 10%），不会自动扣钱。这期间别人落上来，可以付原价把它拉走。OpenSearch、ElastiCache 这类现实里不能停机的不能下线；Lightsail 停机照样收套餐费，也不让下线。</li><li>EC2 每圈多交 $5 公网 IPv4 地址费（2024 年起真实收费），你的 VPC 开了私有子网就免。</li><li>彻底不要的服务可以<b>卖回亚马逊云科技</b>：买价、升级、容量实际花的钱加起来<b>按 8 折</b>拿回，升级越多卖得越多；以后不用再交它的运行费，这块重新变成谁都能买的状态。只去掉升级或容量、服务留着，是退一半。</li><li><b>不买就是不买</b>：落地的人不买，这块留在亚马逊云科技，别人不能竞价抢。EC2、ECS、EKS、EMR、SageMaker AI 落地时可以用 Spot 自己出价买；已经是 Spot 的，别人落上来可以出更高价抢走，抢走就不付这次过路费。</li><li>自己回合里，掷骰子之前或之后，可以花总资产的 4%（最低 $50）<b>抽一张 re:Invent 卡</b>，每回合一次（在维护窗口里不能抽）。答题的折扣和其他折扣都相乘（折上折）。</li></ul><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>六、怎么变强：升级和扩容</h4><p>落在<b>自己的服务</b>上时，可以加功能、加容量（下面细说），或者用 FIS 攻击一位对手：随机抽一张故障牌，抽到哪张付哪张（注入 API 限流错误 $40、断开依赖服务的网络 $40、停止 EC2 实例 $60、终止实例 $60、模拟 AZ 断电 $100），对手当场承受，三选一：</p><p>加功能（最多 3 级）</p><ul style=\"padding-left:20px;margin:6px 0\"><li><b>实例型服务</b>（EC2、RDS、EKS 等）买下时是<b>单 AZ</b>，第 1 级一般是<b>多 AZ</b>，之后才能加 Auto Scaling 之类的功能。EBS 卷、EMR 集群永远单 AZ；ECS 服务默认就跨 AZ 分散任务。</li><li>其他服务天生跨多个 AZ，三级都是功能，比如：<ul style=\"padding-left:20px;margin:6px 0\"><li>ECR：基础扫描 → 增强扫描 → 跨区域复制</li><li>Lambda：提高并发配额 → 预置并发 → 多区域</li><li>Bedrock：Nova Lite → Nova Pro → 跨区域推理（档位越高，每个 token 越贵，过路费越高；跨区域推理只算一处弹性扩展，不算多区域容灾）</li><li>VPC：私有子网 + NAT（要多交 NAT 的钱）→ Session Manager → Transit Gateway</li></ul></li><li>很多功能自带防护：多 AZ 扛 AZ 断电，Auto Scaling 扛流量暴增，增强扫描扛 CVE，备份扛误删……服务详情里都写着。</li></ul><p>加容量（最多 4 份）</p><p>给服务加节点、加并发：EC2 加实例、EKS 加节点、Lambda 加并发、Kinesis 加分片、SageMaker AI 加实例、Bedrock 加模型单元……每份让过路费 <b>+25%</b>。实例型服务每多一份，每圈运行费也会多一些；Serverless 加并发不增加运行费。</p><p class=\"muted\">集齐一整组之后，不用等落地，在「资产管理」里随时可以升级和扩容。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>七、怎么不被坑：Health 事件和防护</h4><p>Health 事件卡大多是坏事，但几乎每张都有对应的防护。提前做好架构，就能躲过去：</p><table><tr><th>遇到</th><th>怎么防</th></tr><tr><td>一个 AZ 断电 / 单点故障</td><td>实例型服务升多 AZ；托管和全局服务大多本来就跨 AZ；凑齐「高可用入口」的话，EC2 升多 AZ 半价（只挂 ELB 不算多 AZ）</td></tr><tr><td>某个服务在 Region 里宕机</td><td>升到多区域那一级</td></tr><tr><td>us-east-1 大面积故障</td><td>每块服务各自升到多区域那一级（没升的变 Impaired）；Route 53、CloudFront 这类全局服务不受影响</td></tr><tr><td>EC2 实例硬件退役</td><td>EC2 升到 Auto Scaling，自动换实例；多 AZ 挡不住</td></tr><tr><td>流量暴增</td><td>实例型服务升到「扛住流量暴增」那一级（EC2 Auto Scaling、ECS 服务自动扩缩、EKS Karpenter 自动扩缩、RDS 只读副本这类；Lightsail、EBS、SageMaker、OpenSearch 没有这一级），或者凑「订单削峰」架构；其他服务不受影响。全都扛住了就领 $100</td></tr><tr><td>服务配额用完</td><td>Lambda 提高并发配额，或 CloudWatch 告警提前发现</td></tr><tr><td>DDoS</td><td>Shield Advanced、WAF、CloudFront（Shield Standard 默认免费开着）</td></tr><tr><td>SSH 暴力破解</td><td>VPC 升到 Session Manager，或付 $50 借别人的；ECS 用 Fargate、EKS 用 Auto Mode 也不怕；只有 GuardDuty 也能及时发现，改为交 $50、实例不变 Impaired</td></tr><tr><td>高危 CVE</td><td>Inspector 扫描 EC2、EMR（不扫 Lightsail）；ECR 增强扫描或 Inspector 镜像扫描保护容器；托管数据库和 Serverless 的运行时由亚马逊云科技打补丁</td></tr><tr><td>误删数据</td><td>AWS Backup 升「备份计划」，或有别的备份类功能（版本控制、时间点恢复、自动快照……）</td></tr><tr><td>S3 桶被设成公开</td><td>KMS 客户托管密钥、CloudFront 源访问控制；只有 GuardDuty 也能及时发现，改为每人赔一半（现实里靠 AWS Config 规则配自动修正、账户级 Block Public Access 守住）</td></tr><tr><td>Root 密钥泄露</td><td>「威胁自动响应」架构（GuardDuty 发现后自动吊销密钥）</td></tr><tr><td>证书过期</td><td>ELB 或 CloudFront 升到 HTTPS（ACM 自动续期）</td></tr><tr><td>凌晨 3 点被告警叫醒</td><td>「告警自愈」架构</td></tr><tr><td>安全审计没过</td><td>持有 2 个以上安全合规组服务，或「审计与合规」架构</td></tr></table><p>被事件打挂的服务会变成 <b>Impaired</b>，到它主人的下一个回合前收不到过路费。</p><p>实在躲不过，还能用 Enterprise Support 卡、复盘标记、演练标记来抵消，或者把罚款的一半付给一位对这张卡免疫的玩家，请他托管（他同意才行）。要你「停一轮」的卡都能改成交钱立刻处理、照常走。被罚到又没抵消的，标准局起会欠 1 个<b>技术债</b>：每个让每圈运行费多 $20；攒到 2 个升级每级贵 $50；攒到 3 个要\"大重构\"：停一轮交 $300，或者不停交 $400（抽 Health 卡时攒满的，跟着卡牌倍率涨）。重构清掉 1 个：手上有 1 个 $50、2 个 $100，第 10 轮起再加 $30，越拖越贵。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><p><b>同色跳</b>：同色服务打散在棋盘四边。落在自己的服务上（升不升级都行），可以选择飞到前面下一块同色服务（像飞行棋），只跳一次；跳过去的格子没人买的话不能买，别人的要付过路费。</p><p><b>不只靠骰子走</b>：抽到卫星链路、DataSync、跨 Region 扩张、Global Accelerator 快线这类卡会直接飞过去，往前飞和同色跳路过起点、UG 活动照常领钱；抽到 DNS 配错、发布回滚、流量被劫持会被退回去或者跟别人换位置，这些不算经过。往回退时绕过了起点的（比如从 Health 格抽到 DNS 配错），算退回上一圈：下次往前经过起点不领钱、也不交运行费。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>八、角落格</h4><table><tr><th>格子</th><th>发生什么</th></tr><tr><td>Startup 扶持（起点）</td><td>经过领 $200 Credits，同时交这一圈的运行费</td></tr><tr><td>维护窗口</td><td>落在这里或被送进来：停一轮，或者交 $50 照常走（被送进来的下一回合再选；Enterprise Support 卡也能免费出来）。出来时讲一句根因，可以领复盘标记</td></tr><tr><td>User Group 活动</td><td>经过 UG 活动领取 $50；停在上面二选一：抽奖 $100～奖池全部（不够亚马逊云科技补）/ 抽两张 re:Invent 卡选一张</td></tr><tr><td>Root 密钥泄露</td><td>直接进维护窗口</td></tr></table><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>九、怎么赢</h4><ul style=\"padding-left:20px;margin:6px 0\"><li><b>经典模式</b>：别人都破产了，你就赢了。</li><li><b>越往后过路费越高</b>：从第 5 轮起所有过路费 × 1.75，第 10 轮起 × 2.5，第 15 轮起 × 3.25……业务做大了，流量越来越多，后期一块好地就能把人收破产。</li><li><b>破产</b>：钱不够付时，可以先在资产管理里去掉升级和容量、把能停机的服务下线，或者把服务按实付 8 折卖回亚马逊云科技凑钱，也可以直接宣告破产；全卖了也不够还的会直接破产，服务按欠款比例分给各个债主（欠亚马逊云科技的那份退回亚马逊云科技）；平时自己回合里点「宣告破产」也能主动认输，资产交回亚马逊云科技，不能指定送人。</li><li>胜利条件可以多选，谁先达成谁赢。</li><li><b>Well-Architected 模式</b>：先同时满足卓越运营、安全性、可靠性、性能效率、成本优化、可持续性六个支柱的人赢。网页版会实时显示每个人的支柱进度。每条支柱按「有几处」计分，比如每持有一块 CloudWatch、CloudTrail 各算 1 分卓越运营，每块安全服务算 1 分安全性，S3、DynamoDB、Lambda 这类天生跨 AZ 的服务每块算 1 分可靠性（EC2、RDS 这类实例要自己升多 AZ 才算）。入门局每条 1 分就够；标准局每条 1 分、六条加起来 12 分；完整局每条 2 分；地狱模式每条 2 分、六条加起来 18 分。网页上鼠标停在支柱上（手机上点一下）能看到得分和还差什么。</li><li><b>地狱模式</b>：完整局 + 全部玩法 DLC、高速部署和题库，必须答题，掷完骰子还会随机掉题（答对 +$50、答错 −$50），过路费涨得最快，没有新账户保护期，每个角色多一条地狱限制。想挑战再选。</li><li><b>轮数上限</b>（默认开，15 轮，一局约 20 分钟）：打满轮数按资产估值排名，保证一局能打完。不勾也最多打 50 轮（学习模式不限轮数）。</li><li><b>现在结算</b>：时间到了、不想打了，点「对局」菜单里的「现在结算」，按估值排名结束。</li><li><b>限时模式</b>：时间到了按资产估值排名。中途点「对局」菜单的「退出到开局页」，计时会停住，回来「继续上一局」接着计。</li></ul><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>十、DLC 扩展包和开关（开局页第 05 步，可多选，默认都不开）</h4><table><tr><th>扩展包</th><th>加了什么</th></tr><tr><td>GenAI 浪潮</td><td>AI 组过路费 ×1.5；多 2 张 Health 卡、3 张 re:Invent 卡、6 道 AI 题</td></tr><tr><td>安全攻防</td><td>FIS 攻击打 8 折；安全合规组和边缘防护组过路费 ×1.3；多 3 张 Health 卡、2 张 re:Invent 卡、4 道安全题</td></tr><tr><td>FinOps 账单大战</td><td>所有运行费 ×1.5；任何难度都能签 Savings Plans / RI；多 2 张 Health 卡、2 张 re:Invent 卡、4 道成本题</td></tr><tr><td>全球出海</td><td>有多区域功能的服务过路费再 +30%；多 2 张 Health 卡、2 张 re:Invent 卡、4 道全球化题</td></tr><tr><td>高速部署（开关）</td><td>每人一个部署点数 0–12：每回合 +1，被事件打中 −2、进维护窗口 −4；花 1–12 点各发动一个技能，比如 1 点多走或少走一步、4 点故障转移扛住没做高可用的故障、5 点逼对手抽 Health 卡、6 点 DDoS 让对手一块服务 Impaired、12 点 DDoS 让对手一块服务下线 2 回合</td></tr><tr><td>代理商模式（开关）</td><td>座位可以当代理商（不超过一半）：代理商落在没人买的服务上按进货价 5 折（地狱 7 折）占地囤货，自己的地只在组成有效架构时收过路费、架构 ×2（地狱模式正常收）；客户落在代理商的地上可以按转售价从他手里买，在用的（架构、整组、升过级）不卖；之后这块的运行费交给代理商，代理商赚差价。开局资金 = 所有客户开局资金的总和；勾了轮数上限时是角色卡加每位客户 $300（娱乐、地狱模式只按角色卡）。代理商有 3 张自己的角色卡，角色卡上的开局资金是娱乐、地狱模式和有轮数上限时用的：总代理（$1500，技能「年度返点」领「客户经你买的服务总价」的一半（最少 $800））；托管服务商（MSP）（$1400，技能「托管续约」每位客户付你 $400，你再领 $300（没有客户就领 $800））；咨询合作伙伴（$1300，技能「解决方案打包」领 $400，再从没人买、原价不超过 $400 的服务里挑 2 块白拿（没有可拿的再领 $600））</td></tr></table><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><p><b>键盘快捷键</b>：空格掷骰子（单机时骰子还在转，再按一下直接出点数）、回车选主按钮、1–9 按顺序选弹窗里的按钮（从左往右、从上往下，灰的也算一个；Spot 出价、改名字的窗一打开光标就在输入框里，数字直接输进框，回车提交）、B 资产管理、M 玩法、? 看全部快捷键。弹窗开着时 Tab 只在弹窗里转，关掉后焦点回到原来的按钮；电脑的弹窗只能看，按键不会替它选。嫌动画慢，可以在「对局」菜单里把「动画速度」切到「快」。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><p><b>想顺便备考认证？</b> 勾「题库：云从业者 / 解决方案架构师助理 / AI 从业者」任一个 DLC，游戏里就会出对应考纲的原创练习题，答错进错题本，下次再考。不想玩棋盘，开局页点「刷题模式」直接刷题，刷完按考点给正确率。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>十一、新手建议</h4><ol style=\"padding-left:20px;margin:6px 0\"><li><b>前几圈先买运行费低的服务</b>：Lambda、SQS、DynamoDB 这类 Serverless 没人用就不花钱（Lambda 升到第 2 级预置并发后每圈交 $10）；S3 买价只要 $60、EFS $100，每圈也只交 $5 固定月费。</li><li><b>盯住一个架构去凑</b>：联合收费比单块服务强得多。</li><li><b>买了实例型服务，尽早升多 AZ</b>：AZ 断电、单点故障这几张卡专门坑单 AZ 的实例。</li><li><b>VPC 很关键</b>：没有 VPC 的人给实例升多 AZ 要付钱给 VPC 主人；VPC 升到 Session Manager 还能防 SSH 暴力破解，别人也可以付钱借用。</li><li><b>别一口气把钱花光</b>：每圈都要交运行费，账单格和事件卡也会扣钱。现金太少一次没付上，就可能被迫变卖。</li><li><b>注意 Bedrock</b>：它按 token 收费，对方掷的点数越大，你收得越多；但要交 25% token 成本。它不交运行费，未升级时单次过路费和同价位的服务差不多，升级后涨得慢一些；另一个用处是凑 GenAI 知识库（RAG）、AI Agent 工作流这两个非它不可的架构，还有凑齐 AI 组。</li></ol><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>十二、一局开头示例</h4><p class=\"muted\">韩叔是车库创业公司，起始 $1500。<br>第 1 轮掷出 3，落在 <b>re:Invent</b>，抽到「拿到 Activate 创业扶持 Credits」，领 $200。<br>第 2 轮落在 <b>Lambda</b>，花 $220 买下。Serverless 不交运行费，没人来也不花钱。<br>第 4 轮落在另一格 <b>re:Invent</b>，抽到「走 Global Accelerator 快线」，一路飞回自己的 Lambda，路过起点领了 $250（车库创业公司每次多领 $50）；落地后选「加 1 个并发」，过路费 +25%。<br>后来虫虫落在韩叔的 Lambda 上，付了过路费，韩叔把其中 15% 作为请求费付给亚马逊云科技。<br>韩叔又买到 API Gateway 和 DynamoDB，凑齐「Serverless API」。从此别人落在这三块里任意一块，都要按三块加起来的过路费付给韩叔。<br>有一轮抽到 Health 事件「一个 AZ 断电了」：韩叔的服务全是 Serverless，天生跨多个 AZ，一点事都没有；虫虫的 EC2 还是单 AZ，变成 Impaired。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>十三、常见问题</h4><p><b>Q：哪些服务不用自己做多 AZ？</b></p><p>看格子底部类型字的颜色：绿字（Serverless 和大部分托管服务，比如 S3、Lambda、DynamoDB、SQS，还有 ECS）自带跨 AZ 高可用，AZ 断电卡打不到；橙字（EC2、RDS、Aurora、EKS 这类实例型）买下时是单 AZ，要升第 1 级多 AZ；红字（EBS、EMR）永远单 AZ；蓝字（Route 53、CloudFront、Shield Advanced）是全局服务。想扛整个 Region 出问题，不管哪类都要升多区域。</p><p><b>Q：卖回亚马逊云科技和下线有什么区别？</b></p><p>下线是暂时停机、拿回一半周转，服务还是你的，重新上线要还这一半加 10%，期间别人可以付原价拉走；卖回亚马逊云科技是彻底不要，买价、升级、容量的实付按 8 折拿回，服务回到亚马逊云科技，谁先落上去谁就能买，包括你自己。所以缺钱又还想留着的先下线，确定不要了就卖。</p><p><b>Q：为什么 Route 53 没有\"多 AZ\"？</b></p><p>Route 53 是全局服务，本来就不在某个 AZ 里，它的升级是健康检查、故障转移路由这些功能。</p><p><b>Q：CloudWatch、CloudTrail、Data Transfer 怎么收钱？</b></p><p>这三格算一组按用量收费：过路费 = 对方掷出的点数 × 倍数，三格都有时倍数最高，升级后倍数还会增加。</p><p><b>Q：架构联合收费和单块过路费能叠加吗？</b></p><p>不叠加。落在架构里的服务上，就按整套架构的总额收一次，单块的过路费不另算。一块服务同时在几个生效架构里时，这几个架构串联收费：用到的服务过路费都加起来，共用的服务只算一次。比如你有 ELB、EC2、RDS、Route 53，别人落在 EC2 上，「经典三层 Web」和「高可用入口」一起生效，四块的过路费加起来收。</p><p><b>Q：保留卡都干啥的？</b></p><p>抽到后放在面前，需要时用掉：Enterprise Support 免费离开维护窗口或抵消一张 Health 事件卡；Spot 容量让下次 Spot 最低出价降到 10%；Cost Explorer 免一次账单格或抵消「月底账单爆了」；MAP 让下次买 IaaS、PaaS 或容器服务打 7 折；根因在上游让你把下一张 Health 事件甩给另一位玩家承受（他对这张卡免疫就作废）。网页里鼠标停在玩家面板的卡名上（手机上点一下卡名）能看到说明。</p><p><b>Q：Spot 出多少合适？</b></p><p>出价越低越省钱，但越容易被抢。别人抢的时候最少要比你多出原价的 10%，被抢你拿回出价的一半。想长期留着、要升级的服务，要么直接按需买，要么之后补差价转成按需。</p><p><b>Q：奖池的钱从哪来、到哪去？</b></p><p>两个账单格、Health 事件罚款、维护窗口的 $50 都进奖池。停在 User Group 活动选「抽奖」至少拿 $100，最多把奖池整个拿走；抽到「领到 Free Tier 额度」也拿走全部。经过 UG 活动（没停在上面）领取 $50。</p><p><b>Q：网页版能存档吗？</b></p><p>能。浏览器会自动保存，关掉再打开，点「继续上一局」就行。同一个浏览器只存一局：还有没打完的局时开新局会先问一句；别在两个标签页里同时打，后接着打的那边算数。</p><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>附录：有效架构</h4><p>凑齐后，别人落在其中任意一块上，按整套架构所有服务的过路费加起来收。</p><table><tr><th>架构</th><th>组成</th><th>加成</th></tr><tr><td>Serverless API</td><td>API Gateway 接请求 → Lambda 处理 → DynamoDB 或 Aurora（Serverless v2）存数据</td><td>—</td></tr><tr><td>经典三层 Web</td><td>ELB 分发流量 → EC2 跑应用 → RDS 或 Aurora 存数据</td><td>—</td></tr><tr><td>容器平台</td><td>镜像放 ECR → ECS 或 EKS 运行 → ELB 对外提供服务</td><td>容器组升级费减半</td></tr><tr><td>事件驱动</td><td>EventBridge 收事件 → Step Functions 编排 → Lambda 执行每一步</td><td>—</td></tr><tr><td>订单削峰</td><td>EC2 或 ECS 上的网站收订单 → SQS 排队削峰 → Lambda 按自己的节奏处理，大促时网站不被压垮</td><td>免疫「流量暴增」，扛住了还能领钱</td></tr><tr><td>图片缩略图</td><td>图片上传到 S3 触发事件 → Lambda 生成缩略图写回 S3 → CloudFront 就近分发</td><td>—</td></tr><tr><td>GenAI 聊天机器人</td><td>API Gateway 收消息 → Lambda 组装提示词和上下文 → Bedrock 或 SageMaker AI 上部署的模型生成回答</td><td>—</td></tr><tr><td>数仓 ETL</td><td>原始数据落 S3 → Glue 或 EMR 清洗转换 → Redshift 做报表和 BI 分析</td><td>—</td></tr><tr><td>审计与合规</td><td>CloudTrail 跟踪记下控制台和 API 的管理操作 → 存进 S3 → Athena 用 SQL 查谁在什么时候做了什么</td><td>免疫「安全审计没过」</td></tr><tr><td>告警自愈</td><td>CloudWatch 告警 → EventBridge 路由 → Lambda 自动重启、扩容或回滚</td><td>「凌晨 3 点被告警叫醒」不用停一轮</td></tr><tr><td>威胁自动响应</td><td>GuardDuty 发现异常 → EventBridge 路由 → Step Functions 编排处置：隔离实例、吊销密钥、通知值班</td><td>免疫「暴露在公网的实例被 SSH 暴力破解」和「Root 密钥被推到了 GitHub」</td></tr><tr><td>实时日志分析</td><td>Kinesis 收数据流 → Lambda 处理后写进 OpenSearch 检索；Redshift 也能直接从 Kinesis 流式摄取，用 SQL 分析</td><td>—</td></tr><tr><td>Serverless 数据湖</td><td>S3 存原始数据 → Glue 建数据目录 → Athena 直接查询</td><td>每次经过或停在 Startup 扶持多领 $50</td></tr><tr><td>静态网站</td><td>Route 53 解析域名 → CloudFront 加速 → S3 放网页</td><td>—</td></tr><tr><td>GenAI 知识库（RAG）</td><td>资料放 S3 → 向量存在 OpenSearch 或 Aurora PostgreSQL（pgvector）→ Bedrock 检索后生成回答</td><td>别人落在你的 Bedrock 上，额外付你 $50</td></tr><tr><td>ML 训练与部署</td><td>训练数据放 S3、训练镜像放 ECR（或共享数据放 EFS）→ SageMaker AI 训练并部署</td><td>—</td></tr><tr><td>高可用入口</td><td>Route 53 健康检查 → ELB 跨 AZ 分发 → EC2</td><td>EC2 升「多 AZ」半价：ELB 本来就跨多个 AZ，在另一个 AZ 再起一台实例挂进目标组就行</td></tr><tr><td>缓存加速</td><td>ELB 分发流量 → EC2 或 ECS 跑应用 → 热点数据放 ElastiCache，数据库压力小、响应快</td><td>—</td></tr><tr><td>备份与容灾</td><td>AWS Backup 按备份计划给数据库、文件系统和 S3 桶做备份 → 备份放进备份保管库，再复制到另一个 Region 的保管库，出事能恢复</td><td>免疫「实习生误删了生产数据」</td></tr><tr><td>数据加密</td><td>KMS 管密钥给数据加密 → CloudTrail 记下每一次用密钥，没权限拿到数据也解不开</td><td>免疫「S3 桶被设成了公开」</td></tr><tr><td>漏洞管理</td><td>镜像推到 ECR → Inspector 持续扫描漏洞 → 修好的镜像才部署到 ECS、EKS 或 EC2</td><td>免疫「高危 CVE 爆出」</td></tr><tr><td>大数据处理</td><td>数据放 S3 → EMR 跑 Spark 批处理 → 结果写进 Redshift 或用 Athena 查询</td><td>—</td></tr><tr><td>私有网络</td><td>ELB 统一对外接流量 → 应用实例只对 ELB 开放安全组；VPC 再开私有子网，实例连公网 IP 都不用（免公网 IPv4 费）</td><td>—</td></tr><tr><td>AI Agent 工作流</td><td>Step Functions 编排多步任务 → Lambda 调用工具和接口 → Bedrock 推理决定下一步</td><td>—</td></tr><tr><td>实时推荐</td><td>Kinesis 收用户行为 → SageMaker AI 实时推理 → 推荐结果放 DynamoDB 或 ElastiCache 给前端读</td><td>—</td></tr><tr><td>全球 API 加速</td><td>CloudFront 在边缘接请求、WAF 过滤恶意流量 → API Gateway 处理</td><td>—</td></tr><tr><td>纵深防御</td><td>WAF 挡应用层攻击，Shield Advanced 挡 DDoS，GuardDuty 盯异常行为</td><td>免疫所有安全类 Health 事件</td></tr></table><hr style=\"border:0;border-top:1px solid #eaeded;margin:14px 0\"><h4>去哪查细节</h4><ul style=\"padding-left:20px;margin:6px 0\"><li><b>每个服务的特性、三级升级、计费方式</b>：网页里点「图鉴」，或者看「主持人规则书.pdf」第 8 节。</li><li><b>全部 Health 事件卡和 re:Invent 卡</b>：「卡牌.pdf」可以直接打印裁开；每张卡的完整效果和免疫条件见「主持人规则书.pdf」第 20、21 节。</li><li><b>题库和答案</b>：题卡在「卡牌.pdf」里，答案倒印在卡底；完整题库见「主持人规则书.pdf」附录。</li><li><b>所有数字</b>（升级费、运行费、Savings Plans / RI、估值公式）：「主持人规则书.pdf」。</li></ul>";
 // 「玩法」：先看简版（三分钟），可以切到完整版
 async function showManual(full = false) {
   if (modalBlocks()) return;
@@ -6010,14 +5978,14 @@ function shownRent(i) {
   // 架构里只要有一块按用量或 token 收，实际金额就随点数浮动，前面带「≈」；没成架构的 Bedrock 照旧写「点数×单价」
   const fl = m => SQ[m].bill === 'req' || SQ[m].bill === 'token' || SQ[m].t === 'util';
   const txt = !r ? '$0' : s.bill === 'token' && !jr ? `点数×${tokUnit(i)}` : `${(jr ? jr.parts : [i]).some(fl) ? '≈' : ''}$${r}`;
-  // 新账号保护期每笔最多 $50（payRent 最后封顶）：标封顶后的数，随点数浮动的写「≤$50」；full、fullTxt 留着原数，悬停说明和详情里写第 3 轮起收多少
+  // 新账户保护期每笔最多 $50（payRent 最后封顶）：标封顶后的数，随点数浮动的写「≤$50」；full、fullTxt 留着原数，悬停说明和详情里写第 3 轮起收多少
   if (F.balance() && S.round <= BAL.protect && r > 50) return { r: 50, jr, txt: txt[0] === '≈' || txt.startsWith('点数') ? '≤$50' : '$50', rn: ra.note, cap: true, full: r, fullTxt: txt };
   return { r, jr, txt, rn: ra.note };
 }
 // 过路费标签的悬停说明：联合收费列出是哪几块加起来的
 function rentTip(i, sr) {
   // 保护期里格子标的是封顶后的数：先讲第 3 轮起恢复到多少，后面照常解释原数怎么算
-  if (sr.cap) return `新账号保护期：前 ${BAL.protect} 轮每笔过路费最多 $50，第 ${BAL.protect + 1} 轮起恢复到 ${sr.fullTxt}。` + rentTip(i, { ...sr, r: sr.full, txt: sr.fullTxt, cap: false });
+  if (sr.cap) return `新账户保护期：前 ${BAL.protect} 轮每笔过路费最多 $50，第 ${BAL.protect + 1} 轮起恢复到 ${sr.fullTxt}。` + rentTip(i, { ...sr, r: sr.full, txt: sr.fullTxt, cap: false });
   const s = SQ[i], pr = S.props[i], o = P(pr.owner), jr = sr.jr, dm = Math.round(dlcRentMul(i) * 100) / 100;
   if (jr) return `${jr.cs.map(c => `「${c.n}」`).join('')}${jr.cs.length > 1 ? '串联' : ''}架构联合收费：落在其中任一块都按整套收，${jr.parts.map(m => `${SQ[m].n} $${jr.rentOf(m)}`).join(' + ')}${sr.rn ? `，${sr.rn}` : ''}${s.k === 'bedrock' && hasCombo(o, 'rag') ? '，RAG 架构 +$50' : ''}${(d => d.length ? `；已含 DLC 加成（${d.map(m => `${SQ[m].n} ×${Math.round(dlcRentMul(m) * 100) / 100}`).join('、')}）` : '')(jr.parts.filter(m => dlcRentMul(m) > 1))}${sr.txt[0] === '≈' ? '；按平均 7 点估，随点数浮动' : ''}`;
   if (!sr.r) return '代理商自己的库存，没组成有效架构时不收过路费';
@@ -6055,8 +6023,8 @@ function cellHtml(i) {
 function hereHtml(p) {
   const i = p.pos, s = SQ[i], pr = S.props[i], o = pr && pr.owner !== null ? P(pr.owner) : null;
   if (isHidden(i)) return `<button class="here" onclick="showSquare(${i})">${awsImg('reinvent')}<span><b>盲盒</b><em>随机抽卡 · 效果翻倍</em></span></button>`;
-  const rent = o && (s.t === 'prop' || s.t === 'util') ? (pr.offline ? '已下线 · 不收费' : pr.ddos != null ? 'DDoS 下线 · 不收费' : pr.impaired ? 'Impaired · 暂停收费' : (sr => !sr.r ? '没组成架构 · 不收费' : `过路费 ${sr.txt}${sr.cap ? '（新账号保护期封顶）' : sr.jr ? '（整套架构联合收费）' : ''}`)(shownRent(i))) : '';
-  const sub = o ? `<i class="pawn" style="--pc:${o.color}"></i>${o.id === p.id ? '你自己的' : o.name + ' 的'}${rent ? ' · ' + rent : ''}` : s.p ? `没人买 · 售价 $${s.p}` : s.k === 'jail' && p.jail !== null ? '关在里面：掷出对子或付 $50 出来' : CORNER_SUB[s.k] || (s.t === 'tax' ? '交 $200' : s.t === 'tax2' ? '交 $100' : '');
+  const rent = o && (s.t === 'prop' || s.t === 'util') ? (pr.offline ? '已下线 · 不收费' : pr.ddos != null ? 'DDoS 下线 · 不收费' : pr.impaired ? 'Impaired · 暂停收费' : (sr => !sr.r ? '没组成架构 · 不收费' : `过路费 ${sr.txt}${sr.cap ? '（新账户保护期封顶）' : sr.jr ? '（整套架构联合收费）' : ''}`)(shownRent(i))) : '';
+  const sub = o ? `<i class="pawn" style="--pc:${o.color}"></i>${o.id === p.id ? '你自己的' : o.name + ' 的'}${rent ? ' · ' + rent : ''}` : s.p ? `没人买 · 售价 $${s.p}` : s.k === 'jail' && p.jail !== null ? '关在里面：停一轮或付 $50 出来' : CORNER_SUB[s.k] || (s.t === 'tax' ? '交 $200' : s.t === 'tax2' ? '交 $100' : '');
   return `<button class="here" onclick="showSquare(${i})" title="看这一格的现状和历史记录">${awsImg(s.icon)}<span><b>${p.name} 在 ${s.n}</b><em>${sub}</em></span><small>记录</small></button>`;
 }
 // 鼠标停在格子上看收费情况：服务格看价格、过路费、运行费和主人；角落格和账单格看收多少、给多少
@@ -6072,9 +6040,9 @@ function sqTip(i) {
     else {
       const o = P(pr.owner); let run = 0, sr = { r: rent, jr: null, txt: '' }; try { run = runCost(i); sr = shownRent(i); } catch (e) { }
       const jr = sr.jr, off = pr.offline ? '已下线' : pr.ddos != null ? '被 DDoS 打到下线' : pr.impaired ? '现在 Impaired' : '';
-      L.push(`主人：${unesc(o.name)}${s.upg ? ` · ${lvName(i, pr.level)}` : ''}${pr.cap ? ` · ${pr.cap} 个${capU(s.k)}` : ''}`, off ? `过路费：${off}，不收` : sr.cap ? `过路费最多 $50（新账号保护期，前 ${BAL.protect} 轮每笔封顶）；第 ${BAL.protect + 1} 轮起约 $${sr.full}${jr ? '（整套架构联合收费）' : ''}` : `过路费约 $${sr.r}${jr ? `（${jr.cs.map(c => `「${c.n}」`).join('')}${jr.cs.length > 1 ? '串联' : ''}架构联合收费${sr.rn ? ` · ${sr.rn}` : ''}）` : sr.rn ? `（${sr.rn}）` : ''}${sr.r && (jr ? sr.txt[0] === '≈' : float) ? '（按掷出 7 点算，随点数浮动）' : ''}`, `运行费：每圈 $${run}`);
+      L.push(`主人：${unesc(o.name)}${s.upg ? ` · ${lvName(i, pr.level)}` : ''}${pr.cap ? ` · ${pr.cap} 个${capU(s.k)}` : ''}`, off ? `过路费：${off}，不收` : sr.cap ? `过路费最多 $50（新账户保护期，前 ${BAL.protect} 轮每笔封顶）；第 ${BAL.protect + 1} 轮起约 $${sr.full}${jr ? '（整套架构联合收费）' : ''}` : `过路费约 $${sr.r}${jr ? `（${jr.cs.map(c => `「${c.n}」`).join('')}${jr.cs.length > 1 ? '串联' : ''}架构联合收费${sr.rn ? ` · ${sr.rn}` : ''}）` : sr.rn ? `（${sr.rn}）` : ''}${sr.r && (jr ? sr.txt[0] === '≈' : float) ? '（按掷出 7 点算，随点数浮动）' : ''}`, `运行费：每圈 $${run}`);
     }
-  } else if (s.t === 'jail') L.push('直接落在这里：停一轮，或者交 $50 照常走', '被送进来的：掷出对子、付 $50 开 Support Case 或用 Enterprise Support 才能出来');
+  } else if (s.t === 'jail') L.push('落在这里或被送进来：停一轮，或者交 $50 照常走');
   else if (s.d) L.push(s.d.replace(/<[^>]+>/g, ''));
   const n = ((S.hist || {})[i] || []).length; L.push(n ? `点一下看这一格的 ${n} 条记录` : '点一下看这一格的详情');
   return L.join('\n');
@@ -6115,21 +6083,31 @@ function comboCheck() {
   });
   COMBOPREV = now;
 }
+// 轮到你时，能补齐你某个架构的格子：差一块的架构缺的那一环（二选一的两块都算）。
+// 「你」= 联机远端是自己的座位、房主和同屏是本机操作的真人；轮到电脑或别的设备上的人时不标
+function needSquares() {
+  const me = cur(), out = {};
+  if (!me || !me.alive || S.over || isAI(me.id) || (MP.role === 'client' ? me.id !== MP.mySeat : MP.role === 'host' && MP.isRemote(me.id))) return out;
+  COMBOS.filter(comboOpen).filter(c => !hasCombo(me, c.id)).forEach(c => { const miss = c.ix.filter(n => !(Array.isArray(n) ? n : [n]).some(i => active(me, i))); if (miss.length === 1) slotOpen(miss[0]).forEach(i => { if (!owns(me, i)) (out[i] = out[i] || []).push(c.n); }); });
+  return out;
+}
 function renderBoard() {
   comboCheck();
+  const need = needSquares();
   SQ.forEach((s, i) => {
     const d = $('#sq' + i), pr = S.props[i];
     const owned = pr && pr.owner !== null, gc = isHidden(i) ? '#ff9900' : cellGc(s);
     if (pr) { const prev = SQPREV[i], now = Date.now(); if (prev) { if (pr.owner !== null && pr.owner !== prev.o) { SQFX[i] = ['fx-buy', now + 800]; const a = S.aucFx && S.aucFx.i === i && S.aucFx.o === pr.owner ? S.aucFx : null; callout(i, a ? `${P(pr.owner).name} 竞价 $${a.w} 拿下 <b>${SQ[i].n}</b>${a.txt ? `<small>其他出价：${a.txt}${a.tie ? '（同价时离落地的人最近的得）' : ''}</small>` : ''}` : `${P(pr.owner).name} 拿下 <b>${SQ[i].n}</b>`, 'org', a ? 3200 : 2200); FX.splash(i, P(pr.owner).color); } else if (pr.impaired && !prev.imp) { SQFX[i] = ['fx-hit', now + 700]; callout(i, `<b>${SQ[i].n}</b> 变成 Impaired<small>暂停收过路费</small>`, 'warn'); } } SQPREV[i] = { o: pr.owner, imp: !!pr.impaired }; }
     const fx = SQFX[i] && SQFX[i][1] > Date.now() ? SQFX[i][0] : '';
-    d.className = ['sq', isCorner(i) ? 'corner' : sideOf(i), gc ? 'g' : '', isHidden(i) ? 'blind' : '', owned ? 'owned' : '', pr && pr.impaired ? 'impaired' : '', pr && pr.offline ? 'offline' : '', S.lastSq === i ? 'last' : '', SQPOP_I === i ? 'sel' : '', fx].join(' ');
+    d.className = ['sq', isCorner(i) ? 'corner' : sideOf(i), gc ? 'g' : '', isHidden(i) ? 'blind' : '', owned ? 'owned' : '', pr && pr.impaired ? 'impaired' : '', pr && pr.offline ? 'offline' : '', S.lastSq === i ? 'last' : '', SQPOP_I === i ? 'sel' : '', need[i] ? 'need' : '', fx].join(' ');
     d.style.setProperty('--k', i);
     if (SQFX[i] && SQFX[i][0] === 'fx-combo' && SQFX[i][1] > Date.now()) d.classList.add('fx-combo');
     d.style.setProperty('--gc', gc || 'transparent');
     d.style.setProperty('--oc', owned ? P(pr.owner).color : 'transparent');
     // 提示和格子内容跟上次写的一样就不再写：格子里的图标都是内嵌的，48 格整个重写一遍有两百多 KB 要重新解析。
     // 上次写的挂在格子元素自己身上，buildBoard 重建格子时跟着作废
-    const tip = sqTip(i);
+    const tl = sqTip(i).split('\n'); if (need[i]) tl.splice(-1, 0, `${owned ? '换到' : '买下'}这块就能凑成架构「${need[i].join('」「')}」`);
+    const tip = tl.join('\n');
     if (d._t !== tip) { d._t = d.title = tip; d.setAttribute('aria-label', tip.split('\n').slice(0, -1).join('，')); }   // 格子、主人、过路费读屏都要念；最后一行「点一下看记录」不用念
     const h = cellHtml(i); if (d._h !== h) { d._h = h; d.innerHTML = h; }
   });
@@ -6149,7 +6127,7 @@ function renderCenter() {
   if (over) main = MP.role === 'client' ? `<button class="pri lg" onclick="location.href = location.pathname">回开局页</button>` : `<button class="pri lg" onclick="backToSetup()">再来一局</button>`;   // 远端没有这局的存档，不能走 backToSetup（会清掉他自己本机的存档）
   if (over) main += '<button class="lg" onclick="showReport()">查看战报</button>';   // 战报关了还能再看、再导出（远端也能点，只在自己设备上开）
   else if (S.phase === 'roll' && p.jail !== null) {
-    main = `<button class="pri lg" onclick="jailAct('roll')">掷骰子，争取对子</button>${p.cash < 50 ? `<button class="lg off" aria-disabled="true" onclick="toast('现金不够 $50')" title="现金不够 $50">付 $50 开 Support Case</button>` : `<button class="lg" onclick="jailAct('pay')">付 $50 开 Support Case</button>`}`;
+    main = `${p.cash < 50 ? `<button class="lg off" aria-disabled="true" onclick="toast('现金不够 $50')" title="现金不够 $50">付 $50 出来，照常走</button>` : `<button class="pri lg" onclick="jailAct('pay')">付 $50 出来，照常走</button>`}<button class="${p.cash < 50 ? 'pri ' : ''}lg" onclick="jailAct('stay')">停这一轮</button>`;
     if (availCard(p, 'ES')) main += `<button class="lg" onclick="jailAct('es')">用 Enterprise Support</button>`;
   } else if (S.phase === 'roll') main = `<button class="pri lg" onclick="doRoll()">${S.again ? '对子，再掷一次' : '掷骰子'}</button>`;
   else if (S.phase === 'post') main = `<button class="pri lg" onclick="endTurn()">轮到下一位</button>`;
@@ -6172,12 +6150,12 @@ function renderCenter() {
     if (p.reseller) more += B(idleWhy, 'uiAction(setRsRate)', '客户从你手里买服务的价格', `转售价 ${rsRate(p) === 1 ? '原价' : zhe(rsRate(p))}`);
     if (dlcOn('speed')) more += B(idleWhy, 'uiAction(speedMenu)', '花部署点数发动技能：1–12 点各有一个；6 点、12 点是 DDoS', `部署 ${p.speed}/12<span class="spbar">${Array.from({ length: 12 }, (_, k) => `<i class="${k < p.speed ? 'on' : ''}${k === 11 && p.speed >= 12 ? ' max' : ''}"></i>`).join('')}</span>`);
   }
-  const bk = !over ? (idle && !isAI(S.cur) ? `<button class="sm danger-lite" onclick="uiAction(declareBankrupt)" title="主动认输：账号被暂停出局，资产交回亚马逊云科技（不能指定送人）">宣告破产</button>` : `<button class="sm danger-lite off" aria-disabled="true" onclick="toast('现在不能宣告破产：${isAI(S.cur) ? '电脑的回合，轮到你时再点' : S.phase === 'busy' ? '结算中，等一下' : '还没轮到你'}')">宣告破产</button>`) : '';
+  const bk = !over ? (idle && !isAI(S.cur) ? `<button class="sm danger-lite" onclick="uiAction(declareBankrupt)" title="主动认输：账户被暂停出局，资产交回亚马逊云科技（不能指定送人）">宣告破产</button>` : `<button class="sm danger-lite off" aria-disabled="true" onclick="toast('现在不能宣告破产：${isAI(S.cur) ? '电脑的回合，轮到你时再点' : S.phase === 'busy' ? '结算中，等一下' : '还没轮到你'}')">宣告破产</button>`) : '';
   const d = S.lastDice;
   const rolling = S.rollId && S.rollId !== lastAnimRoll;
   if (rolling) lastAnimRoll = S.rollId;
-  const status = over ? '游戏结束' : p.jail !== null ? (p.jail ? `在维护窗口里：掷了 ${p.jail}/${jailMax(p)} 次还没对子` : `在维护窗口里：掷出对子或付 $50 出来，最多掷 ${jailMax(p)} 次`) : S.phase === 'busy' ? '结算中…' : S.phase === 'post' ? '结算完了' : S.again ? '掷出对子，再掷一次' : isAI(S.cur) ? '掷骰子…' : MP.role === 'client' && S.cur !== MP.mySeat ? ((S.mpOff || []).includes(S.cur) ? `${p.name} 掉线了：等他连回来，或者房主替他操作` : `等 ${p.name} 在自己的设备上操作…`) : '轮到你掷骰子';   // 远端看别人的回合和房主那边（afterRender）一个说法；热座的「你」是坐在屏幕前的人
-  const meta = [`第 ${S.round}${S.cfg.roundLimit ? ' / ' + S.cfg.roundLimit : ''} 轮`, diffN, winN, (S.cfg.dlc || []).length ? `<span class="dnl">${S.cfg.dlc.map((k, i) => `<span class="dn">${i ? '' : 'DLC：'}${DLC[k].n}</span>`).join('、')}</span>${S.cfg.dlc.length >= 6 ? `<span class="dls" role="button" tabindex="0" onclick="toast('这局开了：' + this.title, 5000)" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }" title="${S.cfg.dlc.map(k => DLC[k].n).join('、')}">${S.cfg.dlc.length} 个 DLC</span>` : ''}` : '', S.cfg.learn && !isStudy() ? '边玩边答题' : '', S.endAt ? `剩余 <span id="timer">${fmtTime(timeLeft())}</span>` : '', F.balance() && S.round <= BAL.protect ? `<span title="前 ${BAL.protect} 轮每笔过路费最多 $50，格子上也按 $50 标；第 ${BAL.protect + 1} 轮起按原价收">新账号保护期（过路费最多 $50）</span>` : '', S.cfg.cardMul && S.cfg.cardMul !== 1 && S.cfg.cardMul !== '1' ? `卡牌倍率 ${fmtMul(cardMulBase() / cardGrowMul())}${S.cfg.cardMul === 'rand' ? '（每轮随机）' : ''}` : '', cardGrowMul() > 1 ? `<span title="卡牌上的收钱、罚款跟着流量涨">卡牌金额 ${fmtMul(cardGrowMul())}</span>` : '', trafficMul() > 1 ? `<span title="用户增长：每 ${BAL.growthEvery} 轮所有过路费再涨 ${Math.round(BAL.growth * 100)}%">流量 ×${trafficMul()}</span>` : ''].filter(Boolean).map(x => `<span class="mi">${x}</span>`).join(' · ');
+  const status = over ? '游戏结束' : p.jail !== null ? (p.jail ? `在维护窗口里：停了 ${p.jail}/${jailMax(p)} 轮，再停一轮或付 $50 出来` : `在维护窗口里：停${jailMax(p) > 1 ? ` ${jailMax(p)} ` : '一'}轮，或付 $50 出来`) : S.phase === 'busy' ? '结算中…' : S.phase === 'post' ? '结算完了' : S.again ? '掷出对子，再掷一次' : isAI(S.cur) ? '掷骰子…' : MP.role === 'client' && S.cur !== MP.mySeat ? ((S.mpOff || []).includes(S.cur) ? `${p.name} 掉线了：等他连回来，或者房主替他操作` : `等 ${p.name} 在自己的设备上操作…`) : '轮到你掷骰子';   // 远端看别人的回合和房主那边（afterRender）一个说法；热座的「你」是坐在屏幕前的人
+  const meta = [`第 ${S.round}${S.cfg.roundLimit ? ' / ' + S.cfg.roundLimit : ''} 轮`, diffN, winN, (S.cfg.dlc || []).length ? `<span class="dnl">${S.cfg.dlc.map((k, i) => `<span class="dn">${i ? '' : 'DLC：'}${DLC[k].n}</span>`).join('、')}</span>${S.cfg.dlc.length >= 6 ? `<span class="dls" role="button" tabindex="0" onclick="toast('这局开了：' + this.title, 5000)" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }" title="${S.cfg.dlc.map(k => DLC[k].n).join('、')}">${S.cfg.dlc.length} 个 DLC</span>` : ''}` : '', S.cfg.learn && !isStudy() ? '边玩边答题' : '', S.endAt ? `剩余 <span id="timer">${fmtTime(timeLeft())}</span>` : '', F.balance() && S.round <= BAL.protect ? `<span title="前 ${BAL.protect} 轮每笔过路费最多 $50，格子上也按 $50 标；第 ${BAL.protect + 1} 轮起按原价收">新账户保护期（过路费最多 $50）</span>` : '', S.cfg.cardMul && S.cfg.cardMul !== 1 && S.cfg.cardMul !== '1' ? `卡牌倍率 ${fmtMul(cardMulBase() / cardGrowMul())}${S.cfg.cardMul === 'rand' ? '（每轮随机）' : ''}` : '', cardGrowMul() > 1 ? `<span title="卡牌上的收钱、罚款跟着流量涨">卡牌金额 ${fmtMul(cardGrowMul())}</span>` : '', trafficMul() > 1 ? `<span title="用户增长：每 ${BAL.growthEvery} 轮所有过路费再涨 ${Math.round(BAL.growth * 100)}%">流量 ×${trafficMul()}</span>` : ''].filter(Boolean).map(x => `<span class="mi">${x}</span>`).join(' · ');
   $('#center').innerHTML = `
     <div class="c-head">
       <div class="gtitle"><div><h1>亚马逊云科技 User Group 云上大亨</h1><div class="sub">${meta}</div></div></div>
@@ -6225,7 +6203,7 @@ function archMini(c, p) {
   return `<div class="amini"><b>${c.n}</b><div class="aflow">${c.ix.map(n => Array.isArray(n) ? `<span class="aor">${n.map(node).join('<i>或</i>')}</span>` : node(n)).join('<span class="aar">→</span>')}</div><div class="adesc">${c.flow}</div>${c.d !== '—' ? `<div class="adesc">另外：${c.d}</div>` : ''}<div class="adesc">凑齐后别人落在其中任一块，按整套架构联合收费</div></div>`;
 }
 // 支柱的规则缩写（悬停卡第二行）
-const PILLAR_SHORT = ['运维类服务每块 +1 · 写过复盘 +1', '安全或边缘服务每块 +1 · 演练标记每个 +1', '多 AZ 升级 +1 · 多区域功能 +2', '弹性扩展功能 +1 · 生效的架构每个 +1',
+const PILLAR_SHORT = ['运维类服务每块 +1 · 写过复盘 +1', '安全或边缘服务每块 +1 · 演练标记每个 +1', '天生跨 AZ 的服务每块 +1 · 实例升多 AZ +1 · 多区域功能 +2', '弹性扩展功能 +1 · 生效的架构每个 +1',
   '降成本功能 +1 · 签 SP/RI 或用 Cost Explorer +1 · 重构技术债 +1', 'Serverless 每块 +1 · Graviton +1 · 数据分层 +1 · Fargate / Auto Mode +1'];
 // 第 k 条支柱还能怎么补：[{ i: 服务格（有图标）, t: 做什么, c: 要花多少, g: 加几分, n: 排序用的花费 }]，便宜的在前
 function pillarItems(p, k) {
@@ -6235,7 +6213,7 @@ function pillarItems(p, k) {
   const x = pillarParts(p), canSP = (F.full() || dlcOn('finops')) && p.role !== 'indie';
   if (k === 0) { buy([IX.cloudwatch, IX.cloudtrail, IX.sfn, IX.eventbridge].filter(i => !active(p, i))); if (!p.coe.length) out.push({ t: '进一次维护窗口，出来时写复盘', c: '', g: '+1', n: 50 }); }
   if (k === 1) { buy([...GRP('sec'), ...GRP('edge')].filter(i => !active(p, i))); if (F.actions()) out.push({ t: '主动行动里做 GameDay 演练', c: '每个演练标记', g: '+1', n: 60 }); }
-  if (k === 2) { up('maz', '+1'); up('mr', '+2'); if (!out.length) out.push({ t: '买 EC2、RDS、Aurora 这类实例型服务，再升第 1 级「多 AZ」', c: '', g: '+1', n: 300 }); }
+  if (k === 2) { up('maz', '+1'); up('mr', '+2'); buy(OWNABLE.filter(i => { const h = haTag(i); return h && (h.k === 'auto' || h.k === 'glb') && !active(p, i); })); }
   if (k === 3) { up('scale', '+1'); COMBOS.filter(comboOpen).filter(c => !hasCombo(p, c.id)).forEach(c => { const miss = c.ix.filter(n => !(Array.isArray(n) ? n : [n]).some(i => active(p, i))); if (miss.length === 1) out.push({ i: slotOpen(miss[0])[0], t: `凑成「${c.n}」`, c: `再买 ${slotOpen(miss[0]).map(i => SQ[i].n).join(' 或 ')}`, g: '+1', n: SQ[slotOpen(miss[0])[0]].p }); }); }
   if (k === 4) { up('cost', '+1'); if (!x.commit) out.push({ t: canSP ? '签一次 Savings Plans / RI，或用掉 Cost Explorer 卡' : '用掉 Cost Explorer 卡', c: '', g: '+1', n: 100 }); if (F.debt() && !p.refactored && p.techDebt) out.push({ t: '重构清掉 1 个技术债', c: `$${refactorCost(p)}`, g: '+1', n: refactorCost(p) }); }
   if (k === 5) { buy(OWNABLE.filter(i => SQ[i].type === 'sls' && !active(p, i))); up('ssh', '+1'); if (!x.grav && active(p, IX.ec2)) up('cost', '+1'); }
@@ -6247,7 +6225,7 @@ function pillarHave(p, k) {
   return [
     [...svc(x.ops), ...(p.coe.length ? [{ t: '写过复盘' }] : [])],
     [...svc(x.secs), ...(p.drill.length ? [{ t: `演练标记 ×${p.drill.length}` }] : [])],
-    [...x.maz.map(i => ({ i, t: `${SQ[i].n} 多 AZ` })), ...x.mr.map(i => ({ i, t: `${SQ[i].n} 多区域（2 分）` }))],
+    [...x.nat.map(i => ({ i, t: `${SQ[i].n} 天生跨 AZ` })), ...x.maz.map(i => ({ i, t: `${SQ[i].n} 升了多 AZ` })), ...x.mr.map(i => ({ i, t: `${SQ[i].n} 多区域（2 分）` }))],
     [...x.sc.map(i => ({ i, t: `${SQ[i].n} 弹性扩展` })), ...x.combos.map(c => ({ t: `架构「${c.n}」` }))],
     [...(p.refactored ? [{ t: '重构过技术债' }] : []), ...(x.commit ? [{ t: '签过 SP/RI 或用过 Cost Explorer' }] : []), ...x.co.map(i => ({ i, t: `${SQ[i].n} 降成本` }))],
     [...svc(x.sls), ...(x.grav ? [{ i: IX.ec2, t: 'EC2 Graviton' }] : []), ...x.lifecycle.map(i => ({ i, t: `${SQ[i].n} 数据分层` })), ...x.managedCompute.map(i => ({ i, t: `${SQ[i].n} 托管底层机器` }))],
@@ -6308,7 +6286,7 @@ function playerBrief(p) {
   const btn = (label, on, ok = true) => me ? `<button class="sm" data-fk="cr:${on}" ${idle && ok ? '' : 'disabled'} onclick="${on}">${label}</button>` : '';
   const row = (t, b = '', cls = '') => `<div class="todo ${cls}"><span>${t}</span>${b}</div>`;
   const out = [];
-  if (p.jail !== null) out.push(row(`在维护窗口里：掷出对子出来，或者付 $50 马上出来；最多掷 ${jailMax(p)} 次，掷满还没对子就强制付 $50`, '', 'hot'));
+  if (p.jail !== null) out.push(row(`在维护窗口里：付 $50 马上出来、照常掷骰子，或者停${jailMax(p) > 1 ? `满 ${jailMax(p)} ` : '一'}轮再出来`, '', 'hot'));
   else if (S.phase === 'roll') out.push(row(S.again ? '掷出了对子，再掷一次' : '先掷骰子', '', 'hot'));
   const ups = ownedBy(p).filter(i => { const u = upgradeInfo(p, i); return u.ok && p.cash >= u.total; });
   if (ups.length) out.push(row(`可以升级 ${ups.length} 块：${ups.slice(0, 2).map(i => `${SQ[i].n} $${upgradeInfo(p, i).total}`).join('、')}${ups.length > 2 ? '…' : ''}`, btn('资产管理', 'uiAction(()=>manage(cur()))')));
@@ -6440,6 +6418,48 @@ function render() {
 setInterval(() => { if (S && S.endAt && !S.over) { const el = $('#timer'); if (el) el.textContent = fmtTime(timeLeft()); } }, 1000);
 
 // 点格子：弹出这一格的小面板（现状 + 历史记录）。面板只在自己这台设备上，不走游戏弹窗，不会打断别人的回合
+// 每块服务的介绍：[是什么, 常用来做什么]。点格子的面板和「看完整介绍」都放在最上面，边玩边认识服务
+const SVC_INTRO = {
+  s3: ["对象存储：文件当成「对象」放进桶里，按存的数据量和请求次数收费，容量不用提前规划。标准存储类会把数据存到一个区域里至少 3 个 AZ。", "网站图片和静态资源、数据湖、备份归档、日志"],
+  efs: ["托管的共享文件系统（NFS）：多台 EC2、容器、Lambda 能同时挂载同一个目录，容量随写随涨，按用了多少收费。", "多台服务器共用的文件、内容管理、机器学习训练数据"],
+  backup: ["集中管理备份：用一个备份计划给 EC2、EBS、RDS、DynamoDB、EFS、S3 等统一定时备份、设保留期，还能把备份复制到别的账户和区域。", "合规要求的备份留存、防勒索（备份库锁定 Vault Lock）"],
+  lightsail: ["打包价的轻量云服务器：每月固定价格，包含实例、SSD 和一定的流量，还能一键加托管数据库、负载均衡。", "个人网站和博客、小型应用、开发测试环境"],
+  ec2: ["云上的虚拟服务器：自己选 CPU、内存和操作系统，按秒计费，可以用按需、Savings Plans、Spot 等方式买。每台实例在一个 AZ 里，要高可用得在多个 AZ 各放几台，配合 ELB 和 Auto Scaling。", "跑各种应用、需要完全控制操作系统的场景"],
+  ebs: ["给 EC2 用的块存储（云硬盘）：一块卷挂在同一个 AZ 的实例上当系统盘或数据盘，可以打快照备份。卷只在一个 AZ 里。", "系统盘、自建数据库的数据盘"],
+  vpc: ["你在云上的私有网络：自己划网段、子网、路由表和安全组，决定哪些资源能访问公网。VPC 本身不收费。", "把对外的负载均衡放公有子网，应用和数据库放私有子网"],
+  elb: ["负载均衡：把流量分给后面多台 EC2、容器或 Lambda，自动绕开不健康的；ALB 处理 HTTP/HTTPS，NLB 处理 TCP/UDP。", "网站和 API 的统一入口、多 AZ 高可用"],
+  route53: ["托管的 DNS：注册和解析域名，能按健康检查做故障切换，按延迟或地理位置把用户引到不同区域。全局服务，可用性 SLA 是 100%。", "域名解析、跨区域容灾切换"],
+  ecr: ["托管的容器镜像仓库：存放 Docker / OCI 镜像，可以扫描漏洞，ECS、EKS 直接从这里拉镜像。", "CI/CD 构建完镜像推上去，部署时拉下来"],
+  ecs: ["亚马逊云科技自己的容器编排服务：告诉它要跑几个任务，它负责调度、替换坏掉的；底层可以用 EC2，也可以用 Fargate（不用管服务器）。", "微服务、批处理任务"],
+  eks: ["托管的 Kubernetes：控制平面由亚马逊云科技在多个 AZ 里运行，每个集群按小时收费；工作节点可以用 EC2、托管节点组、Fargate 或 Auto Mode。", "已经在用 Kubernetes 的团队上云、多环境统一部署"],
+  lambda: ["无服务器函数：上传代码，有事件来才运行，按请求次数和运行时长（毫秒）收费，没请求不收钱；单次最长运行 15 分钟。", "API 后端、处理 S3 上传的文件、定时任务"],
+  apigw: ["托管的 API 入口：创建 REST、HTTP、WebSocket API，负责鉴权、限流和缓存，后面接 Lambda 或其他服务，按调用次数收费。", "Serverless API、移动应用和小程序后端"],
+  dynamodb: ["Serverless 的键值和文档数据库：毫秒级读写，按需模式按请求收费，数据自动存在多个 AZ；全局表可以多区域同时读写。", "用户会话、购物车、游戏数据、高并发场景"],
+  sqs: ["托管的消息队列：生产者把消息放进队列，消费者按自己的速度取。标准队列至少送达一次，FIFO 队列保证顺序。", "订单削峰填谷、把系统拆开互不拖累、异步任务"],
+  eventbridge: ["Serverless 事件总线：把亚马逊云科技服务、自己的应用和 SaaS 发出的事件按规则转给 Lambda、Step Functions 等，也能定时触发。", "事件驱动架构、跨账户分发事件、定时任务"],
+  sfn: ["可视化的工作流编排：把 Lambda、容器任务和各种服务的 API 调用串成状态机，自带重试、分支、并行，还能停下来等人工审批。", "订单处理流程、数据处理流水线、编排 AI Agent 的步骤"],
+  rds: ["托管的关系数据库：支持 MySQL、PostgreSQL、MariaDB、Oracle、SQL Server、Db2，帮你做备份、打补丁和故障切换。多 AZ 部署会在另一个 AZ 放一台备用实例。", "传统业务系统、电商订单库"],
+  aurora: ["亚马逊云科技自研的云原生关系数据库，兼容 MySQL 和 PostgreSQL：数据在 3 个 AZ 里存 6 份，最多 15 个只读副本；Aurora Serverless v2 按负载自动伸缩，Global Database 能跨区域。", "高并发的核心业务数据库"],
+  elasticache: ["托管的内存缓存：Valkey、Redis OSS、Memcached，读写在微秒到毫秒级，挡在数据库前面扛热点读。", "缓存热点数据、会话、排行榜"],
+  kinesis: ["实时数据流：Kinesis Data Streams 接住每秒大量的事件，多个程序同时读；Data Firehose 能把数据直接送进 S3、Redshift、OpenSearch。", "点击流和日志实时分析、实时大屏、IoT 数据"],
+  glue: ["Serverless 的数据集成（ETL）服务：爬取数据源建数据目录，用 Spark 作业清洗、转换数据，按运行时长收费。", "数据湖入湖、给 Athena 和 Redshift 准备数据"],
+  athena: ["Serverless 交互式查询：直接用 SQL 查 S3 里的数据，不用建集群，按扫描的数据量收费。数据存成列式格式、按日期分区，能少扫很多、省钱。", "日志分析、数据湖临时查询"],
+  redshift: ["云数据仓库：列式存储、大规模并行处理，用 SQL 分析海量数据；有预置集群和 Redshift Serverless 两种用法。", "BI 报表、经营分析"],
+  emr: ["托管的大数据平台：在集群上跑 Apache Spark、Hive、Presto、Flink 等开源框架，也有 EMR Serverless。集群建在一个 AZ 里。", "大规模数据处理、机器学习特征工程"],
+  opensearch: ["托管的 OpenSearch（从 Elasticsearch 分出来的开源项目）：全文搜索、日志分析和可视化，也能当向量数据库用。", "站内搜索、日志检索、RAG 的向量检索"],
+  guardduty: ["威胁检测：持续分析 CloudTrail 事件、VPC 流日志和 DNS 日志等，发现挖矿、凭证泄露、异常访问。它只负责发现、不负责拦截，要配合 EventBridge 和 Lambda 自动处置。", "账户安全监控、自动响应安全事件"],
+  inspector: ["自动漏洞扫描：持续扫描 EC2、ECR 里的容器镜像和 Lambda 函数，找出软件漏洞和不该暴露的网络端口，按风险打分。", "补丁管理、合规检查"],
+  kms: ["托管的密钥管理：创建和管理加密密钥，S3、EBS、RDS 等服务用它加密数据，密钥不会以明文离开 KMS，每次使用都有 CloudTrail 记录。", "静态数据加密、控制谁能解密数据"],
+  cloudfront: ["CDN：把网站、视频和 API 缓存到全球各地的边缘站点，用户就近访问，减轻源站压力；自带 Shield Standard 挡常见的 DDoS。", "网站和静态资源加速、视频分发"],
+  waf: ["Web 应用防火墙：挂在 CloudFront、ALB、API Gateway 前面，按规则拦 SQL 注入、跨站脚本和恶意机器人，还能按 IP 限速。", "防常见 Web 攻击、防刷接口"],
+  shield: ["DDoS 防护：所有账户都免费带 Shield Standard，挡常见的网络层攻击；Shield Advanced 是付费订阅，加上应用层防护、DDoS 响应团队支持和攻击期间扩容费用补偿。", "对 DDoS 敏感的大型网站、游戏、金融业务"],
+  sagemaker: ["机器学习平台：在上面准备数据、训练、调参和部署模型，有托管的 Notebook 环境，推理端点按实例时长收费。", "训练自己的模型、部署推理服务"],
+  bedrock: ["用 API 调用多家公司的基础模型（Anthropic Claude、Amazon Nova、Meta Llama、Mistral 等），按输入输出的 token 收费；还有知识库、Agents、Guardrails。你的数据不会被拿去训练模型。", "聊天机器人、内容生成、AI Agent"],
+  cloudwatch: ["监控和可观测性：收集指标、日志和事件，设告警、做仪表板，告警可以通知人，也能触发 Auto Scaling 自动扩容。", "盯 CPU、错误率和延迟，出事自动告警"],
+  datatransfer: ["不是一个服务，是账单上的数据传输费：数据从亚马逊云科技流到互联网、跨区域、跨 AZ 都要收费，流进来一般免费。", "用 VPC 终端节点、CloudFront、Direct Connect 省流量费"],
+  cloudtrail: ["记录账户里的 API 调用：谁在什么时间、从哪里、做了什么操作。控制台默认能查最近 90 天的管理事件；建跟踪可以长期存进 S3。", "安全审计、查清楚是谁删了资源"],
+};
+const introHtml = i => { const x = SVC_INTRO[SQ[i].k]; return x ? `<div class="svc-intro"><p><b>是什么</b>${x[0]}</p><p><b>常用来</b>${x[1]}</p></div>` : ''; };
 function showSquare(i) {
   if (!S) return;
   const s = SQ[i], h = ((S.hist || {})[i] || []).slice().reverse();
@@ -6447,9 +6467,9 @@ function showSquare(i) {
   // 服务格：价格和计费方式、现在的状态、各级一览（效果、过路费、每圈运行费）、升级和加容量的价格
   const svc = s.t === 'prop' && s.upg && !isHidden(i), pr = S.props[i];
   const billTxt = { hour: '按小时计费', req: '按用量计费', sub: '订阅', token: '按 token 计费', free: '免费', bundle: '打包价' }[s.bill] || '';
-  const svcHtml = svc ? `<div class="sp-sub">价格 $${s.p} · ${grpN(s.g)}${s.type !== 'token' ? ` · ${TYPE_N[s.type]}` : ''} · ${billTxt}</div>${haTag(i) ? `<div class="hatag ${haTag(i).k}"><b>${haTag(i).t}</b><span>${haTag(i).d}</span></div>` : ''}${propStatusHtml(i)}<h5>各级一览</h5>${lvTableHtml(i)}
+  const svcHtml = svc ? `<div class="sp-sub">价格 $${s.p} · ${grpN(s.g)}${s.type !== 'token' ? ` · ${TYPE_N[s.type]}` : ''} · ${billTxt}</div>${introHtml(i)}${haTag(i) ? `<div class="hatag ${haTag(i).k}"><b>${haTag(i).t}</b><span>${haTag(i).d}</span></div>` : ''}${propStatusHtml(i)}<h5>各级一览</h5>${lvTableHtml(i)}
     <p class="sp-n">每级升级 $${sideCost(i)}，落在自己的服务上升一级，集齐整组可以随时升；每个${capU(s.k)} $${capCost(i)}，过路费 +25%，最多 ${CAP_MAX} 个${pr && pr.cap ? `（现在 ${pr.cap} 个）` : ''}</p>` : '';
-  const status = isHidden(i) ? '<p>娱乐模式里，不常用的服务格变成盲盒：落上去随机抽一张 Health 或 re:Invent 卡，效果翻倍。</p>' : svc ? svcHtml : ['prop', 'util'].includes(s.t) ? propStatusHtml(i) : `<p>${sqTip(i).split('\n').slice(1, -1).join('<br>')}</p>`;
+  const status = isHidden(i) ? '<p>娱乐模式里，不常用的服务格变成盲盒：落上去随机抽一张 Health 或 re:Invent 卡，效果翻倍。</p>' : svc ? svcHtml : ['prop', 'util'].includes(s.t) && !isHidden(i) ? introHtml(i) + propStatusHtml(i) : `<p>${sqTip(i).split('\n').slice(1, -1).join('<br>')}</p>`;
   el.setAttribute('aria-label', `${s.n} 的历史记录`);
   el.innerHTML = `<div class="sp-h">${awsImg(isHidden(i) ? 'reinvent' : s.icon)}<b>${isHidden(i) ? '盲盒格' : s.n}</b><button type="button" class="sm" onclick="closeSqPop()" aria-label="关闭">关闭</button></div>
     <div class="sp-b">${status}<h5>这一格的记录${h.length ? `（${h.length} 条，新的在上面）` : ''}</h5>${h.length ? `<ol class="sp-l">${h.map(x => `<li><em>第 ${x.r} 轮</em>${clean(logBody(x.t))}</li>`).join('')}</ol>` : '<p class="muted">还没有发生过什么。</p>'}
@@ -6640,7 +6660,7 @@ async function showRoles() {
 // 新手引导只自动弹一次，每步说的都要和眼前的界面对得上：手机上格子只有图标、也没有鼠标悬停，用 PHONE_MQ 分开写
 const tourPillarTip = () => matchMedia('(hover:none)').matches ? '；点一下支柱能看到得分和还差什么。' : PHONE_MQ.matches ? (winWA() ? '；还差哪几条支柱，「这回合还能做什么」里会写。' : '。') : '；鼠标停在支柱上能看到还差什么。';
 const TOUR = [
-  { sel: '#center .gtitle .sub', t: '这局怎么赢', d: () => `标题下面这行是这局的设置。${(S.cfg.dlc || []).length >= 6 && !PHONE_MQ.matches ? `开的 DLC 多，这里只写「${S.cfg.dlc.length} 个 DLC」，点一下能看是哪几个。` : ''}${winParts().map(x => x[1]).join('；')}。${winTimed() || S.cfg.roundLimit ? '估值是总资产再加上升级投入、生效的架构和没用掉的复盘标记，扣掉技术债，玩家卡上能看到。' : ''}${F.balance() && S.round <= BAL.protect ? `前 ${BAL.protect} 轮是新账号保护期：每笔过路费最多 $50。` : ''}` },
+  { sel: '#center .gtitle .sub', t: '这局怎么赢', d: () => `标题下面这行是这局的设置。${(S.cfg.dlc || []).length >= 6 && !PHONE_MQ.matches ? `开的 DLC 多，这里只写「${S.cfg.dlc.length} 个 DLC」，点一下能看是哪几个。` : ''}${winParts().map(x => x[1]).join('；')}。${winTimed() || S.cfg.roundLimit ? '估值是总资产再加上升级投入、生效的架构和没用掉的复盘标记，扣掉技术债，玩家卡上能看到。' : ''}${F.balance() && S.round <= BAL.protect ? `前 ${BAL.protect} 轮是新账户保护期：每笔过路费最多 $50。` : ''}` },
   { sel: '#center .stage .row:not(.more) button, #mbar button', t: '掷骰子', d: '轮到你时点这里掷骰子，按点数顺时针往前走。掷出对子可以再掷一次。' },
   { sel: '#board .sq.b', t: '棋盘上的服务', d: () => TABP_MQ.matches ? '没人买的格子标的是买价，落上去可以买下；有主的格子标的是主人和这次落上来大概要付的过路费。橙底的数是整套架构的联合收费：落在架构里任一块，都按整套服务的过路费加起来收。停在哪一格，棋盘中间那张卡片也会写这次要付多少。点任意格子能看详情和高可用类型。' : PHONE_MQ.matches ? '手机上格子只显示图标，底边的色条是主人的颜色。停在哪一格，棋盘下面那张卡片会写这次要付多少，整套架构的会注明联合收费：落在架构里任一块，都按整套服务的过路费加起来收。点任意格子能看价格、过路费和高可用类型。' : '没人买的格子标的是买价，落上去可以买下；有主的格子标的是这次落上来大概要付的过路费。橙底的数是整套架构的联合收费：落在架构里任一块，都按整套服务的过路费加起来收。点任意格子能看详情，价格下面那一条是它的高可用类型：自带跨 AZ（绿）、全局服务（蓝）、要自己做多 AZ（橙）、永远单 AZ（红）。' },
   { sel: '#side .pl', t: '你的公司', d: () => S.players.length >= 3   // 3 人以上玩家卡默认收起，总资产和支柱要点开才有
@@ -6923,7 +6943,7 @@ async function botGame(cfg) {
     if (S.phase === 'roll') {
       stall = 0;
       const p = cur();
-      if (p.jail !== null) { const k = ['roll', 'roll', 'pay', 'es'][rnd(4)]; await jailAct(k === 'es' && !availCard(p, 'ES') ? 'roll' : k); }
+      if (p.jail !== null) { const k = ['stay', 'stay', 'pay', 'es'][rnd(4)]; await jailAct(k === 'es' && !availCard(p, 'ES') ? 'stay' : k); }
       else if (dlcOn('speed') && Math.random() < 0.2) await uiAction(speedMenu);
       else await doRoll();
     } else if (S.phase === 'post') {
@@ -7023,7 +7043,7 @@ async function simGame(n, diff) {
       const p = cur();
       // 像真人一样：集齐整组就升级；act=ai 时走游戏里电脑的同一份代码
       if (SIM_AI) aiBuild(p); else ownedBy(p).forEach(i => { const u = upgradeInfo(p, i); if (u.ok && p.cash - u.total >= simReserve * 2) doUpgrade(p, i); });
-      if (p.jail !== null) { if (SIM_AI) { await aiRoleSkill(p); await resolveDebts(); } if (p.alive && cur() === p) await jailAct(p.cash > 600 ? 'pay' : 'roll'); }
+      if (p.jail !== null) { if (SIM_AI) { await aiRoleSkill(p); await resolveDebts(); } if (p.alive && cur() === p) await jailAct(p.cash > 600 ? 'pay' : 'stay'); }
       else { if (SIM_AI) { S.phase = 'busy'; S.uiPrev = 'roll'; S.nextPhase = null; await aiRoleSkill(p); await aiSpeed(p); await resolveDebts(); S.phase = S.nextPhase || 'roll'; S.nextPhase = null; } if (S.phase === 'roll' && cur() === p && p.alive) await doRoll(); }
     }
     else if (S.phase === 'post') { if (SIM_AI) aiBuild(cur()); await endTurn(); }
@@ -7107,7 +7127,7 @@ function demo(kind) {
   if (kind === 'manual') showManual();
   // 战报演示：赢家和标题走真实结算 timedOver（按估值排）；虫虫多给 $150 估值才压过 Damo，留住「收租王也是赢家」；
   // earnBy 按各自手上的服务拆、加起来等于 rentIn，复盘才不会写「没收到过路费」
-  if (kind === 'over' || kind === 'report') { S.players.forEach((q, k) => Object.assign(ST(q), { rentIn: [2140, 3880, 960, 410][k], rentOut: [1320, 900, 2410, 1900][k], maxRent: [480, 1260, 220, 150][k], hit: [2, 1, 4, 3][k], imm: [3, 2, 0, 1][k], upg: [5, 8, 2, 1][k], quizOk: [6, 9, 3, 2][k], quizN: 10, spendBuy: 1400, runTot: [300, 520, 800, 410][k], earnBy: [{ [IX.ec2]: 1300, [IX.s3]: 840 }, { [IX.dynamodb]: 2400, [IX.lambda]: 1480 }, { [IX.rds]: 620, [IX.aurora]: 340 }, { [IX.bedrock]: 260, [IX.sagemaker]: 150 }][k] })); S.players[3].alive = false; S.round = 23; S.events = [{ r: 6, t: '虫虫 付给 韩叔 过路费 $480（EC2）', w: 480 }, { r: 14, t: 'Yuki 账号被暂停', w: 900 }, { r: 21, t: '韩叔 付给 虫虫 过路费 $1260（DynamoDB 架构联合收费）', w: 1260 }]; S.players[1].cash += 150; demoStats(); timedOver('打满 23 轮'); }
+  if (kind === 'over' || kind === 'report') { S.players.forEach((q, k) => Object.assign(ST(q), { rentIn: [2140, 3880, 960, 410][k], rentOut: [1320, 900, 2410, 1900][k], maxRent: [480, 1260, 220, 150][k], hit: [2, 1, 4, 3][k], imm: [3, 2, 0, 1][k], upg: [5, 8, 2, 1][k], quizOk: [6, 9, 3, 2][k], quizN: 10, spendBuy: 1400, runTot: [300, 520, 800, 410][k], earnBy: [{ [IX.ec2]: 1300, [IX.s3]: 840 }, { [IX.dynamodb]: 2400, [IX.lambda]: 1480 }, { [IX.rds]: 620, [IX.aurora]: 340 }, { [IX.bedrock]: 260, [IX.sagemaker]: 150 }][k] })); S.players[3].alive = false; S.round = 23; S.events = [{ r: 6, t: '虫虫 付给 韩叔 过路费 $480（EC2）', w: 480 }, { r: 14, t: 'Yuki 账户被暂停', w: 900 }, { r: 21, t: '韩叔 付给 虫虫 过路费 $1260（DynamoDB 架构联合收费）', w: 1260 }]; S.players[1].cash += 150; demoStats(); timedOver('打满 23 轮'); }
   if (kind === 'cw') info('CloudWatch · 按用量收费', propInfoHtml(IX.cloudwatch));
   if (kind === 'land') { S.props[IX.lambda].cap = 2; S.players[1].pos = IX.lambda; S.cur = 1; render(); offerLandingUpgrade(P(1), IX.lambda); }
 }
@@ -8025,7 +8045,7 @@ function aiKick() {
     if (!S || S.over || !isAI(S.cur) || S.phase !== 'roll' || !$('#modal').hidden || $('#tour') || AI_PAUSE) return aiKick();
     const p = cur();
     aiBuild(p);   // 掷骰子前先看看要不要升级（在维护窗口里、有欠款时不升）
-    const jailK = () => jailAct(p.cash > 500 ? 'pay' : availCard(p, 'ES') ? 'es' : 'roll');
+    const jailK = () => jailAct(p.cash > 500 ? 'pay' : availCard(p, 'ES') ? 'es' : 'stay');
     if (p.jail !== null && !canSkill(p)) return jailK();
     if (p.jail === null && !dlcOn('speed') && !canSkill(p) && !(p.reseller && !p.rsSet)) return doRoll();
     (async () => {
@@ -8077,7 +8097,7 @@ document.addEventListener('keydown', e => {
   else if (k === 'm') { e.preventDefault(); showManual(); }
   else if (k === 'g') { e.preventDefault(); gallery(); }
   else if (k === 's') { e.preventDefault(); toggleSfx(); }
-  else if (e.key === '?') { e.preventDefault(); ask({ local: true, cancelable: true, title: '键盘快捷键', html: '<table><tr><td><b>空格 / 回车</b></td><td>掷骰子、轮到下一位；弹窗里选主选项；骰子在转时直接出点数（单机）</td></tr><tr><td><b>1–9</b></td><td>弹窗里按顺序数第几个按钮（从左往右、从上往下，灰的也算一个）</td></tr><tr><td><b>回车（输入框里）</b></td><td>出价、改名字这类有输入框的窗口：输完按回车等于点主按钮；竞价、Spot 出价、改名字一打开光标就在框里，数字直接输进框。交易窗按回车不成交，要点按钮</td></tr><tr><td><b>B</b></td><td>资产管理</td></tr><tr><td><b>T</b></td><td>交易</td></tr><tr><td><b>M</b></td><td>玩法手册</td></tr><tr><td><b>G</b></td><td>图鉴</td></tr><tr><td><b>S</b></td><td>音效开关</td></tr><tr><td><b>H</b></td><td>收起 / 展开弹窗，先看棋盘再选</td></tr><tr><td><b>Esc</b></td><td>关掉只有一个按钮的提示、退出新手引导</td></tr></table>', buttons: [{ label: '知道了', value: true, cls: 'pri' }] }); }
+  else if (e.key === '?') { e.preventDefault(); ask({ local: true, cancelable: true, title: '键盘快捷键', html: '<table><tr><td><b>空格 / 回车</b></td><td>掷骰子、轮到下一位；弹窗里选主选项；骰子在转时直接出点数（单机）</td></tr><tr><td><b>1–9</b></td><td>弹窗里按顺序数第几个按钮（从左往右、从上往下，灰的也算一个）</td></tr><tr><td><b>回车（输入框里）</b></td><td>出价、改名字这类有输入框的窗口：输完按回车等于点主按钮；Spot 出价、改名字一打开光标就在框里，数字直接输进框。交易窗按回车不成交，要点按钮</td></tr><tr><td><b>B</b></td><td>资产管理</td></tr><tr><td><b>T</b></td><td>交易</td></tr><tr><td><b>M</b></td><td>玩法手册</td></tr><tr><td><b>G</b></td><td>图鉴</td></tr><tr><td><b>S</b></td><td>音效开关</td></tr><tr><td><b>H</b></td><td>收起 / 展开弹窗，先看棋盘再选</td></tr><tr><td><b>Esc</b></td><td>关掉只有一个按钮的提示、退出新手引导</td></tr></table>', buttons: [{ label: '知道了', value: true, cls: 'pri' }] }); }
 });
 
 // ================= 联机（房主权威：游戏只在房主那台跑，其他设备看同步画面、轮到自己时操作） =================
@@ -8157,11 +8177,11 @@ const MP = {
   answer(id, ans, inp) { this.send(this.hostConn, { t: 'ans', id, ...('k' in ans ? { k: ans.k } : { v: String(ans.v) }), inp }); },
   // 远端玩家点的按钮 → 房主这边执行（只认白名单里的操作，而且必须轮到他）
   ACTS: {
-    roll: () => doRoll(), end: () => endTurn(), 'jail:roll': () => jailAct('roll'), 'jail:pay': () => jailAct('pay'), 'jail:es': () => jailAct('es'),
+    roll: () => doRoll(), end: () => endTurn(), 'jail:roll': () => jailAct('stay'), 'jail:stay': () => jailAct('stay'), 'jail:pay': () => jailAct('pay'), 'jail:es': () => jailAct('es'),
     manage: () => uiAction(() => manage(cur())), trade: () => uiAction(trade), sp: () => uiAction(edpDialog), action: () => uiAction(activeAction), bankrupt: () => uiAction(declareBankrupt), buyrei: () => uiAction(buyReinvent), refactor: () => uiAction(refactorDebt),
     skill: () => uiAction(useRoleSkill), speed: () => uiAction(speedMenu), rsrate: () => uiAction(setRsRate),
   },
-  ONCLICK: { 'doRoll()': 'roll', 'endTurn()': 'end', "jailAct('roll')": 'jail:roll', "jailAct('pay')": 'jail:pay', "jailAct('es')": 'jail:es',
+  ONCLICK: { 'doRoll()': 'roll', 'endTurn()': 'end', "jailAct('stay')": 'jail:stay', "jailAct('pay')": 'jail:pay', "jailAct('es')": 'jail:es',
     'uiAction(()=>manage(cur()))': 'manage', 'uiAction(trade)': 'trade', 'uiAction(edpDialog)': 'sp', 'uiAction(activeAction)': 'action', 'uiAction(declareBankrupt)': 'bankrupt', 'uiAction(buyReinvent)': 'buyrei', 'uiAction(refactorDebt)': 'refactor', 'uiAction(useRoleSkill)': 'skill', 'uiAction(speedMenu)': 'speed', 'uiAction(setRsRate)': 'rsrate' },
   onHostMsg(conn, m) {
     if (!m || typeof m !== 'object') return;
