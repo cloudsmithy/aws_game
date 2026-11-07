@@ -2721,26 +2721,26 @@ const CATS = { sec: '安全', avail: '可用性', cost: '成本', ops: '运维' 
 const INC = [null,
   { n: '服务配额用完了', c: 'avail', e: '新请求全被拒绝：停一轮，或者交 $80 加急提额、继续走', im: 'Lambda 升了「提高并发配额」，或者 CloudWatch 开了「告警与仪表板」（配额用量快满就告警）', tip: '自动扩缩也会撞上配额；用 Service Quotas 提前申请提高，并给配额用量设 CloudWatch 告警', art: 'cloudwatch' },
   { n: 'us-east-1 大面积故障', c: 'avail', e: '你名下没有多区域功能的服务都变成 Impaired（暂停收过路费）', im: '有多区域功能的服务和全局服务（Route 53、CloudFront、Shield Advanced）不受影响', tip: '用 Route 53 健康检查 + 故障转移路由切到另一个 Region；切换要靠数据面自动完成，别指望故障时再去改控制面配置；要提前演练', art: 'region' },
-  { n: '实习生误删了生产数据', c: 'ops', e: '拆掉你数据库组的 1 级升级（不退钱）；没有可拆的就交 $100 进奖池', im: 'AWS Backup 升了「备份计划」，或你有别的带备份功能的升级（版本控制、时间点恢复、自动快照等）', tip: '删除保护只防删掉整个实例或整张表，误删数据要靠时间点恢复和备份；备份要定期演练恢复', art: 'rds' },
+  { n: '实习生误删了生产数据', c: 'ops', e: '拆掉你数据库组的 1 级升级（不退钱）；没有可拆的就交 $100 进奖池', im: 'AWS Backup 升了「备份计划」，或者你有别的带备份功能的升级（S3 版本控制、DynamoDB 时间点恢复、EBS 或 Lightsail 自动快照、EFS 自动备份）；互联网医疗公司免疫（地狱模式不算）', tip: '删除保护只防删掉整个实例或整张表，误删数据要靠时间点恢复和备份；备份要定期演练恢复', art: 'rds' },
   { n: '流量暴增', c: 'avail', e: '你名下没有弹性扩展功能的实例型服务变成 Impaired；要是全都扛住了（而且你有服务），从亚马逊云科技领 $100', im: '持有「订单削峰」架构：直接领 $100', tip: 'Auto Scaling 按负载加减实例；可预期的高峰用预测性扩缩或定时扩缩提前加机器；队列能削峰', art: 'ec2' },
   { n: '月底账单爆了', c: 'cost', e: '你每块服务按升级级别交：1 级 $25、2 级 $50、3 级 $100；每份容量再交 $10，全部进奖池', im: '用掉 Cost Explorer 卡（开了成本异常检测，早发现早处理）', tip: '用 AWS Budgets 设账单告警，用 Cost Anomaly Detection 发现异常支出', art: 'budgets' },
-  { n: 'Root 密钥被推到了 GitHub', c: 'sec', e: '直接进维护窗口，不经过 Startup 扶持', im: '持有「威胁自动响应」架构', tip: '别给 root 创建访问密钥，开启 MFA；亚马逊云科技会扫描公开的 GitHub，发现泄露的密钥会通知你并限制它', art: 'iam' },
-  { n: 'S3 桶被设成了公开', c: 'sec', e: '赔给每位其他玩家 $50', im: '你有数据保护类功能：KMS 客户托管密钥（没有密钥权限读不出来）、CloudFront 源访问控制；只有 GuardDuty 时每人少赔一半', tip: '账户级开启 S3 Block Public Access；AWS Config 规则 s3-bucket-public-read-prohibited 发现公开的桶，配自动修正（自动化文档 AWS-DisableS3BucketPublicReadWrite）改回私有；GuardDuty 只告警', art: 's3' },
+  { n: 'Root 密钥被推到了 GitHub', c: 'sec', e: '直接进维护窗口，不经过 Startup 扶持', im: '持有「威胁自动响应」架构', tip: '别给 root 用户创建访问密钥，并给它开 MFA；亚马逊云科技会扫描公开的 GitHub 仓库，发现泄露的访问密钥会通知你，IAM 用户的密钥还会被自动加上隔离策略', art: 'iam' },
+  { n: 'S3 桶被设成了公开', c: 'sec', e: '赔给每位其他玩家 $50', im: '有数据保护类升级：KMS「客户托管密钥」（没有密钥权限读不出来）、CloudFront「源访问控制」、AWS Config「自动修正」（自动改回私有）；只有 GuardDuty 时每人少赔一半', tip: '账户级开启 S3 Block Public Access；AWS Config 规则 s3-bucket-public-read-prohibited 发现公开的桶，配自动修正（自动化文档 AWS-DisableS3BucketPublicReadWrite）改回私有；GuardDuty 只告警', art: 's3' },
   { n: '有人手动改了生产配置', c: 'ops', e: '后退 3 格，结算落点', im: 'AWS Config 升了「自动修正」', tip: '用 CloudFormation 或 CDK 管理基础设施，用 AWS Config 或 CloudFormation 漂移检测发现手工改动', art: 'cloudformation' },
-  { n: '依赖的第三方 API 挂了', c: 'avail', e: '停一轮，或者交 $80 临时切到备用供应商、继续走', im: '持有 SQS 或 Step Functions（排队 + 重试），或者 EventBridge 开了「事件归档与重放」', tip: '重试加指数退避，失败的消息进死信队列', art: 'sqs' },
-  { n: '证书过期，网站打不开', c: 'ops', e: '二选一：交 $100 进奖池紧急换证书；或者你的 ELB / CloudFront 变成 Impaired（暂停收过路费，到你下回合开始自动恢复）', im: '你的 ELB 或 CloudFront 升到了 HTTPS（ACM 自动续期）', tip: '用在 ELB、CloudFront 上的 ACM 公有证书免费，用 DNS 验证就能自动续期', art: 'elb' },
-  { n: '单点故障', c: 'avail', e: '你名下最贵的实例型服务如果还是单 AZ：变成 Impaired，并交价格的 10% 做紧急恢复，进奖池', im: '最贵的那块已经做了多 AZ；升了「多主节点」的 EMR 也扛得住（集群还在一个 AZ 里，只是坏一个主节点照常跑）；只在单 AZ 的 EC2 前面挂 ELB 不算，另一个 AZ 里得有健康的实例', tip: '生产环境至少跨两个 AZ；ELB 和 Auto Scaling 组都要配多个 AZ 的子网', art: 'ec2' },
-  { n: '凌晨 3 点被告警叫醒', c: 'ops', e: '现场讲一次你（或者你同事）半夜被告警叫醒的经历：讲出来了，领 $50 加班费、照常走；讲不出来，停一轮，或者交 $80 请值班同事处理', im: 'CloudWatch 万能服务绑在一个有你自己在线的 Lambda 或 EC2 的架构上：告警直接调 Lambda，或者重启、恢复 EC2（不算罚）', tip: '告警要配好运行手册（Runbook），能自动处理的用 Systems Manager 自动化文档或 Lambda 自动处理', art: 'cloudwatch' },
+  { n: '依赖的第三方 API 挂了', c: 'avail', e: '停一轮，或者交 $80 临时切到备用供应商、继续走', im: '持有 SQS 或 Step Functions（排队 + 重试），或者 EventBridge 开了「事件归档与重放」', tip: '调用外部 API 要设超时，重试加指数退避和随机抖动；处理不了的消息转进 SQS 死信队列，对方恢复后再放回原队列重新处理', art: 'sqs' },
+  { n: '证书过期，网站打不开', c: 'ops', e: '二选一：交 $100 进奖池紧急换证书；或者让你的 ELB 或 CloudFront（两块都有时是过路费高的那块）变成 Impaired，暂停收过路费，到你下回合开始自动恢复。两块都没有（或者都已经 Impaired）就只能交钱', im: '你的 ELB 或 CloudFront 升到了 HTTPS（ACM 自动续期）', tip: '用在 ELB、CloudFront 上的 ACM 公有证书免费，用 DNS 验证就能自动续期', art: 'elb' },
+  { n: '单点故障', c: 'avail', e: '你名下最贵的实例型服务如果还是单 AZ（EBS 卷永远算单 AZ）：变成 Impaired，再交它价格的 10% 进奖池做紧急恢复', im: '最贵的那块已经升了多 AZ；EMR 升了「多主节点」也算（集群还在一个 AZ 里，只是坏一个主节点照常跑）；ECS 本来就跨 AZ 分散任务。只在单 AZ 的 EC2 前面挂 ELB 不算', tip: '生产环境至少跨两个 AZ；ELB 和 Auto Scaling 组都要配多个 AZ 的子网', art: 'ec2' },
+  { n: '凌晨 3 点被告警叫醒', c: 'ops', e: '现场讲一次你（或者你同事）半夜被告警叫醒的经历：讲出来了，领 $50 加班费、照常走；讲不出来，停一轮，或者交 $80 请值班同事处理', im: '你的 CloudWatch（万能服务）绑在了含 Lambda 或 EC2 的架构上，而且那块 Lambda 或 EC2 是你的、在线：告警直接调 Lambda，或者重启、恢复 EC2（不算罚）', tip: '告警要配好运行手册（Runbook），能自动处理的用 Systems Manager 自动化文档或 Lambda 自动处理', art: 'cloudwatch' },
   { n: '日志打太多了', c: 'cost', e: '付 $100 给 CloudWatch 的主人；没人买就进奖池；主人是你自己就免付', im: '无', tip: '日志的钱主要花在摄取上：控制日志级别、用低频访问日志类；保留期只省存储那部分', art: 'cloudwatch' },
   { n: '回滚后重新发布', c: 'ops', e: '前进到 Startup 扶持', im: '无（不算罚）', tip: '用 CodeDeploy 做蓝绿或金丝雀部署，配 CloudWatch 告警触发自动回滚', art: 'codedeploy' },
-  { n: '安全审计没过', c: 'sec', e: '其他玩家当审计员，每人问你一个安全问题（比如根用户开 MFA 了吗、S3 桶是公开的吗）；过半的人觉得你答得过关就通过。没通过：停一轮整改，或者交 $80 加急整改', im: '持有 2 个以上安全合规组服务（金融合规公司免疫）', tip: '用 Security Hub CSPM 持续检查安全标准和合规', art: 'securityhub' },
+  { n: '安全审计没过', c: 'sec', e: '其他玩家当审计员，每人问你一个安全问题（比如根用户开 MFA 了吗、S3 桶是公开的吗）；过半的人觉得你答得过关就通过。没通过：停一轮整改，或者交 $80 加急整改', im: '持有 2 块以上安全合规组服务，或者有审计类升级（WAF 或 AWS Config 的「托管规则」、CloudTrail「日志文件完整性验证」、KMS「自动轮换」等）；金融合规公司免疫', tip: '用 Security Hub CSPM 持续检查安全标准和合规', art: 'securityhub' },
   { n: '一个 AZ 断电了', c: 'avail', e: '你名下还是单 AZ 的实例型服务（IaaS、PaaS、EKS；EBS 卷和 EMR 集群永远是单 AZ）变成 Impaired', im: '大多数托管服务和全局服务本来就跨多个 AZ，不受影响；EC2 这类实例型服务要升了多 AZ 才扛得住，前面只挂 ELB 不够', tip: '多 AZ 部署让一个 AZ 出问题时服务照常运行；可以用 FIS 的「AZ 断电」场景提前演练', art: 'region' },
-  { n: 'EC2 实例硬件退役', c: 'ops', e: '你的 EC2 如果没有 Auto Scaling：变成 Impaired，交 $50 把实例重新启动到新的硬件上，进奖池', im: 'EC2 升了 Auto Scaling（自动换掉要退役的实例）；多 AZ 挡不住某一台实例被退役', tip: '亚马逊云科技会提前通知计划内的实例退役；Auto Scaling 会自动换掉不健康的实例', art: 'ec2' },
-  { n: '某个服务在一个 Region 里宕机了', c: 'avail', e: '从你现在的位置往前数，第一块有主的服务所在的色组宕机：组里没有多区域功能的服务都变成 Impaired', im: '有多区域功能的服务不受影响；多 AZ 挡不住整个服务出问题', tip: 'AWS Health Dashboard 会显示影响你账户的服务事件，也可以用 EventBridge 订阅 Health 事件自动通知', art: 'health' },
-  { n: '暴露在公网的实例被 SSH 暴力破解', c: 'sec', e: '你有 EC2、Lightsail、ECS 或 EKS：交 $100，其中最贵的一块变成 Impaired', im: '持有「威胁自动响应」架构；VPC 是你的而且升到了 Session Manager；VPC 主人有 Session Manager 时可以付 $50 借用；Fargate、EKS Auto Mode 没有 SSH 可登录；你没有这类服务也不受影响；只有 GuardDuty 时改为交 $50，实例不变 Impaired', tip: '实例放私有子网，用 Session Manager 或 EC2 Instance Connect 端点登录，安全组不对公网开 22 端口', art: 'vpc' },
-  { n: 'DDoS 打满了入口', c: 'sec', e: '二选一：交 $150 进奖池买清洗服务；或者你最贵的一块入口服务（CloudFront、ELB、API Gateway、Route 53）变成 Impaired（暂停收过路费，到你下回合开始自动恢复）', im: '持有 Shield Advanced、WAF 或 CloudFront', tip: '所有账户默认免费开着 Shield Standard，挡常见的网络层攻击；更大的攻击要靠 CloudFront、WAF 和 Shield Advanced', art: 'shield' },
-  { n: '高危 CVE 爆出', c: 'sec', e: '你名下每块没被漏洞扫描保护的 EC2、Lightsail、ECS、EKS、EMR、SageMaker AI：交 $30，并变成 Impaired', im: 'Inspector 的 EC2 扫描保护 EC2、EMR（Lightsail 不在 Inspector 扫描范围内）；ECR 增强扫描或 Inspector 镜像扫描保护 ECS、EKS、SageMaker AI 的容器。RDS 这类托管数据库和 Serverless 的运行时由亚马逊云科技打补丁，不受影响（Lambda 依赖包里的漏洞还得自己管）', tip: 'Amazon Inspector 会持续扫描 EC2、ECR 镜像和 Lambda 里的已知漏洞', art: 'inspector' },
-  { n: '这次事故谁背锅', c: 'ops', e: '开复盘会找背锅的：指一位其他玩家，说出他的服务怎么连累了你；其他人（不算你们俩）投票，过半同意他就交 $100 进奖池，不然你自己交 $100。只有两个人玩时掷骰子，4–6 甩锅成功', im: '—', tip: '好的事故复盘对事不对人（Blameless Postmortem）：找的是流程和系统的漏洞，不是找人背锅', art: 'cloudwatch',
+  { n: 'EC2 实例硬件退役', c: 'ops', e: '你的 EC2 没升到 Auto Scaling：变成 Impaired，再交 $50 进奖池，把实例停止再启动，换到新的硬件上', im: 'EC2 升了 Auto Scaling（自动换掉要退役的实例）；多 AZ 挡不住某一台实例被退役', tip: '亚马逊云科技会提前通知计划内的实例退役；Auto Scaling 会自动换掉不健康的实例', art: 'ec2' },
+  { n: '某个服务在一个 Region 里宕机了', c: 'avail', e: '从你现在的位置往前数，第一块有主的服务所在的色组宕机：组里没有多区域功能的服务都变成 Impaired，不管是谁的', im: '有多区域功能的服务和全局服务（Route 53、CloudFront、Shield Advanced）不受影响；多 AZ 挡不住整个服务出问题', tip: 'AWS Health Dashboard 会显示影响你账户的服务事件，也可以用 EventBridge 订阅 Health 事件自动通知', art: 'health' },
+  { n: '暴露在公网的实例被 SSH 暴力破解', c: 'sec', e: '你暴露在公网的实例（EC2、Lightsail，没升到 Fargate 的 ECS，没升到 Auto Mode 的 EKS）：交 $100 进奖池，最贵的一块变成 Impaired；有 GuardDuty 的只交 $50，实例不受影响。别人的 VPC 升到了 Session Manager，可以付他 $50 借用，躲过去', im: '持有「威胁自动响应」架构；或者你的 VPC 升到了 Session Manager；没有暴露在公网的实例也不受影响', tip: '实例放私有子网，用 Session Manager 或 EC2 Instance Connect 端点登录，安全组不对公网开 22 端口', art: 'vpc' },
+  { n: 'DDoS 打满了入口', c: 'sec', e: '二选一：交 $150 进奖池买清洗服务；或者让你过路费最高的一块入口服务（CloudFront、ELB、API Gateway、Route 53）变成 Impaired，暂停收过路费，到你下回合开始自动恢复。没有入口服务就只能交钱', im: '持有 Shield Advanced、WAF 或 CloudFront', tip: '所有账户默认免费开着 Shield Standard，挡常见的网络层攻击；更大的攻击要靠 CloudFront、WAF 和 Shield Advanced', art: 'shield' },
+  { n: '高危 CVE 爆出', c: 'sec', e: '你名下每块没被漏洞扫描保护的 EC2、Lightsail、ECS、EKS、EMR、SageMaker AI：交 $30，并变成 Impaired', im: '持有「漏洞管理」架构；或者按块算：Inspector「EC2 扫描」保护 EC2、EMR（Lightsail 不在扫描范围内），ECR「增强扫描」或 Inspector「ECR 镜像扫描」保护 ECS、EKS、SageMaker AI。RDS 这类托管数据库和 Serverless 由亚马逊云科技打补丁，不受影响', tip: 'Amazon Inspector 会持续扫描 EC2、ECR 镜像和 Lambda 里的已知漏洞', art: 'inspector' },
+  { n: '这次事故谁背锅', c: 'ops', e: '开复盘会找背锅的：指一位其他玩家，说出他的服务怎么连累了你；其他人（不算你们俩）投票，过半同意他就交 $100 进奖池，不然你自己交 $100。只有两个人玩时掷骰子，4–6 甩锅成功', im: '无', tip: '好的事故复盘对事不对人（Blameless Postmortem）：找的是流程和系统的漏洞，不是找人背锅', art: 'cloudwatch',
     run: async p => {
       const others = S.players.filter(o => o.alive && o.id !== p.id); if (!others.length) return 'nopen';
       const t = others.length === 1 ? others[0] : (isAI(p.id) || (SIM && SIM_AI)) ? others[rnd(others.length)] : P(+(await ask({ who: p.id, cls: 'pick', title: '这次事故甩给谁？', html: `<p>指一位其他玩家，说清他的服务怎么连累了你。其他人投票，过半同意他就交 $${cardAmt(100)} 进奖池，不然你自己交。</p>`, buttons: others.map(o => ({ label: o.name, value: o.id })) })));
@@ -2755,24 +2755,24 @@ const INC = [null,
 const REI = [null,
   { n: '拿到 Activate 创业扶持 Credits', e: '从亚马逊云科技领 $200', tip: '初创公司可以申请 AWS Activate 抵扣额度，通过合作的孵化器、投资机构申请额度更高，具体以官网为准', art: 'activate' },
   { n: '买了 Enterprise Support', keep: 'ES', e: '保留：免费离开维护窗口，或抵消一张任意 Health 事件卡', tip: 'Enterprise Support：指定技术客户经理（TAM），关键业务故障 15 分钟内响应，还含 AWS Security Incident Response；2027 年起 Business 和 Enterprise On-Ramp 停用，改成 Business Support+ 和 Enterprise Support', art: 'support' },
-  { n: '按 Cost Explorer 推荐签了 Savings Plans', e: '你有 EC2、ECS、EKS、EMR、Lambda、SageMaker AI、RDS、Aurora、ElastiCache、OpenSearch 的运行费时，立即签一份 1 年（1 圈）Savings Plans（承诺额按现在的用量自动算，运行费打 75 折）；已经有一份、没有能抵扣的运行费，或者按下次的账单签了也省不下钱的，改领 $50；独立开发者不能签，抽到没有效果', tip: 'Cost Explorer 会按你过去的用量推荐 Savings Plans 的承诺额', art: 'savingsplans' },
+  { n: '按 Cost Explorer 推荐签了 Savings Plans', e: '立即签一份 1 年（1 圈）Savings Plans：承诺额按你现在的用量自动算，EC2、ECS、EKS、EMR、Lambda、SageMaker AI、RDS、Aurora、ElastiCache、OpenSearch 的运行费打 75 折。已经有一份、没有这些运行费，或者按下次的账单算签了也省不下钱的，改领 $50；独立开发者不能签，这张卡没有效果', tip: 'Cost Explorer 会按你过去的用量推荐 Savings Plans 的承诺额', art: 'savingsplans' },
   { n: '抢到便宜的 Spot 容量', keep: 'SPOT', e: '保留：下次 Spot 购买时自动用掉，最低出价降到原价的 10%；金融合规公司抽到放回牌堆底', tip: 'Spot 用的是空闲容量，最多比按需便宜约 90%，被收回前只提前 2 分钟通知；现在的 Spot 不用竞价，游戏用出价模拟被抢', art: 'ec2' },
   { n: '新服务正式 GA', e: '前进到 Bedrock；没人买的话可以打 8 折买，有主正常付过路费', tip: '标着 Preview 的服务不在 SLA 范围内，功能也可能随时改；等它正式 GA 了再放生产流量', art: 'bedrock' },
   { n: 'Keynote 现场演示成功', e: '用 30 秒介绍你的公司和架构（用了哪些服务、组成了什么架构）；其他玩家投票，觉得精彩的每人付你 $50', tip: 're:Invent 每年年底在拉斯维加斯举办', art: 'chime' },
   { n: '考过了 Solutions Architect 认证', e: '清掉 1 个技术债；没有技术债就领 $100', tip: 'Solutions Architect – Associate 是最常见的亚马逊云科技认证之一，认证有效期 3 年', art: 'training' },
-  { n: 'Well-Architected Review 通过', e: '选一块能升级的服务免费升一级；没有可升的就领 $100', tip: '六大支柱：卓越运营、安全性、可靠性、性能效率、成本优化、可持续性', art: 'wat' },
+  { n: 'Well-Architected Review 通过', e: '选一块能升级的服务免费升一级；没有可升的就领 $100', tip: '控制台里的 AWS Well-Architected Tool 免费，按六大支柱逐项自查：卓越运营、安全性、可靠性、性能效率、成本优化、可持续性', art: 'wat' },
   { n: 'Trusted Advisor 找到闲置资源', e: '可以选一块服务按实付全额卖回亚马逊云科技（买价、升级、容量都退，不打折）；不卖就领 $50', tip: '定期检查闲置的 EBS 卷和弹性 IP；完整的成本优化检查要 Business Support+ 及以上的支持计划', art: 'trustedadvisor' },
-  { n: '用上了 Cost Explorer', keep: 'CE', e: '保留：用掉后可以免一次账单格，或抵消一次「月底账单爆了」', tip: '按标签做成本分析；成本异常检测（Cost Anomaly Detection）免费，开了就能收到异常支出提醒', art: 'costexplorer' },
-  { n: '亚马逊云科技宣布降价', e: '接下来 2 次经过 Startup 扶持时，运行费都减半（已经签的 Savings Plans 承诺额照付）；按现在的用量一分钱都省不下的，改领 $50', tip: '降价之外还有阶梯价：S3 存储和 EC2 出网流量用得越多每 GB 越便宜；传进亚马逊云科技的流量一直免费', art: 'billing' },
+  { n: '用上了 Cost Explorer', keep: 'CE', e: '保留：踩到账单格时用掉，免交一次；或者用来抵消一次「月底账单爆了」', tip: '按标签做成本分析；成本异常检测（Cost Anomaly Detection）免费，开了就能收到异常支出提醒', art: 'costexplorer' },
+  { n: '亚马逊云科技宣布降价', e: '接下来 2 次经过 Startup 扶持时，运行费都减半（已经签的 Savings Plans 承诺额照付），手上原有的减半卡换成这张；按现在的用量多省不下钱的，改领 $50', tip: '降价之外还有阶梯价：S3 存储和 EC2 出网流量用得越多每 GB 越便宜；传进亚马逊云科技的流量一直免费', art: 'billing' },
   { n: '领到 Free Tier 额度', e: '直接拿走奖池里所有的钱', tip: '2025 年 7 月起，新账户的 Free Tier 改成抵扣额度：注册送 $100，完成入门任务最多再送 $100，具体以官网为准', art: 'activate' },
   { n: '加入迁移加速计划 MAP', keep: 'MAP', e: '保留：下次买 IaaS、PaaS 或容器服务时用掉，打 7 折', tip: 'MAP 分评估、动员、迁移与现代化三个阶段：评估时按云采用框架（CAF）的六个维度找能力差距；计划里还有资金，抵掉一部分前期迁移成本', art: 'mgn' },
   { n: 'Hackathon 拿了奖', e: '选一块服务免费加 1 份容量（不用集齐整组）；没有能加的就领 $100', tip: '比赛环境用 CloudFormation 搭：比完删掉栈，栈里的资源一起删除，不会漏下实例接着扣费；DeletionPolicy 设成 Retain 的会留下，CDK 给 S3 桶、DynamoDB 表这类存数据的资源默认就设成保留', art: 'codecatalyst' },
   { n: '业务扩张', e: '掷一颗骰子，前进相应的格数', tip: '选 Region 看延迟、合规和价格；同一个服务在不同 Region 价格可能不一样', art: 'region' },
   { n: '技术分享会', e: '每位其他玩家讲一个亚马逊云科技知识点，讲不出来的付你 $20', tip: '各地 User Group 和 Community Day 定期有技术分享，讲出来比只看文档记得牢', art: 'chime' },
-  { n: '解决方案架构师的建议', e: '飞到你某个架构里还缺的、还没人买的那块服务；没有的话飞到前面最近一块没人买的服务', tip: '亚马逊云科技架构中心（Architecture Center）有大量参考架构，照着搭比从零摸索快', art: 'wat' },
-  { n: '去上了一节 Workshop', e: '后退 2 格，结算落点', tip: '很多 AWS Workshop 的动手实验都公开在网上', art: 'training' },
+  { n: '解决方案架构师的建议', e: '前进到你某个架构里还缺、还没人买的服务（有几块就去最近的那块）；没有的话前进到最近一块没人买的服务；都没有就领 $100', tip: '亚马逊云科技架构中心（Architecture Center）有大量参考架构，照着搭比从零摸索快', art: 'wat' },
+  { n: '去上了一节 Workshop', e: '后退 2 格，结算落点', tip: 'workshops.aws 上有大量公开的动手实验，用自己的账户就能跟着做，做完记得删掉资源', art: 'training' },
   { n: '入选 AWS Community Builders', e: '领 1 个复盘标记（自己选类别），以后抵消一张同类 Health 事件卡', tip: 'Community Builders 是亚马逊云科技面向技术分享者的公开项目', art: 'training' },
-  { n: '上了 Startup Showcase', e: '前进到前面最近一块没人买的服务，可以打 8 折买', tip: '初创公司可以把软件上架 AWS Marketplace：客户买了由亚马逊云科技统一出账，费用记在客户自己的亚马逊云科技账单上', art: 'activate' },
+  { n: '上了 Startup Showcase', e: '前进到前面最近一块没人买的服务，可以打 8 折买；没有就领 $100', tip: '初创公司可以把软件上架 AWS Marketplace：客户买了由亚马逊云科技统一出账，费用记在客户自己的亚马逊云科技账单上', art: 'activate' },
   { n: '迁移到 Graviton', e: 'EC2 已经升到 Auto Scaling 的，免费换成 Graviton；还没到这一级的，记一次免费，以后升 Graviton 这一级不花钱；没有 EC2、已经是 Graviton 或已经记过的，领 $50', tip: 'Graviton 是亚马逊云科技自研的 Arm 处理器，通常比同级 x86 实例性价比更高、也更省电', art: 'ec2' },
   { n: '踩坑大会', e: '每位玩家（包括你）讲一个在云上踩过的坑，然后大家投票选最惨的那个（不能投自己）：得票最多的人从亚马逊云科技领 $100，再领 1 个运维类复盘标记；平票的都领', tip: '亚马逊云科技公开过它的复盘写法 COE（Correction of Error）：写清影响和时间线，用「5 个为什么」追到根因，再列改进项；只找原因，不找人背锅', art: 'chime',
     run: async p => {
@@ -2836,7 +2836,7 @@ const REI = [null,
       }
       log(`绕了两圈都接上了，${nm(p)} 领带头奖 $${credit(p, 100)}`);
     } },
-  { n: '根因在上游', keep: 'BLAME', e: '保留：下次抽到 Health 事件时，可以把它甩给另一位玩家承受（他对这张卡免疫的话就作废）', tip: 'CloudWatch 里的 X-Ray 追踪地图按调用关系把服务连成图，出问题的节点会描色：红色是 5xx 故障，黄色是 4xx 客户端错误，紫色是 429 限流；顺着连线就能看出是哪个依赖在报错', art: 'cloudwatch' },
+  { n: '根因在上游', keep: 'BLAME', e: '保留：抽到 Health 事件卡时，可以用它把那张卡甩给另一位玩家承受（他对那张卡免疫的话就作废）', tip: 'CloudWatch 里的 X-Ray 追踪地图按调用关系把服务连成图，出问题的节点会描色：红色是 5xx 故障，黄色是 4xx 客户端错误，紫色是 429 限流；顺着连线就能看出是哪个依赖在报错', art: 'cloudwatch' },
 ];
 const CARDN = { BLAME: '根因在上游', ES: 'Enterprise Support', SP: 'Savings Plans', SPOT: 'Spot 实例', CE: 'Cost Explorer', MAP: 'MAP 迁移加速' };
 const CARDE = { BLAME: '下次抽到 Health 事件时，可以把它甩给另一位玩家承受', ES: '免费离开维护窗口，或抵消一张任意 Health 事件卡', SP: '付过路费时用掉，这次减半（旧存档里的卡）', SPOT: '下次 Spot 购买时自动用掉，最低出价降到原价的 10%', CE: '踩到账单格时用掉免交一次，或抵消一次「月底账单爆了」', MAP: '下次买 IaaS、PaaS 或容器服务时用掉，打 7 折' };
@@ -3012,13 +3012,13 @@ const DLC_INC = [
       if (!mine.length) { log(`${nm(p)} 没有从代理商手里买的服务，不用补差价`); return 'nopen'; }
       mine.forEach(i => pay(p, P(S.props[i].via), 20)); log(`${nm(p)} 为 ${mine.length} 块从代理商手里买的服务补交差价 $${cardAmt(20) * mine.length}`);
     } },
-  { dlc: 'reseller', n: '渠道合规审计', c: 'cost', e: '代理商：客户从你手里买的服务每块交 $40；客户：你从代理商手里买的服务每块交 $20；跟代理商没关系的不受影响', im: '无', tip: '经销的每一笔账单都要能和合作伙伴计划的记录对上，审计时才说得清', art: 'cloudtrail',
+  { dlc: 'reseller', n: '渠道合规审计', c: 'cost', e: '代理商：客户从你手里买的服务每块交 $40；客户：你从代理商手里买的服务每块交 $20；都交进奖池。跟代理商没有往来的不受影响', im: '无', tip: '代理商可以用 AWS Billing Conductor 按客户分组出账，每一笔转售都对得上，审计时说得清', art: 'cloudtrail',
     imm: o => '', run: async p => {
       const n = p.reseller ? S.players.reduce((a, q) => a + (q.id === p.id ? 0 : viaOf(p, q).length), 0) : ownedBy(p).filter(i => S.props[i].via != null).length;
       if (!n) { log(`${nm(p)} 跟代理商没有往来，不受影响`); return 'nopen'; }
       const x = (p.reseller ? 40 : 20) * n; log(`${nm(p)} 为 ${n} 块从代理商手里买的服务交审计费 $${pay(p, 'pot', x)}`);
     } },
-  { dlc: 'reseller', n: '代理合同到期没续', c: 'ops', e: '客户：你从代理商手里买的服务都改成直接向亚马逊云科技付费；代理商：从你手里买得最多的那位客户和你断开代理关系', im: '—', tip: '代理合同到期前要提前续签，不然账单会直接回到亚马逊云科技', art: 'billing',
+  { dlc: 'reseller', n: '代理合同到期没续', c: 'ops', e: '客户：你从代理商手里买的服务都改成直接向亚马逊云科技付费；代理商：从你手里买得最多的那位客户和你断开代理关系', im: '无', tip: '代理合同到期前要提前续签，不然账单会直接回到亚马逊云科技', art: 'billing',
     run: async p => {
       if (p.reseller) {
         const cs = rsCustomers(p).sort((a, b) => viaOf(p, b).length - viaOf(p, a).length);
@@ -3029,7 +3029,7 @@ const DLC_INC = [
       if (!mine.length) { log(`${nm(p)} 没有从代理商手里买的服务`); return 'nopen'; }
       mine.forEach(i => { S.props[i].via = null; }); log(`${nm(p)} 的 ${mine.map(sqn).join('、')} 改成直接向亚马逊云科技付费`); return 'nopen';
     } },
-  { dlc: 'genai', n: '提示词注入攻击', c: 'sec', e: '有人用恶意提示词让你的 AI 应用泄露数据：持有 Bedrock 的交 $120；有 WAF 的减半，交 $60', im: '没有 Bedrock', tip: 'WAF 按规则匹配请求，能限速、拦已知的恶意来源，挡不住换个说法的提示词；对口的是 Bedrock Guardrails 的提示词攻击过滤，再配敏感信息过滤防泄露', art: 'bedrock',
+  { dlc: 'genai', n: '提示词注入攻击', c: 'sec', e: '有人用恶意提示词让你的 AI 应用泄露数据：交 $120 进奖池；有 WAF 的减半，交 $60', im: '没有 Bedrock', tip: 'WAF 按规则匹配请求，能限速、拦已知的恶意来源，挡不住换个说法的提示词；对口的是 Bedrock Guardrails 的提示词攻击过滤，再配敏感信息过滤防泄露', art: 'bedrock',
     imm: o => !owns(o, IX.bedrock) ? '没有 Bedrock' : '', run: async p => { const w = active(p, IX.waf); log(`${nm(p)} 交 $${pay(p, 'pot', w ? 60 : 120)}${w ? '（WAF 拦掉了一部分恶意请求，减半）' : ''}`); } },
   { dlc: 'genai', n: 'GPU 容量不够用', c: 'avail', e: '训练任务排不上队：你的 SageMaker AI 变成 Impaired', im: 'SageMaker AI 升了多卡训练（GPU 已用训练计划预留好）', tip: '大模型训练要提前用 SageMaker 训练计划预留 GPU，训练任务和 HyperPod 集群都能用；Bedrock 的跨区域推理只分流推理请求，管不到训练', art: 'sagemaker',
     imm: o => !owns(o, IX.sagemaker) ? '没有 SageMaker AI' : S.props[IX.sagemaker].level >= 2 ? 'SageMaker AI 有多卡训练（GPU 已预留）' : '', run: async p => { impair([IX.sagemaker]); log(`${sqn(IX.sagemaker)} 变成 Impaired`); } },
@@ -3039,17 +3039,17 @@ const DLC_INC = [
     // GuardDuty 只发现、CloudTrail 只记录，都不会吊销密钥，不算免疫；吊销靠自动响应（「威胁自动响应」架构）。
     // 只有 GuardDuty 时跟 #6、#19 一样减损：交 $50、不停、不记技术债（返回 'nopen'）；放在抵消窗之后，有抵消卡的人照样先问
     imm: o => hasCombo(o, 'soar') ? '有「威胁自动响应」架构，自动吊销了密钥' : '', run: async p => { if (active(p, IX.guardduty)) { log(`${nm(p)} 的 GuardDuty 发现异常 API 调用，及时吊销了密钥：交 $${pay(p, 'pot', 50)}，不用停`); return 'nopen'; } await skipOrPay(p, '访问密钥被盗用', 80, '立刻吊销密钥'); } },
-  { dlc: 'sec', n: '接口被恶意刷爆', c: 'sec', e: '交 $100 进奖池', im: 'WAF 升了限速规则，或 API Gateway 升了使用计划限流', tip: 'WAF 的限速规则按 IP 拦截，API Gateway 使用计划按 API 密钥限流', art: 'waf',
+  { dlc: 'sec', n: '接口被恶意刷爆', c: 'sec', e: '交 $100 进奖池', im: 'WAF 升了限速规则，或 API Gateway 升了使用计划限流', tip: 'WAF 限速规则按来源 IP（也可以按请求头等）统计请求数，超了就拦；API Gateway 使用计划按 API 密钥限流', art: 'waf',
     // 刷接口要靠限速规则按 IP 拦，WAF 只开托管规则挡不住
     imm: o => active(o, IX.waf) && effActive(IX.waf, 'ddos') ? 'WAF 有限速规则' : owns(o, IX.apigw) && S.props[IX.apigw].level >= 1 ? 'API Gateway 有限流' : '', run: async p => { log(`${nm(p)} 交 $${pay(p, 'pot', 100)}`); } },
-  { dlc: 'finops', n: '测试环境忘了删', c: 'cost', e: '你名下每块没升级的实例型服务交 $30', im: '用过 Cost Explorer 卡（开了成本异常检测）', tip: '给测试资源打标签，用 AWS Budgets 和成本异常检测发现没人管的资源；Savings Plans 只是承诺用量换折扣，忘了删的实例照样计费', art: 'budgets',
+  { dlc: 'finops', n: '测试环境忘了删', c: 'cost', e: '你名下每块没升级的实例型服务交 $30 进奖池', im: '用过 Cost Explorer 卡（开了成本异常检测）', tip: '给测试资源打标签，用 AWS Budgets 和成本异常检测发现没人管的资源；Savings Plans 只是承诺用量换折扣，忘了删的实例照样计费', art: 'budgets',
     // Savings Plans 按承诺额给折扣，不会发现也不会关掉没人管的资源，不算免疫；只认开了成本异常检测（用过 CE 卡），和「跨区流量费暴涨」一样
     imm: o => o.cards.some(x => x.id === 'CE' && x.used) ? '开了成本异常检测' : '', run: async p => { const hit = ownedBy(p).filter(i => isInst(i) && !S.props[i].level); if (!hit.length) { log(`${nm(p)} 没有闲置的实例`); return 'nopen'; } log(`${nm(p)} 为 ${hit.map(sqn).join('、')} 交 $${pay(p, 'pot', 30 * hit.length)}`); } },
-  { dlc: 'finops', n: '跨区流量费暴涨', c: 'cost', e: '你名下每块有多区域功能的服务交 $40', im: '用过 Cost Explorer 卡（开了成本异常检测，流量费一涨就收到提醒）', tip: '跨 Region 复制、跨 AZ 访问都按 GB 收费；VPC 终端节点省的是 NAT 网关的处理费，跨 Region 的流量照样收，规划架构时要算进去', art: 'billing',
+  { dlc: 'finops', n: '跨区流量费暴涨', c: 'cost', e: '你名下每块有多区域功能的服务交 $40 进奖池', im: '用过 Cost Explorer 卡（开了成本异常检测，流量费一涨就收到提醒）', tip: '跨 Region 复制、跨 AZ 访问都按 GB 收费；VPC 终端节点省的是 NAT 网关的处理费，跨 Region 的流量照样收，规划架构时要算进去', art: 'billing',
     imm: o => o.cards.some(x => x.id === 'CE' && x.used) ? '开了成本异常检测' : '', run: async p => { const hit = ownedBy(p).filter(i => effActive(i, 'mr')); if (!hit.length) { log(`${nm(p)} 没有多区域服务`); return 'nopen'; } log(`${nm(p)} 交 $${pay(p, 'pot', 40 * hit.length)}`); } },
   { dlc: 'global', n: '海外用户访问太慢', c: 'avail', e: '用户流失：交 $100 进奖池', im: '持有 CloudFront', tip: 'CloudFront 把内容缓存到全球边缘节点，Global Accelerator 走亚马逊云科技骨干网', art: 'cloudfront',
     imm: o => active(o, IX.cloudfront) ? '有 CloudFront' : '', run: async p => { log(`${nm(p)} 交 $${pay(p, 'pot', 100)}`); } },
-  { dlc: 'global', n: '当地要求数据本地存储', c: 'ops', e: '你名下有多区域功能的服务，各去掉一级「多区域」重新规划（不退钱）', im: '持有 KMS，且没升到「多区域密钥」', tip: '出海前先确认当地的数据合规要求，再决定数据放哪个 Region；单区域密钥加密的数据只能在本 Region 解密，多区域密钥会把密钥材料复制到别的 Region', art: 'region',
+  { dlc: 'global', n: '当地要求数据本地存储', c: 'ops', e: '你名下最高一级是「多区域」的服务，各降一级重新规划（不退钱）', im: '持有 KMS，且没升到「多区域密钥」', tip: '出海前先确认当地的数据合规要求，再决定数据放哪个 Region；单区域密钥加密的数据只能在本 Region 解密，多区域密钥会把密钥材料复制到别的 Region', art: 'region',
     // 官方说用单区域密钥能守住数据驻留，多区域密钥会把密钥材料复制出本 Region、让驻留合规更复杂：升到第 3 级就不再免疫，会和别的多区域功能一起去掉一级，降回第 2 级以后再抽到又免疫
     imm: o => active(o, IX.kms) && !effActive(IX.kms, 'mr') ? 'KMS 只用单区域密钥' : '', run: async p => { const hit = ownedBy(p).filter(i => effActive(i, 'mr')); const h2 = hit.filter(i => SQ[i].upg[S.props[i].level - 1] && SQ[i].upg[S.props[i].level - 1][2] === 'mr'); if (!h2.length) { log(`${nm(p)} 没受影响`); return 'nopen'; } h2.forEach(i => { S.props[i].level--; if (S.props[i].upPaid) S.props[i].upPaid.length = S.props[i].level; }); log(`${h2.map(sqn).join('、')} 去掉了多区域那一级`); } },
 ];
@@ -3066,7 +3066,7 @@ const DLC_REI = [
       const o = c.find(z => z.i === +v); await withCardMul(0, async () => pay(p, 'bank', o.x)); S.props[o.i].owner = p.id; S.props[o.i].paid = o.x; ST(p).spendBuy = (ST(p).spendBuy || 0) + o.x;
       log(`🏷️ ${nm(p)} 按进货价 $${o.x} 拿下 ${sqn(o.i)}`);
     } },
-  { dlc: 'reseller', n: '代理商清仓', e: '代理商：把你没组成有效架构的最便宜一块服务卖回亚马逊云科技（按卖回价）；客户：可以按原价 7 折从代理商手里买下一块他没组成架构的服务，钱付给代理商', tip: '代理商手上积压的资源会打折转给客户，客户能捡便宜', art: 'trustedadvisor',
+  { dlc: 'reseller', n: '代理商清仓', e: '代理商：把你没组成有效架构的服务里最便宜的一块卖回亚马逊云科技（按卖回价）；客户：可以按原价 7 折从代理商手里买下一块他没组成架构的服务（连同升级），钱付给代理商，代理商手上没有这样的服务就改领 $100', tip: '代理商手上积压的资源会打折转给客户，客户能捡便宜', art: 'trustedadvisor',
     run: async p => {
       const loose = r => ownedBy(r).filter(i => ['prop', 'util'].includes(SQ[i].t) && !comboOn(r, i).length && !S.props[i].offline);
       if (p.reseller) {
@@ -3083,24 +3083,24 @@ const DLC_REI = [
     } },
   { dlc: 'reseller', n: '升级为高级合作伙伴', e: '代理商：每有一位客户领 $150（没有客户也领 $150）；客户：领 $100', tip: '合作伙伴等级越高，拿到的折扣、市场资金和技术支持越多', art: 'wat',
     run: async p => { if (p.reseller) { const n = Math.max(1, rsCustomers(p).length); log(`${nm(p)} 升级为高级合作伙伴，领 $${credit(p, 150 * n)}`); } else log(`${nm(p)} 是客户，领 $${credit(p, 100)}`); } },
-  { dlc: 'reseller', n: 'Marketplace 联合销售', e: '代理商：免费拿下一块没人买、原价不超过 $300 的服务；没有的话领 $200。客户：领 $100', tip: '通过 AWS Marketplace 的渠道合作伙伴私有报价，代理商可以替客户采购第三方软件', art: 'activate',
+  { dlc: 'reseller', n: 'Marketplace 联合销售', e: '代理商：免费拿下没人买、原价不超过 $300 的服务里最贵的一块；没有的话领 $200。客户：领 $100', tip: '通过 AWS Marketplace 的渠道合作伙伴私有报价，代理商可以替客户采购第三方软件', art: 'activate',
     run: async p => {
       if (!p.reseller) { log(`${nm(p)} 是客户，领 $${credit(p, 100)}`); return; }
       const c = OWNABLE.filter(i => S.props[i].owner === null && SQ[i].t === 'prop' && SQ[i].p <= 300 && !isHidden(i)).sort((a, b) => SQ[b].p - SQ[a].p);
       if (!c.length) { log(`没有原价 $300 以内没人买的服务，${nm(p)} 改领 $${credit(p, 200)}`); return; }
       S.props[c[0]].owner = p.id; S.props[c[0]].paid = 0; log(`${nm(p)} 通过 Marketplace 联合销售拿下 ${sqn(c[0])}`);
     } },
-  { dlc: 'reseller', n: '渠道激励计划', e: '每位代理商从亚马逊云科技领 $200；抽到的人是客户的话，自己再领 $100', tip: '亚马逊云科技会给渠道伙伴发激励，鼓励他们帮客户上云', art: 'costexplorer',
+  { dlc: 'reseller', n: '渠道激励计划', e: '每位代理商从亚马逊云科技领 $200；抽到的人是客户的话，自己领 $100', tip: '亚马逊云科技会给渠道伙伴发激励，鼓励他们帮客户上云', art: 'costexplorer',
     run: async p => { const rs = S.players.filter(q => q.alive && q.reseller); rs.forEach(q => credit(q, 200)); if (rs.length) log(`每位代理商领到 $${cardAmt(200)} 渠道激励`); if (!p.reseller) log(`${nm(p)} 是客户，领 $${credit(p, 100)}`); } },
   // Bedrock 第 3 级是跨区域推理，不是新模型，所以只在 Nova Lite、Nova Pro 这两档里换
   { dlc: 'genai', n: 'Bedrock 上了新模型', e: '你的 Bedrock 还没用上 Nova Pro 的，免费换下一档模型；已经用上或没有 Bedrock 的，领 $100', tip: 'Bedrock 上的模型会持续更新，换模型只要改模型 ID', art: 'bedrock',
     run: async p => { const pr = S.props[IX.bedrock], mine = owns(p, IX.bedrock); if (mine && pr.level < 2 && upgradeInfo(p, IX.bedrock, true).ok) { pr.level++; (pr.upPaid = pr.upPaid || [])[pr.level - 1] = 0; log(`🔧 ${nm(p)} 免费给 ${sqn(IX.bedrock)} 换上「${lvName(IX.bedrock, pr.level)}」`); } else log(`${nm(p)} ${mine && pr.level >= 2 ? `的 ${sqn(IX.bedrock)} 已经用上 Nova Pro` : '没有能换模型的 Bedrock'}，领 $${credit(p, 100)}`); } },
   { dlc: 'genai', n: '拿到生成式 AI 创新中心支持', e: '从亚马逊云科技领 $150', tip: '亚马逊云科技生成式 AI 创新中心会派专家帮客户做 GenAI 落地', art: 'activate', run: async p => { log(`${nm(p)} 领 $${credit(p, 150)}`); } },
-  { dlc: 'genai', n: 'AI Agent 上线', e: '前进到 Lambda；没人买可以打 8 折买', tip: 'Agent 通常用 Lambda 当工具，让模型调用你的业务接口', art: 'lambda', run: async p => { await moveTo(p, IX.lambda); await land(p, { discount: 0.8 }); } },
+  { dlc: 'genai', n: 'AI Agent 上线', e: '前进到 Lambda；没人买可以打 8 折买', tip: 'Agent 常把 Lambda 函数当工具，让模型调用你的业务接口；Bedrock AgentCore Gateway 能把现有的 API 和 Lambda 函数转成 Agent 可调用的 MCP 工具', art: 'lambda', run: async p => { await moveTo(p, IX.lambda); await land(p, { discount: 0.8 }); } },
   { dlc: 'sec', n: '通过了安全合规审计', e: '持有 2 块以上安全合规组服务领 $150，否则领 $50', tip: 'AWS Artifact 里可以下载亚马逊云科技的合规报告', art: 'securityhub', run: async p => { log(`${nm(p)} 领 $${credit(p, secActive(p, 'sec') >= 2 ? 150 : 50)}`); } },
   { dlc: 'sec', n: 'Security Hub CSPM 全绿', e: '清掉 1 个技术债；没有技术债就领 $80', tip: 'Security Hub CSPM 按安全标准持续检查配置', art: 'securityhub', run: async p => { if (p.techDebt > 0) { p.techDebt--; p.refactored = true; log(`${nm(p)} 清掉 1 个技术债`); } else log(`${nm(p)} 没有技术债，领 $${credit(p, 80)}`); } },
   { dlc: 'finops', n: '成本异常检测发现一笔浪费', e: '从亚马逊云科技领 $100', tip: '成本异常检测免费，用机器学习发现异常支出', art: 'costexplorer', run: async p => { log(`${nm(p)} 领 $${credit(p, 100)}`); } },
-  { dlc: 'finops', n: 'Compute Optimizer 建议降配', e: '下次经过 Startup 扶持时，EC2、EBS、Lambda、RDS、Aurora、EMR 和跑在 Fargate 上的 ECS 运行费减半（Spot 买的、其他服务、EC2 的公网 IPv4 地址费和 Savings Plans 承诺额照付）；一分钱都省不下的，改领 $50', tip: 'Compute Optimizer 按实际利用率推荐更合适的实例规格', art: 'trustedadvisor',
+  { dlc: 'finops', n: 'Compute Optimizer 建议降配', e: '下次经过 Startup 扶持时，EC2、EBS、Lambda、RDS、Aurora、EMR 和跑在 Fargate 上的 ECS 运行费减半（Spot 买的、下线的、其他服务、EC2 的公网 IPv4 地址费和 Savings Plans 承诺额照付）；手上已经有一张没用上的运行费减半，或者一分钱都省不下的，改领 $50', tip: 'Compute Optimizer 按实际利用率推荐更合适的实例规格', art: 'trustedadvisor',
     // 减半卡不叠加：手上已经有一张没用上的，或者按现在的用量省不下钱（名下没有它能降配的服务、技能让下一圈本来就全免），就改领 $50
     run: async p => { const s = p.halfRun ? 0 : halfSave(p, 'hour'); if (!s) { log(`${nm(p)} ${p.halfRun ? '已经有一张运行费减半还没用上' : '按现在的用量，降配也省不下钱'}，改领 $${credit(p, 50)}`); return; }
       p.halfRun = 'hour'; p.halfLaps = 1; log(`${nm(p)} 下次经过 Startup 扶持时，${CO_SVCS} 运行费减半：按现在的用量大约少交 $${s}`); } },
@@ -3174,7 +3174,7 @@ const MOVE_INC = [
     imm: o => owns(o, IX.route53) && S.props[IX.route53].level >= 1 ? 'Route 53 有健康检查' : '', run: async p => { await flyTo(p, IX.route53, 'DNS 配错，', { passGo: false, backward: true }); await land(p); return 'nopen'; } },
   { n: '发布出问题，回滚', c: 'ops', e: '掷一颗骰子，后退相应格数，结算落点', im: '无（不算罚）', tip: '用 CodeDeploy 蓝绿或金丝雀部署，出问题自动回滚', art: 'codedeploy',
     run: async p => { const d = 1 + rnd(6); log(`${nm(p)} 掷出 ${d}，后退 ${d} 格`); await moveSteps(p, -d); await land(p); return 'nopen'; } },
-  { n: '流量被劫持到别人那里', c: 'sec', e: '和随机一位不在维护窗口里的玩家交换位置（双方都不结算落点）', im: '持有 Shield Advanced 或 CloudFront', tip: '把入口放在 CloudFront 和 Shield 后面，用 Route 53 和 Global Accelerator 的固定入口，减少被劫持的风险', art: 'shield',
+  { n: '流量被劫持到别人那里', c: 'sec', e: '和随机一位不在维护窗口里的玩家交换位置（双方都不结算落点）', im: '持有 Shield Advanced 或 CloudFront', tip: '给 Route 53 公有托管区开 DNSSEC 签名，开了验证的解析器能识别被篡改的应答；入口放在 CloudFront 后面，源站地址不直接暴露', art: 'shield',
     imm: o => active(o, IX.shield) ? '有 Shield Advanced' : active(o, IX.cloudfront) ? '有 CloudFront' : '', run: async p => { const os = S.players.filter(q => q.alive && q.id !== p.id && q.jail === null); if (!os.length || p.jail !== null) return 'nopen'; const q = os[rnd(os.length)]; const a = p.pos; await flyTo(p, q.pos, '流量被劫持，', { passGo: false }); q.pos = a; render(); log(`${nm(q)} 被换到 ${sqn(a)}`); } },
   { n: '主 Region 出问题，紧急切到灾备', c: 'avail', e: '飞到棋盘正对面那一格，结算落点（经过起点、User Group 活动照常领钱）', im: '无（不算罚）', tip: '灾备切换要提前演练；可以用 Route 53 故障转移路由或 Application Recovery Controller 做切换', art: 'region',
     run: async p => { await flyTo(p, (p.pos + Math.floor(N / 2)) % N, '切到灾备 Region，'); await land(p); return 'nopen'; } },
@@ -3841,7 +3841,7 @@ function modal({ title, html = '', inputs = [], buttons = [{ label: '确定', va
       if (ap) { const upd = () => { ap.previousElementSibling.innerHTML = AI_PAUSE ? `${nmAI} 已暂停，点「继续」它再选` : `${nmAI} 在选…`; ap.textContent = AI_PAUSE ? '继续' : '暂停'; }; upd(); ap._upd = upd; ap.onclick = toggleAiPause; }
       box.querySelectorAll('.btns button,[data-v],.inps input,.inps textarea,.inps select').forEach(el => { el._d0 = el.disabled; el.disabled = true; });
       const tk = box.querySelector('[data-mptake]');
-      if (tk) tk.onclick = () => { box.classList.remove('mpwait'); tk.parentNode.remove(); box.querySelectorAll('.btns button,[data-v],.inps input,.inps textarea,.inps select').forEach(el => { el.disabled = false; }); buttons.forEach((b, k) => { if (b.disabled) box.querySelector(`button[data-k="${k}"]`).disabled = true; }); };
+      if (tk) tk.onclick = () => { box.classList.remove('mpwait'); tk.parentNode.remove(); box.querySelectorAll('.btns button,[data-v],.inps input,.inps textarea,.inps select').forEach(el => { el.disabled = !!el._d0; }); buttons.forEach((b, k) => { if (b.disabled) box.querySelector(`button[data-k="${k}"]`).disabled = true; }); };
       // 人走了不回来：点一次「他回来之前都由我来选」，之后他的买地、抽卡、竞价、投票、交易确认都直接在房主这台选，不用每个窗再点。
       // 只认真掉线的座位（hostPlays 还要求 !online，30 秒没动的计时只露出上面那个按钮）；他用同一个名字连回来，admit 换掉整个座位对象，标记跟着没了
       const ta = box.querySelector('[data-mpall]');
@@ -3927,10 +3927,16 @@ const lvBadge = (l, i) => {
 // 卡面：竖卡，默认 63 × 88（和宣传片、打印的实体卡一样），只当最小高度，免疫和知识点长的卡往下长、不裁字：彩色标题栏、大图标和标题、效果、免疫框、知识点
 const CARD_COL = { inc: '#e7157b', rei: '#8c4fff', fis: '#d13212' };
 const pcardHtml = (kind, head, art, title, eff, im, tip) => `<div class="pcard ${kind}" style="--cc:${CARD_COL[kind]}"><div class="ph">${awsImg(kind === 'rei' ? 'reinvent' : 'health')}<span>${head}</span></div><div class="pa">${awsImg(art, 'hero')}<b class="ett">${title}</b></div><div class="pe ed">${eff}</div>${im ? `<div class="pim imm"><b>免疫</b><span class="gb">${im}</span></div>` : ''}${tip ? `<div class="pt tip"><b>知识点：</b>${tip}</div>` : ''}</div>`;
+// 抽卡时卡上的金额按这次的卡牌倍率换算好再显示（收钱、付钱、罚款都乘倍率；「原价不超过 $300」这种门槛不乘），卡面上写一句倍率
+function cardMulTxt(t) {
+  const m = S && S.players && S.cardMul; if (!t || !m || Math.abs(m - 1) < 0.001) return t;
+  return String(t).replace(/\$(\d+)/g, (x, n, off, str) => /(不超过|低于|超过|原价|价格|以内|以上|最多|最少|高于|满)\s*$/.test(str.slice(Math.max(0, off - 6), off)) ? x : `$${Math.round(+n * m)}`);
+}
+const cardMulNote = () => { const m = S && S.players && S.cardMul; return m && Math.abs(m - 1) >= 0.001 ? `<br><span class="muted">卡牌倍率 ${fmtMul(m)}：上面的金额已经按倍率算好</span>` : ''; };
 function cardHtml(kind, id) {
-  if (kind === 'inc') { const c = INC[id]; return pcardHtml('inc', `Health 事件 · ${CATS[c.c]} · #${id}`, c.art, c.n, c.e, c.im, c.tip); }
+  if (kind === 'inc') { const c = INC[id]; return pcardHtml('inc', `Health 事件 · ${CATS[c.c]} · #${id}`, c.art, c.n, cardMulTxt(c.e) + cardMulNote(), cardMulTxt(c.im), c.tip); }
   const c = REI[id];
-  return pcardHtml('rei', `re:Invent${c.keep ? ' · 保留卡' : ''} · #${id}`, c.art, c.n, c.e.replace(/^保留：/, '') + (c.keep ? '<br><span class="muted">保留卡，用掉后翻面留在面前。</span>' : ''), '', c.tip);
+  return pcardHtml('rei', `re:Invent${c.keep ? ' · 保留卡' : ''} · #${id}`, c.art, c.n, cardMulTxt(c.e.replace(/^保留：/, '')) + (c.keep ? '<br><span class="muted">保留卡，用掉后翻面留在面前。</span>' : '') + cardMulNote(), '', c.tip);
 }
 const cardBack = kind => `<div class="face back ${kind}" style="--cc:${CARD_COL[kind]}">${awsImg(kind === 'rei' ? 'reinvent' : 'health')}<span>${kind === 'inc' ? 'Health 事件' : kind === 'fis' ? 'FIS 故障注入' : 're:Invent'}</span></div>`;
 // 发牌动画的起点：从牌堆的位置飞到窗口中间（偏移限制在 ±260px，窗口外的部分会被裁掉）
@@ -6430,7 +6436,7 @@ function renderCenter() {
   const d = S.lastDice;
   const rolling = S.rollId && S.rollId !== lastAnimRoll;
   if (rolling) lastAnimRoll = S.rollId;
-  const status = over ? '游戏结束' : p.jail !== null ? (p.jail ? `在维护窗口里：停了 ${p.jail}/${jailMax(p)} 轮，再停一轮或付 $50 出来` : `在维护窗口里：停${jailMax(p) > 1 ? ` ${jailMax(p)} ` : '一'}轮，或付 $50 出来`) : S.phase === 'busy' ? '结算中…' : S.phase === 'post' ? '结算完了' : S.again ? '掷出对子，再掷一次' : isAI(S.cur) ? '掷骰子…' : MP.role === 'client' && S.cur !== MP.mySeat ? ((S.mpOff || []).includes(S.cur) ? `${p.name} 掉线了：等他连回来，或者房主替他操作` : `等 ${p.name} 在自己的设备上操作…`) : '轮到你掷骰子';   // 远端看别人的回合和房主那边（afterRender）一个说法；热座的「你」是坐在屏幕前的人
+  const status = over ? '游戏结束' : p.jail !== null ? (p.jail ? `在维护窗口里：停了 ${p.jail}/${jailMax(p)} 轮，再停一轮或付 $50 出来` : `在维护窗口里：停${jailMax(p) > 1 ? ` ${jailMax(p)} ` : '一'}轮，或付 $50 出来`) : S.phase === 'busy' ? '结算中…' : S.phase === 'post' ? '结算完了' : S.again ? '掷出对子，再掷一次' : isAI(S.cur) ? '掷骰子…' : MP.role === 'host' && MP.isRemote(S.cur) && !MP.seats[S.cur].online ? (MP.hostPlays(S.cur) ? `${p.name} 掉线了，由你替他操作` : `${p.name} 掉线了：你可以替他掷骰子、操作，弹窗里点「我来替他选」；或者等他连回来`) : MP.role === 'client' && S.cur !== MP.mySeat ? ((S.mpOff || []).includes(S.cur) ? `${p.name} 掉线了：等他连回来，或者房主替他操作` : `等 ${p.name} 在自己的设备上操作…`) : '轮到你掷骰子';   // 远端看别人的回合和房主那边（afterRender）一个说法；热座的「你」是坐在屏幕前的人
   const meta = [`第 ${S.round}${S.cfg.roundLimit ? ' / ' + S.cfg.roundLimit : ''} 轮`, diffN, winN, (S.cfg.dlc || []).length ? `<span class="dnl">${S.cfg.dlc.map((k, i) => `<span class="dn">${i ? '' : 'DLC：'}${DLC[k].n}</span>`).join('、')}</span>${S.cfg.dlc.length >= 6 ? `<span class="dls" role="button" tabindex="0" onclick="toast('这局开了：' + this.title, 5000)" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }" title="${S.cfg.dlc.map(k => DLC[k].n).join('、')}">${S.cfg.dlc.length} 个 DLC</span>` : ''}` : '', S.cfg.learn && !isStudy() ? '边玩边答题' : '', S.endAt ? `剩余 <span id="timer">${fmtTime(timeLeft())}</span>` : '', F.balance() && S.round <= BAL.protect ? `<span title="前 ${BAL.protect} 轮每笔过路费最多 $50，格子上也按 $50 标；第 ${BAL.protect + 1} 轮起按原价收">新账户保护期（过路费最多 $50）</span>` : '', S.cfg.cardMul && S.cfg.cardMul !== 1 && S.cfg.cardMul !== '1' ? `卡牌倍率 ${fmtMul(cardMulBase() / cardGrowMul())}${S.cfg.cardMul === 'rand' ? '（每轮随机）' : ''}` : '', cardGrowMul() > 1 ? `<span title="卡牌上的收钱、罚款跟着流量涨">卡牌金额 ${fmtMul(cardGrowMul())}</span>` : '', trafficMul() > 1 ? `<span title="用户增长：每 ${BAL.growthEvery} 轮所有过路费再涨 ${Math.round(BAL.growth * 100)}%">流量 ×${trafficMul()}</span>` : ''].filter(Boolean).map(x => `<span class="mi">${x}</span>`).join(' · ');
   $('#center').innerHTML = `
     <div class="c-head">
