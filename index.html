@@ -214,7 +214,7 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:#fafafa}
 .ppop .pph{display:flex;align-items:baseline;gap:8px}.ppop .pph b{font-size:15px}.ppop .pps{font-variant-numeric:tabular-nums;font-weight:700}.ppop .ppst{margin-left:auto;font-size:12px;font-weight:700;color:#d13212}.ppop .ppst.ok{color:var(--green)}
 .ppbar{height:6px;background:#e6e9ec;border-radius:3px;overflow:hidden;margin:6px 0}.ppbar i{display:block;height:100%;background:#d13212}.ppbar.on i{background:var(--green)}
 .pprule{margin:0;color:var(--mut);font-size:12px}.ppsec{margin:10px 0 4px;font-size:12px;font-weight:700;color:var(--mut)}.ppmore{margin:4px 0 0;font-size:12px;color:var(--mut)}
-.ppl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}.ppl li{display:flex;align-items:center;gap:8px}.ppl img{width:22px;height:22px;flex:none}.ppl .ppdot{width:22px;height:22px;flex:none;border:1px dashed #aab4be;border-radius:4px}
+.ppl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}.ppl li{display:flex;align-items:center;gap:8px}.ppl img{width:22px;height:22px;flex:none}.ppl .ppdot{width:22px;height:22px;flex:none;border:1px dashed #aab4be;border-radius:4px}.ppl .ppico{display:inline-flex;gap:3px;margin-left:6px;vertical-align:-4px}.ppl .ppico img{width:18px;height:18px;border-radius:3px}.ppl .ppico img.miss{filter:grayscale(1);opacity:.35;outline:1px dashed #8a96a3;outline-offset:1px}.ppl .ppico img.wild{outline:2px solid #0972d3;outline-offset:1px}
 .ppl .pt{flex:1;min-width:0}.ppl .pt small{display:block;color:var(--mut);font-size:11.5px}.ppl .pg{flex:none;font-variant-numeric:tabular-nums;color:var(--green);font-size:13px}.ppl.have .pt{font-size:12.5px}
 .pillar svg{display:none}
 .pchip{display:inline-block;padding:0 6px;font-size:11px;margin-right:4px;font-weight:700;border:1px solid var(--gc);color:var(--gc)}
@@ -2732,7 +2732,7 @@ const INC = [null,
   { n: '单点故障', c: 'avail', e: '你名下最贵的实例型服务如果还是单 AZ（EBS 卷永远算单 AZ）：变成 Impaired，再交它价格的 10% 进奖池做紧急恢复', im: '最贵的那块已经升了多 AZ；EMR 升了「多主节点」也算（集群还在一个 AZ 里，只是坏一个主节点照常跑）；ECS 本来就跨 AZ 分散任务。只在单 AZ 的 EC2 前面挂 ELB 不算', tip: '生产环境至少跨两个 AZ；ELB 和 Auto Scaling 组都要配多个 AZ 的子网', art: 'ec2' },
   { n: '凌晨 3 点被告警叫醒', c: 'ops', e: '现场讲一次你（或者你同事）半夜被告警叫醒的经历：讲出来了，领 $50 加班费、照常走；讲不出来，停一轮，或者交 $80 请值班同事处理', im: '你的 CloudWatch（万能服务）绑在了含 Lambda 或 EC2 的架构上，而且那块 Lambda 或 EC2 是你的、在线：告警直接调 Lambda，或者重启、恢复 EC2（不算罚）', tip: '告警要配好运行手册（Runbook），能自动处理的用 Systems Manager 自动化文档或 Lambda 自动处理', art: 'cloudwatch' },
   { n: '日志打太多了', c: 'cost', e: '付 $100 给 CloudWatch 的主人；没人买就进奖池；主人是你自己就免付', im: '无', tip: '日志的钱主要花在摄取上：控制日志级别、用低频访问日志类；保留期只省存储那部分', art: 'cloudwatch' },
-  { n: '回滚后重新发布', c: 'ops', e: '前进到 Startup 扶持', im: '无（不算罚）', tip: '用 CodeDeploy 做蓝绿或金丝雀部署，配 CloudWatch 告警触发自动回滚', art: 'codedeploy' },
+  { n: '回滚后重新发布', c: 'ops', e: '退回 Startup 扶持重新来过：这次不算经过起点，不领 Credits、也不交运行费', im: '无（不算罚）', tip: '用 CodeDeploy 做蓝绿或金丝雀部署，配 CloudWatch 告警触发自动回滚', art: 'codedeploy' },
   { n: '安全审计没过', c: 'sec', e: '其他玩家当审计员，每人问你一个安全问题（比如根用户开 MFA 了吗、S3 桶是公开的吗）；过半的人觉得你答得过关就通过。没通过：停一轮整改，或者交 $80 加急整改', im: '持有 2 块以上安全合规组服务，或者有审计类升级（WAF 或 AWS Config 的「托管规则」、CloudTrail「日志文件完整性验证」、KMS「自动轮换」等）；金融合规公司免疫', tip: '用 Security Hub CSPM 持续检查安全标准和合规', art: 'securityhub' },
   { n: '一个 AZ 断电了', c: 'avail', e: '你名下还是单 AZ 的实例型服务（IaaS、PaaS、EKS；EBS 卷和 EMR 集群永远是单 AZ）变成 Impaired', im: '大多数托管服务和全局服务本来就跨多个 AZ，不受影响；EC2 这类实例型服务要升了多 AZ 才扛得住，前面只挂 ELB 不够', tip: '多 AZ 部署让一个 AZ 出问题时服务照常运行；可以用 FIS 的「AZ 断电」场景提前演练', art: 'region' },
   { n: 'EC2 实例硬件退役', c: 'ops', e: '你的 EC2 没升到 Auto Scaling：变成 Impaired，再交 $50 进奖池，把实例停止再启动，换到新的硬件上', im: 'EC2 升了 Auto Scaling（自动换掉要退役的实例）；多 AZ 挡不住某一台实例被退役', tip: '亚马逊云科技会提前通知计划内的实例退役；Auto Scaling 会自动换掉不健康的实例', art: 'ec2' },
@@ -2753,7 +2753,7 @@ const INC = [null,
     } },
 ];
 const REI = [null,
-  { n: '拿到 Activate 创业扶持 Credits', e: '从亚马逊云科技领 $200', tip: '初创公司可以申请 AWS Activate 抵扣额度，通过合作的孵化器、投资机构申请额度更高，具体以官网为准', art: 'activate' },
+  { n: '拿到 Activate 创业扶持 Credits', e: '从亚马逊云科技领 $100；你每有一个生效的架构，再领 $50（最多再领 $200）', tip: '初创公司可以申请 AWS Activate 抵扣额度，通过合作的孵化器、投资机构申请额度更高，具体以官网为准', art: 'activate' },
   { n: '买了 Enterprise Support', keep: 'ES', e: '保留：免费离开维护窗口，或抵消一张任意 Health 事件卡', tip: 'Enterprise Support：指定技术客户经理（TAM），关键业务故障 15 分钟内响应，还含 AWS Security Incident Response；2027 年起 Business 和 Enterprise On-Ramp 停用，改成 Business Support+ 和 Enterprise Support', art: 'support' },
   { n: '按 Cost Explorer 推荐签了 Savings Plans', e: '立即签一份 1 年（1 圈）Savings Plans：承诺额按你现在的用量自动算，EC2、ECS、EKS、EMR、Lambda、SageMaker AI、RDS、Aurora、ElastiCache、OpenSearch 的运行费打 75 折。已经有一份、没有这些运行费，或者按下次的账单算签了也省不下钱的，改领 $50；独立开发者不能签，这张卡没有效果', tip: 'Cost Explorer 会按你过去的用量推荐 Savings Plans 的承诺额', art: 'savingsplans' },
   { n: '抢到便宜的 Spot 容量', keep: 'SPOT', e: '保留：下次 Spot 购买时自动用掉，最低出价降到原价的 10%；金融合规公司抽到放回牌堆底', tip: 'Spot 用的是空闲容量，最多比按需便宜约 90%，被收回前只提前 2 分钟通知；现在的 Spot 不用竞价，游戏用出价模拟被抢', art: 'ec2' },
@@ -2770,7 +2770,7 @@ const REI = [null,
   { n: '业务扩张', e: '掷一颗骰子，前进相应的格数', tip: '选 Region 看延迟、合规和价格；同一个服务在不同 Region 价格可能不一样', art: 'region' },
   { n: '技术分享会', e: '每位其他玩家讲一个亚马逊云科技知识点，讲不出来的付你 $20', tip: '各地 User Group 和 Community Day 定期有技术分享，讲出来比只看文档记得牢', art: 'chime' },
   { n: '解决方案架构师的建议', e: '前进到你某个架构里还缺、还没人买的服务（有几块就去最近的那块）；没有的话前进到最近一块没人买的服务；都没有就领 $100', tip: '亚马逊云科技架构中心（Architecture Center）有大量参考架构，照着搭比从零摸索快', art: 'wat' },
-  { n: '去上了一节 Workshop', e: '后退 2 格，结算落点', tip: 'workshops.aws 上有大量公开的动手实验，用自己的账户就能跟着做，做完记得删掉资源', art: 'training' },
+  { n: '去上了一节 Workshop', keep: 'WS', e: '保留：下一次答题答错了，算你答对（落地答题、被对手出题考、抽查都算）', tip: 'workshops.aws 上有大量公开的动手实验，用自己的账户就能跟着做，做完记得删掉资源', art: 'training' },
   { n: '入选 AWS Community Builders', e: '领 1 个复盘标记（自己选类别），以后抵消一张同类 Health 事件卡', tip: 'Community Builders 是亚马逊云科技面向技术分享者的公开项目', art: 'training' },
   { n: '上了 Startup Showcase', e: '前进到前面最近一块没人买的服务，可以打 8 折买；没有就领 $100', tip: '初创公司可以把软件上架 AWS Marketplace：客户买了由亚马逊云科技统一出账，费用记在客户自己的亚马逊云科技账单上', art: 'activate' },
   { n: '迁移到 Graviton', e: 'EC2 已经升到 Auto Scaling 的，免费换成 Graviton；还没到这一级的，记一次免费，以后升 Graviton 这一级不花钱；没有 EC2、已经是 Graviton 或已经记过的，领 $50', tip: 'Graviton 是亚马逊云科技自研的 Arm 处理器，通常比同级 x86 实例性价比更高、也更省电', art: 'ec2' },
@@ -2838,8 +2838,8 @@ const REI = [null,
     } },
   { n: '根因在上游', keep: 'BLAME', e: '保留：抽到 Health 事件卡时，可以用它把那张卡甩给另一位玩家承受（他对那张卡免疫的话就作废）', tip: 'CloudWatch 里的 X-Ray 追踪地图按调用关系把服务连成图，出问题的节点会描色：红色是 5xx 故障，黄色是 4xx 客户端错误，紫色是 429 限流；顺着连线就能看出是哪个依赖在报错', art: 'cloudwatch' },
 ];
-const CARDN = { BLAME: '根因在上游', ES: 'Enterprise Support', SP: 'Savings Plans', SPOT: 'Spot 实例', CE: 'Cost Explorer', MAP: 'MAP 迁移加速' };
-const CARDE = { BLAME: '下次抽到 Health 事件时，可以把它甩给另一位玩家承受', ES: '免费离开维护窗口，或抵消一张任意 Health 事件卡', SP: '付过路费时用掉，这次减半（旧存档里的卡）', SPOT: '下次 Spot 购买时自动用掉，最低出价降到原价的 10%', CE: '踩到账单格时用掉免交一次，或抵消一次「月底账单爆了」', MAP: '下次买 IaaS、PaaS 或容器服务时用掉，打 7 折' };
+const CARDN = { BLAME: '根因在上游', ES: 'Enterprise Support', SP: 'Savings Plans', SPOT: 'Spot 实例', CE: 'Cost Explorer', MAP: 'MAP 迁移加速', WS: 'Workshop 动手实验' };
+const CARDE = { BLAME: '下次抽到 Health 事件时，可以把它甩给另一位玩家承受', ES: '免费离开维护窗口，或抵消一张任意 Health 事件卡', SP: '付过路费时用掉，这次减半（旧存档里的卡）', SPOT: '下次 Spot 购买时自动用掉，最低出价降到原价的 10%', CE: '踩到账单格时用掉免交一次，或抵消一次「月底账单爆了」', MAP: '下次买 IaaS、PaaS 或容器服务时用掉，打 7 折', WS: '下一次答题答错了，算你答对' };
 
 // 题卡：o[0] 是正确答案。干扰项要和正确项差不多长、说法确实是错的，不然玩家挑最长的那个就能蒙对
 const QUIZ = {
@@ -3095,11 +3095,11 @@ const DLC_REI = [
   // Bedrock 第 3 级是跨区域推理，不是新模型，所以只在 Nova Lite、Nova Pro 这两档里换
   { dlc: 'genai', n: 'Bedrock 上了新模型', e: '你的 Bedrock 还没用上 Nova Pro 的，免费换下一档模型；已经用上或没有 Bedrock 的，领 $100', tip: 'Bedrock 上的模型会持续更新，换模型只要改模型 ID', art: 'bedrock',
     run: async p => { const pr = S.props[IX.bedrock], mine = owns(p, IX.bedrock); if (mine && pr.level < 2 && upgradeInfo(p, IX.bedrock, true).ok) { pr.level++; (pr.upPaid = pr.upPaid || [])[pr.level - 1] = 0; log(`🔧 ${nm(p)} 免费给 ${sqn(IX.bedrock)} 换上「${lvName(IX.bedrock, pr.level)}」`); } else log(`${nm(p)} ${mine && pr.level >= 2 ? `的 ${sqn(IX.bedrock)} 已经用上 Nova Pro` : '没有能换模型的 Bedrock'}，领 $${credit(p, 100)}`); } },
-  { dlc: 'genai', n: '拿到生成式 AI 创新中心支持', e: '从亚马逊云科技领 $150', tip: '亚马逊云科技生成式 AI 创新中心会派专家帮客户做 GenAI 落地', art: 'activate', run: async p => { log(`${nm(p)} 领 $${credit(p, 150)}`); } },
+  { dlc: 'genai', n: '拿到生成式 AI 创新中心支持', e: '从亚马逊云科技领 $100；你名下每块 AI 组的服务（Bedrock、SageMaker AI 等），再领 $50', tip: '亚马逊云科技生成式 AI 创新中心会派专家帮客户做 GenAI 落地', art: 'activate', run: async p => { const ai = ownedBy(p).filter(i => SQ[i].g === 'ai' && active(p, i)); log(`${nm(p)} ${ai.length ? `有 ${ai.map(sqn).join('、')}，` : ''}领 $${credit(p, 100 + 50 * ai.length)}`); } },
   { dlc: 'genai', n: 'AI Agent 上线', e: '前进到 Lambda；没人买可以打 8 折买', tip: 'Agent 常把 Lambda 函数当工具，让模型调用你的业务接口；Bedrock AgentCore Gateway 能把现有的 API 和 Lambda 函数转成 Agent 可调用的 MCP 工具', art: 'lambda', run: async p => { await moveTo(p, IX.lambda); await land(p, { discount: 0.8 }); } },
   { dlc: 'sec', n: '通过了安全合规审计', e: '持有 2 块以上安全合规组服务领 $150，否则领 $50', tip: 'AWS Artifact 里可以下载亚马逊云科技的合规报告', art: 'securityhub', run: async p => { log(`${nm(p)} 领 $${credit(p, secActive(p, 'sec') >= 2 ? 150 : 50)}`); } },
   { dlc: 'sec', n: 'Security Hub CSPM 全绿', e: '清掉 1 个技术债；没有技术债就领 $80', tip: 'Security Hub CSPM 按安全标准持续检查配置', art: 'securityhub', run: async p => { if (p.techDebt > 0) { p.techDebt--; p.refactored = true; log(`${nm(p)} 清掉 1 个技术债`); } else log(`${nm(p)} 没有技术债，领 $${credit(p, 80)}`); } },
-  { dlc: 'finops', n: '成本异常检测发现一笔浪费', e: '从亚马逊云科技领 $100', tip: '成本异常检测免费，用机器学习发现异常支出', art: 'costexplorer', run: async p => { log(`${nm(p)} 领 $${credit(p, 100)}`); } },
+  { dlc: 'finops', n: '成本异常检测发现一笔浪费', e: '从亚马逊云科技领 $50；你名下每块实例型服务（IaaS、PaaS、容器），再领 $25（最多再领 $150）', tip: '成本异常检测免费，用机器学习发现异常支出', art: 'costexplorer', run: async p => { const n = Math.min(6, ownedBy(p).filter(i => isInst(i) && active(p, i)).length); log(`${nm(p)} ${n ? `有 ${n} 块实例型服务，` : ''}领 $${credit(p, 50 + 25 * n)}`); } },
   { dlc: 'finops', n: 'Compute Optimizer 建议降配', e: '下次经过 Startup 扶持时，EC2、EBS、Lambda、RDS、Aurora、EMR 和跑在 Fargate 上的 ECS 运行费减半（Spot 买的、下线的、其他服务、EC2 的公网 IPv4 地址费和 Savings Plans 承诺额照付）；手上已经有一张没用上的运行费减半，或者一分钱都省不下的，改领 $50', tip: 'Compute Optimizer 按实际利用率推荐更合适的实例规格', art: 'trustedadvisor',
     // 减半卡不叠加：手上已经有一张没用上的，或者按现在的用量省不下钱（名下没有它能降配的服务、技能让下一圈本来就全免），就改领 $50
     run: async p => { const s = p.halfRun ? 0 : halfSave(p, 'hour'); if (!s) { log(`${nm(p)} ${p.halfRun ? '已经有一张运行费减半还没用上' : '按现在的用量，降配也省不下钱'}，改领 $${credit(p, 50)}`); return; }
@@ -3176,8 +3176,10 @@ const MOVE_INC = [
     run: async p => { const d = 1 + rnd(6); log(`${nm(p)} 掷出 ${d}，后退 ${d} 格`); await moveSteps(p, -d); await land(p); return 'nopen'; } },
   { n: '流量被劫持到别人那里', c: 'sec', e: '和随机一位不在维护窗口里的玩家交换位置（双方都不结算落点）', im: '持有 Shield Advanced 或 CloudFront', tip: '给 Route 53 公有托管区开 DNSSEC 签名，开了验证的解析器能识别被篡改的应答；入口放在 CloudFront 后面，源站地址不直接暴露', art: 'shield',
     imm: o => active(o, IX.shield) ? '有 Shield Advanced' : active(o, IX.cloudfront) ? '有 CloudFront' : '', run: async p => { const os = S.players.filter(q => q.alive && q.id !== p.id && q.jail === null); if (!os.length || p.jail !== null) return 'nopen'; const q = os[rnd(os.length)]; const a = p.pos; await flyTo(p, q.pos, '流量被劫持，', { passGo: false }); q.pos = a; render(); log(`${nm(q)} 被换到 ${sqn(a)}`); } },
-  { n: '主 Region 出问题，紧急切到灾备', c: 'avail', e: '飞到棋盘正对面那一格，结算落点（经过起点、User Group 活动照常领钱）', im: '无（不算罚）', tip: '灾备切换要提前演练；可以用 Route 53 故障转移路由或 Application Recovery Controller 做切换', art: 'region',
-    run: async p => { await flyTo(p, (p.pos + Math.floor(N / 2)) % N, '切到灾备 Region，'); await land(p); return 'nopen'; } },
+  { n: '主 Region 出问题，紧急切到灾备', c: 'avail', e: '飞到棋盘正对面那一格，先交 $80 切换费进奖池，再结算落点（经过起点、User Group 活动照常领钱）', im: 'Route 53 升了健康检查：自动故障转移，照样飞过去，不交切换费（都不算罚）', tip: '灾备切换要提前演练；可以用 Route 53 故障转移路由或 Application Recovery Controller 做切换', art: 'region',
+    run: async p => { if (p.jail !== null) { log(`${nm(p)} 在维护窗口里，不移动`); return 'nopen'; } await flyTo(p, (p.pos + Math.floor(N / 2)) % N, '切到灾备 Region，');
+      if (active(p, IX.route53) && S.props[IX.route53].level >= 1) log(`${nm(p)} 的 Route 53 健康检查自动故障转移，不交切换费`); else log(`${nm(p)} 交 $${pay(p, 'pot', 80)} 切换费`);
+      await land(p); return 'nopen'; } },
 ];
 const MOVE_REI = [
   { n: '搭上 AWS Ground Station 卫星链路', e: '飞到任意一个角落格（Startup 扶持、维护窗口、User Group 活动之一），路上经过起点、User Group 活动照常领钱', tip: 'AWS Ground Station 是卫星地面站服务，按分钟租用天线收发卫星数据', art: 'cloud',
@@ -3191,6 +3193,34 @@ const MOVE_REI = [
 ];
 MOVE_INC.forEach(c => INC.push(c));
 MOVE_REI.forEach(c => REI.push(c));
+// 11-07 新加：万能服务改绑、免费出题。在 DLC 卡后面才挂上去（见下面 DLC_REI.forEach），已有卡的编号都不变，存档里的牌堆照旧对得上
+const NEW_REI = [
+  { n: '请合作伙伴梳理了一遍架构', e: '你的一块万能服务免费改绑一次：已经绑了的可以换到另一个架构上，还没绑的现在就绑；没有能绑的，或者不想改，领 $100', tip: 'AWS Well-Architected 合作伙伴可以按六大支柱帮你评审工作负载，找出缺的那一环、给出改进方案', art: 'wat',
+    run: async p => {
+      const opts = ownedBy(p).filter(w => isWild(w) && active(p, w)).flatMap(w => { const b = S.props[w].wild, mine = b && b.p === p.id ? b.c : null;
+        return COMBOS.filter(c => comboOpen(c) && c.id !== mine && !c.ix.flat().includes(w) && !wildOf(p, c.id)).map(c => ({ w, c, miss: comboMiss(p, c), from: mine })).filter(x => x.miss.length <= 1); });
+      if (!opts.length) { log(`${nm(p)} 没有能绑的万能服务，改领 $${credit(p, 100)}`); return; }
+      const lose = x => x.from == null ? 0 : (() => { const c0 = COMBOS.find(c => c.id === x.from); return comboMiss(p, c0).length === 1 ? 1e4 + c0.ix.flat().reduce((a, i) => a + (active(p, i) ? baseRent(i, 7) : 0), 0) : 0; })();
+      const val = x => (x.miss.length ? 1e4 : 0) + x.c.ix.flat().reduce((a, i) => a + (active(p, i) ? baseRent(i, 7) : 0), 0) - lose(x);
+      const fromN = x => x.from == null ? '' : `（从「${COMBOS.find(c => c.id === x.from).n}」改过来）`;
+      let k;
+      if (isAI(p.id) || (SIM && SIM_AI)) { const b = opts.map((x, n) => [val(x), n]).sort((a, z) => z[0] - a[0])[0]; k = b[0] > 0 ? b[1] : -1; }
+      else k = +(await ask({ who: p.id, cls: 'pick', title: '合作伙伴梳理架构：万能服务绑到哪？', html: '<p>这次改绑不算它那一次。改走的话，原来靠它补缺的架构会散。</p>', buttons: [...opts.slice(0, 10).map((x, n) => ({ label: `${SQ[x.w].n} → ${x.miss.length ? `补上「${x.c.n}」缺的 ${slotOpen(x.miss[0]).map(i => SQ[i].n).join(' 或 ')}` : `并进「${x.c.n}」`}${fromN(x)}`, value: n })), { label: `不改，领 $${cardAmt(100)}`, value: -1 }] }));
+      if (!(k >= 0)) { log(`${nm(p)} 没有改绑，领 $${credit(p, 100)}`); return; }
+      const o = opts[k]; wildBind(p, o.w, o.c.id); if (o.from != null) log(`${nm(p)} 的 ${sqn(o.w)} ${fromN(o)}`);
+    } },
+  { n: '当了一回认证考官', e: '马上免费出一题考一位对手（不占这回合的出题次数）：他答错了赔你 $200，答对了谁也不用给钱', tip: '亚马逊云科技认证的题目由各领域的专家出题、反复审核；考试指南会列出每个考点的占比', art: 'training',
+    run: async (p, others) => {
+      if (!others.length) { log(`${nm(p)} 没有能考的对手`); return; }
+      const t = others.length === 1 ? others[0] : (isAI(p.id) || (SIM && SIM_AI)) ? others[rnd(others.length)] : P(+(await ask({ who: p.id, cls: 'pick', title: '认证考官：免费出题考谁？', html: `<p>他答错了赔你 $${cardAmt(200)}，答对了谁也不用给钱。</p>`, buttons: others.map(o => ({ label: o.name, value: o.id })) })));
+      const x = pickQuestion((SQ[t.pos] && SQ[t.pos].g) || 'general');
+      log(`❓ ${nm(p)} 当考官，免费出题考 ${nm(t)}`);
+      const a0 = MP.actor; MP.actor = t.id; let ok = false;
+      try { ok = await askQuestion(x.q, x.id, `${p.name} 当考官免费出题考你：答错了赔他 $${cardAmt(200)}，答对了不用给钱`, { again: x.again, skip: false }); } finally { MP.actor = a0; }
+      { const st = ST(t); st.quizN++; if (ok) st.quizOk++; }
+      if (ok) log(`${nm(t)} 答对了，谁也不用给钱`); else log(`${nm(t)} 答错了，赔给 ${nm(p)} $${pay(t, p, 200)}`);
+    } },
+];
 
 
 // ================= 认证题库 DLC（每个题库单独一个 DLC；题目原创，按官方考试指南的考点出，解析附官方文档） =================
@@ -3245,15 +3275,18 @@ async function askQuestion(q, id, why, { local = false, skip = true, again = fal
   // 按钮的值是第几个选项（结果里要标出选的是哪个）；qok 给电脑认对错，联机时不会发给远端
   const k = await ask({ local, cls: 'quiz', title: qLabel(id), html: `${why ? `<p class="muted">${why}</p>` : ''}${again ? '<p class="wbtag">错题本里的题，再练一次</p>' : ''}<p class="q">${q.q}</p>`, buttons: [...opts.map((o, n) => ({ label: o.t, value: n, qok: o.ok })), ...(skip ? [{ label: skipLabel, value: 'skip', cls: 'skipq' }] : [])] });
   if (k === 'skip') return k;
-  const ok = !!(opts[k] && opts[k].ok), w = wbMark(id, ok, local), mine = !ok && opts[k] ? opts[k].t : '';
+  let ok = !!(opts[k] && opts[k].ok); const w = wbMark(id, ok, local), mine = !ok && opts[k] ? opts[k].t : '';
   // 联机局里别人也看得到这个结果、电脑答题时看屏幕的也不是答题人：「你选的」改写答题人的名字。单机热座答题人就坐在屏幕前，照旧写「你」
   // 错题本：联机时各记各的（远端的记进他自己的浏览器），写上是谁的；单机整个浏览器共用一本，不写名字
   const qw = local ? null : quizWho(), qp = qw != null && S && S.players ? S.players[qw] : null, named = !!qp && (MP.role === 'host' || isAI(qw));
   const wbN = MP.role === 'host' && qp ? ` ${qp.name} 的错题本` : '错题本';
   const tail = `<p class="muted">${q.a || ''}</p>${q.ref ? `<p><a href="${esc(q.ref)}" target="_blank" rel="noopener">去看官方文档</a></p>` : ''}<p class="muted">${!w ? '' : !ok ? `已记进${wbN}，以后会再考。` : w[id] ? `${wbN.trim()}里这道还要再答对 ${2 - w[id].n} 次。` : again ? `这道题已经从${wbN}移出。` : ''}</p>`;
-  if (inline) return { ok, html: `<div class="qbox ${ok ? 'ok' : 'bad'}" data-desc><p><b>${ok ? '答对了' : '答错了'}</b>：正确答案是 <b>${esc(q.o[0])}</b>${mine ? `，${named ? nm(qp) + ' ' : '你'}选的是「${esc(mine)}」` : ''}</p>${tail}</div>` };
+  // 「去上了一节 Workshop」保留卡：答错了自动用掉，按答对算（错题本照记这道错题）
+  const wsc = !ok && !local && qp && availCard(qp, 'WS'); if (wsc) { wsc.used = true; ok = true; log(`🧪 ${nm(qp)} 答错了，用掉「${CARDN.WS}」：这题算答对`); }
+  const okT = wsc ? '答错了，Workshop 卡算你答对' : ok ? '答对了' : '答错了';
+  if (inline) return { ok, html: `<div class="qbox ${ok ? 'ok' : 'bad'}" data-desc><p><b>${okT}</b>：正确答案是 <b>${esc(q.o[0])}</b>${mine ? `，${named ? nm(qp) + ' ' : '你'}选的是「${esc(mine)}」` : ''}</p>${tail}</div>` };
   // 结果窗沿用题目窗的版式：题干照写，选项改成不能点的行；读屏念的是这几行（data-desc），不再把题干念一遍
-  await ask({ local, cls: 'quiz', title: ok ? '答对了' : '答错了', html: `<p class="qs">${q.q}</p><ul class="qres" data-desc>${opts.map((o, n) => `<li class="${o.ok ? 'ok' : n === k ? 'bad' : ''}">${esc(o.t)}${o.ok ? '<em>正确答案</em>' : n === k ? `<em>${named ? qp.name + ' ' : '你'}选的</em>` : ''}</li>`).join('')}</ul>${tail}`, buttons: [{ label: '继续', value: 1, cls: 'pri' }] });
+  await ask({ local, cls: 'quiz', title: okT, html: `<p class="qs">${q.q}</p><ul class="qres" data-desc>${opts.map((o, n) => `<li class="${o.ok ? 'ok' : n === k ? 'bad' : ''}">${esc(o.t)}${o.ok ? '<em>正确答案</em>' : n === k ? `<em>${named ? qp.name + ' ' : '你'}选的</em>` : ''}</li>`).join('')}</ul>${tail}`, buttons: [{ label: '继续', value: 1, cls: 'pri' }] });
   return ok;
 }
 // 刷题模式：不玩棋盘，只刷一套题，最后按考点给正确率
@@ -3281,6 +3314,7 @@ async function practice() {
 // 把 DLC 的卡和题挂到主数据上（卡牌编号接在后面）
 DLC_INC.forEach(c => INC.push(c));
 DLC_REI.forEach(c => REI.push(c));
+NEW_REI.forEach(c => REI.push(c));   // 新卡接在 DLC 卡后面，DLC 卡编号不变
 Object.entries(DLC_QUIZ).forEach(([k, list]) => list.forEach(q => { const g = k === 'genai' ? 'ai' : k === 'sec' ? 'sec' : 'general'; QUIZ[g].push({ ...q, dlc: k }); }));
 
 // ================= 状态 =================
@@ -4827,7 +4861,7 @@ async function incident(p, id) {
       if (await tryCancel(p, id)) return;
       log(`${nm(p)} 付 $${pay(p, ow === null ? 'pot' : P(ow), 100)} 给 ${ow === null ? '奖池' : nm(P(ow))}`); break;
     }
-    case 14: await dealNow(); await moveTo(p, 0); return;
+    case 14: await dealNow(); if (p.jail === null && p.pos !== IX.go) { await flyTo(p, IX.go, '回滚后重新发布，', { passGo: false, backward: true }); log(`${nm(p)} 回到起点重新来过，这次不领 Credits、不交运行费`); } return;
     case 16: {
       const hit = ownedBy(p).filter(i => SQ[i].t === 'prop' && singleAZ(i) && !S.props[i].impaired);
       if (!hit.length) { await dealNow(); log(`${nm(p)} 没有单 AZ 的实例型服务，没受影响`); return; }
@@ -4906,7 +4940,7 @@ async function drawReinvent0(p, forced) {
   const others = S.players.filter(o => o.alive && o.id !== p.id);
   if (c.run) { await c.run(p, others); return; }
   switch (id) {
-    case 1: log(`${nm(p)} 领 $${credit(p, 200)} Credits`); break;
+    case 1: { const n = Math.min(4, COMBOS.filter(c => comboOpen(c) && hasCombo(p, c.id)).length); log(`${nm(p)} ${n ? `有 ${n} 个生效的架构，` : ''}领 $${credit(p, 100 + 50 * n)} Credits`); break; }
     // 独立开发者的弱点就是不能签 Savings Plans / RI，这张卡也不能绕过去：没有效果、也不给保底，卡照常进弃牌堆。
     // 别人签不了（已经有一份、没有能抵扣的运行费）就改领 $50。签之前还要按下次经过时的实际账单比一比：手上的减半卡让下一圈用量
     // 掉到承诺额以下、或者技能让下一圈全免的，1 年期的承诺额等于白付，也不签、改领 $50，和减半卡「省不下钱就改领」是同一条规则
@@ -4963,7 +4997,6 @@ async function drawReinvent0(p, forced) {
       break;
     }
     case 17: { const t = saTarget(p); if (t === null) { log(`${nm(p)} 没有可以飞的地方，改领 $${credit(p, 100)}${mulNote()}`); break; } log(`${nm(p)} 飞向 ${sqn(t)}`); await moveTo(p, t); await land(p); break; }
-    case 18: await moveSteps(p, -2); await land(p); break;
     case 19: {
       const cat = await ask({ title: '入选 AWS Community Builders：领哪一类复盘标记？', html: '<p>复盘标记以后可以抵消一张同类的 Health 事件卡。</p>', buttons: Object.entries(CATS).map(([k, n]) => ({ label: n, value: k })) });
       p.coe.push({ cat, used: false, text: 'Community Builders 分享的经验' }); log(`📝 ${nm(p)} 入选 Community Builders，领到 1 个${CATS[cat]}类复盘标记`);
@@ -6653,8 +6686,9 @@ let SIDE_CUR = null, SIDE_LOG0;
 const archProg = p => COMBOS.filter(comboOpen).map(c => {
   const have = c.ix.filter(n => (Array.isArray(n) ? n : [n]).some(i => active(p, i)));
   if (!have.length) return null;
-  const miss = c.ix.filter(n => !have.includes(n)).map(n => slotOpen(n).map(i => SQ[i].n).join(' 或 '));
-  return { c, done: !miss.length, n: have.length, t: c.ix.length, miss };
+  const lack = c.ix.filter(n => !have.includes(n)), w = wildOf(p, c.id), wf = w != null && lack.length === 1;   // 万能服务顶上缺的那一块，算生效（和 hasCombo 一致）
+  const nmOf = n => slotOpen(n).map(i => SQ[i].n).join(' 或 '), miss = wf ? [] : lack.map(nmOf);
+  return { c, done: !miss.length, n: have.length + (wf ? 1 : 0), t: c.ix.length, miss, w: w ?? null, fill: wf ? nmOf(lack[0]) : '' };
 }).filter(Boolean).sort((a, b) => b.done - a.done || b.n / b.t - a.n / a.t);
 // 名字、架构名夹在中文句子里：两边都是汉字时不留空格（「到韩叔下回合开始恢复」），挨着英文、数字的照常留一个（「被 Damo DDoS」「到 Yuki 下回合」）。
 // 只去掉「汉字 空格 汉字」中间的空格，中间隔着标签（nm() 的 <b>、能悬停的架构名）也算挨着；换行缩进、别的空格不动。玩家卡、格子面板的状态、悬停小卡用
@@ -6680,10 +6714,19 @@ const SV_GRP = {
   ddos: ['DDoS', '被 DDoS：不收过路费，运行费照交，也不算持有（不凑整组、架构和支柱），到攻击的人第 2 个自己的回合开始时恢复'],
   spot: ['Spot', 'Spot：按出价买的，别人落上来出更高的价就能抢走（抢的人不付这次的过路费）；不能升级、不能加容量'],
 };
+// 架构里每一环的图标：有的亮、缺的灰；万能服务顶上缺的那一环换成它的图标（加框），只是并进来的接在最后
+function archIcons(p, x) {
+  const im = (i, cls, t) => `<img src="${AWSI[SQ[i].icon]}" alt="" class="${cls}" title="${SQ[i].n}${t}">`;
+  let used = false;
+  const out = x.c.ix.map(n => { const l = Array.isArray(n) ? n : [n], h = l.find(i => active(p, i)); if (h != null) return im(h, '', ''); const o = slotOpen(n)[0] ?? l[0];
+    if (x.fill && !used) { used = true; return im(x.w, 'wild', `（万能服务，顶上缺的 ${SQ[o].n}）`); } return im(o, 'miss', '（还缺）'); });
+  if (x.w != null && !used) out.push(im(x.w, 'wild', '（万能服务，并进来一起收）'));
+  return `<span class="ppico">${out.join('')}</span>`;
+}
 // 悬停「全部 N 套」：每套架构凑了几块、还缺什么
 function archAllPop(p) {
   const prog = archProg(p), near = prog.filter(x => x.done || x.n >= 2 || x.miss.length === 1), list = (near.length ? near : prog).slice(0, near.length ? 10 : 6), rest = prog.length - list.length;
-  return `<div class="ppop"><div class="pph"><b>${p.name} 的架构</b><span class="pps">${prog.filter(x => x.done).length} 套生效</span></div>${list.length ? `<ul class="ppl">${list.map(x => `<li><span class="pt">${x.c.n} ${x.n}/${x.t}<small>${x.done ? '已生效，别人落在其中任一块按整套联合收费' : `还缺 ${x.miss.join('、')}`}</small></span></li>`).join('')}</ul>` : ''}${rest ? `<p class="ppmore">另有 ${rest} 套${near.length ? '只凑了 1 块' : ''}，看「明细和日志」</p>` : ''}</div>`;
+  return `<div class="ppop"><div class="pph"><b>${p.name} 的架构</b><span class="pps">${prog.filter(x => x.done).length} 套生效</span></div>${list.length ? `<ul class="ppl">${list.map(x => `<li><span class="pt">${x.c.n} ${x.n}/${x.t}${archIcons(p, x)}<small>${x.done ? `已生效${x.w == null ? '' : x.fill ? `（万能服务 ${SQ[x.w].n} 顶上了缺的 ${x.fill}）` : `（万能服务 ${SQ[x.w].n} 并进来一起收）`}，别人落在其中任一块按整套联合收费` : `还缺 ${x.miss.join('、')}`}</small></span></li>`).join('')}</ul>` : ''}${rest ? `<p class="ppmore">另有 ${rest} 套${near.length ? '只凑了 1 块' : ''}，看「明细和日志」</p>` : ''}</div>`;
 }
 // 收起的卡上「支柱 x/6 达成」：六条各几分
 function pillarSumPop(p) {
