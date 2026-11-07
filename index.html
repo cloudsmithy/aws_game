@@ -2005,6 +2005,7 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 .fxchip{display:inline-block;font-size:11.5px;font-weight:600;color:#0972d3;background:#f2f8fd;border:1px solid #b9d7f0;padding:0 6px;margin:2px 4px 0 0;white-space:nowrap}
 .fxchip .warn{color:var(--red)}
 
+.psneed{margin:0 0 6px;padding:5px 9px;border-radius:6px;background:#eef8ea;border:1px solid #9fd38a;color:#1d6b00;font-weight:700;font-size:13px}
 /* 中间右栏：这回合还能做什么 */
 .todo.dim>span{color:#687078;font-size:12.5px}
 .briefline{font-size:12.5px;color:var(--mut2);margin:-2px 0 4px}
@@ -3242,6 +3243,9 @@ const NEW_REI = [
       { const st = ST(t); st.quizN++; if (ok) st.quizOk++; }
       if (ok) log(`${nm(t)} 答对了，谁也不用给钱`); else log(`${nm(t)} 答错了，赔给 ${nm(p)} $${pay(t, p, 200)}`);
     } },
+  // 11-07：免一圈账单（运行费）。现实里推广 Credits 自动抵扣符合条件的服务费用；Savings Plans 承诺额不让抵，照付
+  { n: '领到 AWS 推广 Credits', e: '下次经过 Startup 扶持时，这一圈的运行费用 Credits 抵掉，技术债加价一起免（Savings Plans 承诺额照付）；已经记着一圈的，再多记一圈', tip: '亚马逊云科技会通过活动、Activate 和合作项目发推广 Credits，自动抵扣符合条件的服务费用；Credits 有有效期，过期作废，具体以官网为准', art: 'billing',
+    run: async p => { p.billFree = (p.billFree || 0) + 1; log(`💳 ${nm(p)} 领到 AWS 推广 Credits：${p.billFree > 1 ? `接下来 ${p.billFree} 次` : '下次'}经过 Startup 扶持时，运行费用 Credits 抵掉`); } },
 ];
 
 
@@ -4049,7 +4053,7 @@ const showCard = async (kind, id, p) => (S.lastCard = { kind, id, who: p.id }, r
 function propStatusHtml(i) {
   const s = SQ[i], pr = S && S.props && S.props[i];
   if (!pr || !S.players) return '';
-  const o = pr.owner === null ? null : P(pr.owner), who = o || cur();
+  const o = pr.owner === null ? null : P(pr.owner), who = o || viewerP() || cur();   // 没人买的格子：按看棋盘的人算架构进度（电脑在玩时不按电脑算）
   const lvTxt = s.upg ? `${pr.level ? lvFull(i, pr.level) : `未升级 · ${lvName(i, 0)}`}（共 3 级）` : '—';
   const sx = o ? svcState(i) : [], sxl = k => { const x = sx.find(y => y.k === k); return x ? `<b class="warn">${x.head}</b>：${x.t}` : ''; };
   const st = [pr.cap ? `${pr.cap} 个${capU(s.k)}` : '', pr.spot ? `Spot 出价 $${pr.spotPaid}（出更高价可以抢走）` : '', sxl('imp'), sxl('off'), sxl('ddos'), pr.via != null ? `从代理商 ${P(pr.via).name} 手里买的` : ''].filter(Boolean).join(' · ');
@@ -4074,7 +4078,7 @@ function propStatusHtml(i) {
     ${s.upg ? `<tr><th>当前级别</th><td>${lvTxt}${st ? `<br><span class="muted">${st}</span>` : ''}</td></tr>` : (st ? `<tr><th>状态</th><td>${st}</td></tr>` : '')}
     <tr><th>现在的过路费</th><td class="runc">${o ? rent : '<span class="muted">没人买，不收</span>'}${o && !rs0 && (s.bill === 'req' || s.t === 'util') ? ' <span class="muted">（按 7 点估，随点数浮动）</span>' : ''}${rentUp}</td></tr>
     <tr><th>每圈运行费<br><span class="muted" style="font-weight:400;font-size:12px">经过 Startup 扶持时交</span></th><td class="runc">${run ? `$${run}` : '$0'}${o ? (pr.offline ? ' <span class="muted">（下线期间）</span>' : pr.level ? ' <span class="muted">（现在）</span>' : '') : ' <span class="muted">（买下后，没升级时）</span>'}${useFeeTxt(i, pr.level) && !pr.offline ? `<br><span class="muted">另外每次${useFeeTxt(i, pr.level)}（${SQ[i].bill === 'token' ? '按 token 计费' : '按请求计费'}：每圈不交固定运行费，用多少交多少）</span>` : ''}${runUp}</td></tr>
-    ${cbs ? `<tr><th>关联的有效架构</th><td>${cbs}<span class="muted" style="font-size:12px">按${o ? ` ${o.name} ` : '你'}现在持有的算</span></td></tr>` : ''}
+    ${cbs || needLine(i, needSquares()) ? `<tr><th>关联的有效架构</th><td>${needLine(i, needSquares()) ? `<div class="psneed">${needLine(i, needSquares())}</div>` : ''}${cbs}${cbs ? `<span class="muted" style="font-size:12px">按${o ? ` ${o.name} ` : '你'}现在持有的算</span>` : ''}</td></tr>` : ''}
   </table>`);
 }
 // 某一级的每圈运行费：按这一格现在的容量、主人算（没人买就按刚买下算），下线的按上线算
@@ -4094,6 +4098,16 @@ function rentAt(i, l) {
 }
 // est：按用量计费的按 7 点估成金额（状态栏用）；不估就写「点数 × 单价」（各级一览用）
 const rentTxt = (i, l, est) => { const x = rentAt(i, l); return x.pt != null && (x.v == null || !est) ? `骰子点数 × ${+x.pt.toFixed(1)}` : x.pt != null ? `≈$${Math.round(x.v)}` : `$${Math.round(x.v)}`; };
+// 升一级、加一份容量的说法：各级一览、落地弹窗、资产管理共用一份，几处写的数一样
+const rentUpTxt = (i, l) => { const a = rentAt(i, l - 1), b = rentAt(i, l); return a.pt != null ? `过路费每点 $${+a.pt.toFixed(1)} → $${+b.pt.toFixed(1)}` : `过路费 $${Math.round(a.v)} → $${Math.round(b.v)}`; };
+const runUpTxt = (i, l) => { const a = runIfMine(i, () => runAt(i, l - 1)), b = runIfMine(i, () => runAt(i, l)); return a === b ? '' : `每圈运行费 $${a} → $${b}`; };
+function lvUpTxt(i, l, sep = '；') { return [effLabel(i, l), rentUpTxt(i, l), runUpTxt(i, l)].filter(Boolean).join(sep); }
+function capUpTxt(i) {
+  const pr = S.props[i], c0 = pr.cap || 0, a = rentAt(i, pr.level), r0 = runCost(i); let b, r1;
+  pr.cap = c0 + 1; try { b = rentAt(i, pr.level); r1 = runCost(i); } finally { pr.cap = c0; }
+  const rent = a.pt != null ? `过路费 +25%：每点 $${+a.pt.toFixed(1)} → $${+b.pt.toFixed(1)}` : `过路费 +25%：$${Math.round(a.v)} → $${Math.round(b.v)}`;
+  return `${rent}；${r1 !== r0 ? `每圈运行费 $${r0} → $${r1}` : '不加运行费'}`;
+}
 // 各级一览：效果、过路费、每圈运行费（点格子的小面板和完整介绍共用）
 function lvTableHtml(i) {
   const s = SQ[i], pr = S.props[i], lv = pr ? pr.level : -1, tm = trafficMul();
@@ -4101,7 +4115,7 @@ function lvTableHtml(i) {
   const R = l => rentAt(i, l), $r = v => `$${Math.round(v)}`, per = v => `$${+v.toFixed(1)}`;
   const rentCell = l => { const x = R(l); return x.pt != null ? `骰子点数 × ${+x.pt.toFixed(1)}<br><span class="muted" style="font-size:12px">掷 7 点 ${$r(x.pt * 7)}</span>` : $r(x.v); };
   // 效果一栏：这一级多了什么功能，再写过路费从多少涨到多少（不再只写「过路费提高」）
-  const up = l => { const a = R(l - 1), b = R(l); return a.pt != null ? `过路费每点 ${per(a.pt)} → ${per(b.pt)}` : `过路费 ${$r(a.v)} → ${$r(b.v)}`; };
+  const up = l => rentUpTxt(i, l);
   // 收到过路费另交的那一份（15% 请求费 / 25% token 成本）：每一级都一样就写在表下面一次，不一样（某一级开了降成本、减半）才每行写
   const fees = [0, 1, 2, 3].map(l => useFeeTxt(i, l)), feeSame = fees.every(x => x === fees[0]);
   const rows = [0, 1, 2, 3].map(l => `<tr class="${lv === l ? 'hi' : ''}"><td>${l ? `第 ${l} 级 · ` : '未升级 · '}<b>${lvName(i, l)}</b>${l && s.upg[l - 1][3] ? `<br><span class="muted" style="font-size:12px">${s.upg[l - 1][3]}</span>` : ''}</td><td>${l ? [effLabel(i, l), up(l)].filter(Boolean).join('<br>') : '<span class="muted">刚买下的样子</span>'}</td><td>${rentCell(l)}</td><td>${pr ? `$${runIfMine(i, () => runAt(i, l))}${fees[l] && !feeSame ? `<br><span class="muted" style="font-size:12px">另外${fees[l]}</span>` : ''}` : ''}</td></tr>`).join('');
@@ -4236,6 +4250,8 @@ async function passLaunch(p) {
   }
   let debt = F.debt() ? debtFee(p) : 0;   // 技能减半/全免也作用在技术债这份上，所以跟着 runMul 一起乘
   if (p.runLaps > 0) { oc = Math.round(oc * p.runMul); debt = Math.round(debt * p.runMul); p.runLaps--; log(`${nm(p)} 的「${roleOf(p).sk.n}」：这圈运行费${p.runMul ? '减半' : '全免'}（还剩 ${p.runLaps} 圈）`); }
+  // 「领到 AWS 推广 Credits」：这一圈的运行费拿 Credits 抵掉，技术债加价一起免，Savings Plans 承诺额照付。技能已经免了这一圈的，Credits 留到下一圈，不白用
+  else if (p.billFree > 0 && oc > 0) { const sp = spActive(p), keep = sp ? Math.min(oc, sp.amt) : 0, saved = oc - keep; p.billFree--; oc = keep; debt = 0; log(`💳 ${nm(p)} 用 AWS 推广 Credits 抵掉这一圈的运行费，少交 $${saved}${keep ? `（Savings Plans 承诺额 $${keep} 照付）` : ''}${p.billFree ? `；还记着 ${p.billFree} 圈` : ''}`); }
   { const t = ST(p); t.runTot += oc; t.salary += g; ownedBy(p).forEach(i => { const c = runCost(i); if (c) t.runBy[i] = (t.runBy[i] || 0) + c; }); }
   if (oc) payRun(p, oc, debt, half); payMspFee(p); if (p.role === 'rs_dist' && p.alive) { pay(p, 'bank', 50); log(`${nm(p)} 交 $50 渠道维护费`); } if (S.stats) { S.stats.run += oc; S.stats.salary += g; }
   if (p.commits && p.commits.length) {
@@ -4348,8 +4364,8 @@ async function endTurn() {
   S.phase = 'busy'; await nextTurn();
 }
 async function nextTurn() {
-  const p = cur();
-  if (winWA() && p.alive && waDone(p)) return gameOver(p, '六大支柱全部达成');
+  const p = cur(), wa = waWinner();
+  if (wa) return gameOver(wa, '六大支柱全部达成');
   if (winTimed() && Date.now() >= S.endAt) return timedOver();
   if (S.cfg.roundLimit && S.round >= S.cfg.roundLimit && S.cur >= S.players.length - 1 - [...S.players].reverse().findIndex(q => q.alive)) return timedOver(`打满 ${S.cfg.roundLimit} 轮`);
   let n = S.cur;
@@ -4486,10 +4502,11 @@ async function offerLandingUpgrade(p, i, canJump = false) {
   let html = `<p>落在自己的服务上，可以做一件事：</p>`;
   if (u.ok) {
     const next = s.upg[u.next - 1];
-    b.push({ label: `加「${next[0]}」$${u.total}`, desc: `${next[3] || ''}${effLabel(i, u.next) ? `。游戏效果：${effLabel(i, u.next)}` : '。过路费提高'}${u.fees.length ? '。价格含' + u.fees.map(f => f.why).join('、') : ''}${u.off ? '。' + u.off : ''}`, value: 'up', cls: 'pri', disabled: p.cash < u.total });
+    const base = sideCost(i), why = [...u.fees.map(f => `${f.why} +$${f.amt}`), F.debt() && p.techDebt >= 2 && !(s.k === 'ec2' && s.upg[u.next - 1][2] === 'cost' && p.gravFree) ? '技术债攒到 2 个 +$50' : '', u.off].filter(Boolean);
+    b.push({ label: `升到第 ${u.next} 级「${next[0]}」$${u.total}`, desc: `${next[3] ? next[3] + '。' : ''}${lvUpTxt(i, u.next)}${u.total !== base ? `。基础价 $${base}，这次${why.length ? `：${why.join('；')}` : '价格不同'}` : ''}`, value: 'up', cls: 'pri', disabled: p.cash < u.total });
   } else if (u.why) html += `<p class="muted">不能加功能：${u.why}</p>`;
   if (c.ok) {
-    b.push({ label: `加 1 个${capU(s.k)} $${c.cost}`, desc: `过路费 +25%${s.bill === 'hour' || s.bill === 'token' || s.bill === 'bundle' ? '，每圈运行费也会增加' : '，不增加运行费'}（现在 ${S.props[i].cap || 0}/${CAP_MAX}）`, value: 'cap', disabled: p.cash < c.cost });
+    b.push({ label: `加 1 个${capU(s.k)} $${c.cost}`, desc: `这是容量，不是升级：${capUpTxt(i)}（现在 ${S.props[i].cap || 0}/${CAP_MAX} 个）`, value: 'cap', disabled: p.cash < c.cost });
   }
   if (foes.length) {
     b.push({ label: `用 FIS 抽故障牌攻击对手（$${Math.min(...FIS.map(fisCost))}～$${Math.max(...FIS.map(fisCost))}）`, desc: `选一位对手，从 FIS 故障牌里随机抽一张，抽到哪张付哪张的钱；要先有 $${Math.max(...FIS.map(fisCost))} 现金`, value: 'fis', disabled: p.cash < Math.max(...FIS.map(fisCost)) });
@@ -5473,7 +5490,7 @@ async function manage(p, debtMode = false) {
       const s = SQ[i], pr = S.props[i], acts = [];
       if (s.upg && !debtMode) {
         const u = upgradeInfo(p, i, i === landHere(p));
-        if (u.ok) acts.push(`<button class="sm pri" data-v="up:${i}" data-bw="0.6" ${p.cash < u.total ? 'disabled' : ''}>升到第 ${u.next} 级「${s.upg[u.next - 1][0]}」$${u.total}</button>`);
+        if (u.ok) acts.push(`<button class="sm pri" data-v="up:${i}" data-bw="0.6" title="${esc(lvUpTxt(i, u.next))}" ${p.cash < u.total ? 'disabled' : ''}>升到第 ${u.next} 级「${s.upg[u.next - 1][0]}」$${u.total}</button>`);
         else if (u.why && pr.level < 3) acts.push(`<span class="tagm" title="${u.why}">${/集齐整组/.test(u.why) ? '没集齐整组' : u.why}</span>`);
       }
       if (s.t === 'prop' && !debtMode && ownsGroup(p, s.g)) { const c = capInfo(p, i); if (c.ok) acts.push(`<button class="sm" data-v="cap:${i}" data-bw="0.4" ${p.cash < c.cost ? 'disabled' : ''}>加 1 个${capU(s.k)} $${c.cost}</button>`); }
@@ -5762,10 +5779,14 @@ function pillarWhy(p) {
   return x.score.map((v, k) => `${v}/${need} 分${v >= need ? '，已达成' : `，还差 ${need - v} 分`}${got[k].some(Boolean) ? '：' + got[k].filter(Boolean).join('；') : ''}`);
 }
 function checkOverSilent() { return S.players.filter(q => q.alive).length <= 1; }
+// 六大支柱胜利：谁先做到谁直接赢，不等他自己的回合结束。以前只在「轮到下一位」时查当前玩家，
+// 别人回合里靠交易、卡牌凑齐的（尤其是掉线、由房主代打的座位）要等到他自己的回合打完才算，回合没人打完就一直不出赢家。同时达成的先算当前玩家
+const waWinner = () => { if (!winWA()) return null; const c = cur(); return [c, ...S.players.filter(q => q !== c)].find(q => q && q.alive && waDone(q)) || null; };
 function checkOver() {
   if (S.over) return true;
   const alive = S.players.filter(q => q.alive);
   if (alive.length <= 1) { gameOver(alive[0], '其他玩家都被暂停了账户'); return true; }
+  const wa = waWinner(); if (wa) { gameOver(wa, '六大支柱全部达成'); return true; }
   return false;
 }
 // 每位玩家的战报数据
@@ -6530,11 +6551,33 @@ function comboCheck() {
 }
 // 轮到你时，能补齐你某个架构的格子：差一块的架构缺的那一环（二选一的两块都算）。
 // 「你」= 联机远端是自己的座位、房主和同屏是本机操作的真人；轮到电脑或别的设备上的人时不标
+function viewerP() {
+  if (!S || !S.players) return null;
+  if (MP.role === 'client') { const q = S.players[MP.mySeat]; return q && q.alive ? q : null; }
+  const loc = q => q && q.alive && !isAI(q.id) && !(MP.role === 'host' && MP.isRemote(q.id) && !MP.hostPlays(q.id)), n = S.players.length;
+  for (let k = 0; k < n; k++) { const q = S.players[(S.cur + k) % n]; if (loc(q)) return q; }
+  return null;
+}
+// 哪些格子能帮看棋盘的人补齐架构（缺的正好就是这一块）：棋盘上标「补齐」、悬停和格子面板里写是哪套。以前只在自己的回合里算，别人回合里看不到
 function needSquares() {
-  const me = cur(), out = {};
-  if (!me || !me.alive || S.over || isAI(me.id) || (MP.role === 'client' ? me.id !== MP.mySeat : MP.role === 'host' && MP.isRemote(me.id) && !MP.hostPlays(me.id))) return out;
+  const me = viewerP(), out = {};
+  if (!me || S.over) return out;
   COMBOS.filter(comboOpen).filter(c => !hasCombo(me, c.id)).forEach(c => { const miss = c.ix.filter(n => !(Array.isArray(n) ? n : [n]).some(i => active(me, i))); if (miss.length === 1) slotOpen(miss[0]).forEach(i => { if (!owns(me, i)) (out[i] = out[i] || []).push(c.n); }); });
   return out;
+}
+// 万能服务格：买下后能绑到看棋盘的人哪几套只差一块的架构上（自己就在里面的不算）
+function needWild(i) {
+  const me = viewerP(); if (!me || !isWild(i) || owns(me, i) || S.over) return [];
+  return COMBOS.filter(c => comboOpen(c) && !hasCombo(me, c.id) && !c.ix.flat().includes(i) && comboMiss(me, c).length === 1 && !wildOf(me, c.id)).map(c => c.n);
+}
+// 悬停、格子面板里的那一句：能帮谁补齐哪套、现在怎么拿到这块
+function needLine(i, need) {
+  const me = viewerP(), pr = S.props[i]; if (!me) return '';
+  const o = pr && pr.owner != null ? P(pr.owner) : null, how = !o ? '没人买，落上去买下就凑成' : pr.offline ? `${o.name} 的这块已下线，落上去付原价就能拉走` : `在 ${o.name} 手上，换过来就凑成`;
+  const names = (need && need[i]) || [], wild = names.length ? [] : needWild(i);
+  if (names.length) return `能帮 ${me.name} 补齐架构「${names.join('」「')}」：${how}`;
+  if (wild.length) return `万能服务：${me.name} 拿到后能绑到「${wild.join('」「')}」上，顶上缺的那块`;
+  return '';
 }
 function renderBoard() {
   comboCheck();
@@ -6551,7 +6594,7 @@ function renderBoard() {
     d.style.setProperty('--oc', owned ? P(pr.owner).color : 'transparent');
     // 提示和格子内容跟上次写的一样就不再写：格子里的图标都是内嵌的，48 格整个重写一遍有两百多 KB 要重新解析。
     // 上次写的挂在格子元素自己身上，buildBoard 重建格子时跟着作废
-    const tl = sqTip(i).split('\n'); if (need[i]) tl.splice(-1, 0, `${owned ? '换到' : '买下'}这块就能凑成架构「${need[i].join('」「')}」`);
+    const tl = sqTip(i).split('\n'), nl = needLine(i, need); if (nl) tl.splice(-1, 0, nl);
     const tip = tl.join('\n');
     if (d._t !== tip) { d._t = d.title = tip; d.setAttribute('aria-label', tip.split('\n').slice(0, -1).join('，')); }   // 格子、主人、过路费读屏都要念；最后一行「点一下看记录」不用念
     const h = cellHtml(i); if (d._h !== h) { d._h = h; d.innerHTML = h; }
@@ -6953,6 +6996,7 @@ function plCard(p, mine, offSeats) {
   if (p.rent3Left > 0) fx.push(`爆款 ×3 · 还剩 ${p.rent3Left} 笔`);
   if (p.immuneTill >= S.round) fx.push(`监管沙盒 · 到第 ${p.immuneTill} 轮`);
   if (p.aiBoostTill >= S.round) fx.push(`AI 组 ×2 · 到第 ${p.aiBoostTill} 轮`);
+  if (p.billFree > 0) fx.push(`推广 Credits：${p.billFree > 1 ? `接下来 ${p.billFree} 次` : '下次'}经过 Startup 扶持运行费全免`);
   if (p.runLaps > 0) fx.push(`${skn}运行费${p.runMul ? '减半' : '全免'} · 还剩 ${p.runLaps} 圈`);
   if (p.subsTurns > 0) fx.push(`${skn}订阅费 $${p.subsAmt} · 还剩 ${p.subsTurns} 次`);
   const rows = [];
@@ -7108,7 +7152,7 @@ function showSquare(i) {
   const svc = s.t === 'prop' && s.upg && !isHidden(i), pr = S.props[i];
   const billTxt = { hour: '按小时计费', req: '按用量计费', sub: '订阅', token: '按 token 计费', free: '免费', bundle: '打包价' }[s.bill] || '';
   const svcHtml = svc ? `<div class="sp-sub">价格 $${s.p} · ${grpN(s.g)}${s.type !== 'token' ? ` · ${TYPE_N[s.type]}` : ''} · ${billTxt}</div>${introHtml(i)}${haTag(i) ? `<div class="hatag ${haTag(i).k}"><b>${haTag(i).t}</b><span>${haTag(i).d}</span></div>` : ''}${propStatusHtml(i)}<h5>各级一览</h5>${lvTableHtml(i)}
-    <p class="sp-n">每级升级 $${sideCost(i)}，落在自己的服务上才能升一级；每个${capU(s.k)} $${capCost(i)}，过路费 +25%，最多 ${CAP_MAX} 个${pr && pr.cap ? `（现在 ${pr.cap} 个）` : ''}</p>` : '';
+    <p class="sp-n">每级升级基础价 $${sideCost(i)}，落在自己的服务上才能升一级（落地时按你的情况可能加钱或减半，比如没有 VPC、升多区域、技术债攒到 2 个会贵，有对应的架构会减半，弹窗里会写明）；每个${capU(s.k)} $${capCost(i)}，过路费 +25%，最多 ${CAP_MAX} 个${pr && pr.cap ? `（现在 ${pr.cap} 个）` : ''}</p>` : '';
   const status = isHidden(i) ? '<p>娱乐模式里，不常用的服务格变成盲盒：落上去随机抽一张 Health 或 re:Invent 卡，效果翻倍。</p>' : svc ? svcHtml : ['prop', 'util'].includes(s.t) && !isHidden(i) ? introHtml(i) + propStatusHtml(i) : `<p>${sqTip(i).split('\n').slice(1, -1).join('<br>')}</p>`;
   el.setAttribute('aria-label', `${s.n} 的历史记录`);
   el.innerHTML = `<div class="sp-h">${awsImg(isHidden(i) ? 'reinvent' : s.icon)}<b>${isHidden(i) ? '盲盒格' : s.n}</b><button type="button" class="sm" onclick="closeSqPop()" aria-label="关闭">关闭</button></div>
