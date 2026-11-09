@@ -2,7 +2,7 @@
 
 配置完成后：合并/推送到本仓库 `master` → Actions 校验、打包 → 受限 SSH 上传 → 整体切换 → 公网检查；失败尝试恢复上一版。
 
-生产地址：<https://game.usergroup.cn/aws-game/>。现有域名、TLS 证书及 DNS 继续使用。PR 验证不接触服务器；部署默认关闭，设置 `CHENGDU_DEPLOY_ENABLED=true` 后才启用。配置 Secrets 和服务器需要管理员权限，提交 PR 的贡献者不需要拿到服务器凭证。
+生产地址：<https://aws-game.usergroup.cn/>。现有域名、TLS 证书及 DNS 继续使用。PR 验证不接触服务器；部署默认关闭，设置 `CHENGDU_DEPLOY_ENABLED=true` 后才启用。配置 Secrets 和服务器需要管理员权限，提交 PR 的贡献者不需要拿到服务器凭证。
 
 ## 1. 在管理员电脑生成专用密钥
 
@@ -42,24 +42,26 @@ volumes:
   - /srv/aws-game:/srv/aws-game:ro
 ```
 
-由管理员按现有管理流程重新创建 Nginx 容器以加载新挂载。在服务 `game.usergroup.cn` 的 HTTPS `server` 中添加/替换以下两条路径规则；若 `game.zhugdamo.cn` 是另一个 `server`，同步配置到那个站点，使两个域名指向同一版本：
+由管理员按现有管理流程重新创建 Nginx 容器以加载新挂载。在独立域名 `aws-game.usergroup.cn` 的 HTTPS `server` 中，将站点根目录指向 `current`（保留现有 TLS 证书设置）：
 
 ```nginx
-location = /aws-game {
-    return 301 /aws-game/;
-}
-location ^~ /aws-game/ {
-    alias /srv/aws-game/current/;
-    index index.html;
+server_name aws-game.usergroup.cn;
+root /srv/aws-game/current;
+index index.html;
+
+location / {
+    try_files $uri $uri/ =404;
     autoindex off;
     add_header Cache-Control "no-cache" always;
     add_header X-Content-Type-Options nosniff always;
 }
 ```
 
+该域名从 `/` 提供游戏，游戏入口为 `/code/index.html`，不再添加 `/aws-game` 路径前缀。确认 DNS 与 TLS 证书覆盖 `aws-game.usergroup.cn`；旧域名和旧路径如需保留，由管理员另行配置重定向。
+
 Nginx 的 `http` 保留标准 `mime.types`，确保 HTML、JS、PDF 和 M4A 使用正常的 MIME 类型。核实网关可读取挂载后的 `current/index.html`，运行配置检查再重载。现有 URL 应继续打开原游戏，不能仍然落到旧 MCP 发布目录。
 
-新流程支持中文文件名及 `.m4a`，直接发布上游静态内容，不再需要旧 MCP 发布时的改名或音频转换。之后此路径由 Actions 管理，避免同时通过 MCP 写旧目录。
+新流程支持中文文件名及 `.m4a`，直接发布上游静态内容，不再需要旧 MCP 发布时的改名或音频转换。之后新域名的站点内容由 Actions 管理，避免同时通过 MCP 写旧目录。
 
 ## 4. GitHub 中配置并启用
 

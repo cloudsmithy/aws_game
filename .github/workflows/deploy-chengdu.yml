@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: chengdu
-      url: https://game.usergroup.cn/aws-game/
+      url: https://aws-game.usergroup.cn/
     concurrency:
       group: chengdu-aws-game-production
       cancel-in-progress: false
@@ -71,7 +71,7 @@ jobs:
           }
           trap rollback ERR
           "${remote[@]}" "deploy $GITHUB_SHA" < /tmp/aws-game.tar.gz
-          base='https://game.usergroup.cn/aws-game'
+          base='https://aws-game.usergroup.cn'
           curl --fail --silent --show-error --retry 3 --retry-all-errors --max-time 30 "$base/_deployment.json?revision=$GITHUB_SHA" -o "$RUNNER_TEMP/aws-game-manifest.json"
           python3 -c 'import json,os,sys; assert json.load(open(sys.argv[1]))["revision"] == os.environ["GITHUB_SHA"], "unexpected live revision"' "$RUNNER_TEMP/aws-game-manifest.json"
           curl --fail --silent --show-error --retry 3 --max-time 30 "$base/code/index.html?revision=$GITHUB_SHA" -o /dev/null

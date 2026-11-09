@@ -135,4 +135,4 @@ docker run --rm -p 127.0.0.1:18080:8080 aws-ug-tycoon  # 打开 http://127.0.0.1
 
 ## chengdu 自动部署
 
-维护者可按 [自动部署配置说明](deploy/README.md) 一次性配置服务器及 GitHub Environment。启用后，`master` 的更新会自动部署到 <https://game.usergroup.cn/aws-game/>；PR 仅运行校验，不发布。
+维护者可按 [自动部署配置说明](deploy/README.md) 一次性配置服务器及 GitHub Environment。启用后，`master` 的更新会自动部署到 <https://aws-game.usergroup.cn/>；PR 仅运行校验，不发布。
