@@ -2058,6 +2058,9 @@ tr.gempty td{padding:20px;text-align:center;color:#687078}
 .box.gal .gac-diag{border-radius:0;background-color:#fafbfc;background-image:radial-gradient(rgba(35,47,62,.13) 1px,transparent 1px);background-size:12px 12px;border-color:var(--gline2)}
 .box.gal .ar-slot{border-radius:0}.box.gal .ar-optl{font-family:var(--gmono)}
 .box.gal .gac-bonus{border-radius:0}
+.svc-intro .sv-gal{margin-top:6px}.svc-intro .sv-gal a{font-weight:700;text-decoration:none}.svc-intro .sv-gal a:hover{text-decoration:underline}
+.box.doc .mb tr.gflash>td{animation:gflash 2s ease-out}@keyframes gflash{0%,35%{background:#fff1dc}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){.box.doc .mb tr.gflash>td{animation:none;background:#fff1dc}}
 .gitem-empty{padding:16px;text-align:center}
 .glegend{display:flex;flex-wrap:wrap;gap:6px 18px;margin:8px 0 10px;padding:8px 12px;background:#fafafa;border:1px solid var(--line2);font-size:12.5px;line-height:1.5;color:#545b64}
 .glegend span{display:inline-flex;align-items:center;gap:6px}
@@ -7622,7 +7625,21 @@ const SVC_INTRO = {
   config: ["配置记录和合规检查：持续记录账户里每个资源的配置和变更历史，用规则检查合不合规（比如 S3 桶有没有公开、EBS 卷有没有加密），不合规的可以自动修正。", "合规审计、查清楚是谁把配置改坏了、自动把公开的 S3 桶改回私有"],
   cloudtrail: ["记录账户里的 API 调用：谁在什么时间、从哪里、做了什么操作。控制台默认能查最近 90 天的管理事件；建跟踪可以长期存进 S3。", "安全审计、查清楚是谁删了资源"],
 };
-const introHtml = i => { const x = SVC_INTRO[SQ[i].k]; return x ? `<div class="svc-intro"><p><b>是什么</b>${x[0]}</p><p><b>常用来</b>${x[1]}</p></div>` : ''; };
+const introHtml = i => { const x = SVC_INTRO[SQ[i].k]; return x ? `<div class="svc-intro"><p><b>是什么</b>${x[0]}</p><p><b>常用来</b>${x[1]}</p><p class="sv-gal"><a href="#" data-gal="${SQ[i].k}">在图鉴里看 ${SQ[i].n}：升级路线、过路费、高可用 →</a></p></div>` : ''; };
+// 打开图鉴、跳到服务一览里这一块并闪一下；开着完整介绍窗的话先关掉
+async function galleryAt(k) {
+  closeSqPop();
+  if (viewOpen()) { const b = $('#vmodal .btns button.pri'); if (b) b.click(); await new Promise(r => setTimeout(r, 80)); }
+  gallery();
+  setTimeout(() => {
+    const box = $('#vmodal .box'); if (!box) return;
+    const row = box.querySelector(`tr.gsvc[data-k="${k}"]`) || [...box.querySelectorAll('h4')].find(h => /服务一览/.test(h.textContent)); if (!row) return;
+    const head = [box.querySelector('h3'), box.querySelector('.mtoc')].reduce((a, e) => a + (e ? e.offsetHeight : 0), 0);
+    box.scrollTop += row.getBoundingClientRect().top - box.getBoundingClientRect().top - head - 12;
+    if (row.tagName === 'TR') { row.classList.add('gflash'); setTimeout(() => row.classList.remove('gflash'), 2000); }
+  }, 150);
+}
+document.addEventListener('click', e => { const a = e.target.closest && e.target.closest('[data-gal]'); if (!a) return; e.preventDefault(); galleryAt(a.dataset.gal); });
 // 升级路线：一级一张小卡（面板窄，表格四列会把字挤成一列）。卡头是级别和升级价，下面一行是这一级的过路费、运行费，再下面是效果和现实里是什么
 function lvCardsHtml(i) {
   const s = SQ[i], pr = S.props[i], lv = pr ? pr.level : -1, tm = trafficMul();
@@ -7770,7 +7787,7 @@ function rentLevels(i) {
 const rentLvHtml = i => { const tk = SQ[i].bill === 'token', xs = rentLevels(i).replace(/（乘点数）$/, '').split(' → ');
   return `<div class="rlv">${xs.map((x, l) => `<i>${l ? `${l} 级` : '未升级'}</i><b>${x}</b>`).join('')}</div>${tk ? '<small class="muted">再乘骰子点数</small>' : ''}`; };
 function gallery() {
-  const gord = Object.keys(GROUPS), svcRow = (s, i) => `<tr class="gsvc" data-g="${s.g}" data-type="${s.type}" data-ha="${haTag(i).k}" data-bill="${s.bill}"><td><div class="gsn">${awsImg(s.icon)}<span><b>${s.n}</b><small>售价 $${s.p}</small></span></div>${svcBtn(s, 'xs')}</td><td class="gcol"><span class="gdot" style="--gc:${GROUPS[s.g].color}"></span>${grpN(s.g)}</td><td class="nw">${TYPE_N[s.type]}</td><td><span class="hatag-s ${haTag(i).k}">${haTag(i).t}</span></td><td class="nw">${BILL_N[s.bill]}</td><td>${rentLvHtml(i)}</td><td><ol class="gup">${s.upg.map((u, k) => `<li><b>${u[0]}</b>${u[3] ? `：${u[3]}` : ''}${effLabel(i, k + 1) ? `<small>${effLabel(i, k + 1)}</small>` : ''}</li>`).join('')}</ol></td></tr>`;
+  const gord = Object.keys(GROUPS), svcRow = (s, i) => `<tr class="gsvc" data-k="${s.k}" data-g="${s.g}" data-type="${s.type}" data-ha="${haTag(i).k}" data-bill="${s.bill}"><td><div class="gsn">${awsImg(s.icon)}<span><b>${s.n}</b><small>售价 $${s.p}</small></span></div>${svcBtn(s, 'xs')}</td><td class="gcol"><span class="gdot" style="--gc:${GROUPS[s.g].color}"></span>${grpN(s.g)}</td><td class="nw">${TYPE_N[s.type]}</td><td><span class="hatag-s ${haTag(i).k}">${haTag(i).t}</span></td><td class="nw">${BILL_N[s.bill]}</td><td>${rentLvHtml(i)}</td><td><ol class="gup">${s.upg.map((u, k) => `<li><b>${u[0]}</b>${u[3] ? `：${u[3]}` : ''}${effLabel(i, k + 1) ? `<small>${effLabel(i, k + 1)}</small>` : ''}</li>`).join('')}</ol></td></tr>`;
   // 11-08 按色组分组排：组名一行（色块、几块、都有谁），组里按棋盘顺序
   const svcRows = gord.filter(g => g !== 'util').map(g => { const xs = SQ.map((s, i) => [s, i]).filter(([s]) => s.t === 'prop' && s.g === g); return xs.length ? `<tr class="ggrp" data-g="${g}"><th colspan="7"><span class="gdot" style="--gc:${GROUPS[g].color}"></span>${grpN(g)}<small>${xs.length} 块 · ${xs.map(([s]) => s.n).join('、')}</small></th></tr>` + xs.map(([s, i]) => svcRow(s, i)).join('') : ''; }).join('');
   // 服务一览的筛选：色组、类型、高可用、计费，选项后面写有几块

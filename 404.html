@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>页面搬家了 · 亚马逊云科技 User Group 云上大亨</title>
+<script>
+// 网页挪进 code/ 以后，旧链接（demo/<架构>.html、svc/<服务>.html）在 GitHub Pages 上会 404：这里认出来，带着网址参数跳到新位置
+(function () {
+  var p = location.pathname, m = p.match(/^(.*?\/)(demo|svc)\/(.*)$/);
+  if (m) { location.replace(m[1] + 'code/' + (m[2] === 'demo' ? 'arch' : 'svc') + '/' + m[3] + location.search + location.hash); return; }
+  var r = p.match(/^(\/[^\/]+\/)/);   // 别的找不到的页面：回到游戏
+  window.HOME = (r ? r[1] : '/') + 'code/index.html';
+})();
+</script>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0b111c;color:#d3dbe6;font:15px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;text-align:center}a{color:#ffb266}</style>
+</head><body><div><p>这个页面不在了，可能是旧链接。</p><p><a id="home" href="code/index.html">回到游戏</a></p></div>
+<script>if (window.HOME) document.getElementById('home').href = window.HOME;</script>
+</body></html>
