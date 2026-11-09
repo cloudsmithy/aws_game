@@ -1,7 +1,11 @@
+# 生成物和缓存：配音合成的中间文件、截图、宣传片素材都能重新生成，不进仓库
 tools/out/
 tools/promo/
 宣传片/
+__pycache__/
+*.pyc
+node_modules/
+*.log
+# 本机和编辑器的文件
 .claude/
 .DS_Store
-build.log
-tools/

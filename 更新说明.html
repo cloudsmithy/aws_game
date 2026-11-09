@@ -49,7 +49,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <h1>亚马逊云科技 User Group 云上大亨 · 这一轮改了什么</h1>
   <p>从「破产逻辑是不是有问题」开始，一路改到新角色、两个新开关、地狱模式和全套文档。每条改动后面写了为什么改；平衡数字都是用电脑玩家对打模拟出来的。</p>
   <nav>
-    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#todo">待定</a>
+    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#todo">待定</a>
   </nav>
 </header>
 
@@ -150,7 +150,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <h2><i>06</i>地狱模式（新难度）</h2>
   <ul>
     <li><span class="tag new">新</span>完整局 + 4 个玩法 DLC + 高速部署，<b>必须边玩边答题</b>，卡牌 ×2 并跟着流量全额涨。</li>
-    <li>过路费每 5 轮 +1.5 倍；没有新账号保护期；起点只领 $150；卖回只有 6 折；答对过路费只减 30%；角色技能金额不随流量涨。</li>
+    <li>过路费每 5 轮 +1.5 倍；没有新账户保护期；起点只领 $150；卖回只有 6 折；答对过路费只减 30%；角色技能金额不随流量涨。</li>
     <li><b>每个角色一条地狱限制</b>，削掉它在地狱模式里最占便宜的那一点：</li>
   </ul>
   <table>
@@ -353,7 +353,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
     <li><span class="tag chg">改</span>提示词注入：有 WAF 从全免改成罚款减半（对口的是 Bedrock Guardrails）；跨区流量费：免疫条件改成用过 Cost Explorer 卡（VPC 终端节点省的是 NAT 处理费）；CloudWatch「日志保留期」改成请求费减半（原来的免疫从来不起作用）。</li>
     <li><span class="tag chg">改</span>「运行费减半」类卡只减按小时计费的部分，Savings Plans 承诺额照付；飞行路过 User Group 活动也领 $50；维护窗口格交的 $50 进奖池；掷出对子落在维护窗口格、交钱继续走的，照样再掷。</li>
     <li><span class="tag chg">改</span>独立开发者抽到 Savings Plans 卡没有效果；金融合规抢 Spot 也要出到原价 40%；完整局技能金额 ×1.5 写进规则，界面上显示当前倍数。</li>
-    <li><span class="tag chg">改</span>和现实对齐：Inspector 不扫 Lightsail；KMS 只用 AWS 托管密钥时不收月费；Savings Plans 也能抵 OpenSearch（数据库类）和 EMR（计算类）；Snowball 不再向新客户提供，卡换成 DataSync；「服务停止支持」改叫「旧版本停止支持」。</li>
+    <li><span class="tag chg">改</span>和现实对齐：Inspector 不扫 Lightsail；KMS 只用 亚马逊云科技托管密钥时不收月费；Savings Plans 也能抵 OpenSearch（数据库类）和 EMR（计算类）；Snowball 不再向新客户提供，卡换成 DataSync；「服务停止支持」改叫「旧版本停止支持」。</li>
   </ul>
   <h3>Bug 修复</h3>
   <ul>
@@ -361,7 +361,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
     <li><span class="tag bug">BUG</span>电脑什么交易都同意，$10 能换走它全部现金和服务；现在收到的要比交出去的值钱两成以上、交易后现金还有 $250，会让对方集齐整组的服务基本不卖。电脑的服务下线后会重新上线，集齐整组后会自己升级。</li>
     <li><span class="tag bug">BUG</span>卡牌倍率不是 1 时：卡牌带人飞过起点、走过 UG 的工资和运行费被放大；托管费、旧版本停止支持的退款、代理商卡的买卖被放大；日志写的是原价。现在不该乘的不乘，日志写实际金额。</li>
     <li><span class="tag bug">BUG</span>娱乐模式经过起点送的卡在半路就抽，卡里又让人移动时会多走、结算两次，还会在棋盘上留一个 3D 棋子；现在落地结算完再抽。</li>
-    <li><span class="tag bug">BUG</span>卡牌：流量劫持能和维护窗口里的人换位置；在维护窗口里被卡牌移动；掷骰前抽卡被送进维护窗口还能马上掷出来；甩锅后弹窗还是抽卡人在选；纵深防御挡不住勒索软件；「数据本地存储」从不生效；Fargate 替整个账号挡 SSH 暴力破解；Region 宕机打到全局服务。</li>
+    <li><span class="tag bug">BUG</span>卡牌：流量劫持能和维护窗口里的人换位置；在维护窗口里被卡牌移动；掷骰前抽卡被送进维护窗口还能马上掷出来；甩锅后弹窗还是抽卡人在选；纵深防御挡不住勒索软件；「数据本地存储」从不生效；Fargate 替整个账户挡 SSH 暴力破解；Region 宕机打到全局服务。</li>
     <li><span class="tag bug">BUG</span>其他：弹窗里焦点在「不买」上按回车还是会买；欠款弹窗反复点「关闭」能赖账；结算中退出会存下半个回合；名字带 &amp; ' 显示乱码；电脑答错的题记进你的错题本；已下线的服务还能升级；被 DDoS 打下线的服务照算支柱；高速部署 1 号位整局少 1 点；WebGL 失败时页面底部不断多出空 canvas。</li>
     <li><span class="tag bug">BUG</span>联机：远端看不到结束动画和战报；房主刷新后座位按加入先后分配；改名后用新名字重连被拒；远端的错题记到房主浏览器；房主看图鉴会推给所有人。</li>
   </ul>
@@ -379,7 +379,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
 
 <section id="r5">
   <h2><i>13</i>第五轮（11-02）</h2>
-  <p class="why">第二轮全量审查：合并进来的改动逐段核对、6 种模式按真人方式各打几局、新玩家第一次上手、性能、键盘和读屏、约 1.3 万局经济模拟、再核一遍真实 AWS。42 条经复核确认的问题都改了。</p>
+  <p class="why">第二轮全量审查：合并进来的改动逐段核对、6 种模式按真人方式各打几局、新玩家第一次上手、性能、键盘和读屏、约 1.3 万局经济模拟、再核一遍真实的亚马逊云科技。42 条经复核确认的问题都改了。</p>
   <h3>平衡（都有模拟数字，记在规则书第 32 节）</h3>
   <ul>
     <li><span class="tag chg">改</span>开局资金：车库创业公司 $1300→$1500、独立开发者 $1400→$1500、数据智能 $1500→$1600、金融合规 $1800→$1600、SaaS $1700→$1600。默认 15 轮按估值排名时，各角色胜率原来 16–32%，现在回到 20–29% 附近。</li>
@@ -387,7 +387,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
     <li><span class="tag chg">改</span>完整局技能金额 ×1.5 → ×1.2：用过技能的人翻盘率原来 17–32%，比目标 12% 高太多。</li>
     <li><span class="tag chg">改</span>代理商：有轮数上限的局（不含娱乐、地狱），开局资金改成角色卡 + 每位客户 $300。按客户总和起步时 15 轮局代理商 86% 拿第一，只按角色卡又只有 8%。现在 15 轮标准局约 27%、不限轮数约 21%。</li>
   </ul>
-  <h3>和真实 AWS 对齐</h3>
+  <h3>和真实的亚马逊云科技 对齐</h3>
   <ul>
     <li><span class="tag chg">改</span>「Compute Optimizer 建议降配」只减它真正覆盖的服务（EC2、EBS、Lambda、RDS/Aurora、EMR，ECS 升到 Fargate 才算）。</li>
     <li><span class="tag bug">BUG</span>re:Invent「迁移到 Graviton」实际给 EC2 加的是「多 AZ」；「Bedrock 上了新模型」第 2 级送的是跨区域推理。都按卡面改对。</li>
@@ -399,7 +399,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
     <li><span class="tag bug">BUG</span>飞行和 User Group 动画之后，星火粒子变成灰黑小点留在页面上。</li>
     <li><span class="tag bug">BUG</span>电脑的弹窗在它自己选之前，真人按空格、数字键或点鼠标就替它做了决定；现在电脑的弹窗只能看，旁边可以暂停。</li>
     <li><span class="tag bug">BUG</span>1 号位是电脑时，角色分配弹窗 0.9 秒就被电脑点掉，新手引导在电脑回合弹出；现在等真人看完、轮到真人再弹。</li>
-    <li><span class="tag bug">BUG</span>托管服务商的托管费，客户这一圈运行费是 $0 时漏收；DDoS 选目标、风暴接入收购的列表按单块过路费标价，和格子上的联合收费对不上；新账号保护期里格子写 ≈$80，实际只收 $50。</li>
+    <li><span class="tag bug">BUG</span>托管服务商的托管费，客户这一圈运行费是 $0 时漏收；DDoS 选目标、风暴接入收购的列表按单块过路费标价，和格子上的联合收费对不上；新账户保护期里格子写 ≈$80，实际只收 $50。</li>
   </ul>
   <h3>上手、键盘和读屏</h3>
   <ul>
@@ -491,7 +491,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
 
 <section id="r10">
   <h2><i>18</i>第十轮（11-04 ～ 11-05）：第五轮审查</h2>
-  <p class="why">8 个方向（按真人方式玩完每种模式、联机、平衡、和真实 AWS 对不对得上、文档、界面、动画、存档）找出 75 条问题，每条都有人独立复现、尽力推翻，站得住的才改。下面先是 11-04 先修的 7 条最影响对局的，后面是其余的。</p>
+  <p class="why">8 个方向（按真人方式玩完每种模式、联机、平衡、和真实的亚马逊云科技 对不对得上、文档、界面、动画、存档）找出 75 条问题，每条都有人独立复现、尽力推翻，站得住的才改。下面先是 11-04 先修的 7 条最影响对局的，后面是其余的。</p>
   <h3>先修的 7 条</h3>
   <ul>
     <li><span class="tag bug">BUG</span>掷完骰子刷新页面、点「继续上一局」能重掷：落点、过路费、欠款、Health 卡、高速部署的回滚重发都能刷掉。现在掷骰前就把这一把（连同回滚重发要用的几把）点数存进存档，刷新回来掷出的还是同样的数。落地答题的题目刷新后还是会换。</li>
@@ -514,21 +514,21 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
     <li><span class="tag ui">UI</span>导出的对局记录里，复盘段原来文字粘在一起（「1韩叔短视频平台 · 赢家」「买服务$1380」），还带一堆缩进；没有关键时刻时只剩一个空标题。现在名字和角色、类别和金额之间有空格，条目前加「- 」，去掉了缩进；没有关键时刻就不写这一段。</li>
     <li><span class="tag doc">文档</span>规则书「网页版小功能」：存档一条补上「点数在掷骰子之前就定好，刷新再掷还是同样的点数」，以及结束后存档已删、用「再来一局」；结束复盘一条写全新的花钱分类；战报一条补上「查看战报」和「再来一局沿用这一局的设置」。新手引导「资产管理和更多操作」一步补了一句：「SP / RI」要手上有交运行费的计算类、数据库类服务才能点。</li>
   </ul>
-  <h3>和真实 AWS 对齐</h3>
+  <h3>和真实的亚马逊云科技 对齐</h3>
   <ul>
-    <li><span class="tag bug">BUG</span>升级说明对不上实际判定：Lambda「提高并发配额」、API Gateway「使用计划限流」原来写「扛住流量暴增」，可流量暴增只打实例型服务，这句从来用不上；CloudWatch「告警与仪表板」、Route 53「健康检查」、SageMaker AI「多卡训练」、AWS Backup「跨账户备份」、Data Transfer「Global Accelerator」、EC2「Auto Scaling」明明能免疫某张卡，按钮上却没写。现在落地升级按钮、各级一览、图鉴、规则书、打印的服务卡都会写它免疫哪张卡；非实例型服务的弹性扩展改写「性能效率支柱 +1 分」。</li>
+    <li><span class="tag bug">BUG</span>升级说明对不上实际判定：Lambda「提高并发配额」、API Gateway「使用计划限流」原来写「扛住流量暴增」，可流量暴增只打实例型服务，这句从来用不上；CloudWatch「告警与仪表板」、Route 53「健康检查」、SageMaker AI「多卡训练」、Backup「跨账户备份」、Data Transfer「Global Accelerator」、EC2「Auto Scaling」明明能免疫某张卡，按钮上却没写。现在落地升级按钮、各级一览、图鉴、规则书、打印的服务卡都会写它免疫哪张卡；非实例型服务的弹性扩展改写「性能效率支柱 +1 分」。</li>
     <li><span class="tag chg">改</span>旧版本停止支持：原来 DynamoDB、S3、SQS、CloudFront 这类根本没有版本的服务，也会被当成「跑在旧版本上」收走。现在只打带版本的服务：RDS、Aurora、ElastiCache、OpenSearch、EKS、Lambda、Glue、EMR、Bedrock。日志写明到期的是数据库引擎大版本、运行时、Kubernetes 版本还是模型；手上没有这类空服务的人不受影响。</li>
-    <li><span class="tag chg">改</span>S3 桶被设成了公开：原来 GuardDuty 升到「S3 保护」就整张免疫。现实里发现桶被公开靠的是 GuardDuty 基础检测（不用开 S3 保护），而且它只告警、不会把桶改回私有。现在只要持有 GuardDuty（不用升级），每人少赔一半、不记技术债；「S3 保护」那一级改为只涨过路费。KMS 客户托管密钥、CloudFront 源访问控制照旧免疫。卡上的知识点改成真实做法：账号级开启 Block Public Access，用 AWS Config 规则 s3-bucket-public-read-prohibited 配自动修正（自动化文档 AWS-DisableS3BucketPublicReadWrite）把桶改回私有。</li>
+    <li><span class="tag chg">改</span>S3 桶被设成了公开：原来 GuardDuty 升到「S3 保护」就整张免疫。现实里发现桶被公开靠的是 GuardDuty 基础检测（不用开 S3 保护），而且它只告警、不会把桶改回私有。现在只要持有 GuardDuty（不用升级），每人少赔一半、不记技术债；「S3 保护」那一级改为只涨过路费。KMS 客户托管密钥、CloudFront 源访问控制照旧免疫。卡上的知识点改成真实做法：账户级开启 Block Public Access，用 Config 规则 s3-bucket-public-read-prohibited 配自动修正（自动化文档 AWS-DisableS3BucketPublicReadWrite）把桶改回私有。</li>
     <li><span class="tag doc">文档</span>Inspector「EC2 扫描」和 ECR「增强扫描」原来都写「免疫高危 CVE」，实际各只管一半。现在分别写「你的 EC2、EMR 免疫高危 CVE」和「你的 ECS、EKS、SageMaker AI 免疫高危 CVE」（结算没变）。</li>
     <li><span class="tag chg">改</span>员工的访问密钥被盗用（安全攻防 DLC）：原来只要持有 CloudTrail 或 GuardDuty 就整张免疫，可 CloudTrail 只记录、GuardDuty 只发现，都不会吊销密钥。现在只认「威胁自动响应」架构；只有 GuardDuty 时和 Root 密钥卡、SSH 暴力破解卡一样减损：交 $50、不用停、不记技术债。</li>
     <li><span class="tag chg">改</span>当地要求数据本地存储（全球出海 DLC）：原来 KMS 升到「多区域密钥」也照样免疫，而官方文档说多区域密钥会把密钥材料复制到别的 Region，数据驻留合规反而更复杂。现在 KMS 升到第 3 级就不再免疫，会和别的多区域功能一起去掉一级；第 0–2 级（单区域密钥）照旧免疫。</li>
     <li><span class="tag chg">改</span>Redshift 第 3 级「跨区域快照」原来算「扛住整个 Region 出问题」，和同样是快照复制的 EBS 第 3 级不一致。快照要先在那边恢复成集群才能用，现在不算多区域：us-east-1 故障、Region 宕机会打到它，升这一级也不再收跨区域数据传输费，不挨「跨区流量费暴涨」；格子上的标从「多区域」换成「跨区快照」。</li>
-    <li><span class="tag chg">改</span>实习生误删了生产数据：原来只要持有 0 级 AWS Backup 就免疫，花 $100 升「备份计划」等于白买，可现实里不建备份计划，Backup 什么都不会备份。现在要升了「备份计划」才免疫；下线或被打下线的服务不算。</li>
+    <li><span class="tag chg">改</span>实习生误删了生产数据：原来只要持有 0 级 Backup 就免疫，花 $100 升「备份计划」等于白买，可现实里不建备份计划，Backup 什么都不会备份。现在要升了「备份计划」才免疫；下线或被打下线的服务不算。</li>
     <li><span class="tag doc">文档</span>SQS「死信队列」原来写「免疫依赖的第三方 API 挂了」，可持有 SQS 本身就免疫这张卡。现在这一级只涨过路费，说明改成「反复处理失败的消息转到单独的队列，方便排查原因」。</li>
     <li><span class="tag chg">改</span>测试环境忘了删（FinOps DLC）：原来签着 Savings Plans 就免疫，可 Savings Plans 只是承诺用量换折扣，发现不了没人管的资源。现在只认用过 Cost Explorer 卡（开了成本异常检测），和「跨区流量费暴涨」一样；卡上知识点补了一句「忘了删的实例照样计费」。</li>
     <li><span class="tag doc">文档</span>SageMaker 按官方改名叫 SageMaker AI（2024 年 12 月起；现在的 Amazon SageMaker 指的是统一的数据和 AI 平台）。棋盘、卡牌、架构、Savings Plans 说明、规则书和玩法手册都改了；HyperPod、训练计划这些子功能官方没改名，保持原样。3D 翻牌的效果文字上限放宽到 8 行，re:Invent「按 Cost Explorer 推荐签了 Savings Plans」不再丢最后一个字。</li>
     <li><span class="tag doc">文档</span>Step Functions「Express 工作流」原来写「按次数计费更便宜」，但官方是按执行次数和运行时长（按内存折算）计费，按状态转换次数收费的是标准工作流。现在说明改成「适合 5 分钟内跑完的高频短流程：按执行次数和运行时长（按内存折算）计费，不按状态转换数计，步骤多、跑得快时更便宜」。</li>
-    <li><span class="tag doc">文档</span>功能名按官方中文文档统一：CloudFront「源站访问控制」改「源访问控制」、「源站故障转移」改「源故障转移」，AWS Backup「跨账号备份」改「跨账户备份」，CloudWatch「跨账号可观测」改「跨账户可观测性」，EMR「托管扩缩」改「托管扩展」；OAC 那道题的「源站访问身份（OAI）」改「源访问身份（OAI）」；「凌晨 3 点被告警叫醒」知识点里的「处理手册（Runbook）」改「运行手册（Runbook）」。</li>
+    <li><span class="tag doc">文档</span>功能名按官方中文文档统一：CloudFront「源站访问控制」改「源访问控制」、「源站故障转移」改「源故障转移」，Backup「跨账户备份」改「跨账户备份」，CloudWatch「跨账户可观测」改「跨账户可观测性」，EMR「托管扩缩」改「托管扩展」；OAC 那道题的「源站访问身份（OAI）」改「源访问身份（OAI）」；「凌晨 3 点被告警叫醒」知识点里的「处理手册（Runbook）」改「运行手册（Runbook）」。</li>
   </ul>
   <h3>文档和说明</h3>
   <ul>
@@ -613,16 +613,162 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
 </section>
 
 <section id="r12">
-  <h2><i>20</i>第十二轮（11-06）：动画人物和自动变卖</h2>
+  <h2><i>20</i>第十二轮（11-06）：动画人物、自动变卖、架构和支柱提示</h2>
   <ul>
     <li><span class="tag ui">UI</span>飞到对面、参加 User Group 活动这些动画里，原来用几何体捏的小人换成韩叔、虫虫、Damo、Yuki 的设定图立牌。每局开局随机把四个人分给各位玩家，整局不变（存档、读档、联机各台设备一致）；每次播动画从这个人的几张动作图里随机挑一张，连着两次不重复。</li>
     <li><span class="tag ui">UI</span>人物头顶原来挂座位号圆牌，现在是写玩家名字的名牌，底色是这位玩家的颜色。</li>
     <li><span class="tag chg">改</span>欠款时点「自动变卖」：原来拆升级、下线凑不够就把整块服务连升级一起卖掉，现在先减容量、去掉升级、下线，还不够才整块卖回；只有先拆再卖凑不够、整块 8 折才够时才直接整块卖。</li>
+      <li><span class="tag bug">BUG</span>轮到自己时，右边自己的玩家卡上把架构那几行整块藏起来了（本意是只藏「只差一块」的，那些在中间右栏写着），结果凑成有效架构以后在哪都看不到。现在自己的卡上照样显示「某某架构 3/3 已生效，联合收费」。</li>
+      <li><span class="tag ui">UI</span>玩家「明细和日志」里新加「架构」一节：凑成的和只差一块的架构画成带图标的小架构图，每块服务下面写现在归谁；还缺的那块写清在谁手上（要靠交易）还是没人买（落上去就能买）；下面列全场谁凑成了哪些架构。</li>
+    <li><span class="tag ui">UI</span>「图鉴」的有效架构表在对局里多一列「谁已凑成」，每块服务下面写现在归谁。</li>
+    <li><span class="tag ui">UI</span>玩家「明细和日志」里新加「六大支柱」一节：每条支柱现在几分、还差几分，按你手上的服务和这局的设置写具体怎么拿分（比如「EC2 升到第 1 级「多 AZ」」「签一次 Savings Plans」「买 GuardDuty」）。</li>
+      <li><span class="tag ui">UI</span>玩家卡上的六大支柱改成写「几分」加一条进度条（原来只有空心、实心圆点）；鼠标停在某条支柱上（触屏点一下），那一条会标出底色，弹出说明：现在几分、要几分、已有的分从哪来、最便宜的 3 种补法（升哪一级、买哪块、花多少、加几分）。</li>
+    <li><span class="tag chg">改</span>可靠性支柱：S3、DynamoDB、Lambda、Route 53 这类天生跨 AZ 的服务（托管服务、Serverless、全局服务和 ECS）每持有一块算 1 分。原来只有实例型服务升多 AZ、升多区域才有分，可靠性是六条里最难凑的一条。EC2、RDS 这类实例还是要自己升多 AZ 才算，EBS 永远单 AZ 不算。电脑对打模拟（标准局，每种 240/120 局）：打满 15 轮时六大支柱胜从约 4% 到约 10%，不限轮数时从约 78% 到约 87%，中位局长 29 轮到 27 轮。</li>
+    <li><span class="tag ui">UI</span>「明细和日志」的架构一节，缺的那块写着「在某某手上，要靠交易」的，旁边多一个「找他交易」按钮：点了直接打开和他的交易窗，把这块先勾好。只在轮到你、你还能操作的时候出现。</li>
+    <li><span class="tag ui">UI</span>轮到你时，棋盘上买下（或换到）就能凑成你某个架构的格子，右上角多一个「补齐」小角标：没人买的是绿底，在别人手上的是橙色描边。鼠标停在格子上会写凑成哪个架构。</li>
+    <li><span class="tag doc">文档</span>游戏、手册、规则书和题库里「账号」「账户」混着用，统一按亚马逊云科技中文文档写「账户」，root 用户写「根用户」。</li>
+    <li><span class="tag chg">改</span>不买就是不买：EC2、ECS、EKS、SageMaker AI 落地的人点「不买」后，不再弹出 Spot 竞价让所有人暗标出价抢，这块留在亚马逊云科技。已经是 Spot 的服务照旧可以被落上来的人出更高价抢走，抢走时不付这次过路费。金融合规公司的弱点里「不能参加 Spot 竞价」一起去掉。</li>
+    <li><span class="tag chg">改</span>维护窗口：被送进来（Root 密钥泄露、连掷 3 次对子、Health 卡）的也和自己走到这格一样，二选一：付 $50 马上出来、照常掷骰子，或者停一轮再出来；不再掷对子出狱、不再最多掷 3 次。Enterprise Support 卡照样能免费出来，出来照样写复盘。传统企业上云的弱点从「最多要停 4 轮」改成「不交钱要停 2 轮」。</li>
+    <li><span class="tag chg">改</span>Root 密钥泄露直接进维护窗口：原来持有 GuardDuty 改交 $50 不进，GuardDuty 只发现、拦不住，这条去掉；Health 卡「Root 密钥被推到了 GitHub」也一样，只有「威胁自动响应」架构（GuardDuty 发现后自动吊销密钥）还能免疫。</li>
+    <li><span class="tag ui">UI</span>点棋盘格子弹出的面板和「看完整介绍」最上面加了这块服务的介绍：是什么、常用来做什么（38 块服务都有），边玩边认识服务。</li>
+    <li><span class="tag new">新</span>开局页联机一节加「联机设置和测试」（加入失败的提示里也有「检测网络」）：逐项测信令服务器、本机点对点、公网地址（STUN，顺带判断是不是对称型 NAT）、中继服务器（TURN），按最先卡住的一步写结论和怎么办；还能填自己的中继服务器，存在这台设备上，建房、加入时自动带上。</li>
+    <li><span class="tag bug">BUG</span>联机原来用 PeerJS 默认的中继 eu-0 / us-0.turn.peerjs.com，这两个域名已经被 PeerJS 删掉了（它自己的权威 DNS 返回 NXDOMAIN，不是公司网络解析不了），不在同一个网络的设备直连打不通时没有退路。现在去掉这两个，换成公共 STUN 加自己配的中继。</li>
+    <li><span class="tag bug">BUG</span>勾了代理商模式、但名字后面没有座位勾「代理商」时，开局后所有人都是客户，代理商模式被默默去掉，看不出哪里不对。现在开局前问一句：随机挑 1 位当代理商、这局不开，或者回去自己勾（地狱模式自动勾上的不问）。角色分配的卡片上也写明「代理商」或「客户」。</li>
+    <li><span class="tag chg">改</span>「数据加密」架构（任意数据服务 + KMS + CloudTrail）去掉了：KMS 几乎能给所有服务加密、CloudTrail 记所有 API 调用，这两个和谁都能凑，是万金油，算不上一个架构。换成「私有内容分发」：S3 + KMS + CloudFront，S3 桶不对外开放，对象用 KMS 客户托管密钥加密，密钥策略只允许 CloudFront 解密，用户只能经 CloudFront（源访问控制 OAC）拿内容。加成照旧是免疫「S3 桶被设成了公开」：桶策略被误改成公开，匿名请求也拿不到密钥、读不出内容。</li>
+    <li><span class="tag chg">改</span>「ML 训练与部署」的二选一放错了位置：原来是 S3 →（ECR 或 EFS）→ SageMaker AI，可 EFS 和 S3 一样是放训练数据的，不能顶替放镜像的 ECR。现在是（S3 或 EFS）→ ECR → SageMaker AI。</li>
+    <li><span class="tag ui">UI</span>图鉴：标签上面加了搜索框，服务、架构、卡牌、角色都能搜，标签上写每一章找到几条，没结果的章节变灰；对局里最前面多一章「谁凑成了哪些架构」，每位玩家凑成的架构画成小流程，每块写归谁，再列只差一块的；新加一章「状态说明」：单 AZ / 多 AZ、多区域、Impaired、已下线、被 DDoS 下线、Spot、级数和容量、维护窗口、停 N 轮、技术债、复盘和演练标记、新账户保护期，各写什么意思、怎么来、怎么解除。</li>
+    <li><span class="tag ui">UI</span>中间那排轮流顺序里，每人现金后面加了「资产」（总资产），鼠标停上去写怎么算。</li>
+    <li><span class="tag bug">BUG</span>开局页「代理商」原来能勾满所有座位，到点开始才提示太多。现在勾满一半，其余座位的「代理商」就变灰；人数改少了，多出来的从后往前自动取消。</li>
+    <li><span class="tag new">新</span>万能服务：KMS、CloudTrail、CloudWatch、VPC 跟哪个服务都能配，不再算进任何有效架构。每块能「顶一次」：轮到你时点中间的「用万能服务」，绑到你的一个架构上，缺一块就顶上那一块，已经凑齐的就并进去、过路费一起收；绑了不能换，卖掉或下线它，靠它顶上的架构跟着散。CloudWatch 绑在有自己在线的 Lambda 或 EC2 的架构上，「凌晨 3 点被告警叫醒」不算罚（告警直接调 Lambda，或者重启、恢复 EC2）；其他三块绑上只把过路费并进去，该有的免疫已经在各自的升级里。电脑会自己绑。</li>
+    <li><span class="tag chg">改</span>换掉 6 个架构，还是 27 个。含万能服务的 4 个：「审计与合规」换成「访问日志分析」（ELB + S3 + Athena：ALB 访问日志投递到 S3，Athena 查），「告警自愈」换成「文件排队处理」（S3 + SQS + Lambda：S3 事件通知进 SQS，Lambda 成批处理），「私有内容分发」换成「轻量建站」（Lightsail + RDS 或 Aurora + S3），「私有网络」换成「多机共享文件」（ELB + EC2 / ECS / EKS + EFS）。三位审查都判为生搬硬凑的 2 个：「备份与容灾」换成「防勒索备份」（EBS + Backup + GuardDuty：每次备份完 GuardDuty 扫一遍恢复点，中了勒索从最近一个干净的恢复点恢复；「勒索软件加密了数据」只交一半），「纵深防御」换成「DDoS 防护」（CloudFront 或 ELB + Shield Advanced + WAF：入口关联 WAF Web ACL，订阅含 Anti-DDoS 托管规则组；WAF 不交固定费用、「托管规则」「限速规则」升级半价，因为 Shield Advanced 订阅包了 WAF 的标准费用）。原来没进任何架构的 EBS、Lightsail 现在都有了；S3、Lambda 进的架构数不变，ELB 多了 2 个。「威胁自动响应」留着；「安全审计没过」「渠道合规审计」不再有架构免疫；「S3 桶被设成了公开」「实习生误删了生产数据」照旧靠 KMS 客户托管密钥、Backup 备份计划这些升级免疫。</li>
+    <li><span class="tag ui">UI</span>图鉴里的架构改成小框图：每一格一个框，二选一的竖着叠在同一个框里，框之间画箭头，不再在「或」那里折行；对局里只在有主的服务旁边写归谁。</li>
+    <li><span class="tag ui">UI</span>右边的玩家面板重排（卡片形状和收起规则不变）：
+      <ul>
+        <li>右上角大号写现金，下面写估值；展开的卡多一行「总资产 · 估值 · 运行费」。有欠款时，现金下面红字写「欠 $X」。</li>
+        <li>折叠箭头挪到名字前面。「电脑 · 代理商」改成灰色小字；联机时自己的座位写「（你）」，掉线的用红字。</li>
+        <li>服务图标按状态分组：正常的在前，「下线」「Impaired」「DDoS」「Spot」各一组，组前写字。级别和容量合成一个角标，不会再连成「2+1」。鼠标停在图标上写完整规则：下线就是抵押、上线要还多少，Impaired 到谁的回合恢复，Spot 出价多少等等。</li>
+        <li>为 0 的技术债、部署点数这类不再显示；技能只在能发动时才写。</li>
+        <li>角色说明收成一行「能力 · 弱点 · 技能」，点开看全文；架构写成一行汇总（已生效的和差 1 块的）；收起的卡也写「支柱 3/6 达成」。</li>
+        <li>「明细和日志」改成卡片右下角的小按钮，收起的卡也能点。</li>
+        <li>架构、支柱的小卡停 280 毫秒再弹出，窗口矮时放到旁边，不压住下一张卡。触屏上服务图标放大到 26px。</li>
+      </ul></li>
+    <li><span class="tag chg">改</span>按要求把 PeerJS 自带的两个免费中继（eu-0 / us-0.turn.peerjs.com）加回联机配置。PeerJS 在 2023 年 12 月宣布停掉，现在它自己的 DNS 也查不到，所以多半用不上，带着也不碍事。「联机设置和测试」没填自己的中继时会测一下它们，能连上就显示「PeerJS 自带的能用」。</li>
+    <li><span class="tag ui">UI</span>联机时远端也播动画了：3D 棋子一格格走、飞到某一格（压暗、标题、角色立牌）、User Group 活动的过场、护盾、升级方块、DDoS 连线、奖池金币和格子气泡，和房主同一时刻播。原来远端只有掷骰子、收过路费连线和抽卡翻牌。中途加入、断线重连、切到后台不会留下藏着的棋子；远端开了「减少动态效果」就不播 3D。</li>
+    <li><span class="tag chg">改</span>下线要至少停 2 轮才能重新上线（原来下一回合就能上线）。这 2 轮里别人落上来照样可以付原价把它拉走；满 2 轮后，主人在资产管理里还那一半再加原价 10% 就能上线。</li>
+    <li><span class="tag chg">改</span>Data Transfer 格换成 Config（Data Transfer 不是服务，是账单项）。Config 还是按用量收费的那一类，三级升级：托管规则（免疫「安全审计没过」）、自动修正（免疫「S3 桶被设成了公开」「有人手动改了生产配置」）、聚合器。它也是横向服务，算第五块万能服务。跟着 Data Transfer 一起去掉的：VPC 终端节点让 NAT 账单减半、Global Accelerator 免疫「海外用户访问太慢」（现在只认 CloudFront）；升多区域那一级的 $50 跨区域数据传输费改成交给亚马逊云科技。AI 原生公司的弱点改成「付 S3 过路费时交双倍（训练数据读写量大）」。</li>
+    <li><span class="tag ui">UI</span>联机时远端补上单机有、远端没有的东西：
+      <ul>
+        <li>音效：自己买下服务、过起点领钱、收到钱、发动技能、抽奖这些，远端自己的设备上也响了。</li>
+        <li>别人的窗口开着时，远端也能打开图鉴、明细、玩法、改名字，关掉后别人的窗口自动回来。</li>
+        <li>断线后自动重连（2、4、8 秒各试一次），也能点「重新连接」，不用再输房间号和密码。</li>
+        <li>明细里的「找他交易」远端也有了；新手引导「你的公司」框住的是自己的卡；自己答的题结果写「你选的」「错题本」，不写自己的名字；台面中间的落点卡按屏幕前的人写「你自己的」或「某某 自己的」。</li>
+        <li>对局菜单：远端显示「动画速度（房主设）」，多了「提议现在结算」（房主确认）和「离开房间」；轮到电脑时远端也能点「暂停 / 继续」。</li>
+        <li>房主出错时，点了操作的远端会收到提示，不再像点了没反应。</li>
+      </ul></li>
+    <li><span class="tag chg">改</span>联机时远端连着却一直不动：30 秒后房主中间出一个「某某 半天没动，我来替他操作」，点了这一回合房主替他掷骰子、结束回合。答题窗的「半天没动，我来替他选」改成 90 秒后才出现（地狱模式的题读完常超过 30 秒，房主一点就替人答了，看着像只有房主在答题）。</li>
+    <li><span class="tag chg">改</span>联机「再来一局」：房主不再刷新页面，房间和在线的人都留着，大家回到大厅等房主开下一局，不用重新建房、发房间号。</li>
+    <li><span class="tag bug">BUG</span>联机连不上：前面改「联机设置和测试」时，把 PeerJS 的连接配置换成了自己写的一套。现在改回去：没填自己的中继时一个配置都不传，和之前能连上的版本一模一样。</li>
+    <li><span class="tag new">新</span>开局页可以勾「三选一挑角色」：开局每人发 3 张角色卡自己挑一张，挑走的别人拿不到；电脑随机挑。不勾照旧随机分。</li>
+    <li><span class="tag new">新</span>出题考对手：轮到你时，每回合一次，花 $100 从题库给一位对手出题，他答对拿走这 $100，答错赔你 $200。</li>
+    <li><span class="tag chg">改</span>升级只能在落到自己那块服务上时升，资产管理里不能随时升级了（集齐整组后照样能随时加容量）。模拟里完整局不限轮数从中位 29.5 轮回到 34.5 轮。</li>
+    <li><span class="tag chg">改</span>专属技能：发动时先结算角色自己的效果（大多会先领一笔钱），再做「战略并购」收购，不会刚发动就欠债。去掉了「数据风暴」「风暴接入」这些借来的叫法，统一叫专属技能、战略并购。</li>
+    <li><span class="tag chg">改</span>季度财报的标题去掉「（每 3 圈一次）」：它按 1 号位经过起点的次数算，每 3 次一份，写成「每 3 圈」容易误会成按轮数。</li>
+    <li><span class="tag ui">UI</span>开局页表单：圆角卡片，选中的是浅蓝底加蓝框，特别模式左边一道橙色短条；每一步之间用细线隔开；六种难度的说明压成一两行，完整说明在鼠标悬停里；「三选一挑角色」是名字下面一行小勾选；去掉了「第一次玩选这个」标签。</li>
+    <li><span class="tag ui">UI</span>抽卡时卡面上的金额按这次的卡牌倍率换算好再显示（收钱、付钱、罚款都乘；「原价不超过 $300」这种门槛不乘），下面写一行「卡牌倍率 ×1.5：上面的金额已经按倍率算好」。原来卡上写的是原始金额，看不出实际收付多少。</li>
+    <li><span class="tag doc">文档</span>Health 卡和 re:Invent 卡润色了 35 张（Health 22 张、re:Invent 13 张），只改效果、免疫和知识点的说法，数字和机制不动。顺手改正 15 处卡面和实际效果对不上的地方，比如「S3 桶被设成了公开」漏写了 Config 自动修正也免疫，「证书过期」「DDoS 打满了入口」是挑过路费最高的那块变 Impaired、不是最贵的那块，几张 re:Invent 卡漏写了「没有就领 $100」的保底。</li>
+    <li><span class="tag bug">BUG</span>联机：房主点「我来替他选」接手弹窗时，原来本来就是灰的按钮（钱不够、有升级不能交易）也被一起放开了，现在保持灰；远端掉线又轮到他时，房主中间写清楚「某某 掉线了，由你替他操作」，不再写「轮到你掷骰子」。</li>
+    <li><span class="tag chg">改</span>Health「主 Region 出问题，紧急切到灾备」：以前和 re:Invent「跨 Region 业务扩张」效果一模一样（飞到正对面）。现在飞过去要先交 $80 切换费进奖池；Route 53 升了健康检查的自动故障转移，不交。</li>
+    <li><span class="tag chg">改</span>Health「回滚后重新发布」改名「CloudFormation 栈创建失败，整栈回滚」：以前是前进到起点白领 Credits，放在坏事卡里说不通，名字和知识点还跟「发布出问题，回滚」几乎一样。现在退回起点从头再来，不算经过起点，不领 Credits、也不交运行费；知识点换成 CloudFormation 创建失败整栈回滚、可以关掉失败回滚保留已建好的资源。</li>
+    <li><span class="tag chg">改</span>re:Invent「去上了一节 Workshop」：以前是后退 2 格。现在是保留卡：下一次答题答错了算你答对（落地答题、被对手出题考、抽查都算），错题本照记。</li>
+    <li><span class="tag chg">改</span>三张只给钱的 re:Invent 卡和服务挂钩：Activate 领 $100，每个生效架构再领 $50（最多再领 $200）；生成式 AI 创新中心领 $100，每块 AI 组服务再领 $50；成本异常检测领 $50，每块实例型服务再领 $25（最多再领 $150）。</li>
+    <li><span class="tag new">新</span>re:Invent「请合作伙伴梳理了一遍架构」：一块万能服务免费改绑一次（已经绑了的换到别的架构，没绑的现在就绑）；没有能绑的或不想改，领 $100。</li>
+    <li><span class="tag new">新</span>re:Invent「当了一回认证考官」：马上免费出一题考一位对手，不占这回合的出题次数；他答错了赔你 $200，答对了谁也不用给钱。</li>
+    <li><span class="tag ui">UI</span>玩家卡上悬停「全部 N 套」架构：每套后面带上服务图标，有的亮、缺的灰；万能服务顶上缺的那块时，换成它的图标加蓝框。以前万能服务补上的架构这里还写「还缺」，现在算生效。</li>
+    <li><span class="tag ui">UI</span>看明细、图鉴、玩法、格子完整介绍、快捷键时，不会再被别人回合（或电脑）弹出来的窗口顶掉：这几个查资料的窗口单独一层，别人的弹窗开在下面照常走完，电脑等你关掉再走下一步。下面来了要你自己选的窗口，顶上挂一条提示，点「去处理」就过去。联机时房主和远端都一样。</li>
+    <li><span class="tag new">新</span>出题考全场：至少两位对手时，可以改成给每位对手各出一道（每人 $50：答对的拿走你 $50，答错的赔你 $100），和考一个人共用每回合一次。</li>
+    <li><span class="tag ui">UI</span>Spot：格子上直接写出价（「Spot $120」），大家都看得到；抢的人弹窗里先写对方出了多少、自己至少要出多少；现金不够出到最低价就照常付过路费。日志里不写出价：Spot 买下写「用 Spot 出价买下」，抢走写「出更高的价抢走了」。</li>
+    <li><span class="tag chg">改</span>re:Invent「白板画架构」：以前是画自己现在的架构、大家投票，和「Keynote 现场演示成功」玩法一样。现在随机抽一套你还没凑成的有效架构来画，大家对照图鉴里的数据流向投票，奖惩不变。</li>
+    <li><span class="tag chg">改</span>re:Invent「搭上 Ground Station 卫星链路」：去掉「飞到维护窗口」这个选项（落上去要停一轮或交 $50，选它没有好处），改成起点和 User Group 活动二选一。</li>
+    <li><span class="tag new">新</span>Health「存储账单越滚越大」（成本类，基础牌里成本类原来只有两张）：名下的 S3、EFS、EBS、OpenSearch 没开数据分层或省钱存储的，每块交 $40 进奖池；S3 智能分层、EFS 生命周期管理、EBS gp3、OpenSearch UltraWarm 按块免交。</li>
+    <li><span class="tag chg">改</span>re:Invent #25「服务名接龙」换成「亚马逊云科技 Jam 闯关」：接龙说没说对全靠嘴，电脑只是掷概率，弹窗还会提前写出哪个电脑要断。新卡按你名下服务的色组连出三道题，每答对一道领 $40，三道全对再领 1 个复盘标记（自己选类别），对错由游戏判。</li>
+    <li><span class="tag ui">UI</span>日志里抽卡那一行不再带「（卡牌金额 ×1.75）」，抽卡窗下面那句「卡上写的金额这次按 ×1.75 结算」也去掉：卡面上的金额已经按倍率换算好，日志里的钱数也是实际到账的数。</li>
+    <li><span class="tag ui">UI</span>明细里的六大支柱多一栏「分是怎么来的」：每条支柱的分一项一行列出来，带服务图标和几分（比如 CloudWatch +1、写过复盘 +1、S3 天生跨 AZ +1、EC2 升了多 AZ +1、多区域每块 +2）；没达成的照旧在最后一栏列怎么补。</li>
+    <li><span class="tag ui">UI</span>架构悬停卡：万能服务顶替缺的那块时，那一环换成万能服务的图标，蓝框彩色标出「顶替 Bedrock」，下面写清怎么收费；只是并进来的接在最后。明细「架构」表的组成一栏也画上这块。</li>
+    <li><span class="tag new">新</span>战报能导出 PDF：战报下面多一个「导出 PDF 战报」，打开浏览器的打印窗口，目标选「另存为 PDF」。只印战报，深色底照屏幕上的，所有人的档案都摊开（每份前面写名次和名字），详细数据展开。「导出对局记录」照旧存带完整日志的文字版。</li>
+    <li><span class="tag ui">UI</span>战报「关键时刻」里的大额过路费，是架构联合收费的写出是哪套（比如「Bedrock · 「RAG 知识库」联合收费」）。</li>
+    <li><span class="tag ui">UI</span>战报里的名次和座位号分开：玩家档案切换条写「第 1 名」，排名和切换条里的棋子不再写座位号（以前第 3 名旁边是 4 号棋子，看着对不上）。</li>
+    <li><span class="tag new">新</span>联机：房主在联机栏里也能填自己的名字（就是玩家 1 的名字，和名字栏里那个框连着），大厅名单写出来。</li>
+    <li><span class="tag new">新</span>联机：房主可以移出玩家。大厅名单里每人后面有「移出」；开局后在「对局」菜单里点「移出玩家」，他的座位交给电脑接着打。被移出的人不再自动重连，这个名字不能再进这个房间。</li>
+    <li><span class="tag ui">UI</span>架构里「或」的几块竖着摞成一组（明细的架构表、架构悬停卡都是），不再横着排、被挤到下一行；明细架构表里每块下面一行写归谁（小字加主人颜色的圆点），不再在名字后面跟一个彩色的名字。</li>
+    <li><span class="tag new">新</span>首页加「玩家图鉴」：所有角色卡（起始资金按开局页选的模式算、能力、弱点、专属技能），代理商角色单独一节；开局页「三选一挑角色」后面也有入口。</li>
+    <li><span class="tag ui">UI</span>服务升到第几级写清楚：日志写「升到第 1 级「Nova Lite」」，落地卡、明细、格子悬停写「第 N 级「名字」」，没升级写「未升级（基础版）」，格子上的级别角标悬停写「（共 3 级）」。</li>
+    <li><span class="tag ui">UI</span>「Hackathon 拿了奖」加的是容量不是升级：日志写明「这是容量，不是升级：每个让过路费 +25%」，后面带上现在的级别；落地卡、悬停里容量写成「容量 N 个模型单元」，和级别分开。</li>
+    <li><span class="tag ui">UI</span>服务的「各级一览」：第一行写「未升级 · 名字」；效果一栏不再只写「过路费提高」，改成具体的数（比如「过路费每点 $16 → $48」「过路费 $20 → $100」）；过路费是「点数 × 单价」的，下面给一个掷 7 点的例子，表下写明点数是落上来的人掷出的两颗骰子之和（2–12）。</li>
+    <li><span class="tag ui">UI</span>按请求、按 token 计费的服务：运行费一栏和服务面板写明「每圈不交固定运行费，每次收到过路费交 15% 请求费 / 25% token 成本」，不再只写 $0，看着像白跑。</li>
+    <li><span class="tag bug">BUG</span>EC2 升到 Graviton 后，公网 IPv4 地址费也被跟着减半了（先加 $5 再减半）。现在先减半再加 IPv4 费：Graviton 只让实例本身便宜，IP 照收。</li>
+    <li><span class="tag chg">改</span>re:Invent「上了 Startup Showcase」：飞到没人买的服务后不买（或者买不起），也领卡上的钱，以前只有前面没有没人买的服务才领，不买就白跑一趟。</li>
+    <li><span class="tag ui">UI</span>「点数」改叫「骰子点数」（服务面板、各级一览、悬停里都改了，格子上地方小，还写「点数×」）；各级一览下面写明骰子点数是什么、「运行费/圈」是每次经过 Startup 扶持时交、和骰子点数无关；服务面板「每圈运行费」下面也写「经过 Startup 扶持时交」。15% 请求费 / 25% token 成本每一级都一样时只在表下写一次，不再每行重复。</li>
+    <li><span class="tag bug">BUG</span>落在自己的服务上，弹窗里点了「先不加」以后就再也升不了：中间右栏「这回合还能做什么」那一行还按「随时能升」算，升级改成只能落地升以后永远是空的。现在这一回合还停在这块上、落地那一件事还没做时，右栏写「停在自己的 X 上，还能做一件事：升到第 N 级…」，带「升级」「加容量」按钮，资产管理里这一块也能升；做了一件就没了。没停在自己的服务上时写一行灰字说明为什么不能升。</li>
+    <li><span class="tag ui">UI</span>落在自己的服务上弹的那个窗，和服务详情的「各级一览」写成同一套：「升到第 N 级「名字」$价格」，下面写这一级多了什么、过路费从多少到多少、每圈运行费从多少到多少；价格和详情里的基础价不一样时写清为什么（没有 VPC、多区域传输费、没有 S3、技术债攒到 2 个各 +$50，有对应架构减半）。加容量写明「这是容量，不是升级」和过路费、运行费各变多少。详情卡片里的价格改叫「基础价」，写明落地时可能加钱或减半。</li>
+    <li><span class="tag new">新</span>re:Invent「领到 亚马逊云科技推广 Credits」（#48）：下次经过 Startup 扶持时，这一圈的运行费用 Credits 抵掉，技术债加价一起免，Savings Plans 承诺额照付；角色技能已经免了那一圈的，Credits 留到下一圈。玩家卡上写着还记着几圈。</li>
+    <li><span class="tag ui">UI</span>能帮你补齐架构的格子：以前只在自己的回合里标「补齐」，现在别人（或电脑）的回合里也标，按看棋盘的这个人算（联机按自己的座位）。悬停写「能帮 X 补齐架构「Serverless API」：没人买，落上去买下就凑成」（在别人手上写要换过来、下线了写能拉走）；点开格子面板，「关联的有效架构」最上面一条绿框写同一句。万能服务格写买下后能绑到哪套只差一块的架构上。没人买的格子，架构进度也按看棋盘的人算，不再按正在玩的电脑算。</li>
+    <li><span class="tag bug">BUG</span>六大支柱胜利只在「轮到下一位」时查当前玩家：别人回合里靠交易、卡牌凑齐的（特别是掉线、由房主代打的座位），要等到他自己的回合打完才算赢，回合没人打完就一直不出赢家。现在每做完一步就查所有人，谁先达成谁直接赢；同时达成的先算当前玩家。</li>
+    <li><span class="tag doc">文档</span>游戏和文档里的「AWS」都改掉了：品牌、活动和计划写「亚马逊云科技」（亚马逊云科技账户、亚马逊云科技 Jam、亚马逊云科技 Community Builders、亚马逊云科技 Marketplace、亚马逊云科技免费套餐、亚马逊云科技推广 Credits……），服务名去掉 AWS 前缀，和棋盘上 S3、Lambda 的写法一样（Backup、Config、Artifact、CloudTrail、Budgets……）。只留了自动化文档的原名 AWS-DisableS3BucketPublicReadWrite，那是控制台里要搜的名字。宣传片没动。</li>
+    <li><span class="tag ui">UI</span>开了六大支柱胜利时，日志里写每条支柱什么时候达标、什么时候掉回去：「🏛 Damo 的六大支柱「安全性」达标了（安全性 1 分，每条要 1 分）：现在 4/6 条，还差 性能效率、成本优化；总分 5/12」，卖掉、下线让某条掉回去时也写一条。</li>
+    <li><span class="tag chg">改</span>下线的服务至少停 3 轮（主人自己的回合数）才能还钱重新上线，以前是 2 轮；这几轮里别人落上来照样能付原价拉走。</li>
+    <li><span class="tag ui">UI</span>日志上色：钱数按动作上色（领、收、拿回是绿的，交、付、花、赔是红的），人名照主人的颜色写、加粗，只有 1 号位的红色不用在名字上（写成深色，免得像报错）；获胜、破产、支柱达标那行左边一道细色条，不铺整行底色。支柱达标的日志写短：「Damo 的六大支柱安全性达标了：4/6 条，总分 5/12」。</li>
+    <li><span class="tag ui">UI</span>开局页「边玩边答题」挪到 02 难度的标题行上，做成一个开关，说明放在悬停里。</li>
+    <li><span class="tag ui">UI</span>中间右栏「这回合还能做什么」：一行有两个按钮时（出题考对手），按钮挤不下就整组换到下一行，字不再被挤成一个字一行；出题那行的说明也写短了。对局里顶上多一个「角色」按钮，直接打开玩家图鉴。</li>
+    <li><span class="tag chg">改</span>User Group 活动：停在上面照旧二选一（抽奖池，或者抽 re:Invent 卡），re:Invent 那一项改成各模式都抽 3 张选一张（以前普通局两张、娱乐模式三张）。经过照旧领 $50。</li>
+    <li><span class="tag chg">改</span>Kinesis 第 3 级从「多区域」改成「数据转换」：Data Firehose 投递前调用 Lambda 清洗、转换记录，或者按 Glue 数据目录的表结构转成 Parquet 写进 S3；游戏效果是运行费减半、算成本优化支柱。现实里 Kinesis 没有一键多区域。</li>
+    <li><span class="tag chg">改</span>出题考全场：从出题人的下一位开始，按座位顺序轮流答。</li>
+    <li><span class="tag ui">UI</span>点格子弹出的服务面板能拖：按住标题栏拖到别处，之后点别的格子也开在那里（手机布局不拖）。各级一览不再在运行费那一栏塞「另外交 15% 请求费」，统一写在表下面，表不会被撑宽、左边级别不再挤成一个字一行。开局页「边玩边答题」「卡牌倍率」两句说明写清楚了。支柱达标的日志就是普通一行。</li>
+    <li><span class="tag chg">改</span>Lightsail 换成 AgentCore（Bedrock AgentCore，棋盘第 2 格，AI 组，$100，按用量计费）：三级是 Memory 记忆、Gateway 工具网关（过路费 +20%）、Identity 身份（免疫「安全审计没过」）。AI 组从两块变成三块。「轻量建站」架构换成「托管智能体」：AgentCore + Bedrock + Lambda。卡面和说明里的 Lightsail 都改掉了。</li>
+    <li><span class="tag new">新</span>AgentCore 和 SageMaker AI 的卡：Health「智能体陷入死循环，一直调工具」「推理端点没人用还一直开着」；re:Invent「Bedrock AgentCore 正式发布」「用 AgentCore Gateway 把老接口接成 MCP 工具」「SageMaker Unified Studio 打通数据和 AI」。基础牌 Health 29 张、re:Invent 36 张。</li>
+    <li><span class="tag chg">改</span>几块服务的升级换成现实里更常用的功能：EC2 第 1 级自动 AMI、第 2 级跨 AZ Auto Scaling（多 AZ 和弹性扩展都在这一级）；Lambda 第 3 级容器镜像 + Web Adapter；API Gateway 第 2 级接入认证、第 3 级缓存；EventBridge 定时启停 EC2（主人的 EC2 运行费减半）→ Health 事件通知（免疫 EC2 实例硬件退役）→ 调用任意 API；S3 第 3 级自动生成缩略图；ELB 第 3 级负载均衡 + Auto Scaling（你的 EC2 免疫硬件退役和单点故障）；Redshift 第 3 级 Zero-ETL 集成（数据从 Aurora、RDS、DynamoDB 同步进来）。</li>
+    <li><span class="tag chg">改</span>升级价分级：第 1 级是基础价的 0.75 倍、第 2 级 1 倍、第 3 级 1.25 倍（三级加起来不变）；各级一览里写每一级的升级价和多收多少过路费。CloudWatch、CloudTrail、Config 的格子面板也显示各级一览和升级价（以前看着像不能升）。</li>
+    <li><span class="tag ui">UI</span>服务面板重排：最上面一排三个数（价格、现在的过路费、每圈运行费），下面一行写归谁、在第几级、容量和状态，再往下是能帮你补齐的架构、这是什么服务、升级路线（一级一张小卡，现在这一级蓝框标出来）、关联的架构（带进度）；这一格的记录收进折叠块。完整介绍也换成同一套。</li>
+    <li><span class="tag ui">UI</span>开局页：「三选一挑角色」做成 01 玩家标题行上的开关，旁边是「玩家图鉴」；「联机设置和测试」换成齿轮图标，放在创建房间、加入房间那一行，说明放进悬停。</li>
+    <li><span class="tag new">新</span>AgentCore 的几种典型架构：智能客服（API Gateway + AgentCore + DynamoDB）、运维助手智能体（EventBridge + AgentCore + Lambda）、数据分析智能体（AgentCore + Athena + S3），加上原来的托管智能体（AgentCore + Bedrock + Lambda）一共四套。</li>
+    <li><span class="tag chg">改</span>SQS 第 3 级从「多区域」改成「积压告警 + SNS 通知」：CloudWatch 告警盯着队列积压和死信队列，超过阈值通过 SNS 发通知（SQS 自己不能直接推 SNS）；游戏效果是这块过路费 +20%。</li>
+    <li><span class="tag ui">UI</span>开局页：卡牌倍率改成下拉框，和「边玩边答题」一起放在 02 难度的标题行，标题行上的控件都靠右；01 玩家标题行的「三选一挑角色」「玩家图鉴」也靠右。作者一栏写上云上大亨开发小组。右栏「考一个人」「考全场」「升级」「加容量」悬停写什么时候能点、点了怎么算。</li>
+  </ul>
+</section>
+
+<section id="r13">
+  <h2><i>21</i>第十三轮（11-08～09）：官方分类色组、Cognito、更多架构、讲解和知识点页</h2>
+  <ul>
+    <li><span class="tag chg">改</span>色组改成亚马逊云科技控制台里的服务分类：计算（EC2、Lambda）、存储（S3、EFS、EBS）、数据库（RDS、Aurora、ElastiCache、DynamoDB、DMS）、网络（VPC、ELB、Route 53、CloudFront、API Gateway）、安全（GuardDuty、Inspector、KMS、WAF、Shield Advanced、Cognito）、分析（Kinesis、Glue、Athena、Redshift、OpenSearch）、AI、容器、应用集成；CloudWatch、CloudTrail、Config 是监控组（官方分类「管理与治理」），按用量收费，也就是万能服务。Serverless 不再当色组，只是服务的类型。升级价、角色折扣、娱乐模式藏起来的格子都按服务算，不跟着换组变；题库还按原来的分堆出题，错题本不受影响。</li>
+    <li><span class="tag new">新</span>每个架构两页讲解，放在 <code>demo/</code>：<code>&lt;架构&gt;-video.html</code> 是讲解视频（科技风深色画面，three.js 三维架构图，打开就自动播，一块一块讲：这是什么服务、常见用法、为什么用它、在这个架构里干什么，几选一的那一环讲怎么选；字幕加配音，配音用本机 VoxCPM2 合成，浏览器拦住自动出声时右上角点一下就有声音；点图上任意一块弹出它的说明卡，拖动换角度、滚轮缩放），<code>&lt;架构&gt;.html</code> 是图文讲解（架构图、数据怎么走、每一块干什么和为什么用它、「这一环怎么选」、在游戏里怎么算）。从游戏里点进去会带上这位玩家手上有哪几块，对比他现在这套和最优架构差在哪、配满大约多收多少。图鉴「架构介绍」一栏、架构悬停小卡里都有链接；自己凑成架构时弹窗恭喜，问要不要看讲解（可以勾「不再弹」）。</li>
+    <li><span class="tag new">新</span>每块服务一页知识点，放在 <code>svc/</code>（和架构讲解的 <code>demo/</code> 分开）：它是什么、常见用法、为什么用它、核心知识点（38 块共 190 条）、三个关键功能（游戏里的三级升级就是现实里的这三个功能）、和谁比怎么选、练一练（游戏题库和认证练习题，点选项判对错，共 170 道）、用在哪些架构、在游戏里的数字。<code>svc/index.html</code> 是目录，能搜关键词、按色组筛。图鉴「服务一览」每一行、点格子的面板、完整介绍、架构图文讲解里每块服务都有「知识点」按钮。</li>
+    <li><span class="tag ui">UI</span>封面作者那一栏加了项目地址（github.com/cloudsmithy/aws_game），在提 issue 那一行上面。</li>
+    <li><span class="tag ui">UI</span>图鉴「有效架构」重排：48 个架构分成网站与 API、事件与流程、数据与分析、AI 与智能体、安全与合规五类，上面一排按钮按类筛；一个架构一张卡（名字、几块、谁已凑成、讲解按钮 / 用在哪 / 架构图 / 数据怎么走点开看 / 加成），不再是撑出横向滚动条的大表格；连接符图例缩成一行，万能服务规则折起来。讲解链接改成按钮（讲解视频、图文讲解）。手机上架构图一行放不下就折行。</li>
+    <li><span class="tag ui">UI</span>讲解视频的配音全部配好（48 个架构，505 句，本机 VoxCPM2 合成）；视频开场的大架构图放大，几选一那一环的说明卡把「这一环怎么选」放最上面；手机上说明卡挪到画面下面。图文讲解的「你的架构和最优架构」分清还没凑成（缺必须的）和可以再加（可选、「或」的另一块）。</li>
+    <li><span class="tag chg">改</span>几个架构的「数据怎么走」改了写法，悬停每块时说的才是它自己干的事：图片缩略图里 S3 是「图片上传到 S3」、EventBridge 是「先收到 S3 事件并按规则过滤」；防勒索备份里 EBS 和 S3 分开写；DynamoDB 变更事件里 EventBridge 是「收到 Lambda 转好的业务事件」；多机共享文件写明 EC2、ECS 或 EKS 上的应用都挂同一个 EFS。</li>
+    <li><span class="tag new">新</span>别人（电脑、或联机时别的设备上的玩家）凑成有效架构时，右下角弹一张小卡：「几号 谁 组成了有效架构「…」」，写他手上这几块怎么连，带「看讲解视频」「看图文讲解」两个按钮。不挡游戏，15 秒后自己收起（底下有一条倒计时，鼠标停在上面不收）；能最小化成右下角一条，收着的时候后面的提示先排在条里，条上写「还有几条」，点一下展开。「对局」菜单里加了「架构提示：开 / 关」，自己的恭喜窗和别人的提示一起开关。</li>
+    <li><span class="tag chg">改</span>「API 查询服务」里 DMS 改成必须的一块：RDS、Aurora 自己没法把数据推给 OpenSearch，没有 DMS 这条同步链就断了。顺带查了所有中间带可选块的架构，跳过可选的那块以后前后还接不接得上：「经典三层 Web」末尾 RDS → OpenSearch 也接不上，改成「+」并列（应用写库时顺手把要搜的内容写进 OpenSearch）；其余的都接得上（S3 事件能直接触发 Lambda、发进 SQS，DynamoDB Streams 能直接触发 Lambda，Athena 不用 Glue 也能建表查 S3 等）。</li>
+    <li><span class="tag ui">UI</span>架构图上每一块悬停，写它在这个架构里干什么；悬停小卡里的架构图一行排完不折行，「可选」小标压在框的右上角，可选的那块和别的一样大；图鉴、恭喜窗里架构图放不下时整体缩小，一眼看全。</li>
+    <li><span class="tag chg">改</span>EventBridge 不是万能服务，还是普通服务；在几个本来就靠事件触发的架构里加成可选的一块（有就一起收，没有也成立）：图片缩略图、文件排队处理、ELB 日志检索、缓存自动刷新（EventBridge Pipes）、数据库变更入湖（DMS 任务事件告警）、漏洞管理（Inspector 发现自动通知）。它本来是必须一块的 8 个架构不动。图片缩略图的顺序改回 S3 → Lambda → CloudFront。</li>
+    <li><span class="tag chg">改</span>万能服务 5 个：监控组三格 CloudWatch、CloudTrail、Config（灰色，按用量收费）什么架构都能绑；KMS 只能绑到有存储或数据库的架构，VPC 只要架构里有一块能接进 VPC 的服务就能绑（计算、容器、数据库、存储、分析、AI 组，或者 ELB、API Gateway；纯 Serverless 也行，Lambda 能接入 VPC，S3、DynamoDB 走终端节点），只由安全、监控、Route 53、CloudFront、应用集成服务组成的架构绑不了；KMS、VPC 另外还是防勒索备份、安全防护基线、高可用入口、多机共享文件里可选的一块，不能绑到自己已经在里面的架构上。封面分类加上监控组，每组写几块。</li>
+    <li><span class="tag chg">改</span>EMR 换成 DMS（数据库迁移服务，数据库组，$340，还在第 28 格）：三级是多 AZ 复制实例、DMS Serverless（按用量自动扩缩）、Schema Conversion（异构迁移）。新架构「数据库迁上云」（DMS → RDS 或 Aurora ← EC2）；「数据库变更入湖」「API 查询服务」里 DMS 是必须的一块；「大数据处理」拿掉（数据处理有 Glue、Athena、Redshift）。跟着改：Spot 只剩 EC2、ECS、EKS、SageMaker AI；Savings Plans、Compute Optimizer、高危 CVE 不再算 EMR；永远单 AZ 只剩 EBS；RI 能买 DMS。新卡 re:Invent「DMS Schema Conversion 用生成式 AI 转换存储过程」，数据库题多 2 道 DMS 题。</li>
+    <li><span class="tag chg">改</span>Backup 换成 Cognito（安全组，$80，按月活跃用户计费）：三级是 MFA 多因素认证、社交与企业登录、身份池（联合身份：用登录身份换临时凭证，直接调云上的其他服务）。「防勒索备份」改成 EBS + S3 + GuardDuty（EBS 快照锁定、S3 对象锁定），凑成后免疫「勒索软件加密了数据」；DataSync 那张卡只能飞到 S3 或 EFS（DataSync 不能直接写 EBS）。新卡：Health「用户账号被撞库」（Cognito 开了 MFA 免疫，WAF 升了限速规则只交一半），re:Invent「Cognito 支持通行密钥」；安全题多 3 道 Cognito 题。</li>
+    <li><span class="tag new">新</span>架构从 30 个加到 48 个，不再只有三块：电商下单流程（5 块）、安全防护基线；Cognito 的带登录的 API、ALB 登录认证、App 直传 S3、带登录的智能体、边缘登录校验（Cognito ⇄ CloudFront + Lambda@Edge → S3）；Zero-ETL 实时数仓、Zero-ETL 商品搜索；CDC 的 DynamoDB 变更事件、数据库变更入湖、缓存自动刷新；死信队列兜底（EventBridge → Lambda → SQS 死信队列）；还有 API 查询服务（RDS 的 SQL Server、MySQL 或 OpenSearch）、定时启停 EC2、ELB 日志检索（ELB → S3 → Lambda → OpenSearch）。</li>
+    <li><span class="tag new">新</span>架构里可以有「可选」的几块：没有也算凑成，有的话一起收（Serverless API 的 CloudFront、S3、Cognito，经典三层 Web 的 Route 53、CloudFront、Cognito、OpenSearch，电商下单流程的 SQS，安全防护基线的 WAF，缓存加速前面的 Cognito）；架构逐个过了一遍：顺序画错的重画；大架构只是小架构加几块前端、入口的合并成一个（高可用全栈网站并进经典三层 Web，Serverless 全栈网站并进 Serverless API，点击流分析并进 Serverless 数据湖，企业知识问答拿掉，和 GenAI 知识库、聊天机器人重复）；数仓 ETL 只认 Glue，和用 EMR 的「大数据处理」分开。带可选服务的有 比如 Serverless API、GenAI 聊天机器人、智能客服前面的 Cognito，订单削峰、文件排队处理后面的数据库，静态网站、高可用入口里的 WAF，威胁自动响应里执行处置的 Lambda。「或」的几块有一块就算凑成，都在手上就都一起收（原来只算过路费最高的那块）。数据库变更入湖的目标端加了 OpenSearch。GenAI 聊天机器人中间可选 AgentCore，GenAI 知识库可选 Lambda（自定义切分文档）。缓存加速改成要有一个持久数据库（RDS、Aurora 或 DynamoDB）；托管智能体画成 Bedrock ⇄ AgentCore → Lambda。架构图的连接符分四种：→ 往下走，⇄ 去问一下再回来（验令牌、调模型），+ 一起配合不分先后，← 数据从后面流进来；按这个重画了图片缩略图、带登录的 API、ALB 登录认证、App 直传 S3、防勒索备份、DDoS 防护等十几个架构的顺序。</li>
+    <li><span class="tag chg">改</span>Config 是这几个合规架构的一块：S3 公开自动关闭（S3 + Config + EventBridge）、安全组自动收紧（EC2 + Config + EventBridge，免疫 SSH 暴力破解）、安全防护基线（WAF + GuardDuty + Inspector + Config，免疫「安全审计没过」）。</li>
+    <li><span class="tag new">新</span>两个架构共用服务、串在一起收时，「谁凑成了哪些架构」、明细的架构页、服务面板、玩家卡的悬停里都写出来：和哪一套共用了哪几块，落在共用的那块上几套一起收。</li>
+    <li><span class="tag chg">改</span>出题考对手：考一个人每局一次；考全场每 3 圈一次（按自己经过 Startup 扶持的次数算，开局就能用一次）；同一回合两种只能发动一个。按钮悬停写还差几圈。</li>
+    <li><span class="tag new">新</span>花钱让对手抽 Health 卡：价钱是自己抽 re:Invent 卡的 1.5 倍；可以指定一位、随机一位，或者付两倍让每位对手各抽一张；每走一圈只能发一次。</li>
+    <li><span class="tag chg">改</span>Spot 出价只有主人自己知道：棋盘、格子面板、明细上只写「Spot」。别人落上来要猜一个价，比主人的出价多出原价的 10% 才抢得走，猜低了照付过路费、出价不扣钱。电脑也不偷看，在原价 4–8 成之间猜。</li>
+    <li><span class="tag ui">UI</span>图鉴重排：开头一句说明，章节标题带条数；服务一览加了色组、类型、高可用、计费四个筛选（筛选胶囊，选中的变蓝，能一键清除），色组带颜色块，过路费按「未升级 / 1 级 / 2 级 / 3 级」一行一个，升级路线编号、效果写成小标签；Health 卡类别带颜色，保留卡、代理商角色加小标。</li>
+    <li><span class="tag ui">UI</span>玩法速览、玩法手册的窗口收窄成适合阅读的宽度，字号、行距加大，章节之间留白；去掉里面重复的作者那段（封面上有）。封面作者一栏重新排版。</li>
+    <li><span class="tag ui">UI</span>开局页 05 DLC 分成四个标签页：玩法拓展、题库、代理商模式、技能包，标签上写这一页勾了几个；04 联机的「联机设置和测试」挪到标题行右边。</li>
+    <li><span class="tag bug">BUG</span>有的浏览器装了广告拦截插件，图鉴里的架构图只剩箭头：架构图的类名以 ad- 开头，被插件当成广告藏掉了，改了类名。</li>
+    <li><span class="tag bug">BUG</span>User Group 活动那一格底下的说明太长，第二行被格子切掉：改成「经过领 $50 · 停下抽奖或抽卡」，只占一行。</li>
   </ul>
 </section>
 
 <section id="todo">
-  <h2><i>21</i>待定 / 已知问题</h2>
+  <h2><i>22</i>待定 / 已知问题</h2>
   <ul>
     <li>代理商在完整局（不限轮数约 16%）和地狱模式 15 轮（约 14%）偏弱，公平是 25%；各模式的数字见规则书第 32 节。</li>
     <li>模拟里的电脑不会刻意凑六大支柱，所以 Well-Architected 的达成率只能当下限看。</li>
