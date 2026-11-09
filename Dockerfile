@@ -6,7 +6,7 @@
 #
 # 端口只发布到本机（127.0.0.1）。容器里 nginx 监听 8080 所有网卡没关系，对外的边界是 -p 这一步；
 # 别写成 -p 8080:8080，那样会发布到所有网卡，同一网络里的任何人都能打开。
-# 别的电脑要用：直接把 index.html 拷过去用浏览器打开就行（联机走浏览器之间的 WebRTC，不经过这个服务器）；
+# 别的电脑要用：直接把 code/ 整个文件夹拷过去，用浏览器打开 code/index.html 就行（联机走浏览器之间的 WebRTC，不经过这个服务器）；
 # 一定要连这台机器的话，用 SSH 隧道：ssh -L 8080:127.0.0.1:8080 这台机器
 FROM nginx:alpine
 
@@ -16,6 +16,7 @@ RUN rm -f /etc/nginx/conf.d/default.conf /usr/share/nginx/html/*
 
 # 只放玩家要用的：网页、PDF 手册、更新说明；规则源文件、生成脚本、编辑器设置都不进镜像（见 .dockerignore）
 COPY --chown=nginx:nginx index.html 更新说明.html /usr/share/nginx/html/
+COPY --chown=nginx:nginx code/ /usr/share/nginx/html/code/
 COPY --chown=nginx:nginx 更新说明.pdf /usr/share/nginx/html/
 COPY --chown=nginx:nginx 手册/ /usr/share/nginx/html/手册/
 

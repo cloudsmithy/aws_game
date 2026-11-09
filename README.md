@@ -17,11 +17,12 @@
 
 | 文件 | 是什么 |
 |---|---|
-| `index.html` | 网页版，单文件。同一台电脑 2–4 人轮流操作，也能各用各的设备联机 |
+| `index.html` | 入口：打开后自动跳到 `code/index.html`（旧链接、仓库首页都不断） |
+| `code/index.html` | 网页版，单文件。同一台电脑 2–4 人轮流操作，也能各用各的设备联机 |
 | `手册/` | 全部 PDF，按「谁在什么时候用」分文件夹，都带书签（见下表） |
 | `常用手册/` | 最常用的 7 份，从 `手册/` 拷过来按使用先后编号：玩法速览、玩法手册、速查卡、主持人规则书、组织者包（UG 活动流程单 + UG 活动局规则），实体版再加卡牌、棋盘与配件。每次跑 `tools/build_pdfs.py` 都会重新拷，别在这里改 |
-| `demo/` | 每个有效架构两页讲解：`<架构>-video.html` 是讲解视频（three.js 三维架构图，打开就播，一块一块讲这是什么服务、常见用法、为什么用它、在这里干什么，几选一的讲怎么选；字幕加配音，点图上任意一块看说明卡），`<架构>.html` 是图文讲解（架构图、数据怎么走、每一块干什么、这一环怎么选、在游戏里怎么算；从游戏里点进去会对比这位玩家现在这套和最优架构）；配音在 `demo/audio/`；`demo/index.html` 是目录。直接双击打开也能看。改了架构以后用 `node tools/build_arch_demos.mjs` 重新生成，配音用 `screen -dmS demotts zsh tools/demo_tts_run.sh`（本机 VoxCPM2 合成，只合成改过的句子） |
-| `svc/` | 每块服务一页知识点：它是什么、常见用法、为什么用它、核心知识点、三个关键功能、和谁比怎么选、练一练（点选项判对错）、用在哪些架构、在游戏里的数字；`svc/index.html` 是目录（能搜、能按色组筛）。和 `demo/` 分开放。改了服务、升级、题目或 `tools/svc_text.mjs` 以后用 `node tools/build_svc_pages.mjs` 重新生成 |
+| `code/arch/` | 每个有效架构两页讲解：`<架构>-video.html` 是讲解视频（three.js 三维架构图，打开就播，一块一块讲这是什么服务、常见用法、为什么用它、在这里干什么，几选一的讲怎么选；字幕加配音，点图上任意一块看说明卡），`<架构>.html` 是图文讲解（架构图、数据怎么走、每一块干什么、这一环怎么选、在游戏里怎么算；从游戏里点进去会对比这位玩家现在这套和最优架构）；配音在 `code/arch/audio/`；`code/arch/index.html` 是目录。直接双击打开也能看。改了架构以后用 `node tools/build_arch_demos.mjs` 重新生成，配音用 `screen -dmS demotts zsh tools/demo_tts_run.sh`（本机 VoxCPM2 合成，只合成改过的句子） |
+| `code/svc/` | 每块服务一页知识点：它是什么、常见用法、为什么用它、核心知识点、三个关键功能、和谁比怎么选、练一练（点选项判对错）、用在哪些架构、在游戏里的数字；`code/svc/index.html` 是目录（能搜、能按色组筛）。和 `code/arch/` 分开放。改了服务、升级、题目或 `tools/svc_text.mjs` 以后用 `node tools/build_svc_pages.mjs` 重新生成 |
 | `更新说明.html` / `更新说明.pdf` | 每一轮改了什么、为什么改、模拟数据 |
 | `玩法速览.md` / `玩法手册.md` / `规则书.md` | 手册的源文件。网页里点「玩法」看到的是玩法速览（简版）和玩法手册（完整版） |
 | `Dockerfile` / `docker/nginx.conf` | 用 nginx 在本机发网页版和 PDF（见「怎么玩」） |
@@ -44,7 +45,7 @@
 
 ## 怎么玩
 
-**网页版**：用 Chrome 或 Safari 打开 `index.html`，选好人数、难度、胜利条件，点「开始游戏」。
+**网页版**：用 Chrome 或 Safari 打开 `index.html`（会跳到 `code/index.html`），选好人数、难度、胜利条件，点「开始游戏」。
 
 - **办线下活动**：开局页最上面点「UG 活动局 · 一键开局」（娱乐模式 + 边玩边答题，12 轮或 30 分钟先到为准，4 人一桌），或者网址加 `?ug=1`。流程和要讲的规则见 `手册/0-组织者/组织者包.pdf`。
 - 进度自动存在浏览器里（localStorage），关掉再打开可以「继续上一局」。同一个浏览器只存一局，存档旁边记了版本号：两个标签页开着同一局时，后接着打的那边算数，另一边停止存档并提示；开新局前有没打完的局会先确认。浏览器禁止网站保存数据、或者存储满了时存不上，局里会提示。
@@ -72,26 +73,26 @@ docker run --rm -p 127.0.0.1:8080:8080 aws-ug-tycoon   # 然后打开 http://127
 docker run --rm -p 127.0.0.1:18080:8080 aws-ug-tycoon  # 打开 http://127.0.0.1:18080/
 ```
 
-- 镜像里只有 `index.html`、`手册/` 和更新说明（`tools/`、`.md`、`.claude/` 都不放），PDF 在 `http://127.0.0.1:8080/手册/` 下面，nginx 以普通用户运行、监听容器里的 8080。
+- 镜像里只有入口 `index.html`、`code/`（游戏、架构讲解、服务知识点）、`手册/` 和更新说明（`tools/`、`.md`、`.claude/` 都不放），PDF 在 `http://127.0.0.1:8080/手册/` 下面，nginx 以普通用户运行、监听容器里的 8080。
 - 端口只发布到本机 `127.0.0.1`，别的电脑访问不到。别写成 `-p 8080:8080`：那样会发布到所有网卡，同一网络里的人都能打开。
 - 用 8080 不用 443：443 是 HTTPS 端口，要配 TLS 证书；本机玩用 HTTP 就够了。要给别人通过网络访问，得先决定开放给谁并配好证书。
-- 别的电脑想玩，直接把 `index.html` 拷过去用浏览器打开就行，联机走浏览器之间的 WebRTC，不经过这个服务器。
+- 别的电脑想玩，直接把 `code/` 文件夹拷过去，用浏览器打开 `code/index.html` 就行，联机走浏览器之间的 WebRTC，不经过这个服务器。
 
 ## 改了规则之后
 
-规则和数据只有一个来源：`index.html` 里的数据表，包括 `SVC`、`UPGRADES`、`INC`、`REI`、`COMBOS`、`ROLES`、`QUIZ`、`BAL`。改完按下面的顺序同步：
+规则和数据只有一个来源：`code/index.html` 里的数据表，包括 `SVC`、`UPGRADES`、`INC`、`REI`、`COMBOS`、`ROLES`、`QUIZ`、`BAL`。改完按下面的顺序同步：
 
 1. **跑机器人自测**，确认改动没有引入错误：
 
    ```bash
    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --disable-gpu \
-     --virtual-time-budget=1800000 --dump-dom "file://$PWD/index.html?bot=1&games=12" | grep -o 'BOTRESULT {.*' | head -c 600
+     --virtual-time-budget=1800000 --dump-dom "file://$PWD/code/index.html?bot=1&games=12" | grep -o 'BOTRESULT {.*' | head -c 600
    ```
 
    结果里 `"errors":[]` 表示没出错。12 局大约要 4–5 分钟（加了起死回生技能后对局变长了，时限给小了会被截断、看不到结果）。
 
 2. **改两份 md**：`规则书.md`、`玩法手册.md`。大表（棋盘、服务详情、卡牌、角色、架构、题库）不用手改：`node tools/gen_rules.mjs && python3 tools/sync_docs.py` 会从网页数据重新生成并写回去；手写的规则文字要自己改。
-3. **把玩法手册写回网页**：`python3 tools/build_manual.py`，会更新 `index.html` 里的 `MANUAL_HTML`（完整版）和 `MANUAL_LITE_HTML`（简版，来自 `玩法速览.md`）。
+3. **把玩法手册写回网页**：`python3 tools/build_manual.py`，会更新 `code/index.html` 里的 `MANUAL_HTML`（完整版）和 `MANUAL_LITE_HTML`（简版，来自 `玩法速览.md`）。
 4. **出 PDF**：`python3 tools/build_pdfs.py`，一次生成 `手册/` 下全部 PDF 和根目录的 `更新说明.pdf`：两本手册、卡牌、棋盘与配件、速查卡，再调 `tools/build_mode_manuals.py` 出 8 本模式和专题手册、10 本简版手册、分级规则手册、三本图鉴、术语对照、组织者包和 UG 活动流程单、更新说明，最后给所有 PDF 补书签分隔符。改了模式规则的数字记得同步 `build_mode_manuals.py`（专题手册里的角色表和技能表会自动从网页数据取）。流程是先截棋盘图当封面，再把 md 套上 `tools/pdf.css` 打成两本手册，最后用 `tools/build_cards.mjs` 和 `tools/cards.css` 生成卡牌。
 
 ## 其他工具
@@ -102,7 +103,7 @@ docker run --rm -p 127.0.0.1:18080:8080 aws-ug-tycoon  # 打开 http://127.0.0.1
 | `node tools/mp_test.mjs` | 联机自测：同一个浏览器开房主和加入者两个页面，走一遍加入、密码校验、远端掷骰子、远端作答 |
 | `node tools/play_test.mjs 200` | 模拟真人从开局页开始点按钮玩 200 步，最后截图到 `tools/out/playtest.png` |
 | `python3 tools/css_dedupe.py --write` | 删掉 CSS 里被后面同名规则覆盖掉的旧声明 |
-| `node tools/promo/build.mjs promo explain` | 生成 `宣传片/宣传片.html` 和 `宣传片/玩法讲解.html`（three.js 3D 动画，棋盘、卡牌、数量都从 `index.html` 取，网页改了重跑就同步） |
+| `node tools/promo/build.mjs promo explain` | 生成 `宣传片/宣传片.html` 和 `宣传片/玩法讲解.html`（three.js 3D 动画，棋盘、卡牌、数量都从 `code/index.html` 取，网页改了重跑就同步） |
 | `node tools/promo/narrate.mjs` | 按 `tools/promo/explain_script.json` 逐句合成讲解配音（`宣传片/玩法讲解.m4a`），写出字幕和分段时间表；改了讲解词要先跑这个再 build |
 | `node tools/promo/music.mjs promo\|explain 输出.wav` | 用代码合成配乐和音效（不用外部素材） |
 | `node tools/promo/record.mjs 页面.html 输出.mp4 [音频]` | headless Chrome 逐帧截图录成 1080p / 30 帧 mp4 |
@@ -123,7 +124,7 @@ docker run --rm -p 127.0.0.1:18080:8080 aws-ug-tycoon  # 打开 http://127.0.0.1
 
 - 不含个人信息：没有邮箱（唯一一处 `team@peerjs.com` 是内嵌的 PeerJS 开源库自带的）、手机号、账户 ID、密钥、本机路径或用户名；链接都是公开的 `docs.aws.amazon.com` 和 `aws.amazon.com`；PDF 元数据只有标题和生成时间。示例玩家名用的是昵称（韩叔、虫虫、Damo、Yuki）。
 - 打包时删掉 `.claude/`（本机的编辑器设置，跟游戏无关）和 `.DS_Store`（macOS 自动生成）。
-- 只给玩家的话，带上 `index.html` 和需要的 PDF 就够了；要改规则才需要 `tools/`、`*.md` 和 `tools/qbank/`。`tools/out/` 是生成 PDF 的中间文件，可以不带。
+- 只给玩家的话，带上 `code/` 文件夹和需要的 PDF 就够了；要改规则才需要 `tools/`、`*.md` 和 `tools/qbank/`。`tools/out/` 是生成 PDF 的中间文件，可以不带。
 
 ## 内容约定
 
