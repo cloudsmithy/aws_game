@@ -131,3 +131,8 @@ docker run --rm -p 127.0.0.1:18080:8080 aws-ug-tycoon  # 打开 http://127.0.0.1
 - 只用亚马逊云科技对外公开的说法，不用内部术语。品牌写「亚马逊云科技」，服务保留官方名称（如 Amazon S3、Amazon Cognito）。
 - 服务行为要符合真实情况：托管服务天生跨多个 AZ，只有实例型服务买下时是单 AZ，Region 级的故障要靠多区域功能来扛。拿不准的以官网文档为准。
 - 美术用标准架构图风格：白底、细线分组框、官方的亚马逊云科技架构图标加文字标签。不放 logo，不用 emoji 当图标。
+
+
+## chengdu 自动部署
+
+维护者可按 [自动部署配置说明](deploy/README.md) 一次性配置服务器及 GitHub Environment。启用后，`master` 的更新会自动部署到 <https://game.usergroup.cn/aws-game/>；PR 仅运行校验，不发布。
