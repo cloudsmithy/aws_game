@@ -31,7 +31,11 @@ a{color:var(--blue)}:focus-visible{outline:2px solid var(--org);outline-offset:2
 .cf{display:flex;align-items:center;gap:14px;margin-top:auto;padding-top:12px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--mut)}.cf b{font-family:var(--mono);color:var(--orgl)}
 .cf svg{margin-left:auto;color:var(--org);transition:transform .2s}.card:hover .cf svg{transform:translateX(3px)}
 .empty{padding:60px 0;text-align:center;color:var(--mut)}
-footer{margin-top:48px;padding:24px 0 40px;border-top:1px solid var(--line);color:var(--mut);font-size:13px}
+footer{margin-top:48px;padding:24px 0 40px;border-top:1px solid var(--line);color:var(--mut);font-size:13px}footer p.dc{margin:10px 0 0;font-size:12.5px;line-height:1.75}
+/* 免责声明：Bedrock、AgentCore 页开头一块细框；每页最下面一条；「在游戏里」下面一句价格说明 */
+.disc{max-width:880px;margin:18px 0 0;padding:12px 16px;border:1px solid var(--line2);border-left:2px solid #8b97a8;background:rgba(255,255,255,.025);font-size:13px;line-height:1.75;color:var(--mut)}
+.pnote{margin:10px 0 0;font-size:12.5px;color:var(--mut)}
+.sitefoot{margin-top:56px;padding:22px 0 36px;border-top:1px solid var(--line);font-size:12.5px;line-height:1.75;color:var(--mut)}.sitefoot p{max-width:880px;margin:0}.sitefoot p+p{margin-top:4px}
 /* 服务页 */
 body.svp{--gcl:color-mix(in srgb,var(--gc) 68%,#fff)}
 .svh{border-bottom:1px solid var(--line)}.svh .wrap{padding-top:22px;padding-bottom:36px}

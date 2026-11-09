@@ -69,3 +69,5 @@ body.video #card{top:46px}
   #hud{left:12px;top:12px;font-size:10px;gap:6px}#hud i{width:10px}#unmute{left:10px;right:10px;top:30px;font-size:12px}
   #card.m{position:static;width:auto;max-height:none;margin-top:12px;opacity:1;transform:none;pointer-events:auto;backdrop-filter:none;background:rgba(8,14,26,.9)}#card.m:not(.on){display:none}
   .ctrl{flex-wrap:wrap}.ctrl button{padding:8px 12px;min-height:40px}}
+/* 视频页最下面：免责声明和价格说明，小字 */
+.vdisc{margin:14px 0 0;font-size:12px;line-height:1.75;color:#7f97b2}.vdisc span{display:block}
