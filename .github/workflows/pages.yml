@@ -35,3 +35,5 @@ jobs:
           path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          timeout: 1800000   # 30 minutes; the site is ~130 MB (PDFs, walkthrough audio) and the default 10 minutes has timed out
