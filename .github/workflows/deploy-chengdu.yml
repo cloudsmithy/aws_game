@@ -18,9 +18,9 @@ jobs:
         with:
           persist-credentials: false
       - name: Test release validation and rollback
-        run: python3 -m unittest discover -s deploy -p 'test_*.py' -v
+        run: python3 -m unittest discover -s deploy/chengdu -p 'test_*.py' -v
       - name: Build static release
-        run: python3 deploy/package.py --revision "$GITHUB_SHA" --output /tmp/aws-game.tar.gz
+        run: python3 deploy/chengdu/package.py --revision "$GITHUB_SHA" --output /tmp/aws-game.tar.gz
 
   deploy:
     needs: validate
@@ -41,7 +41,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Build static release
-        run: python3 deploy/package.py --revision "$GITHUB_SHA" --output /tmp/aws-game.tar.gz
+        run: python3 deploy/chengdu/package.py --revision "$GITHUB_SHA" --output /tmp/aws-game.tar.gz
       - name: Publish and verify, or roll back
         env:
           DEPLOY_HOST: ${{ secrets.CHENGDU_HOST }}
@@ -74,5 +74,5 @@ jobs:
           base='https://aws-game.usergroup.cn'
           curl --fail --silent --show-error --retry 3 --retry-all-errors --max-time 30 "$base/_deployment.json?revision=$GITHUB_SHA" -o "$RUNNER_TEMP/aws-game-manifest.json"
           python3 -c 'import json,os,sys; assert json.load(open(sys.argv[1]))["revision"] == os.environ["GITHUB_SHA"], "unexpected live revision"' "$RUNNER_TEMP/aws-game-manifest.json"
-          curl --fail --silent --show-error --retry 3 --max-time 30 "$base/code/index.html?revision=$GITHUB_SHA" -o /dev/null
+          curl --fail --silent --show-error --retry 3 --max-time 30 "$base/index.html?revision=$GITHUB_SHA" -o /dev/null
           echo "Deployed $GITHUB_SHA to $base/" >> "$GITHUB_STEP_SUMMARY"

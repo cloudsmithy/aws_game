@@ -1,11 +1,12 @@
-# 镜像里只要网页和 PDF；下面这些不进镜像（docker build -f docker/Dockerfile 时用这一份）
+# 镜像里只要网页和 PDF；下面这些不进镜像（docker build -f deploy/docker/Dockerfile 时用这一份）
 .claude/
 .DS_Store
 .git/
 .github/
 tools/
 tests/
-deploy/
+deploy/chengdu/
+code/i18n/
 i18n/
 node_modules/
 宣传片/

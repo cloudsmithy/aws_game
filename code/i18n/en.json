@@ -4967,7 +4967,7 @@
  "🕹 作弊码打开了：用了会写进日志，可以被举报": "🕹 Cheat codes are on: every use goes into the log and can be reported",
  "🕹 作弊码关掉了": "🕹 Cheat codes are off",
  "更新说明（新标签页）": "Release notes (new tab)",
- "../docs/更新说明.html": "../docs/更新说明.html",
+ "更新说明.html": "更新说明.html",
  "到 GitHub 提 issue（新标签页）": "Open an issue on GitHub (new tab)",
  "项目地址（新标签页）": "Project page (new tab)",
  "<span class=\"hint\">输入命令，比如 version、help；Tab 补全，↑ ↓ 翻历史，Esc 取消</span>": "<span class=\"hint\">Type a command such as version or help; Tab completes, ↑ ↓ for history, Esc cancels</span>",
@@ -4988,7 +4988,7 @@
  "这一版": "This version",
  "构建号": "Build number",
  "线上部署": "Live deployment",
- "<a href=\"../docs/更新说明.html\" target=\"_blank\" rel=\"noopener\">更新说明{$0}</a><a href=\"https://github.com/cloudsmithy/aws_game\" target=\"_blank\" rel=\"noopener noreferrer\">项目地址{$1}</a><a href=\"https://github.com/cloudsmithy/aws_game/issues\" target=\"_blank\" rel=\"noopener noreferrer\">提 issue{$2}</a>": "<a href=\"../docs/更新说明.html\" target=\"_blank\" rel=\"noopener\">Release notes{$0}</a><a href=\"https://github.com/cloudsmithy/aws_game\" target=\"_blank\" rel=\"noopener noreferrer\">Project page{$1}</a><a href=\"https://github.com/cloudsmithy/aws_game/issues\" target=\"_blank\" rel=\"noopener noreferrer\">Open an issue{$2}</a>",
+ "<a href=\"{$0}更新说明.html\" target=\"_blank\" rel=\"noopener\">更新说明{$1}</a><a href=\"https://github.com/cloudsmithy/aws_game\" target=\"_blank\" rel=\"noopener noreferrer\">项目地址{$2}</a><a href=\"https://github.com/cloudsmithy/aws_game/issues\" target=\"_blank\" rel=\"noopener noreferrer\">提 issue{$3}</a>": "<a href=\"{$0}更新说明.html\" target=\"_blank\" rel=\"noopener\">Release notes{$1}</a><a href=\"https://github.com/cloudsmithy/aws_game\" target=\"_blank\" rel=\"noopener noreferrer\">Project page{$2}</a><a href=\"https://github.com/cloudsmithy/aws_game/issues\" target=\"_blank\" rel=\"noopener noreferrer\">Open an issue{$3}</a>",
  "<dt>累计</dt><dd>{$0} 轮更新、{$1} 项改动{$2}{$3}</dd>": "<dt>Total</dt><dd>{$0} rounds of updates, {$1} changes{$2}{$3}</dd>",
  "、{$0} 次提交": ", {$0} commits",
  "（{$0} 起）": " (since {$0})",
@@ -5248,6 +5248,8 @@
   "给{$0}{$1}了 ${$2}": "{$1} ${$2} for {$0}",
   "../更新说明.html": "../更新说明.html",
   "<a href=\"../更新说明.html\" target=\"_blank\" rel=\"noopener\">更新说明{$0}</a><a href=\"https://github.com/cloudsmithy/aws_game\" target=\"_blank\" rel=\"noopener noreferrer\">项目地址{$1}</a><a href=\"https://github.com/cloudsmithy/aws_game/issues\" target=\"_blank\" rel=\"noopener noreferrer\">提 issue{$2}</a>": "<a href=\"../更新说明.html\" target=\"_blank\" rel=\"noopener\">Release notes{$0}</a><a href=\"https://github.com/cloudsmithy/aws_game\" target=\"_blank\" rel=\"noopener noreferrer\">Project page{$1}</a><a href=\"https://github.com/cloudsmithy/aws_game/issues\" target=\"_blank\" rel=\"noopener noreferrer\">Open an issue{$2}</a>",
-  "这是中文原文件；切换语言要用生成后的页面（tools/i18n.mjs bundle）": "This is the Chinese source file; language switching works in the generated page (tools/i18n.mjs bundle)"
+  "这是中文原文件；切换语言要用生成后的页面（tools/i18n.mjs bundle）": "This is the Chinese source file; language switching works in the generated page (tools/i18n.mjs bundle)",
+  "../docs/更新说明.html": "../docs/更新说明.html",
+  "<a href=\"../docs/更新说明.html\" target=\"_blank\" rel=\"noopener\">更新说明{$0}</a><a href=\"https://github.com/cloudsmithy/aws_game\" target=\"_blank\" rel=\"noopener noreferrer\">项目地址{$1}</a><a href=\"https://github.com/cloudsmithy/aws_game/issues\" target=\"_blank\" rel=\"noopener noreferrer\">提 issue{$2}</a>": "<a href=\"../docs/更新说明.html\" target=\"_blank\" rel=\"noopener\">Release notes{$0}</a><a href=\"https://github.com/cloudsmithy/aws_game\" target=\"_blank\" rel=\"noopener noreferrer\">Project page{$1}</a><a href=\"https://github.com/cloudsmithy/aws_game/issues\" target=\"_blank\" rel=\"noopener noreferrer\">Open an issue{$2}</a>"
  }
 }

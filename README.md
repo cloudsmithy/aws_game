@@ -19,27 +19,28 @@
 
 ```
 aws_game/
-├── index.html        入口：打开后跳到 code/index.html（旧链接、仓库首页都不断）
-├── 404.html          旧链接跳转（demo/、svc/、手册/、更新说明 挪过位置）
-├── en/  zh/          按语言打开的入口：/en/ 英文、/zh/ 中文（打开的是同一个游戏页面）
-├── code/             游戏 index.html（单文件，多语言）、架构讲解 arch/、服务知识点 svc/
+├── code/             网站（发布的就是这个文件夹，docs/ 放在网站的 /docs/ 下）
+│   ├── index.html    游戏：单文件、多语言（i18n/ 生成），同屏 2–4 人或联机
+│   ├── 404.html      旧链接跳转（以前的 /code/…、/demo/…、/手册/… 地址）
+│   ├── en/  zh/      按语言打开的入口：/en/ 英文、/zh/ 中文
+│   ├── arch/  svc/   架构讲解、服务知识点
+│   └── i18n/         多语言对照表 en.json、术语表 GLOSSARY.md、英文的玩法手册和速览
 ├── docs/             规则书、玩法手册、玩法速览（md），更新说明（html / pdf），手册/、常用手册/（PDF）
-├── i18n/             多语言对照表 en.json、术语表 GLOSSARY.md、英文的玩法手册和速览
-├── docker/           本机用 Docker 发网页：Dockerfile、nginx 配置
-├── deploy/           成都服务器自动部署（打包、接收、回滚）
+├── deploy/           部署：docker/（本机用 Docker 发网页）、chengdu/（成都服务器自动部署）
 ├── tests/            棋盘布局回归测试（Playwright）
-├── .github/          自动检查（lint + 布局）、自动部署的工作流
+├── .github/          工作流：发布 GitHub Pages、自动检查、成都部署
 └── package.json 等   开发检查用的 Node 配置（ESLint、Stylelint、Playwright）
 ```
+
+网站地址：GitHub Pages 上是 https://cloudsmithy.github.io/aws_game/ （游戏就在根上），英文 https://cloudsmithy.github.io/aws_game/en/ 。以前的 `…/code/index.html` 地址会自动跳过来。
 
 ## 文件
 
 | 文件 | 是什么 |
 |---|---|
-| `index.html` | 入口：打开后自动跳到 `code/index.html`（旧链接、仓库首页都不断） |
-| `code/index.html` | 网页版，单文件。同一台电脑 2–4 人轮流操作，也能各用各的设备联机 |
-| `en/` / `zh/` | 按语言打开的入口：网址后面加 `/en/` 用英文打开、`/zh/` 用中文打开（比如 cloudsmithy.github.io/aws_game/en/）；打开的都是同一个游戏页面 |
-| `i18n/` | 多语言：`en.json` 是「中文原文 → 英文」对照表（改译文改这里），`GLOSSARY.md` 是英文术语表和写法，`en/` 是英文的玩法手册和玩法速览。仓库里的 `code/index.html` 是按对照表生成的多语言页面，页面里点「语言」当场换字 |
+| `code/index.html` | 网页版，单文件、多语言。同一台电脑 2–4 人轮流操作，也能各用各的设备联机；直接用浏览器打开就能玩 |
+| `code/en/` / `code/zh/` | 按语言打开的入口：网址后面加 `/en/` 用英文打开、`/zh/` 用中文打开（比如 cloudsmithy.github.io/aws_game/en/）；打开的都是同一个游戏页面 |
+| `code/i18n/` | 多语言：`en.json` 是「中文原文 → 英文」对照表（改译文改这里），`GLOSSARY.md` 是英文术语表和写法，`en/` 是英文的玩法手册和玩法速览。仓库里的 `code/index.html` 是按对照表生成的多语言页面，页面里点「语言」当场换字 |
 | `docs/` | 文档：规则书、玩法手册、玩法速览（md），更新说明（html / pdf），`docs/手册/` 全部 PDF，`docs/常用手册/` 最常用的 7 份 |
 | `docs/手册/` | 全部 PDF，按「谁在什么时候用」分文件夹，都带书签（见下表） |
 | `docs/常用手册/` | 最常用的 7 份，从 `docs/手册/` 拷过来按使用先后编号：玩法速览、玩法手册、速查卡、主持人规则书、UG 活动流程单，实体版再加卡牌、棋盘与配件。每次跑 `tools/build_pdfs.py` 都会重新拷，别在这里改 |
@@ -47,7 +48,8 @@ aws_game/
 | `code/svc/` | 每块服务一页知识点：它是什么、常见用法、为什么用它、核心知识点、三个关键功能、和谁比怎么选、练一练（点选项判对错）、用在哪些架构、在游戏里的数字；`code/svc/index.html` 是目录（能搜、能按色组筛）。和 `code/arch/` 分开放。改了服务、升级、题目或 `tools/svc_text.mjs` 以后用 `node tools/build_svc_pages.mjs` 重新生成 |
 | `docs/更新说明.html` / `docs/更新说明.pdf` | 每一轮改了什么、为什么改、模拟数据 |
 | `docs/玩法速览.md` / `docs/玩法手册.md` / `docs/规则书.md` | 手册的源文件。网页里点「玩法」看到的是玩法速览（简版）和玩法手册（完整版） |
-| `docker/Dockerfile` / `docker/nginx.conf` | 用 nginx 在本机发网页版和 PDF（见「怎么玩」） |
+| `deploy/docker/` | `Dockerfile`、`nginx.conf`：用 nginx 在本机发网页版和 PDF（见「怎么玩」） |
+| `deploy/chengdu/` | 成都服务器自动部署：打包、服务器上的接收程序、配置说明（见文末） |
 | `宣传片/` | 宣传片和玩法讲解视频（mp4，另有能直接播放的 html）：`玩法讲解_娱乐模式.mp4` … `玩法讲解_地狱模式.mp4` 是 6 个模式各自的讲解 |
 | `tools/` | 生成 PDF、卡牌和跑模拟的脚本；题库在 `tools/qbank/` |
 
@@ -67,7 +69,7 @@ aws_game/
 
 ## 怎么玩
 
-**网页版**：用 Chrome 或 Safari 打开 `index.html`（会跳到 `code/index.html`），选好人数、难度、胜利条件，点「开始游戏」。
+**网页版**：用 Chrome 或 Safari 打开 `code/index.html`，选好人数、难度、胜利条件，点「开始游戏」。
 
 - **办线下活动**：开局页最上面点「UG 活动局 · 一键开局」（娱乐模式 + 边玩边答题，12 轮或 30 分钟先到为准，4 人一桌），或者网址加 `?ug=1`。流程和要讲的规则见 `手册/0-组织者/组织者包.pdf`。
 - 进度自动存在浏览器里（localStorage），关掉再打开可以「继续上一局」。同一个浏览器只存一局，存档旁边记了版本号：两个标签页开着同一局时，后接着打的那边算数，另一边停止存档并提示；开新局前有没打完的局会先确认。浏览器禁止网站保存数据、或者存储满了时存不上，局里会提示。
@@ -91,13 +93,13 @@ aws_game/
 **Docker**：
 
 ```bash
-docker build -f docker/Dockerfile -t aws-ug-tycoon .
+docker build -f deploy/docker/Dockerfile -t aws-ug-tycoon .
 docker run --rm -p 127.0.0.1:8080:8080 aws-ug-tycoon   # 然后打开 http://127.0.0.1:8080/
 # 本机 8080 已经被别的程序占了（报 port is already allocated）就换一个本机端口，比如：
 docker run --rm -p 127.0.0.1:18080:8080 aws-ug-tycoon  # 打开 http://127.0.0.1:18080/
 ```
 
-- 镜像里只有入口 `index.html`、`code/`（游戏、架构讲解、服务知识点）、`docs/`（手册 PDF 和更新说明）（`tools/`、`.md`、`.claude/` 都不放），PDF 在 `http://127.0.0.1:8080/手册/` 下面，nginx 以普通用户运行、监听容器里的 8080。
+- 镜像里只有 `code/`（游戏、架构讲解、服务知识点，放在网站根上）和 `docs/`（手册 PDF 和更新说明）（`tools/`、`.md`、`.claude/` 都不放），PDF 在 `http://127.0.0.1:8080/手册/` 下面，nginx 以普通用户运行、监听容器里的 8080。
 - 端口只发布到本机 `127.0.0.1`，别的电脑访问不到。别写成 `-p 8080:8080`：那样会发布到所有网卡，同一网络里的人都能打开。
 - 用 8080 不用 443：443 是 HTTPS 端口，要配 TLS 证书；本机玩用 HTTP 就够了。要给别人通过网络访问，得先决定开放给谁并配好证书。
 - 别的电脑想玩，直接把 `code/` 文件夹拷过去，用浏览器打开 `code/index.html` 就行，联机走浏览器之间的 WebRTC，不经过这个服务器。
@@ -177,4 +179,4 @@ npm run check
 
 ## chengdu 自动部署
 
-维护者可按 [自动部署配置说明](deploy/README.md) 一次性配置服务器及 GitHub Environment。启用后，`master` 的更新会自动部署到 <https://aws-game.usergroup.cn/>；PR 仅运行校验，不发布。
+维护者可按 [自动部署配置说明](deploy/chengdu/README.md) 一次性配置服务器及 GitHub Environment。启用后，`master` 的更新会自动部署到 <https://aws-game.usergroup.cn/>；PR 仅运行校验，不发布。

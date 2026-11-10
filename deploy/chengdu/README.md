@@ -17,7 +17,7 @@ ssh-keygen -t ed25519 -f ./aws-game-actions -N '' -C github-actions-aws-game
 审查并使用本 PR 合并后的脚本（系统需 Python 3.10+、OpenSSH）：
 
 ```sh
-sudo sh deploy/setup-server.sh /absolute/path/aws-game-actions.pub
+sudo sh deploy/chengdu/setup-server.sh /absolute/path/aws-game-actions.pub
 ```
 
 安装位置：`/usr/local/lib/aws-game/receive.py`（root 管理）；文件存储：`/srv/aws-game`；账号：`aws-game-deploy`。公钥被限制为固定接收程序，禁用转发和终端，只接受 `deploy <40位SHA>` 与 `rollback <40位SHA>`，不能运行任意 shell。此脚本不会修改 Nginx、线上目录或当前 MCP 服务。若已有同名账号，先确认它专用于本部署。确认 SSH 服务允许该账号使用公钥登录，密码登录应保持禁用。
@@ -57,7 +57,7 @@ location / {
 }
 ```
 
-该域名从 `/` 提供游戏，游戏入口为 `/code/index.html`，不再添加 `/aws-game` 路径前缀。确认 DNS 与 TLS 证书覆盖 `aws-game.usergroup.cn`；旧域名和旧路径如需保留，由管理员另行配置重定向。
+该域名从 `/` 提供游戏：打包时仓库的 `code/` 放在网站根上（游戏就是 `/index.html`），`docs/` 放在 `/docs/` 下，和 GitHub Pages 一样。以前的 `/code/…` 地址由网站根上的 `404.html` 跳到新位置，Nginx 要配 `error_page 404 /404.html;` 才会用它。确认 DNS 与 TLS 证书覆盖 `aws-game.usergroup.cn`；旧域名和旧路径如需保留，由管理员另行配置重定向。
 
 Nginx 的 `http` 保留标准 `mime.types`，确保 HTML、JS、PDF 和 M4A 使用正常的 MIME 类型。核实网关可读取挂载后的 `current/index.html`，运行配置检查再重载。现有 URL 应继续打开原游戏，不能仍然落到旧 MCP 发布目录。
 
@@ -106,8 +106,8 @@ sudo -u aws-game-deploy env SSH_ORIGINAL_COMMAND='rollback FULL_40_CHARACTER_SHA
 ## 本地验证
 
 ```sh
-python3 -m unittest discover -s deploy -p 'test_*.py' -v
-python3 deploy/package.py --revision "$(git rev-parse HEAD)" --output /tmp/aws-game.tar.gz
+python3 -m unittest discover -s deploy/chengdu -p 'test_*.py' -v
+python3 deploy/chengdu/package.py --revision "$(git rev-parse HEAD)" --output /tmp/aws-game.tar.gz
 ```
 
 仓库根目录的 `Dockerfile` 继续用于原有 Docker 部署方式，本工作流不改动它，也不在生产服务器运行仓库脚本或构建代码。

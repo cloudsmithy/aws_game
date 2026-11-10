@@ -1,12 +1,11 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 
-const entry = new URL('../index.html', import.meta.url);
+// 网站的根就是 code/：/ 和 /index.html 都是游戏
 const game = new URL('../code/index.html', import.meta.url);
 const server = createServer(async (request, response) => {
   const path = new URL(request.url, 'http://localhost').pathname;
-  const file = path === '/' || path === '/index.html' ? entry
-    : path === '/code/index.html' ? game : null;
+  const file = path === '/' || path === '/index.html' ? game : null;
   if (!file) {
     response.writeHead(404).end();
     return;

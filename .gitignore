@@ -1,15 +1,22 @@
-# 生成脚本只在本机用，不进仓库
+# 只在开发目录里用的：生成脚本、宣传片、参考素材
 tools/
-# 生成物和缓存
 宣传片/
+参考素材/
+# 生成过程的中间文件（仓库里的 code/index.html 已经是生成好的多语言页面）
+code/index.i18n.html
+code/i18n/context.json
+# 缓存、依赖、日志、打包产物
 __pycache__/
 *.pyc
 node_modules/
 *.log
-# 本机和编辑器的文件
-.claude/
-.DS_Store
-# PR #3 的布局测试（Playwright）产物
+*.tar.gz
+# 布局测试（Playwright）的产物
 playwright-report/
 test-results/
 .playwright-cli/
+# 本机和编辑器的文件
+.claude/
+.DS_Store
+.vscode/
+.idea/

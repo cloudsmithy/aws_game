@@ -25,7 +25,7 @@ class DeploymentTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.source = self.root / 'source'
         self.source.mkdir()
-        for name in ('index.html', '404.html', 'docs/更新说明.html', 'docs/更新说明.pdf', 'code/index.html', 'code/audio/voice.m4a', 'docs/手册/玩法.pdf'):
+        for name in ('code/index.html', 'code/404.html', 'code/audio/voice.m4a', 'docs/更新说明.html', 'docs/更新说明.pdf', 'docs/手册/玩法.pdf'):
             path = self.source / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(b'content')
@@ -54,7 +54,7 @@ class DeploymentTests(unittest.TestCase):
         self.deploy('a' * 40)
         current = self.base / 'current'
         self.assertEqual((current / 'docs/手册/玩法.pdf').read_bytes(), b'content')
-        self.assertTrue((current / 'code/audio/voice.m4a').is_file())
+        self.assertTrue((current / 'audio/voice.m4a').is_file())
 
     def test_bad_archive_cannot_change_current(self):
         self.deploy('a' * 40)
@@ -69,7 +69,7 @@ class DeploymentTests(unittest.TestCase):
         with tarfile.open(fileobj=io.BytesIO(raw), mode='r:gz') as src, tarfile.open(fileobj=changed, mode='w:gz') as dst:
             for info in src:
                 data = src.extractfile(info).read()
-                if info.name == 'code/index.html':
+                if info.name == 'index.html':
                     data = b'changed'
                 info.size = len(data)
                 dst.addfile(info, io.BytesIO(data))
@@ -94,7 +94,7 @@ class DeploymentTests(unittest.TestCase):
     def test_same_revision_is_idempotent_but_immutable(self):
         self.deploy('a' * 40)
         self.deploy('a' * 40)
-        (self.source / 'index.html').write_bytes(b'different')
+        (self.source / 'code/index.html').write_bytes(b'different')
         with self.assertRaisesRegex(ValueError, 'different content'):
             self.deploy('a' * 40)
 
