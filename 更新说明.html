@@ -49,7 +49,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <h1>亚马逊云科技 User Group 云上大亨 · 这一轮改了什么</h1>
   <p>从「破产逻辑是不是有问题」开始，一路改到新角色、两个新开关、地狱模式和全套文档。每条改动后面写了为什么改；平衡数字都是用电脑玩家对打模拟出来的。</p>
   <nav>
-    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#todo">待定</a>
+    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#todo">待定</a>
   </nav>
 </header>
 
@@ -784,8 +784,21 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   </ul>
 </section>
 
+<section id="r15">
+  <h2><i>23</i>第十五轮（11-10）：英文版、语言菜单、老板键、版本号</h2>
+  <ul>
+    <li><span class="tag new">新</span>英文版 <code>code/en/index.html</code>：界面、服务介绍、卡牌、角色、架构、题库、玩法手册和玩法速览都翻成了英文（5127 条）。中文原文和英文对照写在 <code>i18n/en.json</code>，<code>tools/i18n.mjs build</code> 按对照表从中文版生成英文版，中文版改了以后重新抽一次、补上新增的几条就行；术语和写法见 <code>i18n/GLOSSARY.md</code>。英文版的讲解视频、图文讲解和服务知识点还是中文页面。</li>
+    <li><span class="tag ui">UI</span>语言菜单：开局页「新建一局」右边、对局顶栏里加了「地球图标 + 语言」按钮，点开列出简体中文、English（每种语言用它自己的写法），当前的打勾；以后加语言只在列表里加一行、再出一份对照表。根目录 <code>index.html</code> 记住上次选的语言，网址加 <code>?lang=en</code> 直接打开英文版。每种语言各存各的档，联机房间也分开。</li>
+    <li><span class="tag ui">UI</span>英文版的对局中间：标题只写 Cloud Tycoon，帮助按钮收紧，玩家条去掉箭头，四个人一行放下，骰子和下面一排按钮不再被挤出去；封面色组名字能折成两行。</li>
+    <li><span class="tag new">新</span>老板键：按 `（Esc 下面那个键）整页换成一张「云资源成本周报.xlsx」表格，标签页标题和图标一起换掉、音效停；方向键能在表格里挪格子，别的键不传给游戏。再按一次 `，或者双击表格最上面的文件名回来；「对局」菜单里也有这个按钮。</li>
+    <li><span class="tag new">新</span>版本号：不在输入框里时输入 <code>:version</code> 回车，弹出版本窗（科技风深色）：版本号 v1.轮.提交、这一版的小标题、累计多少轮多少项改动、构建号和生成时间、内容规模，能一键复制版本信息贴到 issue 里。版本号由 <code>tools/stamp_version.py</code> 按更新说明最后一轮和仓库提交数自动写，同步到仓库前跑。</li>
+    <li><span class="tag ui">UI</span>服务知识点页「三个关键功能」每一级写这一级的运行费（每圈多少，按用量、按 token 计费的写收到过路费另交几成），原来的功能说明和游戏里的效果照旧。</li>
+    <li><span class="tag chg">改</span>电脑玩家认按钮靠按钮上的字：英文版里这些按钮的译文前后对得上（中英文两版各模拟 60 局，中位轮数 31.5 / 31，升级次数、最高过路费、第一次破产的轮数都接近）。</li>
+  </ul>
+</section>
+
 <section id="todo">
-  <h2><i>23</i>待定 / 已知问题</h2>
+  <h2><i>24</i>待定 / 已知问题</h2>
   <ul>
     <li>代理商在完整局（不限轮数约 16%）和地狱模式 15 轮（约 14%）偏弱，公平是 25%；各模式的数字见规则书第 32 节。</li>
     <li>模拟里的电脑不会刻意凑六大支柱，所以 Well-Architected 的达成率只能当下限看。</li>

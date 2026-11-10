@@ -1985,6 +1985,58 @@ table.mpnet tr.bad td.st{color:#d13212}
 /* 图鉴开头的免责声明：灰底细框，小字，左边一道灰线；不抢服务和架构的风头 */
 .gdisc{margin:10px 0 4px;padding:9px 12px;background:#fff;border:1px solid #e3e7ec;border-left:3px solid #879596;font-size:12.5px;line-height:1.7;color:#545b64}
 .gdisc p{margin:0!important}.gdisc p+p{margin-top:3px!important}.gdisc b{display:inline-block;min-width:4.4em;margin-right:8px;font-size:12px;color:#232f3e}
+/* 老板键：整页换成一张白底表格（标题栏、菜单、工具栏、编辑栏、网格、工作表标签、状态栏），盖住一切 */
+#boss{position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;background:#fff;color:#1f1f1f;font:13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;user-select:none;-webkit-user-select:none;cursor:cell}
+#boss[hidden]{display:none}html.bossing,html.bossing body{overflow:hidden}
+#boss .bs-top{display:flex;align-items:center;gap:12px;height:34px;padding:0 12px;background:#f3f3f3;border-bottom:1px solid #e1e1e1;cursor:default}
+#boss .bs-dots{display:flex;gap:6px;width:60px}#boss .bs-dots i{width:11px;height:11px;border-radius:50%;background:#d4d4d4}
+#boss .bs-file{flex:1;text-align:center;font-weight:600;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#boss .bs-saved{width:60px;text-align:right;color:#777;font-size:12px}
+#boss .bs-menu{display:flex;gap:2px;padding:2px 10px 0;background:#f3f3f3;overflow:hidden;cursor:default}#boss .bs-menu span{flex:none;padding:6px 12px;color:#333;border-bottom:2px solid transparent}#boss .bs-menu span.on{border-bottom-color:#1e7145;color:#1e7145;font-weight:600}
+#boss .bs-tool{display:flex;align-items:center;gap:4px;height:40px;padding:0 12px;border-bottom:1px solid #e1e1e1;color:#333;overflow:hidden;cursor:default}#boss .bs-tool>*{flex:none;padding:3px 8px;border:1px solid transparent;font-style:normal}#boss .bs-tool .bs-sel{min-width:72px;border-color:#d0d0d0}#boss .bs-tool .bs-sel.sm{min-width:36px}#boss .bs-tool .bs-sep{width:1px;height:22px;padding:0;margin:0 6px;background:#e1e1e1}
+#boss .bs-fx{display:flex;align-items:center;height:28px;border-bottom:1px solid #e1e1e1;cursor:default}#boss .bs-ref{flex:none;width:76px;padding:0 8px;border-right:1px solid #e1e1e1;color:#333}#boss .bs-fxi{flex:none;padding:0 10px;color:#777;font-style:italic;border-right:1px solid #e1e1e1}#boss .bs-fxv{padding:0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#boss .bs-grid{flex:1;overflow:hidden}
+#boss table{border-collapse:collapse;table-layout:fixed;width:max(100%,1100px)}
+#boss th,#boss td{height:24px;padding:0 6px;border:1px solid #e6e6e6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:400;text-align:left}
+#boss th{background:#f6f6f6;color:#666;text-align:center;font-size:12px}
+#boss tr.ch th{width:auto}#boss tr.ch th:first-child{width:46px}#boss tr.ch th:nth-child(2){width:120px}#boss tr.ch th:nth-child(3){width:150px}#boss tr.ch th:nth-child(4),#boss tr.ch th:nth-child(5){width:130px}#boss tr.ch th:nth-child(6),#boss tr.ch th:nth-child(7){width:90px}#boss tr.ch th:nth-child(8){width:120px}
+#boss td.h{font-weight:600;background:#f8faf8}#boss td.n{text-align:right;font-variant-numeric:tabular-nums}#boss td.up{color:#c42b1c}
+#boss tr.tot td{font-weight:600;border-top:2px solid #b5b5b5}
+#boss td.sel{outline:2px solid #1e7145;outline-offset:-2px}
+#boss .bs-tabs{display:flex;gap:2px;height:30px;padding:0 10px;background:#f3f3f3;border-top:1px solid #e1e1e1;cursor:default}#boss .bs-tabs span{display:flex;align-items:center;padding:0 16px;color:#444}#boss .bs-tabs span.on{background:#fff;color:#1e7145;font-weight:600;border-bottom:2px solid #1e7145}
+#boss .bs-status{display:flex;align-items:center;justify-content:space-between;gap:16px;height:24px;padding:0 12px;background:#f3f3f3;border-top:1px solid #e1e1e1;color:#555;font-size:12px;cursor:default}
+/* :version 这类命令：屏幕最下面一条，像 vim 的命令行 */
+#vimcmd{position:fixed;left:0;right:0;bottom:0;z-index:2147482000;display:flex;align-items:center;height:28px;padding:0 10px;background:#fff;border-top:1px solid #d5dbdb;font:13px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#16191f}
+#vimcmd[hidden]{display:none}#vimcmd.err{color:#d13212}
+#vimcmd .cur{display:inline-block;width:8px;height:15px;margin-left:1px;background:#16191f;animation:vimblink 1s steps(1) infinite}
+@keyframes vimblink{50%{opacity:0}}@media (prefers-reduced-motion:reduce){#vimcmd .cur{animation:none}}
+/* 版本窗（:version）：和封面、服务知识点页一个风格——深色底、24px 网格、左上一团橙光、细线框、方角、等宽字的小标 */
+.box.verbox{max-width:600px;--vl:rgba(255,255,255,.14);--vl2:rgba(255,255,255,.08);--vm:#8b97a8;--vmono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d3dbe6;background-color:#0b111c;background-image:radial-gradient(560px 320px at 0% 0%,rgba(236,114,17,.2),transparent 62%),linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:auto,24px 24px,24px 24px;border:1px solid var(--vl);scrollbar-color:rgba(255,255,255,.25) transparent}
+.box.verbox h3{justify-content:flex-start;background:rgba(11,17,28,.92);color:#fff;border-bottom:1px solid var(--vl)}
+.box.verbox h3::before{content:'VERSION';margin-right:12px;padding:4px 7px;background:#ff9900;color:#16191f;font:800 11px/1 var(--vmono);letter-spacing:.14em}
+.box.verbox .btns{background:rgba(11,17,28,.92);border-top:1px solid var(--vl)}
+.box.verbox .btns button{border-radius:0}.box.verbox .btns button:not(.pri){background:transparent;border-color:var(--vl);color:#f3f6fa}.box.verbox .btns button:not(.pri):hover{border-color:#ff9900;color:#fff}
+.ver{display:grid;gap:14px}
+.ver-h{position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:18px 18px 16px;border:1px solid var(--vl2);background:rgba(255,255,255,.025)}
+.ver-h::before{content:'';position:absolute;left:-1px;top:-1px;width:14px;height:14px;border-left:2px solid #ff9900;border-top:2px solid #ff9900}
+.ver-eb{display:flex;align-items:center;gap:10px;margin:0 0 8px;font:600 12px var(--vmono);letter-spacing:.06em;color:var(--vm)}
+.ver-eb span{padding:3px 6px;border:1px solid rgba(255,153,0,.5);color:#ffb266;font-weight:800;letter-spacing:.14em}
+.ver-t b{display:block;font-size:26px;line-height:1.15;letter-spacing:.04em;color:#fff}
+.ver-no{text-align:right}.ver-no small{display:block;font:700 11px var(--vmono);letter-spacing:.18em;color:var(--vm)}
+.ver-no b{display:block;margin-top:4px;font:800 34px/1 var(--vmono);color:#ff9900;text-shadow:0 0 24px rgba(255,153,0,.35)}
+.ver-term{padding:12px 16px 14px;background:rgba(0,0,0,.35);border:1px solid var(--vl2);border-left:2px solid #ff9900;font:13px/1.7 var(--vmono)}
+.ver-cmd{margin-bottom:6px;color:#f3f6fa}.ver-cmd span{margin-right:8px;color:#5be38c}
+.ver-term dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:2px 18px;margin:0}
+.ver-term dt{color:var(--vm)}.ver-term dd{margin:0;color:#e3e9f0;overflow-wrap:anywhere}
+.ver-term dt[hidden],.ver-term dd[hidden]{display:none}
+.ver-term code{font:inherit;color:#ffb266}
+.ver-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin:0;padding:0;list-style:none;border:1px solid var(--vl2)}
+.ver-stats li{display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 4px;background:rgba(255,255,255,.02)}.ver-stats li+li{border-left:1px solid var(--vl2)}
+.ver-stats b{font:700 22px/1.1 var(--vmono);color:#fff}.ver-stats span{font-size:12px;color:var(--vm);text-align:center}
+.ver-links{display:flex;flex-wrap:wrap;gap:8px}
+.ver-links a{display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:2px 12px;border:1px solid var(--vl);background:rgba(255,255,255,.03);color:#f3f6fa;font-size:12.5px;font-weight:700;text-decoration:none}
+.ver-links a:hover{border-color:#ff9900;color:#fff}.ver-links a:focus-visible{outline:2px solid #ff9900;outline-offset:2px}
+@media (pointer:coarse){.ver-links a{min-height:40px}}
+@media (max-width:480px){.ver-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.ver-stats li:nth-child(4){border-left:0}.ver-stats li:nth-child(n+4){border-top:1px solid var(--vl2)}.ver-h{flex-wrap:wrap;padding:14px}.ver-no{text-align:left}.ver-no b{font-size:32px}}
 .gfil{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0 6px}
 .gfil .gf{position:relative;display:inline-flex;align-items:center;height:34px;padding-left:14px;border:1px solid #c6ccd2;border-radius:17px;background:#fff;font-size:13px;color:#5f6b7a;transition:border-color .15s,background-color .15s}
 .gfil .gf:hover{border-color:#7d8998}
@@ -2071,6 +2123,19 @@ tr.gempty td{padding:20px;text-align:center;color:#687078}
 .hero .flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;align-items:start}.hero .flow .link{display:none}.hero .flow .node{position:relative}
 .hero .flow .node:not(:last-of-type)::after{content:'';position:absolute;top:21px;left:calc(50% + 30px);width:calc(100% - 50px);height:2px;background:repeating-linear-gradient(90deg,#ffb36b 0 6px,transparent 6px 12px);background-size:24px 2px;animation:hflow 1.2s linear infinite;opacity:.8}
 .hero .cats{grid-template-columns:repeat(5,minmax(0,1fr))}.hero .cat span{overflow:hidden;text-overflow:ellipsis}
+/* 英文版：字长，对局中间的标题只留「Cloud Tycoon」（全名在网页标题和封面上），封面色组名字可以折成两行 */
+html[lang=en] .c-head .gt-pre{display:none}
+/* 语言按钮和它的下拉菜单 */
+.langsw{display:inline-flex;align-items:center;gap:5px}.langsw .lc{font-style:normal;font-size:10px;color:var(--mut2)}
+#langmenu{position:fixed;z-index:2147481000;min-width:168px;padding:4px;background:#fff;border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,28,36,.18)}
+#langmenu button{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:34px;padding:6px 12px;border:0;background:#fff;color:var(--ink);font:inherit;font-size:14px;text-align:left;cursor:pointer}
+#langmenu button:hover,#langmenu button:focus-visible{background:#f2f8fd;outline:none}#langmenu button[aria-checked=true]{font-weight:700}#langmenu button i{font-style:normal;color:#0972d3}
+@media (pointer:coarse){#langmenu button{min-height:44px}}
+html[lang=en] .hero .cat span{white-space:normal;overflow:visible;line-height:1.15;font-size:12px}
+/* 英文版对局中间：帮助按钮收紧一点，让左边的对局信息少折几行；玩家条去掉中间的箭头，四个人尽量一行放下 */
+html[lang=en] .c-head .tgrp button,html[lang=en] .c-head .gmenu summary{padding-left:8px;padding-right:8px}
+html[lang=en] .c-head .sub{font-size:12px;line-height:1.45}
+html[lang=en] .turnbar{gap:4px}html[lang=en] .turnbar .tbar{display:none}html[lang=en] .turnbar .tb{padding:3px 8px 3px 5px;gap:5px;font-size:12.5px}
 @media (prefers-reduced-motion:reduce){.hero .flow .node::after{animation:none}}
 .ggrps{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
 .ggc{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 10px;border:1px solid var(--line);border-left:3px solid var(--gc);border-radius:0;background:#fff;color:var(--ink2);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
@@ -2552,6 +2617,7 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 /* 方案 A：清爽卡片 */
 .setup-box{border-radius:14px;padding:30px 34px}
 .setup-head h2{font-size:22px;letter-spacing:.5px}
+.setup-head{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px}.setup-head .langsw{margin-left:auto;align-self:center}.langsw{font-weight:600}
 .sec{margin-top:0;padding:18px 0 4px;border-top:1px solid #eef1f4}
 .setup-head + #resume + .sec, .setup-head + .sec{border-top:0}
 .sec h5{font-size:15px;margin-bottom:12px}
@@ -2839,6 +2905,38 @@ const DISC_GENAI = '免责声明：游戏里特定亚马逊云科技生成式人
 const DISC_GENAI_SVC = '免责声明：前述特定亚马逊云科技生成式人工智能相关的服务目前在亚马逊云科技海外区域可用。亚马逊云科技中国区域相关云服务由西云数据和光环新网运营，具体信息以中国区域官网为准。';
 const DISC_PRICE = '游戏内价格为虚构，不代表实际定价；$ 是游戏币单位。';
 const GENAI_K = ['bedrock', 'agentcore'];   // 只在海外区域可用的生成式 AI 服务
+// 游戏版本：tools/stamp_version.py 按「更新说明.html」最后一轮和这个文件的内容自动写（同步到仓库前跑），别手改。输入 :version 回车能看
+// 界面语言：中文版这里是 'zh'；别的语言的页面由 tools/i18n.mjs 生成，这一行换成那种语言的代码。
+// 每种语言各存各的档（存档键名后面多 -<代码>），联机房间也分开（房间号前缀不同），切换语言等于换到另一种语言的页面
+const LANG = 'zh';
+const LANG_KEY = 'aws-monopoly-lang';   // 记住上次选的语言：根目录 index.html 按它打开哪个版本
+// 有哪些语言：每种语言用它自己的写法（不翻译）。中文版在 code/index.html，别的语言在 code/<代码>/index.html（tools/i18n.mjs build <代码> 按 i18n/<代码>.json 生成）。
+// 以后加语言：这里加一行，再出一份 i18n/<代码>.json
+const LANGS = [{ code: 'zh', name: '简体中文' }, { code: 'en', name: 'English' }];
+const langUrl = code => (LANG === 'zh' ? '' : '../') + (code === 'zh' ? '' : code + '/') + 'index.html' + location.search + location.hash;
+function switchLang(code) {
+  if (code === LANG) return;
+  try { localStorage.setItem(LANG_KEY, code); } catch (e) { }
+  location.href = langUrl(code);
+}
+// 语言按钮：地球图标 +「语言」，点开列出全部语言，当前的打勾（按钮上不写某一种语言的名字，语言多了也一样）
+const GLOBE = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M1.8 8h12.4M8 1.8c1.9 1.7 2.8 3.8 2.8 6.2S9.9 12.5 8 14.2C6.1 12.5 5.2 10.4 5.2 8S6.1 3.5 8 1.8z" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>';
+const langBtn = cls => `<button type="button" class="${cls} langsw" onclick="langMenu(this)" aria-haspopup="menu" aria-expanded="false" title="语言 · Language">${GLOBE}<span>语言</span><i class="lc" aria-hidden="true">▾</i></button>`;
+function langMenu(btn) {
+  let m = $('#langmenu'); if (m) { m._close(); return; }
+  m = document.createElement('div'); m.id = 'langmenu'; m.setAttribute('role', 'menu');
+  m.innerHTML = LANGS.map(l => `<button type="button" role="menuitemradio" aria-checked="${l.code === LANG}" lang="${l.code === 'zh' ? 'zh-CN' : l.code}" data-code="${l.code}"><span>${l.name}</span>${l.code === LANG ? '<i aria-hidden="true">✓</i>' : ''}</button>`).join('');
+  document.body.appendChild(m);
+  const r = btn.getBoundingClientRect(); m.style.top = Math.round(r.bottom + 4) + 'px'; m.style.left = Math.round(Math.max(8, Math.min(innerWidth - m.offsetWidth - 8, r.right - m.offsetWidth))) + 'px';
+  btn.setAttribute('aria-expanded', 'true');
+  const out = e => { if (!m.contains(e.target) && !btn.contains(e.target)) m._close(); };
+  const key = e => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); m._close(); if (btn.isConnected) btn.focus(); } };
+  m._close = () => { m.remove(); btn.setAttribute('aria-expanded', 'false'); document.removeEventListener('pointerdown', out, true); document.removeEventListener('keydown', key, true); };
+  m.onclick = e => { const b = e.target.closest('[data-code]'); if (b) { m._close(); switchLang(b.dataset.code); } };
+  setTimeout(() => { document.addEventListener('pointerdown', out, true); document.addEventListener('keydown', key, true); }, 0);
+  m.querySelector('[aria-checked="true"]')?.focus();
+}
+const GAME_VERSION = { major: 1, round: 15, name: '第十五轮', title: '英文版、语言菜单、老板键、版本号', commits: 52, changes: 416, since: '2026-10-20', build: 'ebf1a00', time: '2026-11-10 12:01' };
 const SQ = LAYOUT.map(k => SVC[k] ? { t: 'prop', k, icon: k, ...SVC[k] } : UTIL[k] ? { t: 'util', k, icon: k, ...UTIL[k] } : { k, ...SPECIAL[k] });
 // 起点、User Group 活动的说明跟着模式变（地狱模式起点只领 $150，娱乐模式 UG 抽三张）；用的时候才读，这时 BAL、S 都有了
 { const go = SQ.find(q => q.k === 'go'), ug = SQ.find(q => q.k === 'free');
@@ -4141,7 +4239,7 @@ const buyPaid = i => { const pr = S.props[i]; return pr.spot ? pr.spotPaid : (pr
 // 和 takeOffline 一样一份一份、一级一级退，每次各自取整，显示的数和实际到账一致
 const stripValue = i => { const pr = S.props[i]; let v = (pr.cap || 0) * Math.round(capCost(i) / 2); for (let l = 1; l <= pr.level; l++) v += Math.round(upPaidOf(i, l) / 2); return v; };
 // 折扣按中文习惯写：0.5 → 5 折，0.45 → 45 折，0.85 → 85 折
-const zhe = x => { const n = Math.round(x * 100); return `${n % 10 ? n : n / 10} 折`; };
+const zhe = x => { const n = Math.round(x * 100); return LANG === 'en' ? `${100 - n}% off` : `${n % 10 ? n : n / 10} 折`; };   // 英文版写成「20% off」
 const sellZhe = () => zhe(BAL.sell);
 // Trusted Advisor 按实付全额退：买价 + 升级 + 容量，下线的减掉下线时已经拿到的钱。按钮上的数和实际到账共用这一个算法
 const fullBack = i => { const pr = S.props[i]; return Math.max(0, buyPaid(i) + upPaidSum(i) + (pr.cap || 0) * capCost(i) - (pr.offline ? pr.offCash || 0 : 0)); };
@@ -6268,10 +6366,10 @@ function retroData(q) {
   return { money, cats, total, earn, burn, near, combos, tips: tips.slice(0, 4) };
 }
 // 成本流向线和小账的颜色（深色战报）：钱花在哪只分三类——浅 = 投进去的（买服务、升级），灰 = 经营开销，红 = 流走的（付给别人的过路费、罚款和账单）
-const SPEND_C = { 买服务: '#e9edf2', 升级和容量: '#e9edf2', 运行费: '#8d99a8', 请求费: '#8d99a8', 抽卡和其他: '#8d99a8', 付过路费: '#f0614f', 罚款和账单: '#f0614f' };
+const SPEND_C = { '买服务': '#e9edf2', '升级和容量': '#e9edf2', '运行费': '#8d99a8', '请求费': '#8d99a8', '抽卡和其他': '#8d99a8', '付过路费': '#f0614f', '罚款和账单': '#f0614f' };   // 键写成字符串：英文版翻译时和 cats 里的名字一起换
 const SPEND_OUT = ['付过路费', '罚款和账单'];   // 小账里这两行的金额写红字
 // 钱从哪来：一种来源一级灰，由浅到深（过路费最浅，最显眼）；深底上最深的一级也有 3:1 的对比度
-const GAIN_C = { 实收过路费: '#e9edf2', '起点 Credits': '#b7c0cb', 卡牌和技能: '#8f9bab', 卖回和下线: '#717d8c', 其他: '#5d6876' };
+const GAIN_C = { '实收过路费': '#e9edf2', '起点 Credits': '#b7c0cb', '卡牌和技能': '#8f9bab', '卖回和下线': '#717d8c', '其他': '#5d6876' };
 const outTag = q => S.winner === q.id ? ' · 获胜' : q.alive ? '' : ' · 已出局';
 // 战报里的状态：「获胜」「已出局」包成一块不折行（不改 outTag，导出的纯文本还在用它）
 const outTagH = q => outTag(q) ? `<span class="tg">${outTag(q).replace(/^ · /, '')}</span>` : '';
@@ -7155,8 +7253,8 @@ function renderCenter() {
   const meta = [`第 ${S.round}${S.cfg.roundLimit ? ' / ' + S.cfg.roundLimit : ''} 轮`, diffN, winN, (S.cfg.dlc || []).length ? `<span class="dnl">${S.cfg.dlc.map((k, i) => `<span class="dn">${i ? '' : 'DLC：'}${DLC[k].n}</span>`).join('、')}</span>${S.cfg.dlc.length >= 6 ? `<span class="dls" role="button" tabindex="0" onclick="toast('这局开了：' + this.title, 5000)" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }" title="${S.cfg.dlc.map(k => DLC[k].n).join('、')}">${S.cfg.dlc.length} 个 DLC</span>` : ''}` : '', S.cfg.learn && !isStudy() ? '边玩边答题' : '', S.endAt ? `剩余 <span id="timer">${fmtTime(timeLeft())}</span>` : '', F.balance() && S.round <= BAL.protect ? `<span title="前 ${BAL.protect} 轮每笔过路费最多 $50，格子上也按 $50 标；第 ${BAL.protect + 1} 轮起按原价收">新账户保护期（过路费最多 $50）</span>` : '', S.cfg.cardMul && S.cfg.cardMul !== 1 && S.cfg.cardMul !== '1' ? `卡牌倍率 ${fmtMul(cardMulBase() / cardGrowMul())}${S.cfg.cardMul === 'rand' ? '（每轮随机）' : ''}` : '', cardGrowMul() > 1 ? `<span title="卡牌上的收钱、罚款跟着流量涨">卡牌金额 ${fmtMul(cardGrowMul())}</span>` : '', trafficMul() > 1 ? `<span title="用户增长：每 ${BAL.growthEvery} 轮所有过路费再涨 ${Math.round(BAL.growth * 100)}%">流量 ×${trafficMul()}</span>` : ''].filter(Boolean).map(x => `<span class="mi">${x}</span>`).join(' · ');
   $('#center').innerHTML = `
     <div class="c-head">
-      <div class="gtitle"><div><h1>亚马逊云科技 User Group 云上大亨</h1><div class="sub">${meta}</div></div></div>
-      <div class="meta"><div class="tgrp" role="group" aria-label="帮助"><button class="sm" onclick="showManual()">玩法</button><button class="sm" onclick="gallery()">图鉴</button><button class="sm" onclick="playerGallery()" title="玩家图鉴：所有角色卡的起始资金、能力、弱点、专属技能">角色</button><button class="sm" onclick="maybeTour(true)">新手引导</button><button class="sm" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'?'}))" title="键盘快捷键">快捷键</button><button class="sm" onclick="toggleSfx()" title="掷骰子、抽卡、收钱的音效" aria-pressed="${SFX.on}">音效：${SFX.on ? '开' : '关'}</button></div><details class="gmenu" ${GMENU.open ? 'open' : ''}><summary>对局</summary><div class="gm"><button class="sm" onclick="renameDialog()" title="给自己（同一台电脑上谁都行）换个名字">改名字</button><button class="sm" onclick="toggleArchTip()" aria-pressed="${!archTipOff()}" title="凑成有效架构时问要不要看讲解：自己凑成弹窗，别人凑成在右下角提示">架构提示：${archTipOff() ? '关' : '开'}</button>${MP.role === 'client' ? `<button class="sm off" aria-disabled="true" onclick="toast('动画速度由房主设置')" title="动画速度由房主设置，大家一起变">动画速度：${S.cfg.anim === 'fast' ? '快' : '标准'}（房主设）</button>${over ? '' : '<button class="sm" onclick="MP.proposeEnd()" title="请房主现在按估值结算这一局">提议现在结算</button>'}<button class="sm" onclick="MP.leave()" title="离开这个房间：房主会把你的座位标成掉线，可以替你操作，你用同一个名字还能加回来">离开房间</button>` : `<button class="sm" onclick="toggleAnim()" aria-pressed="${S.cfg.anim === 'fast'}" title="骰子、走棋、飞行都更快，画面不变；联机时房主改，大家一起变">动画速度：${S.cfg.anim === 'fast' ? '快' : '标准'}</button>${MP.role === 'host' && !over && Object.keys(MP.seats).length ? '<button class="sm" onclick="MP.kickDialog()" title="把联机玩家移出房间，他的座位交给电脑接着打">移出玩家</button>' : ''}`}<button class="sm" onclick="quitGame()" title="${SAVE_FAIL ? '浏览器存储写不进去，这局没存上，退出就回不到现在这一步' : '对局自动保存，回开局页点「继续上一局」能接着玩'}">退出到开局页</button><button class="sm" onclick="confirmNew()">新游戏</button>${over || MP.role === 'client' ? '' : idle ? `<button class="sm" onclick="endNow()" title="时间到了、不想打了：现在按估值排名结束这一局">现在结算</button>` : `<button class="sm off" aria-disabled="true" onclick="toast('结算中，等这一步做完再结算')">现在结算</button>`}${bk}</div></details></div>
+      <div class="gtitle"><div><h1><span class="gt-pre">亚马逊云科技 User Group </span>云上大亨</h1><div class="sub">${meta}</div></div></div>
+      <div class="meta"><div class="tgrp" role="group" aria-label="帮助"><button class="sm" onclick="showManual()">玩法</button><button class="sm" onclick="gallery()">图鉴</button><button class="sm" onclick="playerGallery()" title="玩家图鉴：所有角色卡的起始资金、能力、弱点、专属技能">角色</button><button class="sm" onclick="maybeTour(true)">新手引导</button><button class="sm" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'?'}))" title="键盘快捷键">快捷键</button><button class="sm" onclick="toggleSfx()" title="掷骰子、抽卡、收钱的音效" aria-pressed="${SFX.on}">音效：${SFX.on ? '开' : '关'}</button>${langBtn('sm')}</div><details class="gmenu" ${GMENU.open ? 'open' : ''}><summary>对局</summary><div class="gm"><button class="sm" onclick="renameDialog()" title="给自己（同一台电脑上谁都行）换个名字">改名字</button><button class="sm" onclick="toggleBoss()" title="整页换成一张表格；再按一次 \` 键或者双击表格最上面的文件名回来">老板键（\`）</button><button class="sm" onclick="toggleArchTip()" aria-pressed="${!archTipOff()}" title="凑成有效架构时问要不要看讲解：自己凑成弹窗，别人凑成在右下角提示">架构提示：${archTipOff() ? '关' : '开'}</button>${MP.role === 'client' ? `<button class="sm off" aria-disabled="true" onclick="toast('动画速度由房主设置')" title="动画速度由房主设置，大家一起变">动画速度：${S.cfg.anim === 'fast' ? '快' : '标准'}（房主设）</button>${over ? '' : '<button class="sm" onclick="MP.proposeEnd()" title="请房主现在按估值结算这一局">提议现在结算</button>'}<button class="sm" onclick="MP.leave()" title="离开这个房间：房主会把你的座位标成掉线，可以替你操作，你用同一个名字还能加回来">离开房间</button>` : `<button class="sm" onclick="toggleAnim()" aria-pressed="${S.cfg.anim === 'fast'}" title="骰子、走棋、飞行都更快，画面不变；联机时房主改，大家一起变">动画速度：${S.cfg.anim === 'fast' ? '快' : '标准'}</button>${MP.role === 'host' && !over && Object.keys(MP.seats).length ? '<button class="sm" onclick="MP.kickDialog()" title="把联机玩家移出房间，他的座位交给电脑接着打">移出玩家</button>' : ''}`}<button class="sm" onclick="quitGame()" title="${SAVE_FAIL ? '浏览器存储写不进去，这局没存上，退出就回不到现在这一步' : '对局自动保存，回开局页点「继续上一局」能接着玩'}">退出到开局页</button><button class="sm" onclick="confirmNew()">新游戏</button>${over || MP.role === 'client' ? '' : idle ? `<button class="sm" onclick="endNow()" title="时间到了、不想打了：现在按估值排名结束这一局">现在结算</button>` : `<button class="sm off" aria-disabled="true" onclick="toast('结算中，等这一步做完再结算')">现在结算</button>`}${bk}</div></details></div>
     </div>
     ${over ? '' : `<div class="turnbar">${S.players.map(q => `<span class="tb ${q.id === S.cur && !over ? 'cur' : ''} ${q.alive ? '' : 'dead'} ${GAIN[q.id] > Date.now() ? 'gain' : ''}" title="${q.name}：现金 $${q.cash}，总资产 $${netWorth(q)}" onclick="jumpPl(${q.id})">${PAWN(q.color)}<b>${q.name}</b><span class="tbm"><i>$${q.cash}</i><small class="tba" title="总资产：现金 − 欠款 + 服务买价 + 升级和容量的投入">资产 $${netWorth(q)}</small></span>${q.jail !== null ? '<em>维护窗口</em>' : q.skip ? '<em>停一轮</em>' : !q.alive ? '<em>已出局</em>' : ''}</span>`).join('<span class="tbar">→</span>')}</div>`}
     <div class="cmain">
@@ -7197,9 +7295,9 @@ function renderCenter() {
 }
 const ROLE_ALIAS = { elb: ['ELB', 'ALB'], sagemaker: ['SageMaker AI', 'SageMaker'], shield: ['Shield Advanced', 'Shield'], lambda: ['Lambda@Edge', 'Lambda'] };
 function roleIn(c, i) {
-  const names = ROLE_ALIAS[SQ[i].k] || [SQ[i].n], depth = t => { let d = 0; return [...t].map(ch => (ch === '（' ? d++ : ch === '）' ? d-- : 0, d)); };
+  const names = ROLE_ALIAS[SQ[i].k] || [SQ[i].n], depth = t => { let d = 0; return [...t].map(ch => (ch.charCodeAt(0) === 0xFF08 ? d++ : ch.charCodeAt(0) === 0xFF09 ? d-- : 0, d)); };   // 全角括号按字符码比：英文版不翻这两处，英文的流程描述用半角括号
   // 先按箭头和分号切成几段，再把段里括号外的逗号切开
-  const segs = c.flow.replace(/（⇄[^）]*）|，?⇄）/g, '').split(/\s*(?:→|⇄|←|；)\s*|\s\+\s?|\+（/).flatMap(seg => { const d = depth(seg), out = []; let a = 0; [...seg].forEach((ch, k) => { if (ch === '，' && !d[k]) { out.push(seg.slice(a, k)); a = k + 1; } }); out.push(seg.slice(a)); return out; })
+  const segs = c.flow.replace(/（⇄[^）]*）|，?⇄）/g, '').split(/\s*(?:→|⇄|←|；)\s*|\s\+\s?|\+（/).flatMap(seg => { const d = depth(seg), out = []; let a = 0; [...seg].forEach((ch, k) => { if (ch.charCodeAt(0) === 0xFF0C && !d[k]) { out.push(seg.slice(a, k)); a = k + 1; } }); out.push(seg.slice(a)); return out; })
     .map(x => x.replace(/^（?可选）/, '').replace(/^（可选：?/, '').trim()).filter(Boolean);
   for (const n of names) { const hit = segs.filter(x => x.startsWith(n)); if (hit.length) return hit.slice(0, 2).join('；'); }
   for (const n of names) { const hit = segs.find(x => x.includes(n)); if (hit) return hit; }
@@ -7455,7 +7553,7 @@ function pillarSumPop(p) {
   const need = pillarNeed(), sc = pillarScore(p), n = sc.filter(v => v >= need).length;
   return `<div class="ppop"><div class="pph"><b>六大支柱</b><span class="pps">${n}/6 达成</span><span class="ppst ${waDone(p) ? 'ok' : ''}">${waDone(p) ? '已经够了' : `每条要 ${need} 分`}</span></div><ul class="ppl">${PILLARS.map((x, k) => `<li><span class="pt">${x}</span><b class="pg"${sc[k] >= need ? '' : ' style="color:var(--mut)"'}>${sc[k]}/${need}</b></li>`).join('')}</ul><p class="pprule">本局要求：${waRuleText()}${waTotalNeed() ? `；现在总分 ${pillarTotal(p)}` : ''}</p><p class="ppmore">展开卡片，悬停每条支柱看怎么补</p></div>`;
 }
-const zheTxt = r => r >= 1 ? '原价' : `${Math.round(r * 100) % 10 ? Math.round(r * 100) : Math.round(r * 10)} 折`;
+const zheTxt = r => r >= 1 ? '原价' : LANG === 'en' ? `${100 - Math.round(r * 100)}% off` : `${Math.round(r * 100) % 10 ? Math.round(r * 100) : Math.round(r * 10)} 折`;
 const cmTxt = cm => cm.map(c => c.type === 'sp' ? `Savings Plans 每圈承诺 $${c.amt}（还剩 ${c.laps} 圈）` : `${SQ[c.svc].n} RI 免 $${c.amt} 运行费（还剩 ${c.laps} 圈）`).join('、');
 function plCard(p, mine, offSeats) {
   const r = roleOf(p), isCur = p.id === S.cur && S.phase !== 'over', dead = !p.alive;
@@ -8551,7 +8649,7 @@ const SFX = { on: (() => { try { return localStorage.getItem('amono-sfx') !== 'o
 const sfxWarm = () => { removeEventListener('pointerdown', sfxWarm, true); removeEventListener('keydown', sfxWarm, true); if (SFX.on && !SFX.ctx && !BOT && !SIM && typeof AudioContext !== 'undefined') try { SFX.ctx = new AudioContext(); } catch (e) { } };
 addEventListener('pointerdown', sfxWarm, true); addEventListener('keydown', sfxWarm, true);
 function sfx(kind) {
-  if (!SFX.on || BOT || SIM || typeof AudioContext === 'undefined') return;
+  if (!SFX.on || BOT || SIM || (BOSS && BOSS.on) || typeof AudioContext === 'undefined') return;   // 老板键开着时不出声
   const now = performance.now(); if (SFX.last[kind] && now - SFX.last[kind] < (kind === 'step' ? 40 : 120)) return; SFX.last[kind] = now;
   try {
     const A = SFX.ctx || (SFX.ctx = new AudioContext()); if (A.state === 'suspended') A.resume();
@@ -9470,7 +9568,125 @@ function aiKick() {
 
 
 // ================= 键盘快捷键 =================
-function keyHelp() { ask({ local: true, cancelable: true, view: true, title: '键盘快捷键', html: '<table><tr><td><b>空格 / 回车</b></td><td>掷骰子、轮到下一位；弹窗里选主选项；骰子在转时直接出点数（单机）</td></tr><tr><td><b>1–9</b></td><td>弹窗里按顺序数第几个按钮（从左往右、从上往下，灰的也算一个）</td></tr><tr><td><b>回车（输入框里）</b></td><td>出价、改名字这类有输入框的窗口：输完按回车等于点主按钮；Spot 出价、改名字一打开光标就在框里，数字直接输进框。交易窗按回车不成交，要点按钮</td></tr><tr><td><b>B</b></td><td>资产管理</td></tr><tr><td><b>T</b></td><td>交易</td></tr><tr><td><b>M</b></td><td>玩法手册</td></tr><tr><td><b>G</b></td><td>图鉴</td></tr><tr><td><b>S</b></td><td>音效开关</td></tr><tr><td><b>H</b></td><td>收起 / 展开弹窗，先看棋盘再选</td></tr><tr><td><b>Esc</b></td><td>关掉只有一个按钮的提示、退出新手引导</td></tr></table>', buttons: [{ label: '知道了', value: true, cls: 'pri' }] }); }
+function keyHelp() { ask({ local: true, cancelable: true, view: true, title: '键盘快捷键', html: '<table><tr><td><b>空格 / 回车</b></td><td>掷骰子、轮到下一位；弹窗里选主选项；骰子在转时直接出点数（单机）</td></tr><tr><td><b>1–9</b></td><td>弹窗里按顺序数第几个按钮（从左往右、从上往下，灰的也算一个）</td></tr><tr><td><b>回车（输入框里）</b></td><td>出价、改名字这类有输入框的窗口：输完按回车等于点主按钮；Spot 出价、改名字一打开光标就在框里，数字直接输进框。交易窗按回车不成交，要点按钮</td></tr><tr><td><b>B</b></td><td>资产管理</td></tr><tr><td><b>T</b></td><td>交易</td></tr><tr><td><b>M</b></td><td>玩法手册</td></tr><tr><td><b>G</b></td><td>图鉴</td></tr><tr><td><b>S</b></td><td>音效开关</td></tr><tr><td><b>H</b></td><td>收起 / 展开弹窗，先看棋盘再选</td></tr><tr><td><b>Esc</b></td><td>关掉只有一个按钮的提示、退出新手引导</td></tr><tr><td><b>`</b></td><td>老板键：整页换成一张表格，标签页的标题和图标也换掉；再按一次回来，也可以双击表格最上面的文件名</td></tr><tr><td><b>:version 回车</b></td><td>看游戏版本（不在输入框里时按冒号，屏幕最下面出一条命令行）</td></tr></table>', buttons: [{ label: '知道了', value: true, cls: 'pri' }] }); }
+
+// ================= 老板键、:version =================
+// 老板键：按 `（反引号，Esc 下面、1 左边那个键）整页换成一张表格，标签页的标题和图标一起换掉，音效先停；
+// 再按一次 `、或者双击表格最上面的文件名，回到游戏。表格开着时别的键都不传给游戏（空格、数字不会替你掷骰子、选按钮），方向键、回车、Tab 在表格里挪格子。
+// 用 var：sfx() 里要读 BOSS，var 没有暂时性死区，脚本前面的代码先跑到也不会报错
+var BOSS = { on: false, title: '', icons: [], r: 7, c: 3, tap: 0 };
+const BOSS_FILE = '2026年11月 云资源成本周报.xlsx';
+const BOSS_ICON = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect width="16" height="16" rx="2" fill="#1e7145"/><path d="M3 5.5h10M3 8.5h10M3 11.5h10M6.5 3v10M10 3v10" stroke="#fff" stroke-width="1.1"/></svg>');
+const BOSS_COL = 'ABCDEFGH';
+function bossRows() {
+  const rnd = (i, k) => { const x = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };   // 伪随机，每次打开数字都一样
+  const who = ['张伟', '李娜', '王磊', '刘洋', '陈静'], env = ['prod-web', 'prod-data', 'prod-ml', 'shared-core'], buy = ['按需', '预留实例', 'Savings Plans', '按需', '按用量'];
+  return SQ.filter(x => x.t === 'prop').slice(0, 22).map((s, i) => { const cur = Math.round(1800 + rnd(i, 1) * 46000), prev = Math.round(cur * (.82 + rnd(i, 2) * .36)); return [env[i % 4], s.n, cur, prev, (cur - prev) / prev, who[i % 5], buy[i % 5]]; });
+}
+function bossHtml() {
+  const rows = bossRows(), n = rows.length, t = n + 2, sum = rows.reduce((a, r) => a + r[2], 0), sumP = rows.reduce((a, r) => a + r[3], 0);
+  const yen = v => '¥' + v.toLocaleString('en-US') + '.00', pct = x => (Math.abs(x) < .0005 ? '' : x > 0 ? '+' : '-') + Math.abs(x * 100).toFixed(1) + '%';
+  // 每格带上编辑栏里显示的内容（f），算出来的那几格显示公式
+  const td = (r, c, v, cls, f) => `<td data-r="${r}" data-c="${c}"${cls ? ` class="${cls}"` : ''} data-f="${esc(f ?? v)}">${esc(v)}</td>`;
+  const tr = (r, cells) => `<tr${r === t ? ' class="tot"' : ''}><th>${r}</th>${cells.join('')}</tr>`;
+  const head = ['环境', '服务', '本月费用', '上月费用', '环比', '负责人', '计费方式', ''];
+  const body = [tr(1, head.map((h, c) => td(1, c + 1, h, h ? 'h' : ''))),
+    ...rows.map((x, i) => { const r = i + 2; return tr(r, [td(r, 1, x[0]), td(r, 2, x[1]), td(r, 3, yen(x[2]), 'n', String(x[2])), td(r, 4, yen(x[3]), 'n', String(x[3])), td(r, 5, pct(x[4]), 'n' + (x[4] > .1 ? ' up' : ''), `=(C${r}-D${r})/D${r}`), td(r, 6, x[5]), td(r, 7, x[6]), td(r, 8, '')]); }),
+    tr(t, [td(t, 1, '合计'), td(t, 2, ''), td(t, 3, yen(sum), 'n', `=SUM(C2:C${t - 1})`), td(t, 4, yen(sumP), 'n', `=SUM(D2:D${t - 1})`), td(t, 5, pct((sum - sumP) / sumP), 'n', `=(C${t}-D${t})/D${t}`), td(t, 6, ''), td(t, 7, ''), td(t, 8, '')]),
+    ...Array.from({ length: 16 }, (_, k) => tr(t + 1 + k, Array.from({ length: 8 }, (_, c) => td(t + 1 + k, c + 1, ''))))];
+  return `<div class="bs-top"><span class="bs-dots" aria-hidden="true"><i></i><i></i><i></i></span><b class="bs-file" title="双击回到游戏">${BOSS_FILE}</b><span class="bs-saved">已保存</span></div>
+  <div class="bs-menu">${['文件', '开始', '插入', '页面布局', '公式', '数据', '审阅', '视图', '帮助'].map((m, i) => `<span${i === 1 ? ' class="on"' : ''}>${m}</span>`).join('')}</div>
+  <div class="bs-tool"><span class="bs-sel">等线</span><span class="bs-sel sm">11</span><b>B</b><i>I</i><u>U</u><span class="bs-sep"></span><span>¥</span><span>%</span><span>.00</span><span class="bs-sep"></span><span>求和</span><span>排序和筛选</span><span>条件格式</span></div>
+  <div class="bs-fx"><span class="bs-ref"></span><span class="bs-fxi">fx</span><span class="bs-fxv"></span></div>
+  <div class="bs-grid"><table><tr class="ch"><th></th>${BOSS_COL.split('').map(c => `<th>${c}</th>`).join('')}</tr>${body.join('')}</table></div>
+  <div class="bs-tabs"><span class="on">汇总</span><span>明细</span><span>预算对比</span><span>+</span></div>
+  <div class="bs-status"><span>就绪</span><span>计数：${n}　求和：${yen(sum)}</span><span>100%</span></div>`;
+}
+function bossSel(r, c) {
+  const el = $('#boss'); if (!el) return;
+  const max = el.querySelectorAll('.bs-grid tr').length - 1; r = Math.max(1, Math.min(max, r)); c = Math.max(1, Math.min(BOSS_COL.length, c));
+  el.querySelector('td.sel')?.classList.remove('sel');
+  const cell = el.querySelector(`td[data-r="${r}"][data-c="${c}"]`); if (!cell) return;
+  cell.classList.add('sel'); BOSS.r = r; BOSS.c = c;
+  el.querySelector('.bs-ref').textContent = BOSS_COL[c - 1] + r; el.querySelector('.bs-fxv').textContent = cell.dataset.f;
+}
+function toggleBoss(force) {
+  const on = force ?? !BOSS.on; if (on === BOSS.on) return; BOSS.on = on;
+  let el = $('#boss');
+  if (on) {
+    if (!el) { el = document.createElement('div'); el.id = 'boss'; document.body.appendChild(el); }
+    el.innerHTML = bossHtml(); el.hidden = false;
+    const f = el.querySelector('.bs-file');
+    f.ondblclick = () => toggleBoss(false);
+    f.onpointerup = e => { if (e.pointerType === 'mouse') return; const now = Date.now(); if (now - BOSS.tap < 400) toggleBoss(false); BOSS.tap = now; };   // 触屏没有双击：两下点得够快也算
+    el.querySelector('.bs-grid').onclick = e => { const c = e.target.closest('td[data-r]'); if (c) bossSel(+c.dataset.r, +c.dataset.c); };
+    bossSel(BOSS.r, BOSS.c);
+    BOSS.title = document.title; document.title = BOSS_FILE;
+    BOSS.icons = [...document.querySelectorAll('link[rel~="icon"]')]; BOSS.icons.forEach(l => l.remove());
+    const ic = document.createElement('link'); ic.rel = 'icon'; ic.href = BOSS_ICON; ic.id = 'bossicon'; document.head.appendChild(ic);
+    document.documentElement.classList.add('bossing');
+    if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+  } else {
+    if (el) { el.hidden = true; el.innerHTML = ''; }
+    document.title = BOSS.title || document.title; $('#bossicon')?.remove(); BOSS.icons.forEach(l => document.head.appendChild(l)); BOSS.icons = [];
+    document.documentElement.classList.remove('bossing');
+  }
+}
+// :version 这类命令：不在输入框里时按 :（中文输入法打出来的 ：也算）屏幕最下面出一条命令行，像 vim；回车执行，Esc 取消，退格删到空就关掉
+var VIM = { on: false, s: '', t: 0 };
+function vimBar(txt, err) {
+  let el = $('#vimcmd'); if (!el) { el = document.createElement('div'); el.id = 'vimcmd'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+  el.className = err ? 'err' : ''; el.innerHTML = err ? esc(txt) : ':' + esc(txt) + '<i class="cur" aria-hidden="true"></i>'; el.hidden = false;
+}
+function vimClose() { VIM.on = false; VIM.s = ''; clearTimeout(VIM.t); const el = $('#vimcmd'); if (el) el.hidden = true; }
+function vimRun(cmd) {
+  const c = cmd.trim();
+  if (!c) return vimClose();
+  if (/^(v|ver|version)$/i.test(c)) { vimClose(); return showVersion(); }
+  VIM.on = false; vimBar('E492: 不是编辑器的命令: ' + c, true); clearTimeout(VIM.t); VIM.t = setTimeout(vimClose, 2600);
+}
+// 版本号：v1.<第几轮>.<第几次提交>，见 tools/stamp_version.py
+const verNo = (V = GAME_VERSION) => `v${V.major || 1}.${V.round}${V.commits ? '.' + V.commits : ''}`;
+function showVersion() {
+  const V = GAME_VERSION, nSvc = SQ.filter(x => x.t === 'prop').length, nCard = INC.length - 1 + REI.length - 1, nQ = Object.values(QUIZ).flat().length + Object.values(QBANK).reduce((t, b) => t + b.qs.length, 0);
+  const ext = '<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M6 3h7v7M13 3 4 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const stats = [[N, '格棋盘'], [nSvc, '个服务'], [nCard, '张卡牌'], [COMBOS.length, '个有效架构'], [nQ, '道题']];
+  const info = `亚马逊云科技 User Group 云上大亨 ${verNo()}（${V.name}）build ${V.build}${V.time ? ' · ' + V.time : ''}`;
+  // 和封面一个风格：深色网格底、左上一团橙光、等宽字的小标；中间像终端一样几行（这一版、构建号、生成时间、线上部署），下面一排内容规模和几个链接
+  const html = `<div class="ver">
+    <div class="ver-h"><div class="ver-t"><p class="ver-eb"><span>BUILD</span>亚马逊云科技 User Group</p><b>云上大亨</b></div><div class="ver-no"><small>RELEASE</small><b>${verNo()}</b></div></div>
+    <div class="ver-term"><div class="ver-cmd"><span>$</span>:version</div>
+      <dl><dt>这一版</dt><dd>${esc(V.name)} · ${esc(V.title)}</dd>${V.changes ? `<dt>累计</dt><dd>${V.round} 轮更新、${V.changes} 项改动${V.commits ? `、${V.commits} 次提交` : ''}${V.since ? `（${V.since} 起）` : ''}</dd>` : ''}<dt>构建号</dt><dd><code>${esc(V.build)}</code></dd>${V.time ? `<dt>生成时间</dt><dd>${esc(V.time)}</dd>` : ''}<dt class="vdep" hidden>线上部署</dt><dd class="vdep" hidden><code></code></dd></dl></div>
+    <ul class="ver-stats">${stats.map(([n, t]) => `<li><b>${n}</b><span>${t}</span></li>`).join('')}</ul>
+    <div class="ver-links"><a href="../更新说明.html" target="_blank" rel="noopener">更新说明${ext}</a><a href="https://github.com/cloudsmithy/aws_game" target="_blank" rel="noopener noreferrer">项目地址${ext}</a><a href="https://github.com/cloudsmithy/aws_game/issues" target="_blank" rel="noopener noreferrer">提 issue${ext}</a></div>
+  </div>`;
+  ask({ local: true, cancelable: true, view: true, cls: 'verbox', title: '版本', html, buttons: [{ label: '复制版本信息', value: 'copy', title: '提 issue 时贴上，方便对上是哪一版' }, { label: '知道了', value: true, cls: 'pri' }] })
+    .then(v => { if (v !== 'copy') return; const done = () => toast('版本信息已复制'); try { navigator.clipboard.writeText(info).then(done, () => toast(info, 6000)); } catch (e) { toast(info, 6000); } });
+  // 自动部署的服务器根目录有 _deployment.json（里面是提交号），能读到就加一行；本地打开、GitHub Pages 上没有，不显示
+  if (/^https?:$/.test(location.protocol)) fetch(location.href.replace(/code\/.*$/, '') + '_deployment.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(d => { const els = document.querySelectorAll('.ver .vdep'); if (d && d.revision && els.length) { els[1].querySelector('code').textContent = String(d.revision).slice(0, 7); els.forEach(e => { e.hidden = false; }); } }).catch(() => { });
+}
+// 捕获阶段先拿到按键：老板键、表格里的方向键、命令行都在游戏自己的快捷键之前处理，处理完就不往下传
+addEventListener('keydown', e => {
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || '') || e.target.isContentEditable;
+  if (e.code === 'Backquote' && !e.metaKey && !e.ctrlKey && !e.altKey && !VIM.on) { e.preventDefault(); e.stopImmediatePropagation(); toggleBoss(); return; }
+  if (BOSS.on) {
+    e.stopImmediatePropagation();
+    if (e.metaKey || e.ctrlKey) return;   // 浏览器自己的快捷键（关标签页、切标签页）照常
+    e.preventDefault();
+    const d = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1], Enter: [e.shiftKey ? -1 : 1, 0], Tab: [0, e.shiftKey ? -1 : 1] }[e.key];
+    if (d) bossSel(BOSS.r + d[0], BOSS.c + d[1]);
+    return;
+  }
+  if (VIM.on) {
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (e.key === 'Escape') vimClose();
+    else if (e.key === 'Enter') vimRun(VIM.s);
+    else if (e.key === 'Backspace') { if (!VIM.s) vimClose(); else { VIM.s = VIM.s.slice(0, -1); vimBar(VIM.s); } }
+    else if (e.key.length === 1 && !e.metaKey && !e.ctrlKey) { VIM.s = (VIM.s + e.key).slice(0, 40); vimBar(VIM.s); }
+    return;
+  }
+  if ((e.key === ':' || e.key === String.fromCharCode(0xFF1A)) && !typing && !e.metaKey && !e.ctrlKey && !e.altKey) { e.preventDefault(); e.stopImmediatePropagation(); clearTimeout(VIM.t); VIM.on = true; VIM.s = ''; vimBar(''); }
+}, true);
 // 空格 / 回车：主按钮（掷骰子、轮到下一位、弹窗里的主选项）；1–9：弹窗里第几个按钮；B 资产管理；T 交易；M 玩法；G 图鉴；S 音效开关；? 快捷键说明
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey || !S || $('#game').hidden) return;
@@ -10196,6 +10412,8 @@ function mpUI(kind) {
 }
 
 // ================= 启动 =================
+// 开局页「新建一局」标题右边放语言切换按钮（按钮字跟着语言变，所以不写死在 HTML 里）
+document.querySelector('.setup-head')?.insertAdjacentHTML('beforeend', langBtn('sm'));
 {
   const flow = ['route53', 'cloudfront', 'elb', 'ec2', 'rds'].map(k => `<div class="node">${awsImg(k)}<span>${SQ[IX[k]].n}</span></div>`).join('<div class="link"></div>');
   const REP = { storage: 's3', iaas: 'ec2', net: 'vpc', ctr: 'ecs', integ: 'sqs', db: 'rds', ana: 'athena', sec: 'guardduty', ai: 'bedrock', util: 'cloudwatch' };
