@@ -3,17 +3,18 @@
 <title>页面搬家了 · 亚马逊云科技 User Group 云上大亨</title>
 <script>
 // 网站的根就是仓库里的 code/（游戏是根上的 index.html），文档在 /docs/ 下。旧链接认出来，带着网址参数跳到新位置：
-//   …/code/xxx（游戏、讲解页原来在 code/ 下面）→ …/xxx；…/demo/<架构>.html → …/arch/<架构>.html；
+//   …/code/xxx（游戏、讲解页原来在 code/ 下面）→ …/xxx；…/demo/、…/arch/、…/svc/ → …/learn/arch/、…/learn/svc/；
 //   …/手册/…、…/常用手册/…、…/更新说明.html、三份 md → …/docs/…
 // 网站根：GitHub Pages 上是 /<仓库名>/，自己的域名上是 /
 (function () {
   var p = decodeURIComponent(location.pathname), q = location.search + location.hash;
   var base = /\.github\.io$/.test(location.hostname) ? ((p.match(/^(\/[^\/]+\/)/) || [0, '/'])[1]) : '/';
-  var rest = p.slice(base.length), to = null, m;
-  if ((m = rest.match(/^code\/(.*)$/))) to = m[1];
-  else if ((m = rest.match(/^demo\/(.*)$/))) to = 'arch/' + m[1];
-  else if (/^(手册\/.*|常用手册\/.*|更新说明\.(?:html|pdf)|规则书\.md|玩法手册\.md|玩法速览\.md)$/.test(rest)) to = 'docs/' + rest;
-  if (to != null) { location.replace(base + to.split('/').map(encodeURIComponent).join('/') + q); return; }
+  var rest = p.slice(base.length), to = rest, m;
+  if ((m = to.match(/^code\/(.*)$/))) to = m[1];   // 以前游戏和讲解页在 code/ 下面
+  if ((m = to.match(/^(?:demo|arch)\/(.*)$/))) to = 'learn/arch/' + m[1];   // 架构讲解：demo/ → arch/ → learn/arch/
+  else if ((m = to.match(/^svc\/(.*)$/))) to = 'learn/svc/' + m[1];   // 服务知识点：svc/ → learn/svc/
+  else if (/^(手册\/.*|常用手册\/.*|更新说明\.(?:html|pdf)|规则书\.md|玩法手册\.md|玩法速览\.md)$/.test(to)) to = 'docs/' + to;
+  if (to !== rest) { location.replace(base + to.split('/').map(encodeURIComponent).join('/') + q); return; }
   window.HOME = base;   // 别的找不到的页面：回到游戏
 })();
 </script>

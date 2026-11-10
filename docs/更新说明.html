@@ -785,7 +785,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
 </section>
 
 <section id="r15">
-  <h2><i>23</i>第十五轮（11-10）：英文版、语言菜单、老板键、版本号</h2>
+  <h2><i>23</i>第十五轮（11-10）：英文版、日文版、语言菜单、老板键、版本号</h2>
   <ul>
     <li><span class="tag new">新</span>英文版：界面、服务介绍、卡牌、角色、架构、题库、玩法手册和玩法速览都翻成了英文（5200 条）。中文原文和英文对照写在 <code>i18n/en.json</code>，<code>tools/i18n.mjs bundle</code> 按对照表从中文版生成多语言页面（发布的 <code>code/index.html</code> 就是它）；中文版改了以后重新抽一次、补上新增的几条就行，没补的那几句英文界面先显示中文。术语和写法见 <code>i18n/GLOSSARY.md</code>。讲解视频、图文讲解和服务知识点还是中文页面。</li>
     <li><span class="tag ui">UI</span>语言菜单：开局页「新建一局」右边、对局顶栏里的「地球图标 + 语言」按钮，点开列出简体中文、English（每种语言用它自己的写法），当前的打勾；选了当场换字、重画，不换页面、不回开局页，进行中的这一局接着玩（已经写下的日志还是原来的语言）。网址后面加 <code>/en/</code>、<code>/zh/</code> 直接用那种语言打开；记住上次选的语言。以后加语言只在列表里加一行、再出一份对照表。</li>
@@ -798,8 +798,11 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
     <li><span class="tag new">新</span>命令行（不在输入框里时按 :）：<code>:help</code> 列出全部命令，<code>:lang</code>、<code>:sound</code>、<code>:speed</code>、<code>:arch</code>、<code>:rules</code>、<code>:gallery</code>、<code>:roles</code>、<code>:keys</code>、<code>:tour</code>、<code>:assets</code>、<code>:trade</code>、<code>:w</code>、<code>:q</code>、<code>:wq</code>、<code>:new</code>、<code>:changelog</code>、<code>:issue</code>、<code>:repo</code>、<code>:boss</code>；Tab 补全、↑ ↓ 翻历史，输到一半灰字提示能补成什么，右边写这条命令干什么。</li>
     <li><span class="tag new">新</span>作弊码：<code>:money</code>（加减钱，一次最多 $300，可以给别人）、<code>:dice</code>（定下一次的点数）、<code>:upgrade</code>（名下服务升满）、<code>:jail</code>（把人送进维护窗口）、<code>:free</code>（自己出维护窗口）、<code>:grab</code>（随机抢一块地，抢到别人的照付过路费）。规则：现金高于 $1000 不能用；每人每回合一次、一局最多 3 次；每次都写进日志，旁边有「举报」，一轮以内被举报直接进维护窗口，过了一轮举报无效、作弊得逞；用的当下有 1/3 概率被 CloudTrail 审计发现（场上有别人买了 CloudTrail 是 2/3），技术债 +1（没开技术债的罚 $100），开了高速部署再扣 3 个部署点数。联机时远端发给房主执行，房主用 <code>:cheats off</code> 关掉。</li>
     <li><span class="tag ui">UI</span>玩法速览、玩法手册的窗口换成科技风深色（和版本窗一个样式）；角落格的名字最多两行、放不下就省略号，英文版字收小，下面一行说明照样露出来；显示不全的字，鼠标停上去能看全文。</li>
-    <li><span class="tag doc">文档</span>封面免责声明一栏加一行「本游戏模仿了大富翁的玩法，并拓展了相关云架构方面的功能。若有侵权，请告知。」（「请告知」链到 GitHub issue），README 开头也加了。</li>
+    <li><span class="tag doc">文档</span>封面免责声明的「玩法」一栏：讲开发者儿时和小伙伴玩大富翁、念念不忘，二十年后想用游戏分享亚马逊云科技的架构知识；接着是「本游戏模仿了大富翁的玩法，并拓展了云架构方面的功能」「若有侵权，请告知，我们会立即修改或下架」；反馈地址 github.com/cloudsmithy/aws_game/issues 单独一行写出来，点了打开。README 开头同一段话。</li>
     <li><span class="tag chg">改</span>合进 PR #3 的开发检查：README 的「开发检查」一节、两行 eslint 注释、.gitignore 里测试产物目录都搬进了本机副本，同步时不会冲掉。</li>
+    <li><span class="tag new">新</span>日文版（日本語）：界面、服务介绍、卡牌、角色、架构、题库、玩法手册和速览都翻成了日文（5200 条，<code>i18n/ja.json</code>；术语表 <code>i18n/GLOSSARY.ja.md</code>，服务名照写英文，支柱名用官方日文「運用上の優秀性」等）。语言菜单多了「日本語」，网址 <code>/ja/</code> 直接用日文打开。汉字用日文字形（Hiragino、Yu Gothic），对局中间和英文版一样收紧；封面标题一行放下，色组排成三列不在词中间折行。</li>
+    <li><span class="tag chg">改</span>日文版的电脑玩家、日志和卡牌：电脑认按钮用的字和正则单独手翻、和按钮对得上；日志里钱数的红绿按金额后面的动词判断（日文是「$200 を支払う」）；卡牌倍率不乘「$500 未満」这类门槛。日文版跑 6 局电脑对局 0 错误；中日两版各模拟 60 局，中位轮数 38.5 / 39，最高过路费、第一次破产的轮数接近。</li>
+    <li><span class="tag chg">改</span>仓库目录：架构讲解、服务知识点挪进 <code>code/learn/arch/</code>、<code>code/learn/svc/</code>（以前的 /arch/…、/svc/…、/demo/…、/code/arch/… 由 404 页跳过去）；开发检查的 package.json、lock 和 ESLint、Stylelint、Playwright 配置挪进 <code>tests/</code>（在 tests/ 里 <code>npm ci</code>、<code>npm run check</code>），根目录只留 code/、docs/、deploy/、tests/ 和 README。</li>
   </ul>
 </section>
 

@@ -2,7 +2,7 @@
 
 作者：亚马逊云科技 User Group · 云上大亨开发小组。规则有问题、发现 bug 或有建议，到这里提 issue：https://github.com/cloudsmithy/aws_game/issues
 
-> **免责声明**：游戏里特定亚马逊云科技生成式人工智能相关的服务仅在亚马逊云科技海外区域可用，亚马逊云科技 User Group 仅为帮助您了解行业前沿技术和发展海外业务选择推介该服务。亚马逊云科技中国区域相关云服务由西云数据和光环新网运营，具体信息以中国区域官网为准。游戏内价格为虚构，不代表实际定价；$ 是游戏币单位。本游戏模仿了大富翁的玩法，并拓展了相关云架构方面的功能。若有侵权，请告知（到 https://github.com/cloudsmithy/aws_game/issues 提 issue）。
+> **免责声明**：游戏里特定亚马逊云科技生成式人工智能相关的服务仅在亚马逊云科技海外区域可用，亚马逊云科技 User Group 仅为帮助您了解行业前沿技术和发展海外业务选择推介该服务。亚马逊云科技中国区域相关云服务由西云数据和光环新网运营，具体信息以中国区域官网为准。游戏内价格为虚构，不代表实际定价；$ 是游戏币单位。游戏开发者曾经是个爱玩的孩子，自从儿时和小伙伴玩过大富翁，便一直念念不忘。二十年后的某个夜晚，忽然有了这样的灵感：把自己对亚马逊云科技的了解和架构知识，通过游戏的方式传播出去，希望大家能在玩的同时，轻松学到云架构知识。本游戏模仿了大富翁的玩法，并拓展了云架构方面的功能。水平有限，难免有不周之处，还请多多包涵。若有侵权，请到 https://github.com/cloudsmithy/aws_game/issues 告知，我们会立即修改或下架。给您添麻烦了，恳请谅解。
 
 在亚马逊云科技上创业的大富翁类桌游：买服务、做高可用、扛住 Health 事件、控制账单、把服务组成有效架构。每个服务都按它的真实特性计费和升级，比如实例要自己做多 AZ，Serverless 没人用就不花钱，Bedrock 按 token 收费。玩法灵感来自经典的大富翁类桌游。
 
@@ -22,30 +22,29 @@ aws_game/
 ├── code/             网站（发布的就是这个文件夹，docs/ 放在网站的 /docs/ 下）
 │   ├── index.html    游戏：单文件、多语言（i18n/ 生成），同屏 2–4 人或联机
 │   ├── 404.html      旧链接跳转（以前的 /code/…、/demo/…、/手册/… 地址）
-│   ├── en/  zh/      按语言打开的入口：/en/ 英文、/zh/ 中文
-│   ├── arch/  svc/   架构讲解、服务知识点
-│   └── i18n/         多语言对照表 en.json、术语表 GLOSSARY.md、英文的玩法手册和速览
+│   ├── en/ zh/ ja/   按语言打开的入口：/en/ 英文、/zh/ 中文、/ja/ 日文
+│   ├── learn/        学习内容：arch/ 架构讲解（视频 + 图文）、svc/ 服务知识点
+│   └── i18n/         多语言对照表 en.json、ja.json，术语表 GLOSSARY.md（英文）、GLOSSARY.ja.md（日文），en/、ja/ 下是翻译的玩法手册和速览
 ├── docs/             规则书、玩法手册、玩法速览（md），更新说明（html / pdf），手册/、常用手册/（PDF）
 ├── deploy/           部署：docker/（本机用 Docker 发网页）、chengdu/（成都服务器自动部署）
-├── tests/            棋盘布局回归测试（Playwright）
+├── tests/            开发检查：棋盘布局回归测试（Playwright）、代码检查（ESLint、Stylelint），package.json 和配置都在这里
 ├── .github/          工作流：发布 GitHub Pages、自动检查、成都部署
-└── package.json 等   开发检查用的 Node 配置（ESLint、Stylelint、Playwright）
 ```
 
-网站地址：GitHub Pages 上是 https://cloudsmithy.github.io/aws_game/ （游戏就在根上），英文 https://cloudsmithy.github.io/aws_game/en/ 。以前的 `…/code/index.html` 地址会自动跳过来。
+网站地址：GitHub Pages 上是 https://cloudsmithy.github.io/aws_game/ （游戏就在根上），英文 https://cloudsmithy.github.io/aws_game/en/ ，日文 https://cloudsmithy.github.io/aws_game/ja/ 。以前的 `…/code/index.html` 地址会自动跳过来。
 
 ## 文件
 
 | 文件 | 是什么 |
 |---|---|
 | `code/index.html` | 网页版，单文件、多语言。同一台电脑 2–4 人轮流操作，也能各用各的设备联机；直接用浏览器打开就能玩 |
-| `code/en/` / `code/zh/` | 按语言打开的入口：网址后面加 `/en/` 用英文打开、`/zh/` 用中文打开（比如 cloudsmithy.github.io/aws_game/en/）；打开的都是同一个游戏页面 |
-| `code/i18n/` | 多语言：`en.json` 是「中文原文 → 英文」对照表（改译文改这里），`GLOSSARY.md` 是英文术语表和写法，`en/` 是英文的玩法手册和玩法速览。仓库里的 `code/index.html` 是按对照表生成的多语言页面，页面里点「语言」当场换字 |
+| `code/en/` / `code/zh/` / `code/ja/` | 按语言打开的入口：网址后面加 `/en/` 用英文打开、`/zh/` 用中文打开、`/ja/` 用日文打开（比如 cloudsmithy.github.io/aws_game/ja/）；打开的都是同一个游戏页面 |
+| `code/i18n/` | 多语言：`en.json`、`ja.json` 是「中文原文 → 英文 / 日文」对照表（改译文改这里），`GLOSSARY.md`、`GLOSSARY.ja.md` 是英文、日文的术语表和写法，`en/`、`ja/` 是翻译的玩法手册和玩法速览。仓库里的 `code/index.html` 是按对照表生成的多语言页面，页面里点「语言」当场换字 |
 | `docs/` | 文档：规则书、玩法手册、玩法速览（md），更新说明（html / pdf），`docs/手册/` 全部 PDF，`docs/常用手册/` 最常用的 7 份 |
 | `docs/手册/` | 全部 PDF，按「谁在什么时候用」分文件夹，都带书签（见下表） |
 | `docs/常用手册/` | 最常用的 7 份，从 `docs/手册/` 拷过来按使用先后编号：玩法速览、玩法手册、速查卡、主持人规则书、UG 活动流程单，实体版再加卡牌、棋盘与配件。每次跑 `tools/build_pdfs.py` 都会重新拷，别在这里改 |
-| `code/arch/` | 每个有效架构两页讲解：`<架构>-video.html` 是讲解视频（three.js 三维架构图，打开就播，一块一块讲这是什么服务、常见用法、为什么用它、在这里干什么，几选一的讲怎么选；字幕加配音，点图上任意一块看说明卡），`<架构>.html` 是图文讲解（架构图、数据怎么走、每一块干什么、这一环怎么选、在游戏里怎么算；从游戏里点进去会对比这位玩家现在这套和最优架构）；配音在 `code/arch/audio/`；`code/arch/index.html` 是目录。直接双击打开也能看。改了架构以后用 `node tools/build_arch_demos.mjs` 重新生成，配音用 `screen -dmS demotts zsh tools/demo_tts_run.sh`（本机 VoxCPM2 合成，只合成改过的句子） |
-| `code/svc/` | 每块服务一页知识点：它是什么、常见用法、为什么用它、核心知识点、三个关键功能、和谁比怎么选、练一练（点选项判对错）、用在哪些架构、在游戏里的数字；`code/svc/index.html` 是目录（能搜、能按色组筛）。和 `code/arch/` 分开放。改了服务、升级、题目或 `tools/svc_text.mjs` 以后用 `node tools/build_svc_pages.mjs` 重新生成 |
+| `code/learn/arch/` | 每个有效架构两页讲解：`<架构>-video.html` 是讲解视频（three.js 三维架构图，打开就播，一块一块讲这是什么服务、常见用法、为什么用它、在这里干什么，几选一的讲怎么选；字幕加配音，点图上任意一块看说明卡），`<架构>.html` 是图文讲解（架构图、数据怎么走、每一块干什么、这一环怎么选、在游戏里怎么算；从游戏里点进去会对比这位玩家现在这套和最优架构）；配音在 `code/arch/audio/`；`code/arch/index.html` 是目录。直接双击打开也能看。改了架构以后用 `node tools/build_arch_demos.mjs` 重新生成，配音用 `screen -dmS demotts zsh tools/demo_tts_run.sh`（本机 VoxCPM2 合成，只合成改过的句子） |
+| `code/learn/svc/` | 每块服务一页知识点：它是什么、常见用法、为什么用它、核心知识点、三个关键功能、和谁比怎么选、练一练（点选项判对错）、用在哪些架构、在游戏里的数字；`code/svc/index.html` 是目录（能搜、能按色组筛）。和 `code/arch/` 分开放。改了服务、升级、题目或 `tools/svc_text.mjs` 以后用 `node tools/build_svc_pages.mjs` 重新生成 |
 | `docs/更新说明.html` / `docs/更新说明.pdf` | 每一轮改了什么、为什么改、模拟数据 |
 | `docs/玩法速览.md` / `docs/玩法手册.md` / `docs/规则书.md` | 手册的源文件。网页里点「玩法」看到的是玩法速览（简版）和玩法手册（完整版） |
 | `deploy/docker/` | `Dockerfile`、`nginx.conf`：用 nginx 在本机发网页版和 PDF（见「怎么玩」） |
@@ -79,7 +78,7 @@ aws_game/
 - 3 人以上时右侧玩家卡默认收起，点名字那一行展开；右侧栏不跟着回合自动变化。屏幕 1800 宽以上时右侧栏加宽，玩家卡排两列。
 - 中间右栏是「这回合还能做什么」：能升级的服务、能发动的技能、技术债、能不能抽卡、能不能出题考对手（同一回合只能发动一个：考一个人每局一次，花 $100，答对他拿走、答错他赔你 $200；考全场每 3 圈一次，至少两位对手，每人 $50，答对的拿走、答错的赔你 $100）、哪个架构只差一块，能直接操作的带按钮。技能留下的持续效果（过路费翻倍、监管沙盒、运行费减免、被 DDoS 打下线）挂在玩家卡上。
 - 网页里点「玩法」先看三分钟的简版，可以切到完整版。
-- 语言：开局页「新建一局」右边、对局顶栏里的「语言」按钮，点开选简体中文或 English，当场换字，不换页面、不回开局页，进行中的这一局接着玩（之前的日志还是原来的语言）。
+- 语言：开局页「新建一局」右边、对局顶栏里的「语言」按钮，点开选简体中文、English 或日本語，当场换字，不换页面、不回开局页，进行中的这一局接着玩（之前的日志还是原来的语言）。
 - 老板键：按 `（Esc 下面那个键）整页换成一张表格，标签页标题和图标也换掉；再按一次回来，也可以双击表格最上面的文件名。不在输入框里时输入 `:version` 回车，弹出版本号、构建号和内容规模。
 - 开了高速部署时，中间带进度条的「部署 x/12」按钮打开 12 张技能卡片，亮着的点一下就发动，灰的写着为什么现在不能用。
 - 电脑在玩时主按钮旁边有「暂停 / 继续」；电脑的弹窗只能看，真人点按钮、按键都不会替它选。
@@ -109,6 +108,7 @@ docker run --rm -p 127.0.0.1:18080:8080 aws-ug-tycoon  # 打开 http://127.0.0.1
 开发检查使用 Node.js 24 或更新版本；游戏本身仍可直接打开 HTML，无需安装依赖。
 
 ```bash
+cd tests
 npm ci
 npx playwright install chromium
 npm run check

@@ -13,6 +13,3 @@ node_modules/
 参考素材/
 **/*.md
 **/*.log
-package.json
-package-lock.json
-*.config.mjs
