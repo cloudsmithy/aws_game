@@ -25,7 +25,7 @@ class DeploymentTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.source = self.root / 'source'
         self.source.mkdir()
-        for name in ('code/index.html', 'code/404.html', 'code/audio/voice.m4a', 'docs/更新说明.html', 'docs/更新说明.pdf', 'docs/手册/玩法.pdf'):
+        for name in ('code/index.html', 'code/404.html', 'code/audio/voice.m4a', 'code/i18n/en.json', 'docs/更新说明.html', 'docs/更新说明.pdf', 'docs/手册/玩法.pdf'):
             path = self.source / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(b'content')
@@ -53,8 +53,12 @@ class DeploymentTests(unittest.TestCase):
     def test_real_layout_unicode_and_audio_preserved(self):
         self.deploy('a' * 40)
         current = self.base / 'current'
-        self.assertEqual((current / 'docs/手册/玩法.pdf').read_bytes(), b'content')
+        self.assertEqual((current / 'docs/更新说明.html').read_bytes(), b'content')
         self.assertTrue((current / 'audio/voice.m4a').is_file())
+        # Only pages and audio are published: no PDFs, no translation tables
+        self.assertFalse((current / 'docs/手册').exists())
+        self.assertFalse((current / 'docs/更新说明.pdf').exists())
+        self.assertFalse((current / 'i18n').exists())
 
     def test_bad_archive_cannot_change_current(self):
         self.deploy('a' * 40)

@@ -15,9 +15,10 @@ COPY deploy/docker/nginx.conf /etc/nginx/nginx.conf
 RUN rm -f /etc/nginx/conf.d/default.conf /usr/share/nginx/html/*
 
 # 只放玩家要用的：网页、PDF 手册、更新说明；规则源文件、生成脚本、测试、编辑器设置都不进镜像（见旁边的 Dockerfile.dockerignore）
-# 网站的根就是 code/（和 GitHub Pages、成都服务器一样），文档放在 /docs/ 下
+# 网站的根就是 code/（和 GitHub Pages、成都服务器一样），只发布网页和讲解音频：对照表 code/i18n/ 在 .dockerignore 里排掉，
+# 文档只放更新说明；手册 PDF 和 md 留在仓库里
 COPY --chown=nginx:nginx code/ /usr/share/nginx/html/
-COPY --chown=nginx:nginx docs/ /usr/share/nginx/html/docs/
+COPY --chown=nginx:nginx docs/更新说明.html /usr/share/nginx/html/docs/
 
 USER nginx
 EXPOSE 8080

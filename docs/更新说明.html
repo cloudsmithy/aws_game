@@ -803,6 +803,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
     <li><span class="tag new">新</span>日文版（日本語）：界面、服务介绍、卡牌、角色、架构、题库、玩法手册和速览都翻成了日文（5200 条，<code>i18n/ja.json</code>；术语表 <code>i18n/GLOSSARY.ja.md</code>，服务名照写英文，支柱名用官方日文「運用上の優秀性」等）。语言菜单多了「日本語」，网址 <code>/ja/</code> 直接用日文打开。汉字用日文字形（Hiragino、Yu Gothic），对局中间和英文版一样收紧；封面标题一行放下，色组排成三列不在词中间折行。</li>
     <li><span class="tag chg">改</span>日文版的电脑玩家、日志和卡牌：电脑认按钮用的字和正则单独手翻、和按钮对得上；日志里钱数的红绿按金额后面的动词判断（日文是「$200 を支払う」）；卡牌倍率不乘「$500 未満」这类门槛。日文版跑 6 局电脑对局 0 错误；中日两版各模拟 60 局，中位轮数 38.5 / 39，最高过路费、第一次破产的轮数接近。</li>
     <li><span class="tag chg">改</span>仓库目录：架构讲解、服务知识点挪进 <code>code/learn/arch/</code>、<code>code/learn/svc/</code>（以前的 /arch/…、/svc/…、/demo/…、/code/arch/… 由 404 页跳过去）；开发检查的 package.json、lock 和 ESLint、Stylelint、Playwright 配置挪进 <code>tests/</code>（在 tests/ 里 <code>npm ci</code>、<code>npm run check</code>），根目录只留 code/、docs/、deploy/、tests/ 和 README。</li>
+    <li><span class="tag chg">改</span>网站只发布网页和讲解音频（GitHub Pages、成都服务器、Docker 镜像都一样）：手册 PDF、md 和对照表 <code>code/i18n/</code> 只放在仓库里，网站上的文档只留更新说明；以前的 PDF 链接转到 GitHub 上仓库里的文件。Pages 发布的等待时间从 10 分钟加到 30 分钟（上一次发布超时失败）。</li>
   </ul>
 </section>
 

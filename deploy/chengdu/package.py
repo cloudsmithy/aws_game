@@ -18,13 +18,20 @@ LEGACY_STUB = ('<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">'
 def build(root, output, revision):
     if not re.fullmatch(r'[0-9a-f]{40}', revision):
         raise ValueError('revision must be a full commit SHA')
-    # Site layout: everything in code/ goes to the site root, docs/ is served under /docs/
+    # Site layout: code/ goes to the site root (without code/i18n/, the translation tables), and only the
+    # HTML pages directly in docs/ are served under /docs/. PDFs and Markdown stay in the repository.
     entries = []
     for directory, prefix in (('code', ''), ('docs', 'docs/')):
         base = root / directory
         if not base.is_dir() or base.is_symlink():
             raise ValueError(f'missing or unsafe directory: {directory}')
-        entries.extend((path, prefix + path.relative_to(base).as_posix()) for path in sorted(base.rglob('*')))
+        for path in sorted(base.rglob('*')):
+            rel = path.relative_to(base).as_posix()
+            if directory == 'code' and (rel == 'i18n' or rel.startswith('i18n/')):
+                continue
+            if directory == 'docs' and not (path.suffix == '.html' and '/' not in rel):
+                continue
+            entries.append((path, prefix + rel))
     files, sources = {}, {}
     for path, name in entries:
         if path.is_symlink():

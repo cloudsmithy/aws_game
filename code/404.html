@@ -4,7 +4,7 @@
 <script>
 // 网站的根就是仓库里的 code/（游戏是根上的 index.html），文档在 /docs/ 下。旧链接认出来，带着网址参数跳到新位置：
 //   …/code/xxx（游戏、讲解页原来在 code/ 下面）→ …/xxx；…/demo/、…/arch/、…/svc/ → …/learn/arch/、…/learn/svc/；
-//   …/手册/…、…/常用手册/…、…/更新说明.html、三份 md → …/docs/…
+//   …/更新说明.html → …/docs/更新说明.html；手册 PDF、md（网站上不发布）→ GitHub 上仓库里的文件
 // 网站根：GitHub Pages 上是 /<仓库名>/，自己的域名上是 /
 (function () {
   var p = decodeURIComponent(location.pathname), q = location.search + location.hash;
@@ -13,7 +13,9 @@
   if ((m = to.match(/^code\/(.*)$/))) to = m[1];   // 以前游戏和讲解页在 code/ 下面
   if ((m = to.match(/^(?:demo|arch)\/(.*)$/))) to = 'learn/arch/' + m[1];   // 架构讲解：demo/ → arch/ → learn/arch/
   else if ((m = to.match(/^svc\/(.*)$/))) to = 'learn/svc/' + m[1];   // 服务知识点：svc/ → learn/svc/
-  else if (/^(手册\/.*|常用手册\/.*|更新说明\.(?:html|pdf)|规则书\.md|玩法手册\.md|玩法速览\.md)$/.test(to)) to = 'docs/' + to;
+  else if (to === '更新说明.html') to = 'docs/' + to;
+  // 手册 PDF、md 只放在仓库里（网站只发布网页和音频）：转到 GitHub 上的文件
+  if ((m = to.match(/^(?:docs\/)?((?:手册|常用手册)\/.*|更新说明\.pdf|规则书\.md|玩法手册\.md|玩法速览\.md)$/))) { location.replace('https://github.com/cloudsmithy/aws_game/blob/master/docs/' + m[1].split('/').map(encodeURIComponent).join('/')); return; }
   if (to !== rest) { location.replace(base + to.split('/').map(encodeURIComponent).join('/') + q); return; }
   window.HOME = base;   // 别的找不到的页面：回到游戏
 })();

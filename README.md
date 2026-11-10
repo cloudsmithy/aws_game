@@ -19,7 +19,7 @@
 
 ```
 aws_game/
-├── code/             网站（发布的就是这个文件夹，docs/ 放在网站的 /docs/ 下）
+├── code/             网站（发布的就是这个文件夹，另加 docs/更新说明.html；对照表 i18n/ 不发布）
 │   ├── index.html    游戏：单文件、多语言（i18n/ 生成），同屏 2–4 人或联机
 │   ├── 404.html      旧链接跳转（以前的 /code/…、/demo/…、/手册/… 地址）
 │   ├── en/ zh/ ja/   按语言打开的入口：/en/ 英文、/zh/ 中文、/ja/ 日文
@@ -31,7 +31,7 @@ aws_game/
 ├── .github/          工作流：发布 GitHub Pages、自动检查、成都部署
 ```
 
-网站地址：GitHub Pages 上是 https://cloudsmithy.github.io/aws_game/ （游戏就在根上），英文 https://cloudsmithy.github.io/aws_game/en/ ，日文 https://cloudsmithy.github.io/aws_game/ja/ 。以前的 `…/code/index.html` 地址会自动跳过来。
+网站地址：GitHub Pages 上是 https://cloudsmithy.github.io/aws_game/ （游戏就在根上），英文 https://cloudsmithy.github.io/aws_game/en/ ，日文 https://cloudsmithy.github.io/aws_game/ja/ 。以前的 `…/code/index.html` 地址会自动跳过来。网站只发布网页和讲解音频，手册 PDF 不放到网站上，在仓库的 `docs/` 里下载（旧的 PDF 链接会转到 GitHub 上的文件）。
 
 ## 文件
 
@@ -47,7 +47,7 @@ aws_game/
 | `code/learn/svc/` | 每块服务一页知识点：它是什么、常见用法、为什么用它、核心知识点、三个关键功能、和谁比怎么选、练一练（点选项判对错）、用在哪些架构、在游戏里的数字；`code/svc/index.html` 是目录（能搜、能按色组筛）。和 `code/arch/` 分开放。改了服务、升级、题目或 `tools/svc_text.mjs` 以后用 `node tools/build_svc_pages.mjs` 重新生成 |
 | `docs/更新说明.html` / `docs/更新说明.pdf` | 每一轮改了什么、为什么改、模拟数据 |
 | `docs/玩法速览.md` / `docs/玩法手册.md` / `docs/规则书.md` | 手册的源文件。网页里点「玩法」看到的是玩法速览（简版）和玩法手册（完整版） |
-| `deploy/docker/` | `Dockerfile`、`nginx.conf`：用 nginx 在本机发网页版和 PDF（见「怎么玩」） |
+| `deploy/docker/` | `Dockerfile`、`nginx.conf`：用 nginx 在本机发网页版（见「怎么玩」） |
 | `deploy/chengdu/` | 成都服务器自动部署：打包、服务器上的接收程序、配置说明（见文末） |
 | `宣传片/` | 宣传片和玩法讲解视频（mp4，另有能直接播放的 html）：`玩法讲解_娱乐模式.mp4` … `玩法讲解_地狱模式.mp4` 是 6 个模式各自的讲解 |
 | `tools/` | 生成 PDF、卡牌和跑模拟的脚本；题库在 `tools/qbank/` |
@@ -98,7 +98,7 @@ docker run --rm -p 127.0.0.1:8080:8080 aws-ug-tycoon   # 然后打开 http://127
 docker run --rm -p 127.0.0.1:18080:8080 aws-ug-tycoon  # 打开 http://127.0.0.1:18080/
 ```
 
-- 镜像里只有 `code/`（游戏、架构讲解、服务知识点，放在网站根上）和 `docs/`（手册 PDF 和更新说明）（`tools/`、`.md`、`.claude/` 都不放），PDF 在 `http://127.0.0.1:8080/手册/` 下面，nginx 以普通用户运行、监听容器里的 8080。
+- 镜像里只有网页和讲解音频：`code/`（游戏、架构讲解、服务知识点，放在网站根上，不含对照表 `code/i18n/`）和 `docs/更新说明.html`；手册 PDF、`.md`、`tools/`、`.claude/` 都不放。nginx 以普通用户运行、监听容器里的 8080。
 - 端口只发布到本机 `127.0.0.1`，别的电脑访问不到。别写成 `-p 8080:8080`：那样会发布到所有网卡，同一网络里的人都能打开。
 - 用 8080 不用 443：443 是 HTTPS 端口，要配 TLS 证书；本机玩用 HTTP 就够了。要给别人通过网络访问，得先决定开放给谁并配好证书。
 - 别的电脑想玩，直接把 `code/` 文件夹拷过去，用浏览器打开 `code/index.html` 就行，联机走浏览器之间的 WebRTC，不经过这个服务器。

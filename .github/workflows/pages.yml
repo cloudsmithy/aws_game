@@ -1,5 +1,6 @@
 name: Publish site to GitHub Pages
-# The site is code/ (game, walkthroughs, language entries, 404) with docs/ under /docs/.
+# The site is code/ (game, walkthroughs with their audio, language entries, 404) plus docs/更新说明.html.
+# PDFs, Markdown and the translation tables (code/i18n/) stay in the repository and are not published.
 # Requires Settings -> Pages -> Build and deployment -> Source: GitHub Actions.
 on:
   push:
@@ -24,7 +25,9 @@ jobs:
         run: |
           mkdir -p _site
           cp -R code/. _site/
-          cp -R docs _site/docs
+          rm -rf _site/i18n
+          mkdir -p _site/docs
+          cp docs/更新说明.html _site/docs/
           # Old address /code/index.html -> site root (other old /code/... paths go through 404.html)
           mkdir -p _site/code
           printf '%s' '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><script>location.replace("../index.html" + location.search + location.hash);</script><meta http-equiv="refresh" content="0; url=../index.html"></head><body><a href="../index.html">Cloud Tycoon</a></body></html>' > _site/code/index.html
