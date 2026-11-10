@@ -12,6 +12,7 @@ for (const [width, height] of sizes) {
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto('/?demo=board');
+    await expect(page).toHaveURL(/\/code\/index\.html\?demo=board$/);
     await expect(page.locator('#board .sq')).toHaveCount(48);
 
     const layout = await page.evaluate(() => {

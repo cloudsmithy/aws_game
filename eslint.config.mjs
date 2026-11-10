@@ -3,7 +3,7 @@ import html from 'eslint-plugin-html';
 export default [
   { ignores: ['node_modules/**', 'test-results/**', 'playwright-report/**', '.playwright-cli/**'] },
   {
-    files: ['**/*.mjs', 'index.html'],
+    files: ['**/*.mjs', 'code/index.html'],
     plugins: { html },
     languageOptions: { ecmaVersion: 'latest' },
     rules: {
@@ -17,5 +17,5 @@ export default [
       'valid-typeof': 'error'
     }
   },
-  { files: ['index.html'], languageOptions: { sourceType: 'script' } }
+  { files: ['code/index.html'], languageOptions: { sourceType: 'script' } }
 ];

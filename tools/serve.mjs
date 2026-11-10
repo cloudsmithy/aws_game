@@ -1,10 +1,13 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 
-const file = new URL('../index.html', import.meta.url);
+const entry = new URL('../index.html', import.meta.url);
+const game = new URL('../code/index.html', import.meta.url);
 const server = createServer(async (request, response) => {
   const path = new URL(request.url, 'http://localhost').pathname;
-  if (path !== '/' && path !== '/index.html') {
+  const file = path === '/' || path === '/index.html' ? entry
+    : path === '/code/index.html' ? game : null;
+  if (!file) {
     response.writeHead(404).end();
     return;
   }

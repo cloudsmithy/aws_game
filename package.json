@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "eslint . && stylelint index.html",
+    "lint": "eslint . && stylelint code/index.html",
     "test:layout": "playwright test",
     "check": "npm run lint && npm run test:layout"
   },
