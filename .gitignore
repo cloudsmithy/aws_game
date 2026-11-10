@@ -9,3 +9,6 @@ node_modules/
 # 本机和编辑器的文件
 .claude/
 .DS_Store
+playwright-report/
+test-results/
+.playwright-cli/
