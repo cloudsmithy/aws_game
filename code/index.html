@@ -2936,7 +2936,7 @@ function langMenu(btn) {
   setTimeout(() => { document.addEventListener('pointerdown', out, true); document.addEventListener('keydown', key, true); }, 0);
   m.querySelector('[aria-checked="true"]')?.focus();
 }
-const GAME_VERSION = { major: 1, round: 15, name: '第十五轮', title: '英文版、语言菜单、老板键、版本号', commits: 52, changes: 416, since: '2026-10-20', build: 'ebf1a00', time: '2026-11-10 12:01' };
+const GAME_VERSION = { major: 1, round: 15, name: '第十五轮', title: '英文版、语言菜单、老板键、版本号', commits: 53, changes: 416, since: '2026-10-20', build: 'ebf1a00', time: '2026-11-10 12:52' };
 const SQ = LAYOUT.map(k => SVC[k] ? { t: 'prop', k, icon: k, ...SVC[k] } : UTIL[k] ? { t: 'util', k, icon: k, ...UTIL[k] } : { k, ...SPECIAL[k] });
 // 起点、User Group 活动的说明跟着模式变（地狱模式起点只领 $150，娱乐模式 UG 抽三张）；用的时候才读，这时 BAL、S 都有了
 { const go = SQ.find(q => q.k === 'go'), ug = SQ.find(q => q.k === 'free');

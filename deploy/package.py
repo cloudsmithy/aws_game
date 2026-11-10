@@ -18,6 +18,13 @@ def build(root, output, revision):
         if not base.is_dir() or base.is_symlink():
             raise ValueError(f'missing or unsafe directory: {directory}')
         paths.extend(sorted(base.rglob('*')))
+    # Optional language entry points (/en/, /zh/ redirect into code/); included when present
+    for directory in ('en', 'zh'):
+        base = root / directory
+        if base.is_symlink():
+            raise ValueError(f'unsafe directory: {directory}')
+        if base.is_dir():
+            paths.extend(sorted(base.rglob('*')))
     files = {}
     for path in paths:
         if path.is_symlink():
