@@ -9,6 +9,7 @@ node_modules/
 # 本机和编辑器的文件
 .claude/
 .DS_Store
+# PR #3 的布局测试（Playwright）产物
 playwright-report/
 test-results/
 .playwright-cli/

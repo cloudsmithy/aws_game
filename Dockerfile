@@ -15,12 +15,11 @@ COPY docker/nginx.conf /etc/nginx/nginx.conf
 RUN rm -f /etc/nginx/conf.d/default.conf /usr/share/nginx/html/*
 
 # 只放玩家要用的：网页、PDF 手册、更新说明；规则源文件、生成脚本、编辑器设置都不进镜像（见 .dockerignore）
-COPY --chown=nginx:nginx index.html 404.html 更新说明.html /usr/share/nginx/html/
+COPY --chown=nginx:nginx index.html 404.html /usr/share/nginx/html/
 COPY --chown=nginx:nginx code/ /usr/share/nginx/html/code/
 COPY --chown=nginx:nginx en/ /usr/share/nginx/html/en/
 COPY --chown=nginx:nginx zh/ /usr/share/nginx/html/zh/
-COPY --chown=nginx:nginx 更新说明.pdf /usr/share/nginx/html/
-COPY --chown=nginx:nginx 手册/ /usr/share/nginx/html/手册/
+COPY --chown=nginx:nginx docs/ /usr/share/nginx/html/docs/
 
 USER nginx
 EXPOSE 8080

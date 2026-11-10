@@ -2,10 +2,13 @@
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>页面搬家了 · 亚马逊云科技 User Group 云上大亨</title>
 <script>
-// 网页挪进 code/ 以后，旧链接（demo/<架构>.html、svc/<服务>.html）在 GitHub Pages 上会 404：这里认出来，带着网址参数跳到新位置
+// 网页挪进 code/、文档挪进 docs/ 以后，旧链接（demo/<架构>.html、svc/<服务>.html、手册/…pdf、更新说明.html）在 GitHub Pages 上会 404：这里认出来，带着网址参数跳到新位置
 (function () {
   var p = location.pathname, m = p.match(/^(.*?\/)(demo|svc)\/(.*)$/);
   if (m) { location.replace(m[1] + 'code/' + (m[2] === 'demo' ? 'arch' : 'svc') + '/' + m[3] + location.search + location.hash); return; }
+  // 文档挪进了 docs/：旧的 PDF（手册/、常用手册/）、更新说明、三份 md 的链接跳过去
+  var d = decodeURIComponent(p).match(/^(.*?\/)(手册\/.*|常用手册\/.*|更新说明\.(?:html|pdf)|规则书\.md|玩法手册\.md|玩法速览\.md)$/);
+  if (d) { location.replace(d[1] + 'docs/' + d[2].split('/').map(encodeURIComponent).join('/') + location.search + location.hash); return; }
   var r = p.match(/^(\/[^\/]+\/)/);   // 别的找不到的页面：回到游戏
   window.HOME = (r ? r[1] : '/') + 'code/index.html';
 })();

@@ -1,10 +1,7 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>亚马逊云科技 User Group 云上大亨</title>
-<script>// 网址带 ?lang=en 或者上次选过别的语言，就打开那种语言的版本（code/<代码>/index.html）；中文版是 code/index.html
-var LANGS = ['zh', 'en'], m = location.search.match(/[?&]lang=([a-z]{2})\b/), lc = m ? m[1] : null; if (!lc) try { lc = localStorage.getItem('aws-monopoly-lang'); } catch (e) { }
-if (LANGS.indexOf(lc) < 0) lc = 'zh';
-location.replace('code/' + (lc === 'zh' ? '' : lc + '/') + 'index.html' + location.search + location.hash);</script>
+<script>location.replace('code/index.html' + location.search + location.hash);</script>
 <meta http-equiv="refresh" content="0; url=code/index.html">
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0b111c;color:#d3dbe6;font:15px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}a{color:#ffb266}</style>
 </head><body><p>游戏在 <a href="code/index.html">code/index.html</a>，正在打开……</p></body></html>

@@ -25,7 +25,7 @@ class DeploymentTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.source = self.root / 'source'
         self.source.mkdir()
-        for name in ('index.html', '404.html', '更新说明.html', '更新说明.pdf', 'code/index.html', 'code/audio/voice.m4a', '手册/玩法.pdf'):
+        for name in ('index.html', '404.html', 'docs/更新说明.html', 'docs/更新说明.pdf', 'code/index.html', 'code/audio/voice.m4a', 'docs/手册/玩法.pdf'):
             path = self.source / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(b'content')
@@ -53,7 +53,7 @@ class DeploymentTests(unittest.TestCase):
     def test_real_layout_unicode_and_audio_preserved(self):
         self.deploy('a' * 40)
         current = self.base / 'current'
-        self.assertEqual((current / '手册/玩法.pdf').read_bytes(), b'content')
+        self.assertEqual((current / 'docs/手册/玩法.pdf').read_bytes(), b'content')
         self.assertTrue((current / 'code/audio/voice.m4a').is_file())
 
     def test_bad_archive_cannot_change_current(self):

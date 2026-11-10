@@ -12,7 +12,7 @@ export default defineConfig({
     trace: 'retain-on-failure'
   },
   webServer: {
-    command: 'node tools/serve.mjs',
+    command: 'node tests/serve.mjs',
     url: 'http://127.0.0.1:8878',
     reuseExistingServer: false
   }

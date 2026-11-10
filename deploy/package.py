@@ -12,8 +12,9 @@ import io
 def build(root, output, revision):
     if not re.fullmatch(r'[0-9a-f]{40}', revision):
         raise ValueError('revision must be a full commit SHA')
-    paths = [root / name for name in ('index.html', '404.html', '更新说明.html', '更新说明.pdf')]
-    for directory in ('code', '手册'):
+    paths = [root / name for name in ('index.html', '404.html')]
+    # Game in code/, documents (manual PDFs, release notes) in docs/
+    for directory in ('code', 'docs'):
         base = root / directory
         if not base.is_dir() or base.is_symlink():
             raise ValueError(f'missing or unsafe directory: {directory}')
