@@ -15,6 +15,23 @@
 - 2 个开关（默认关）：高速部署（部署点数 0–12，1–12 点各一个技能，12 点 DDoS 让对手服务下线 2 回合）、代理商模式（座位可以当代理商，不超过一半：落在空地上按进货价 5 折占地，自己的地只在组成有效架构时收过路费、架构 ×2；客户落在代理商的地上可以从他手里买，在用的不卖；开局资金是客户的总和，勾了轮数上限时是角色卡加每位客户 $300（娱乐、地狱模式只按角色卡）；还多 3 张 Health 卡、6 张 re:Invent 卡）
 - 3 个认证题库 DLC（CLF-C02 40 道、SAA-C03 40 道、AIF-C01 30 道，原创练习题，题目在 `tools/qbank/*.json`，改完跑 `python3 tools/inject_qbank.py` 写回网页），带错题本和刷题模式
 
+## 目录
+
+```
+aws_game/
+├── index.html        入口：打开后跳到 code/index.html（旧链接、仓库首页都不断）
+├── 404.html          旧链接跳转（demo/、svc/、手册/、更新说明 挪过位置）
+├── en/  zh/          按语言打开的入口：/en/ 英文、/zh/ 中文（打开的是同一个游戏页面）
+├── code/             游戏 index.html（单文件，多语言）、架构讲解 arch/、服务知识点 svc/
+├── docs/             规则书、玩法手册、玩法速览（md），更新说明（html / pdf），手册/、常用手册/（PDF）
+├── i18n/             多语言对照表 en.json、术语表 GLOSSARY.md、英文的玩法手册和速览
+├── docker/           本机用 Docker 发网页：Dockerfile、nginx 配置
+├── deploy/           成都服务器自动部署（打包、接收、回滚）
+├── tests/            棋盘布局回归测试（Playwright）
+├── .github/          自动检查（lint + 布局）、自动部署的工作流
+└── package.json 等   开发检查用的 Node 配置（ESLint、Stylelint、Playwright）
+```
+
 ## 文件
 
 | 文件 | 是什么 |
@@ -30,7 +47,7 @@
 | `code/svc/` | 每块服务一页知识点：它是什么、常见用法、为什么用它、核心知识点、三个关键功能、和谁比怎么选、练一练（点选项判对错）、用在哪些架构、在游戏里的数字；`code/svc/index.html` 是目录（能搜、能按色组筛）。和 `code/arch/` 分开放。改了服务、升级、题目或 `tools/svc_text.mjs` 以后用 `node tools/build_svc_pages.mjs` 重新生成 |
 | `docs/更新说明.html` / `docs/更新说明.pdf` | 每一轮改了什么、为什么改、模拟数据 |
 | `docs/玩法速览.md` / `docs/玩法手册.md` / `docs/规则书.md` | 手册的源文件。网页里点「玩法」看到的是玩法速览（简版）和玩法手册（完整版） |
-| `Dockerfile` / `docker/nginx.conf` | 用 nginx 在本机发网页版和 PDF（见「怎么玩」） |
+| `docker/Dockerfile` / `docker/nginx.conf` | 用 nginx 在本机发网页版和 PDF（见「怎么玩」） |
 | `宣传片/` | 宣传片和玩法讲解视频（mp4，另有能直接播放的 html）：`玩法讲解_娱乐模式.mp4` … `玩法讲解_地狱模式.mp4` 是 6 个模式各自的讲解 |
 | `tools/` | 生成 PDF、卡牌和跑模拟的脚本；题库在 `tools/qbank/` |
 
@@ -74,7 +91,7 @@
 **Docker**：
 
 ```bash
-docker build -t aws-ug-tycoon .
+docker build -f docker/Dockerfile -t aws-ug-tycoon .
 docker run --rm -p 127.0.0.1:8080:8080 aws-ug-tycoon   # 然后打开 http://127.0.0.1:8080/
 # 本机 8080 已经被别的程序占了（报 port is already allocated）就换一个本机端口，比如：
 docker run --rm -p 127.0.0.1:18080:8080 aws-ug-tycoon  # 打开 http://127.0.0.1:18080/

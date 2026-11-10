@@ -415,7 +415,6 @@
  "本游戏模仿了大富翁的玩法，并拓展了相关云架构方面的功能。若有侵权，": "This game borrows its gameplay from Monopoly-style board games and extends it with cloud-architecture features. If you believe anything here infringes your rights, ",
  "请告知": "please let us know",
  "简体中文": "简体中文",
- "这是中文原文件；切换语言要用生成后的页面（tools/i18n.mjs bundle）": "This is the Chinese source file; language switching works in the generated page (tools/i18n.mjs bundle)",
  "<button type=\"button\" class=\"{$0} langsw\" onclick=\"langMenu(this)\" aria-haspopup=\"menu\" aria-expanded=\"false\" title=\"语言 · Language\">{$1}<span>语言</span><i class=\"lc\" aria-hidden=\"true\">▾</i></button>": "<button type=\"button\" class=\"{$0} langsw\" onclick=\"langMenu(this)\" aria-haspopup=\"menu\" aria-expanded=\"false\" title=\"Language\">{$1}<span>Language</span><i class=\"lc\" aria-hidden=\"true\">▾</i></button>",
  "第十五轮": "Round 15",
  "英文版、语言菜单、老板键、版本号": "English version, language menu, boss key, version number",
@@ -5248,6 +5247,7 @@
   "文件|开始|插入|页面布局|公式|数据|审阅|视图|帮助": "File|Home|Insert|Page Layout|Formulas|Data|Review|View|Help",
   "给{$0}{$1}了 ${$2}": "{$1} ${$2} for {$0}",
   "../更新说明.html": "../更新说明.html",
-  "<a href=\"../更新说明.html\" target=\"_blank\" rel=\"noopener\">更新说明{$0}</a><a href=\"https://github.com/cloudsmithy/aws_game\" target=\"_blank\" rel=\"noopener noreferrer\">项目地址{$1}</a><a href=\"https://github.com/cloudsmithy/aws_game/issues\" target=\"_blank\" rel=\"noopener noreferrer\">提 issue{$2}</a>": "<a href=\"../更新说明.html\" target=\"_blank\" rel=\"noopener\">Release notes{$0}</a><a href=\"https://github.com/cloudsmithy/aws_game\" target=\"_blank\" rel=\"noopener noreferrer\">Project page{$1}</a><a href=\"https://github.com/cloudsmithy/aws_game/issues\" target=\"_blank\" rel=\"noopener noreferrer\">Open an issue{$2}</a>"
+  "<a href=\"../更新说明.html\" target=\"_blank\" rel=\"noopener\">更新说明{$0}</a><a href=\"https://github.com/cloudsmithy/aws_game\" target=\"_blank\" rel=\"noopener noreferrer\">项目地址{$1}</a><a href=\"https://github.com/cloudsmithy/aws_game/issues\" target=\"_blank\" rel=\"noopener noreferrer\">提 issue{$2}</a>": "<a href=\"../更新说明.html\" target=\"_blank\" rel=\"noopener\">Release notes{$0}</a><a href=\"https://github.com/cloudsmithy/aws_game\" target=\"_blank\" rel=\"noopener noreferrer\">Project page{$1}</a><a href=\"https://github.com/cloudsmithy/aws_game/issues\" target=\"_blank\" rel=\"noopener noreferrer\">Open an issue{$2}</a>",
+  "这是中文原文件；切换语言要用生成后的页面（tools/i18n.mjs bundle）": "This is the Chinese source file; language switching works in the generated page (tools/i18n.mjs bundle)"
  }
 }

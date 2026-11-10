@@ -1,6 +1,6 @@
 # 亚马逊云科技 User Group 云上大亨：用 nginx 把网页版和 PDF 手册当静态文件发出来
 #
-# 构建：docker build -t aws-ug-tycoon .
+# 构建（在仓库根目录跑，配置在 docker/ 里）：docker build -f docker/Dockerfile -t aws-ug-tycoon .
 # 运行：docker run --rm -p 127.0.0.1:8080:8080 aws-ug-tycoon
 #       然后浏览器打开 http://127.0.0.1:8080/
 #
@@ -14,7 +14,7 @@ FROM nginx:alpine
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 RUN rm -f /etc/nginx/conf.d/default.conf /usr/share/nginx/html/*
 
-# 只放玩家要用的：网页、PDF 手册、更新说明；规则源文件、生成脚本、编辑器设置都不进镜像（见 .dockerignore）
+# 只放玩家要用的：网页、PDF 手册、更新说明；规则源文件、生成脚本、测试、编辑器设置都不进镜像（见旁边的 Dockerfile.dockerignore）
 COPY --chown=nginx:nginx index.html 404.html /usr/share/nginx/html/
 COPY --chown=nginx:nginx code/ /usr/share/nginx/html/code/
 COPY --chown=nginx:nginx en/ /usr/share/nginx/html/en/

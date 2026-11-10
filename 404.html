@@ -6,6 +6,9 @@
 (function () {
   var p = location.pathname, m = p.match(/^(.*?\/)(demo|svc)\/(.*)$/);
   if (m) { location.replace(m[1] + 'code/' + (m[2] === 'demo' ? 'arch' : 'svc') + '/' + m[3] + location.search + location.hash); return; }
+  // 早先的英文版地址 code/en/：现在中英文是同一个页面，记下语言是英文再跳过去
+  var e = p.match(/^(.*?\/)code\/en\/(index\.html)?$/);
+  if (e) { try { localStorage.setItem('aws-monopoly-lang', 'en'); } catch (x) { } location.replace(e[1] + 'code/index.html' + location.search + location.hash); return; }
   // 文档挪进了 docs/：旧的 PDF（手册/、常用手册/）、更新说明、三份 md 的链接跳过去
   var d = decodeURIComponent(p).match(/^(.*?\/)(手册\/.*|常用手册\/.*|更新说明\.(?:html|pdf)|规则书\.md|玩法手册\.md|玩法速览\.md)$/);
   if (d) { location.replace(d[1] + 'docs/' + d[2].split('/').map(encodeURIComponent).join('/') + location.search + location.hash); return; }
