@@ -7216,7 +7216,7 @@ function cellHtml(i) {
   const ht = haTag(i);
   const bill = s.t === 'prop' ? `<span class="bill ha-${ht ? ht.k : ''}" title="${ht ? ht.t + _t(2670, "：") + ht.d : ''}">${s.bill === 'token' ? _t(357, "按 token") : TYPE_N[s.type]}</span>` : s.t === 'util' ? _t(3960, "<span class=\"bill\">按用量</span>") : '';
   const houses = owner && (pr.level || pr.cap) ? `<span class="lvh" style="--oc:${owner.color}" title="${[pr.level ? _tf(2773, "第 {$0} 级", pr.level) : '', pr.cap ? _tf(3961, "加了 {$0} 个{$1}", pr.cap, capU(s.k)) : ''].filter(Boolean).join(_t(2698, "，"))}">${'<i></i>'.repeat(pr.level)}${pr.cap ? `<b class="capn">+${pr.cap}</b>` : ''}</span>` : '';   // 照宣传片：格子上几级就几块玩家颜色的小方块
-  return `<div class="art">${awsImg(s.icon)}${tokH}</div><div class="txt"><span class="nm" title="${s.n}">${s.n.replace(/([a-z])([A-Z])/g, '$1<wbr>$2')}</span>${price}${rentH}${dlcH}${lv}${bill}</div>${houses}`;
+  return `<div class="art">${awsImg(s.icon)}${tokH}</div><div class="txt"><span class="nm">${s.n.replace(/([a-z])([A-Z])/g, '$1<wbr>$2')}</span>${price}${rentH}${dlcH}${lv}${bill}</div>${houses}`;
 }
 // 手机上格子太小看不清：棋盘下面放一张「当前所在格」，点开看详情
 function hereHtml(p) {
@@ -9771,11 +9771,35 @@ function aiKick() {
 // ================= 键盘快捷键 =================
 function keyHelp() { ask({ local: true, cancelable: true, view: true, title: _t(4124, "键盘快捷键"), html: `<table><tr><td>${_t(4836, "<b>空格 / 回车</b>")}</td><td>${_t(4837, "掷骰子、轮到下一位；弹窗里选主选项；骰子在转时直接出点数（单机）")}</td></tr><tr><td><b>1–9</b></td><td>${_t(4838, "弹窗里按顺序数第几个按钮（从左往右、从上往下，灰的也算一个）")}</td></tr><tr><td>${_t(4839, "<b>回车（输入框里）</b>")}</td><td>${_t(4840, "出价、改名字这类有输入框的窗口：输完按回车等于点主按钮；Spot 出价、改名字一打开光标就在框里，数字直接输进框。交易窗按回车不成交，要点按钮")}</td></tr><tr><td><b>B</b></td><td>${_t(4060, "资产管理")}</td></tr><tr><td><b>T</b></td><td>${_t(4062, "交易")}</td></tr><tr><td><b>M</b></td><td>${_t(4841, "玩法手册")}</td></tr><tr><td><b>G</b></td><td>${_t(4120, "图鉴")}</td></tr><tr><td><b>S</b></td><td>${_t(4842, "音效开关")}</td></tr><tr><td><b>H</b></td><td>${_t(4843, "收起 / 展开弹窗，先看棋盘再选")}</td></tr><tr><td><b>Esc</b></td><td>${_t(4844, "关掉只有一个按钮的提示、退出新手引导")}</td></tr><tr><td><b>\`</b></td><td>${_t(4845, "老板键：整页换成一个代码编辑器（打开的是云架构学习笔记），标签页的标题和图标也换掉；再按一次回来，也可以双击最上面的文件名")}</td></tr><tr><td>${_t(4846, "<b>:version 回车</b>")}</td><td>${_t(4847, "看游戏版本（不在输入框里时按冒号，屏幕最下面出一条命令行）")}</td></tr><tr><td>${_t(4848, "<b>:help 回车</b>")}</td><td>${_t(4849, "看命令行里能用的全部命令：切语言、音效、动画速度、存档、退出……")}</td></tr></table>`, buttons: [{ label: _t(2478, "知道了"), value: true, cls: 'pri' }] }); }
 
-// 显示不全的字（省略号、被裁掉的）：鼠标停上去时，元素自己和外面都没有提示的，就把全文放进 title；棋盘格子有自己的提示（sqTip），不动
+// 仅为显式省略的文字补全全文；滚动面板、布局溢出和已有说明不需要重复提示。
+// 手写 title / 架构小卡负责解释含义；自动 title 只负责补全文字，离开后删除，避免改字或变宽后残留。
+let overflowTitleEl = null, overflowTitleText = '';
+function clearOverflowTitle() {
+  if (overflowTitleEl && overflowTitleEl.getAttribute('title') === overflowTitleText) overflowTitleEl.removeAttribute('title');
+  overflowTitleEl = null; overflowTitleText = '';
+}
 document.addEventListener('mouseover', e => {
-  const el = e.target instanceof Element ? e.target : null; if (!el || el.closest('.sq, [title]')) return;
-  if (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1) { const t = el.textContent.replace(/\s+/g, ' ').trim(); if (t) el.title = t; }
+  clearOverflowTitle();
+  const el = e.target instanceof Element ? e.target : null;
+  if (!el || !matchMedia('(hover:hover)').matches || el.closest('.sq, [title], [data-arch], [data-pillar], [data-archall]')) return;
+  for (let t = el; t && t !== document.body; t = t.parentElement) {
+    if (!t.clientWidth || !t.clientHeight) continue;
+    const s = getComputedStyle(t), cut = v => v === 'hidden' || v === 'clip';
+    const ellipsis = s.textOverflow === 'ellipsis' && cut(s.overflowX) && t.scrollWidth > t.clientWidth + 1;
+    const clamp = parseInt(s.webkitLineClamp, 10) > 0 && cut(s.overflowY) && t.scrollHeight > t.clientHeight + 1;
+    if (!ellipsis && !clamp) continue;
+    // 不拼接复合容器中的多个操作、隐藏文字或子元素自己的说明。
+    if (t.querySelector('button, a, input, select, textarea, [hidden], [title], [data-arch], [data-pillar], [data-archall]')) return;
+    const text = t.innerText.replace(/\s+/g, ' ').trim();
+    if (text) { overflowTitleEl = t; overflowTitleText = text; t.title = text; }
+    return;
+  }
 }, { passive: true });
+document.addEventListener('mouseout', e => {
+  if (overflowTitleEl && (!(e.relatedTarget instanceof Node) || !overflowTitleEl.contains(e.relatedTarget))) clearOverflowTitle();
+}, { passive: true });
+addEventListener('resize', clearOverflowTitle);
+addEventListener('scroll', clearOverflowTitle, { passive: true, capture: true });
 // ================= 作弊码 =================
 // 命令行里的 :money、:dice、:upgrade、:jail、:free、:grab。现金高于 $1000 不能用；给自己用不写玩家；给别人用写座位号或名字（:money -500 2）。
 // 规则：每人每回合只能用一次、一局最多 3 次；每用一次都写进日志（谁给谁做了什么），日志那一行旁边有「举报」，别的玩家在一轮以内点了，作弊的人直接进维护窗口（过了一轮举报无效，作弊得逞）；
