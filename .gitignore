@@ -5,6 +5,7 @@ tools/
 # 生成过程的中间文件（仓库里的 code/index.html 已经是生成好的多语言页面）
 code/index.i18n.html
 code/i18n/context.json
+code/i18n/learn-context.json
 # 缓存、依赖、日志、打包产物
 __pycache__/
 *.pyc
