@@ -515,5 +515,7 @@
   "<a href=\"{$0}.html\" id=\"toPage\">图文讲解</a><a href=\"index.html\">全部架构</a><a href=\"{$1}\">回到游戏</a>": "<a href=\"{$0}.html\" id=\"toPage\">Illustrated guide</a><a href=\"index.html\">All architectures</a><a href=\"{$1}\">Back to game</a>",
   "<a class=\"home\" href=\"{$0}\">{$1}回到游戏</a><span class=\"brand\">亚马逊云科技 User Group 云上大亨</span><a href=\"index.html\"{$2}>服务知识点</a><a href=\"../arch/index.html\">架构讲解</a>": "<a class=\"home\" href=\"{$0}\">{$1}Back to game</a><span class=\"brand\">Amazon Web Services User Group Cloud Tycoon</span><a href=\"index.html\"{$2}>Service notes</a><a href=\"../arch/index.html\">Architecture walkthroughs</a>",
   "<span>必须 <b>{$0}</b> 块</span>{$1}<span>过路费约 <b>${$2}</b>–<b>${$3}</b>（7 点、没升级）</span>": "<span>Required <b>{$0}</b></span>{$1}<span>Rent about <b>${$2}</b>–<b>${$3}</b> (roll of 7, no upgrades)</span>"
- }
+ },
+ "打开游戏首页（新标签页）": "Game home (new tab)",
+ "从对局打开的学习页，可切回原游戏标签继续。": "Opened this page from a game? Switch back to the original game tab to continue."
 }
