@@ -147,7 +147,7 @@ npm run check
 - `npm run test:layout`：用 Chromium 检查 15 种窗口尺寸的棋盘，确认没有页面横向溢出、棋盘格出屏或操作区被裁切，并验证按钮能滚动到可视区域且可点击。另以中文、英文、日文检查 19 种窗口尺寸下棋盘、玩家卡、日志、操作区的内部文字裁切，以及标题与工具栏重叠；覆盖最长玩家名、满级及容量徽章，并抽查开局页、服务详情、事件卡、玩法、图鉴和战报。包含浏览器工具栏占高及缩放对应的视口；正常滚动和明确省略不算错误，手机和平板遵循各自的文字显示规则。
 - `npm run test:content`：仅运行内部裁切专项（先 `cd tests`），复用页面遍历尺寸，弹窗采用代表组合，供本地快速检查；已随 `npm run check` 自动进入 CI，无需新增工作流或依赖。
 - `npm run test:movement`：走棋路径、动画隔离、有界模型与弱网指标；`npm run test:auth`：实际房主协议的观众权限和座位鉴权回归。
-- 浏览器检查还覆盖深浅主题、真实 WebRTC 走棋及受邀观战；详细范围与未覆盖条件见 [受邀观战验证说明](tests/verification/spectator.md)。
+- 浏览器检查还覆盖深浅主题、真实 WebRTC 走棋及受邀观战；生产 PeerJS 建房/自动重连使用本机官方 PeerServer 测试。详细范围与未覆盖条件见 [受邀观战验证说明](tests/verification/spectator.md)。
 - GitHub Actions 在 push 和 PR 时执行以上检查；失败时保留截图和 trace，可用 `npx playwright show-trace <trace.zip>` 查看。
 
 布局约定：棋盘格保持在左右边界内；矮窗口中央操作区可滚动，手机页面允许纵向滚动。不要用整页 `overflow:hidden` 掩盖溢出。增加布局或内容时，边界及操作可达性场景放在 `tests/layout.spec.mjs`，内部裁切与重叠场景放在 `tests/content-layout.spec.mjs`。

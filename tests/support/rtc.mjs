@@ -41,7 +41,7 @@ export async function sameState(host, clients) {
   for (const client of clients) await expect.poll(() => state(client)).toEqual(expected);
 }
 
-export async function world(browser, run, base = 'http://127.0.0.1:8878/') {
+export async function world(browser, run, base = `http://127.0.0.1:${process.env.AWS_GAME_TEST_PORT || 8878}/`) {
   const contexts = [], errors = [];
   async function page(demo = false, viewport = { width: 1440, height: 900 }) {
     const context = await browser.newContext({ reducedMotion: 'no-preference', viewport }); contexts.push(context);
