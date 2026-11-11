@@ -29,10 +29,20 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('tests/package-lock.json') }}
-      - run: npx playwright install --with-deps chromium
+      # 浏览器本体：只走 playwright 自己的 CDN，不碰 apt
+      - run: npx playwright install chromium
         if: steps.pw-cache.outputs.cache-hit != 'true'
-      - run: npx playwright install-deps chromium
-        if: steps.pw-cache.outputs.cache-hit == 'true'
+      # 系统字体等依赖：跑机偶发解析不到 archive.ubuntu.com / security.ubuntu.com，
+      # apt 会整批 Failed to fetch。重试几次，失败也不阻断——缺字体最多让布局测试报出来，
+      # 比整个 job 挂在这一步、测试一个都跑不到要好。
+      - name: 系统依赖（apt 失败不阻断）
+        continue-on-error: true
+        run: |
+          for i in 1 2 3; do
+            npx playwright install-deps chromium && exit 0
+            echo "apt 第 $i 次失败，等 20 秒重试"; sleep 20
+          done
+          echo '::warning title=系统依赖没装上::apt 解析不到 ubuntu 镜像，CJK 字体可能缺失'
       - name: 体积检查（仅提醒）
         env:
           SIZE_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
