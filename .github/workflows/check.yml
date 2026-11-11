@@ -7,7 +7,9 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # 11-11 起 ubuntu-latest 在迁到 Ubuntu 26，playwright install --with-deps 的 apt 安装
+    # 从几秒变成 9 分钟以上，10 分钟的上限会让 job 卡在装浏览器那一步，测试一个都跑不到
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: tests   # package.json 和检查的配置都在 tests/ 里
@@ -21,7 +23,16 @@ jobs:
           cache: npm
           cache-dependency-path: tests/package-lock.json
       - run: npm ci
+      # 缓存浏览器和它的依赖：命中以后不用再走 apt
+      - uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('tests/package-lock.json') }}
       - run: npx playwright install --with-deps chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+      - run: npx playwright install-deps chromium
+        if: steps.pw-cache.outputs.cache-hit == 'true'
       - name: 体积检查（仅提醒）
         env:
           SIZE_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
