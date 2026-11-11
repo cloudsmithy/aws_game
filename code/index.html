@@ -2345,13 +2345,11 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 @media (min-width:1800px){
   #game{grid-template-columns:minmax(0,1fr) 460px!important}
   #side .plist{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));align-content:start;gap:12px}
-/* 双列卡片按侧栏宽度收缩；长译文换行，现金不足一行时移到下一行。 */
-@media (min-width:1800px){
+  /* 双列卡片按侧栏宽度收缩；长译文换行，现金不足一行时移到下一行 */
   #side .pl .pacc{flex-wrap:wrap}
   #side .pl .pacc .pn{flex-basis:100px}
   #side .pacc .cash{margin-left:auto}
   #side .plist .parch .pnw,#side .plist .res .ri{white-space:normal;overflow-wrap:anywhere}
-}
   #side .plist .pl.cur{grid-column:1/-1}
 }
 
@@ -3104,7 +3102,7 @@ function langMenu(btn) {
   setTimeout(() => { document.addEventListener('pointerdown', out, true); document.addEventListener('keydown', key, true); }, 0);
   m.querySelector('[aria-checked="true"]')?.focus();
 }
-let GAME_VERSION = __rv(() => ({ major: 1, round: 15, name: _t(344, "第十五轮"), title: _t(345, "英文版、日文版、语言菜单、老板键、版本号"), commits: 104, changes: 442, since: '2026-10-20', build: '2ce410c', time: '2026-11-11 23:49' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
+let GAME_VERSION = __rv(() => ({ major: 1, round: 15, name: _t(344, "第十五轮"), title: _t(345, "英文版、日文版、语言菜单、老板键、版本号"), commits: 108, changes: 442, since: '2026-10-20', build: '9bdf450', time: '2026-11-12 01:02' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
 let SQ = __rv(() => (LAYOUT.map(k => SVC[k] ? { t: 'prop', k, icon: k, ...SVC[k] } : UTIL[k] ? { t: 'util', k, icon: k, ...UTIL[k] } : { k, ...SPECIAL[k] })), v => { SQ = v; }, () => SQ);
 // 起点、User Group 活动的说明跟着模式变（地狱模式起点只领 $150，娱乐模式 UG 抽三张）；用的时候才读，这时 BAL、S 都有了
 { const go = SQ.find(q => q.k === 'go'), ug = SQ.find(q => q.k === 'free');
@@ -6530,7 +6528,8 @@ const reportEventIs = (e, kind) => e.kind ? e.kind === kind
 const reportOutRound = q => {
   if (q.alive) return null;
   if (Number.isInteger(q.outRound) && q.outRound > 0) return q.outRound;
-  const e = (S.events || []).find(x => x.t.startsWith(q.name) && reportEventIs({ ...x, t: x.t.slice(q.name.length) }, 'out'));
+  // 名字后面必须紧跟空格或 's，否则「Yu」会匹配到「Yuki 账户被暂停」那条（tests/report-i18n.spec.mjs 盯着这条）
+  const e = (S.events || []).find(x => x.t.startsWith(q.name) && /^(?:\s|'s\b)/.test(x.t.slice(q.name.length)) && reportEventIs({ ...x, t: x.t.slice(q.name.length) }, 'out'));
   return e ? e.r : null;
 };
 const ST = p => { S.pst = S.pst || {}; return S.pst[p.id] || (S.pst[p.id] = { rentIn: 0, rentOut: 0, inc: 0, hit: 0, imm: 0, quizOk: 0, quizN: 0, buy: 0, upg: 0, fis: 0, maxRent: 0, earnBy: {}, hitsBy: {}, runBy: {}, runTot: 0, salary: 0 }); };
@@ -6718,7 +6717,7 @@ function repExtra() {
 function repTimeline(w, rank, X) {
   const R = Math.max(1, S.round), x1 = R + 1, px = x => ((Math.min(x1, Math.max(1, x)) - 1) / R * 100).toFixed(2), isOut = e => reportEventIs(e, 'out'), num = y => typeof y === 'number' && isFinite(y);
   // 取分量最重的 8 件事（和正式版同一个口径），再按轮次排；同一轮里按发生的先后（S.events 里的下标），压垮人的那笔过路费排在破产前面
-  const ev = (S.events || []).map((e, i) => ({ r: e.r, t: e.t, w: e.w, i })).sort((a, b) => b.w - a.w).slice(0, 8).sort((a, b) => a.r - b.r || a.i - b.i);
+  const ev = (S.events || []).map((e, i) => ({ ...e, i })).sort((a, b) => b.w - a.w).slice(0, 8).sort((a, b) => a.r - b.r || a.i - b.i);   // 整个展开：只挑 r/t/w 会把 kind 丢掉，isOut 就退回匹配文案了
   const outR = reportOutRound;
   let chart = '', sr = '';
   if (X.vh.length >= 2) {
