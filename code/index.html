@@ -2344,7 +2344,7 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 /* 宽屏：右侧栏加宽，玩家卡排两列，日志多显示几条 */
 @media (min-width:1800px){
   #game{grid-template-columns:minmax(0,1fr) 460px!important}
-  #side .plist{display:grid!important;grid-template-columns:1fr 1fr;align-content:start;gap:12px}
+  #side .plist{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));align-content:start;gap:12px}
   #side .plist .pl.cur{grid-column:1/-1}
 }
 
@@ -2577,6 +2577,13 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 #side .pl .pacc .cash small.pdebt{font-size:12px;font-weight:700;color:var(--red)}
 #side .plist .pacc .cash .nw{font-size:12px}
 #side .plist .pacc .cash .nw span{display:inline;font-size:inherit}
+/* 双列卡片按侧栏宽度收缩；长译文换行，现金不足一行时移到下一行。 */
+@media (min-width:1800px){
+  #side .pl .pacc{flex-wrap:wrap}
+  #side .pl .pacc .pn{flex-basis:100px}
+  #side .pacc .cash{margin-left:auto}
+  #side .plist .parch .pnw,#side .plist .res .ri{white-space:normal;overflow-wrap:anywhere}
+}
 /* 带说明的字：只在名称下面画点线；键盘停上来有焦点框 */
 #side .tipx{cursor:help}
 #side .tipx .lb{border-bottom:1px dotted #879596}
@@ -2633,9 +2640,9 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 #side .parch .pa{color:var(--ink2)}
 #side .parch .pnw{white-space:nowrap}
 #side .parch .pa.done{color:var(--green);font-weight:700}
-/* 支柱：「卓越运营 2/2」不拆开，窄卡自动排两列；不再用 ●○ */
+/* 支柱：窄卡自动排两列，长译文允许换行；不再用 ●○ */
 #side .pillars{grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:2px 10px;font-size:12px}
-#side .pillar{white-space:nowrap;color:var(--mut);font-weight:400}
+#side .plist .pillar{white-space:normal;overflow-wrap:anywhere;color:var(--mut);font-weight:400}
 #side .pillar::before,#side .pillar.on::before{content:none}
 #side .pillar.on{color:var(--green);font-weight:700}
 #side .pillar small{font-size:12px;font-variant-numeric:tabular-nums}

@@ -6,6 +6,40 @@ const sizes = [
   [1440, 500], [1201, 500], [844, 390], [390, 844], [320, 568]
 ];
 
+for (const lang of ['en', 'ja', 'zh']) {
+  for (const [width, height] of [[1920, 1080], [1366, 768]]) {
+    test(`玩家卡完整显示 ${lang} ${width}×${height}`, async ({ page }) => {
+      await page.setViewportSize({ width, height });
+      await page.goto('/?demo=board');
+      await page.evaluate(lang => switchLang(lang), lang);
+      const list = page.locator('#side .plist');
+      const checkCards = async () => {
+        const overflow = await list.evaluate(el => [el, ...el.children].map(card =>
+          card.scrollWidth - card.clientWidth));
+        expect(overflow.every(value => value <= 1), `玩家列表和卡片不能横向裁切：${overflow}`).toBe(true);
+        for (const cash of await page.locator('#side .pacc .cash').all()) {
+          const fits = await cash.evaluate(el => {
+            const card = el.closest('.pl').getBoundingClientRect(), rect = el.getBoundingClientRect();
+            return rect.left >= card.left && rect.right <= card.right;
+          });
+          expect(fits, '现金和估值应在卡片内').toBe(true);
+        }
+      };
+      await checkCards();
+      for (const toggle of await page.locator('#side .plt').all()) await toggle.click();
+      await checkCards();
+      const columns = await list.evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+      expect(columns).toBe(width >= 1800 ? 2 : 1);
+      for (const details of await page.locator('#side .ledbtn').all()) await details.click({ trial: true });
+      if (width >= 1800) {
+        await list.evaluate(el => { el.style.width = '400px'; });
+        await checkCards();
+        expect(await list.evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length)).toBe(1);
+      }
+    });
+  }
+}
+
 for (const [width, height] of sizes) {
   test(`棋盘和操作可达 ${width}×${height}`, async ({ page }) => {
     await page.setViewportSize({ width, height });
