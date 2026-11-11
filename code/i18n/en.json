@@ -3406,6 +3406,7 @@
  "只有带版本的服务会中：RDS、Aurora 的数据库引擎大版本，ElastiCache、OpenSearch 的引擎版本，EKS 的 Kubernetes 版本，Lambda 运行时，Glue 版本，DMS 复制引擎版本，Bedrock 的模型；DynamoDB、S3、SQS 这类没有版本，不受影响。现实里到期的是版本，服务本身还在：RDS 过了标准支持结束日期会自动转入收费的延长支持，Lambda 运行时弃用后不再打安全补丁。日期都会提前公布，留够时间升级。": "Only services with versions are hit: RDS and Aurora database engine major versions, ElastiCache and OpenSearch engine versions, EKS Kubernetes versions, Lambda runtimes, Glue versions, DMS replication engine versions, and Bedrock models; DynamoDB, S3 and SQS have no versions and are unaffected. In reality it is the version that expires and the service itself stays: after the standard support end date, RDS automatically moves into paid Extended Support, and after a Lambda runtime is deprecated it no longer gets security patches. Dates are always announced in advance, leaving enough time to upgrade. ",
  "{$0} 掷出 {$1}": "{$0} rolled {$1}",
  "　": " · ",
+ "🤝 {$0} 和 {$1} 互相欠钱，先抵掉 ${$2}": "🤝 {$0} and {$1} owe each other, so ${$2} is netted off first",
  "{$0} 欠款 ${$1}": "{$0} owes ${$1}",
  "<small>欠款</small><b class=\"hi\">${$0}</b>": "<small>Debt</small><b class=\"hi\">${$0}</b>",
  "<small>全卖了最多能凑</small><b class=\"{$0}\">${$1}</b>": "<small>Most you can raise by selling everything</small><b class=\"{$0}\">${$1}</b>",
