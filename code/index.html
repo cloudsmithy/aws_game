@@ -10412,6 +10412,7 @@ const MP = {
   },
   ONCLICK: { 'doRoll()': 'roll', 'endTurn()': 'end', "jailAct('stay')": 'jail:stay', "jailAct('pay')": 'jail:pay', "jailAct('es')": 'jail:es',
     'uiAction(()=>manage(cur()))': 'manage', 'uiAction(trade)': 'trade', 'uiAction(edpDialog)': 'sp', 'uiAction(activeAction)': 'action', 'uiAction(declareBankrupt)': 'bankrupt', 'uiAction(buyReinvent)': 'buyrei', 'uiAction(refactorDebt)': 'refactor', 'uiAction(useRoleSkill)': 'skill', 'uiAction(wildDialog)': 'wild', 'uiAction(quizChallenge)': 'challenge', 'uiAction(quizAll)': 'challengeall', 'uiAction(incOne)': 'incone', 'uiAction(incRand)': 'incrand', 'uiAction(incAll)': 'incall', 'uiAction(upHere)': 'uphere', 'uiAction(capHere)': 'caphere', 'uiAction(speedMenu)': 'speed', 'uiAction(setRsRate)': 'rsrate' },
+  scalar(value) { return value == null || ['string', 'number', 'boolean'].includes(typeof value); },
   onHostMsg(conn, m) {
     if (this.role !== 'host' || !conn.open || conn._closed || !m || typeof m !== 'object') return;
     const seat = conn._seat;
@@ -10424,7 +10425,7 @@ const MP = {
     if (m.t === 'hello') return this.admit(conn, m);
     if (seat == null || !this.seats[seat] || this.seats[seat].conn !== conn || !this.seats[seat].online) return;
     if (m.t === 'resync') { this.seats[seat].base = null; this.pushState(true, this.seats[seat]); return; }   // 远端的增量接不上了：给他补一份整的
-    if (m.t === 'act' && S && S.cur === seat && Object.prototype.hasOwnProperty.call(this.ACTS, m.a)) {
+    if (m.t === 'act' && typeof m.a === 'string' && S && S.cur === seat && Object.prototype.hasOwnProperty.call(this.ACTS, m.a)) {
       // 这一下能不能执行：和 doRoll / jailAct / uiAction / endTurn 开头查的阶段一样
       const a = m.a, p = cur(), ok = a === 'end' ? S.phase === 'post' : a === 'roll' ? S.phase === 'roll' && p.jail === null : /^jail:/.test(a) ? S.phase === 'roll' && p.jail !== null : S.phase === 'roll' || S.phase === 'post';
       // 房主自己开着看的窗口（玩法、图鉴、明细、大图、改名字……）会挡住这些操作，远端点了却毫无反应：真能执行时先替房主关掉。「轮到下一位」不看弹窗，不用关；
@@ -10438,16 +10439,18 @@ const MP = {
     else if (m.t === 'aipause' && S && !S.over) { toggleAiPause(); toast(`${unesc(S.players[seat].name)} ${AI_PAUSE ? _t(4978, "暂停了电脑") : _t(4979, "让电脑接着跑")}`); }
     else if (m.t === 'endask' && S && !S.over) { const n = unesc(S.players[seat].name); if (S.phase === 'roll' || S.phase === 'post') ask({ local: true, cancelable: true, title: _tf(4980, "{$0} 提议现在结算", n), html: _t(4981, "<p>按每家的估值排名，估值最高的赢。结算后这一局就结束了，不能接着打。</p>"), buttons: [{ label: _t(4719, "现在结算"), value: true, cls: 'pri' }, { label: _t(4982, "接着打"), value: false }] }).then(v => { if (v && S && !S.over) { log(_tf(4983, "🏁 {$0} 提议、房主同意现在结算", n)); timedOver(_t(4722, "大家决定现在结算")); } else this.send(conn, { t: 'toast', msg: _t(4984, "房主选了接着打") }); }); else this.send(conn, { t: 'toast', msg: _t(4985, "房主那边还在结算，等一下再提") }); }
     else if (m.t === 'rename' && S && !S.over && typeof m.name === 'string') { const why = applyRename(seat, m.name); if (why) this.send(conn, { t: 'renameFail', why }); }
-    else if (m.t === 'cheat' && S && !S.over && typeof m.c === 'string' && Array.isArray(m.a)) { const why = applyCheat(seat, m.c, m.a.slice(0, 3).map(x => String(x).slice(0, 20))); if (why) this.send(conn, { t: 'toast', msg: why }); }
+    else if (m.t === 'cheat' && S && !S.over && typeof m.c === 'string' && Array.isArray(m.a) && m.a.slice(0, 3).every(x => this.scalar(x))) { const why = applyCheat(seat, m.c, m.a.slice(0, 3).map(x => String(x).slice(0, 20))); if (why) this.send(conn, { t: 'toast', msg: why }); }
     else if (m.t === 'report' && S && !S.over && Number.isInteger(m.id)) { const why = reportCheat(m.id, seat); if (why) this.send(conn, { t: 'toast', msg: why }); }
     else if (m.t === 'ans' && this.cur && m.id === this.cur.id && this.cur.who === seat) {
+      if (m.inp != null && (typeof m.inp !== 'object' || Array.isArray(m.inp) || !Object.values(m.inp).every(x => this.scalar(x)))) return;
       const ans = Number.isInteger(m.k) ? { k: m.k } : typeof m.v === 'string' ? { v: m.v.slice(0, 80) } : null;
       if (ans) this.cur.onAnswer(ans, m.inp && typeof m.inp === 'object' ? m.inp : {});
     }
   },
   async admit(conn, m, approval) {
     if (this.role !== 'host' || !conn.open || conn._closed || conn._admitted || conn._pending) return;
-    const name = String(m.name || '').replace(/\s+/g, ' ').trim().slice(0, 12) || _t(3861, "玩家");
+    if (m.name != null && typeof m.name !== 'string') return this.reject(conn, '名字必须是文字');
+    const name = (m.name || '').replace(/\s+/g, ' ').trim().slice(0, 12) || _t(3861, "玩家");
     if (m.mode === 'spectator') {
       if (!this.watchToken || m.invite !== this.watchToken) return this.reject(conn, '观战邀请无效或已关闭');
       if (Object.keys(this.viewers).length >= this.watchLimit) return this.reject(conn, '观战人数已满');

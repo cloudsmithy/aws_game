@@ -196,3 +196,113 @@ test('真实身份生命周期：玩家改名后自动认回原座位，撤销�
     expect(await viewer.evaluate(() => MP.role)).toBe('client');
   });
 });
+
+async function suspendJS(page) {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Debugger.enable');
+  const paused = new Promise(resolve => cdp.once('Debugger.paused', resolve));
+  await cdp.send('Debugger.pause'); await paused;
+  return async () => { await cdp.send('Debugger.resume'); await cdp.detach(); };
+}
+
+async function reviewPending(host) {
+  await host.locator('.gmenu').evaluate(e => { e.open = true; });
+  await host.getByRole('button', { name: '确认入座：玩家', exact: true }).click();
+  await expect(host.getByRole('dialog', { name: '确认玩家身份', exact: true })).toBeVisible();
+}
+
+test('并发鉴权：原玩家凭钥匙自动重连后，先前的无钥匙入座审批不能覆盖新连接', async ({ browser }) => {
+  test.setTimeout(45_000);
+  await peerWorld(browser, async page => {
+    const { host, player, viewers: [viewer], room } = await playingRoom(page), challenger = await page();
+    const before = await businessState(host), old = await player.evaluate(() => MP.hostConn.connectionId);
+    const resume = await suspendJS(player);
+    try {
+      await host.evaluate(() => MP.seats[1].conn.close());
+      await expect.poll(() => host.evaluate(() => MP.seats[1].online)).toBe(false);
+      const { joinRoom } = await import('./support/peerjs.mjs');
+      await joinRoom(challenger, room, 'test-room', false, '玩家', false);
+      await expect.poll(() => challenger.evaluate(() => netTrace.some(m => m.t === 'pending'))).toBe(true);
+      await reviewPending(host);
+    } finally { await resume(); }
+    await expect.poll(() => player.evaluate(old => !MP.gone && MP.hostConn?._ok && MP.hostConn.connectionId !== old, old), { timeout: 15000 }).toBe(true);
+    const peer = await player.evaluate(() => MP.peer.id);
+    await host.getByRole('button', { name: '已确认本人，允许入座', exact: true }).click();
+    await expect.poll(() => challenger.evaluate(() => netTrace.some(m => m.t === 'reject'))).toBe(true);
+    expect(await host.evaluate(() => MP.seats[1].conn.peer)).toBe(peer);
+    expect(await host.evaluate(() => Object.keys(MP.pendingJoins).length)).toBe(0);
+    expect(await businessState(host)).toEqual(before); await sameState(host, [player, viewer]);
+  });
+});
+
+test('审批失效：请求者在确认窗口打开后关闭页面，旧审批不能复活连接或占座', async ({ browser }) => {
+  test.setTimeout(95_000);
+  await peerWorld(browser, async page => {
+    const { host, player, viewers: [viewer], room } = await playingRoom(page);
+    const leaveAt = Date.now(); await player.close(); await expect.poll(() => host.evaluate(() => MP.seats[1].online), { timeout: 30000 }).toBe(false);
+    const playerCloseMs = Date.now() - leaveAt;
+    const before = await businessState(host), key = await host.evaluate(() => MP.seats[1].key), challenger = await page();
+    const { joinRoom } = await import('./support/peerjs.mjs');
+    await joinRoom(challenger, room, 'test-room', false, '玩家', false);
+    await expect.poll(() => challenger.evaluate(() => netTrace.some(m => m.t === 'pending'))).toBe(true);
+    await reviewPending(host); const pendingCloseAt = Date.now(); await challenger.close();
+    await expect.poll(() => host.evaluate(() => Object.keys(MP.pendingJoins).length), { timeout: 30000 }).toBe(0);
+    console.log('PEERJS_CLOSE_DETECTION', JSON.stringify({ playerCloseMs, pendingCloseMs: Date.now() - pendingCloseAt }));
+    await host.getByRole('button', { name: '已确认本人，允许入座', exact: true }).click();
+    expect(await host.evaluate(() => ({ online: MP.seats[1].online, key: MP.seats[1].key, seats: Object.keys(MP.seats).length }))).toEqual({ online: false, key, seats: 1 });
+    expect(await businessState(host)).toEqual(before); await sameState(host, [viewer]);
+  });
+});
+
+test('暂停与撤销交错：观众处理消息前被撤销，恢复后保持锁定且不能复活旧决策窗', async ({ browser }) => {
+  test.setTimeout(45_000);
+  await peerWorld(browser, async page => {
+    const { host, player, viewers: [viewer] } = await playingRoom(page);
+    await host.evaluate(() => { modal({ title: '撤销前的选择', who: 0, buttons: [{ label: '确认', value: true }] }); });
+    await expect(viewer.locator('#modal .box')).toHaveAttribute('aria-label', '撤销前的选择');
+    const before = await businessState(host), resume = await suspendJS(viewer);
+    try {
+      await host.locator('#modal .btns button').click();
+      await host.evaluate(() => MP.setWatching(false));
+      await host.waitForTimeout(600); // 跨过撤销连接的 300ms 关闭兜底，观众 JS 全程暂停。
+    } finally { await resume(); }
+    await expect.poll(() => viewer.evaluate(() => MP.gone && MP.kicked), { timeout: 15000 }).toBe(true);
+    await expect(viewer.locator('#modal .box')).not.toHaveAttribute('aria-label', '撤销前的选择');
+    expect(await viewer.evaluate(() => ({ role: MP.role, watching: MP.watching, seat: MP.mySeat, moving: !!MPFX.mv }))).toEqual({ role: 'client', watching: true, seat: null, moving: false });
+    expect(await host.evaluate(() => Object.keys(MP.viewers).length)).toBe(0);
+    expect(await businessState(host)).toEqual(before); await sameState(host, [player]);
+  });
+});
+
+test('真实通道输入校验：畸形入房/操作/答案无副作用，正常作答和观众入房仍有效', async ({ browser }) => {
+  test.setTimeout(45_000);
+  await peerWorld(browser, async page => {
+    const { host, player, room, invite } = await playingRoom(page, 0), probe = await page();
+    await rollTurn(host, player, 0); await sameState(host, [player]);
+    const before = await businessState(host);
+    await probe.evaluate(room => {
+      window.probeMessages = []; window.probePeer = new Peer(undefined, MP.peerOpts());
+      probePeer.on('open', () => {
+        const conn = probePeer.connect('amono-' + room.toLowerCase(), { reliable: true });
+        conn.on('data', m => probeMessages.push(m));
+        conn.on('open', () => conn.send({ t: 'hello', name: { toString: null } }));
+      });
+    }, room);
+    await expect.poll(() => probe.evaluate(() => probeMessages.some(m => m.t === 'reject'))).toBe(true);
+    expect(await host.evaluate(() => Object.keys(MP.pendingJoins).length)).toBe(0);
+    expect(await businessState(host)).toEqual(before);
+    await host.evaluate(() => { window.inputChosen = null; modal({ title: '输入边界校验', who: 1, inputs: [{ id: 'amount', value: 5 }], buttons: [{ label: '确认输入', value: true }] }).then(v => { inputChosen = v; }); });
+    await expect(player.locator('#modal .box')).toHaveAttribute('aria-label', '输入边界校验');
+    const mid = await host.evaluate(() => MP.cur.id);
+    const states = await player.evaluate(() => netTrace.filter(m => m.t === 'state').length);
+    await player.evaluate(mid => {
+      for (const m of [{ t: 'act', a: { toString: null } }, { t: 'cheat', c: 'cash', a: [{ toString: null }] }, { t: 'ans', id: mid, k: 0, inp: { amount: { toString: null } } }, { t: 'resync' }]) MP.hostConn.send(m);
+    }, mid);
+    await expect.poll(() => player.evaluate(() => netTrace.filter(m => m.t === 'state').length)).toBeGreaterThan(states);
+    expect(await host.evaluate(() => inputChosen)).toBe(null); expect(await businessState(host)).toEqual(before);
+    await player.getByRole('button', { name: '确认输入', exact: true }).click();
+    await expect.poll(() => host.evaluate(() => inputChosen)).toEqual({ v: true, inp: { amount: 5 } });
+    const viewer = await page(), { joinRoom } = await import('./support/peerjs.mjs');
+    await joinRoom(viewer, room, invite, true, '正常解说'); await sameState(host, [player, viewer]);
+  });
+});

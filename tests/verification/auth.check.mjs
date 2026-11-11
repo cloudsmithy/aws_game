@@ -183,3 +183,27 @@ test('重连被拒绝后仍是锁定客户端，不能退化为本地玩家覆�
   const h = harness(); h.mp.role = 'client'; h.mp.watching = true; h.ctx.info = () => {};
   h.mp.onClientMsg({ t: 'reject', why: '邀请失效' }); assert.equal(h.mp.role, 'client'); assert.equal(h.mp.gone, true); assert.equal(h.mp.kicked, true);
 });
+
+test('畸形 hello 名字字段被拒绝，不能通过对象字符串转换让房主抛异常', async () => {
+  for (const name of [{ toString: null }, [], 7, true]) {
+    const h = harness(); h.mp.setWatching(true); const c = h.conn(), before = plain(h.ctx.S);
+    await assert.doesNotReject(async () => h.mp.onHostMsg(c, h.hello({ name })));
+    assert.equal(c.messages[0].t, 'reject'); assert.equal(Object.keys(h.mp.viewers).length, 0);
+    assert.deepEqual(plain(h.ctx.S), before);
+  }
+});
+
+test('已认证玩家的畸形操作名、作弊参数和弹窗输入不得触发转换异常或提交选择', async () => {
+  for (const message of [
+    { t: 'act', a: { toString: null } },
+    { t: 'cheat', c: 'cash', a: [{ toString: null }] },
+    { t: 'ans', id: 8, k: 0, inp: { amount: { toString: null } } }
+  ]) {
+    const h = harness(), c = h.player(); h.mp.cur = { id: 8, who: 1, onAnswer: () => h.effects.push('answer') };
+    await assert.doesNotReject(async () => h.mp.onHostMsg(c, message)); assert.deepEqual(h.effects, []);
+  }
+  const h = harness(), c = h.player();
+  h.mp.cur = { id: 8, who: 1, onAnswer: (ans, inp) => h.effects.push({ ans, inp }) };
+  h.mp.onHostMsg(c, { t: 'ans', id: 8, k: 0, inp: { amount: 5, note: '正常', agree: true } });
+  assert.deepEqual(plain(h.effects), [{ ans: { k: 0 }, inp: { amount: 5, note: '正常', agree: true } }]);
+});
