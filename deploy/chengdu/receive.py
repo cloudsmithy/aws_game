@@ -24,7 +24,89 @@ def switch(base, name, target):
     os.replace(temporary, base / name)
 
 
-def unpack(stream, destination, revision):
+def safe_name(name):
+    parts = PurePosixPath(name).parts
+    if (not parts or name.startswith('/')
+            or any(p in ('', '.', '..') or p.startswith('.') for p in parts)
+            or str(PurePosixPath(name)) != name or '\\' in name
+            or any(ord(c) < 32 or ord(c) == 127 for c in name)
+            or len(name.encode()) > 512 or PurePosixPath(name).suffix.lower() not in SUFFIXES):
+        raise ValueError(f'unsafe path: {name!r}')
+
+
+def file_blob_id(path):
+    digest = hashlib.sha1(b'blob ' + str(path.stat().st_size).encode() + b'\0')
+    with path.open('rb') as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b''):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def inventory(base):
+    files = {}
+    total = 0
+    current = base / 'current'
+    if current.exists():
+        if not current.is_symlink() or not current.resolve().is_dir():
+            raise ValueError('current must be a release symlink')
+        for path in sorted(current.rglob('*')):
+            if path.is_symlink():
+                raise ValueError('symlink in current release')
+            if path.is_dir():
+                continue
+            name = path.relative_to(current).as_posix()
+            if name == '_deployment.json':
+                continue
+            safe_name(name)
+            if not path.is_file():
+                raise ValueError('non-regular current file')
+            files[name] = {'git_blob_sha': file_blob_id(path), 'size': path.stat().st_size}
+            total += path.stat().st_size
+            if len(files) > 5000 or total > MAX_EXPANDED:
+                raise ValueError('current release exceeds inventory limits')
+    digest = hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()
+    return {'protocol': 'incremental-v1', 'digest': digest, 'files': files}
+
+
+def assemble_delta(destination, manifest, names, base, baseline):
+    if base is None or baseline is None or manifest.get('base_digest') != baseline['digest']:
+        raise ValueError('server baseline changed; rebuild the delta from a fresh status')
+    expected = manifest['files']
+    if not isinstance(expected, dict) or len(expected) > 5000:
+        raise ValueError('invalid target manifest')
+    by_oid = {v['git_blob_sha']: name for name, v in baseline['files'].items()}
+    required_uploads = set()
+    total = 0
+    for name, item in expected.items():
+        safe_name(name)
+        if name == '_deployment.json' or not isinstance(item, dict):
+            raise ValueError('reserved or malformed manifest entry')
+        size, oid = item.get('size'), item.get('git_blob_sha')
+        if type(size) is not int or size < 0 or not isinstance(oid, str) or not re.fullmatch(r'[0-9a-f]{40}', oid):
+            raise ValueError('invalid target size or hash')
+        total += size
+        if total > MAX_EXPANDED:
+            raise ValueError('assembled release exceeds size limit')
+        if oid not in by_oid:
+            required_uploads.add(name)
+    if names - {'_deployment.json'} != required_uploads:
+        raise ValueError('delta upload list mismatch')
+    for name, item in expected.items():
+        path = destination / name
+        oid = item['git_blob_sha']
+        if name not in required_uploads:
+            source = base / 'current' / by_oid[oid]
+            path.parent.mkdir(parents=True, exist_ok=True, mode=0o755)
+            # Copy, never hard-link: releases remain isolated for rollback.
+            shutil.copyfile(source, path)
+            path.chmod(0o644)
+        if path.stat().st_size != item['size'] or file_blob_id(path) != oid:
+            raise ValueError(f'assembled file hash mismatch: {name}')
+    if not {'index.html', 'code/index.html'}.issubset(expected):
+        raise ValueError('missing entry points')
+
+
+def unpack(stream, destination, revision, base=None, baseline=None):
     """Validate the complete archive before publishing; reject links and traversal."""
     with tempfile.TemporaryFile() as incoming:
         size = 0
@@ -69,6 +151,9 @@ def unpack(stream, destination, revision):
     manifest = json.loads(meta.read_text())
     if manifest['revision'] != revision:
         raise ValueError('manifest revision mismatch')
+    if manifest.get('protocol') == 'incremental-v1':
+        assemble_delta(destination, manifest, names, base, baseline)
+        return
     expected = manifest['files']
     if set(expected) != names - {'_deployment.json'}:
         raise ValueError('manifest file list mismatch')
@@ -81,9 +166,12 @@ def unpack(stream, destination, revision):
 
 
 def operate(base, command, stream):
+    if command == 'status':
+        print(json.dumps(inventory(base), sort_keys=True))
+        return
     match = re.fullmatch(r'(deploy|rollback) ([0-9a-f]{40})', command)
     if not match:
-        raise ValueError('only deploy SHA or rollback SHA is permitted')
+        raise ValueError('only status, deploy SHA or rollback SHA is permitted')
     action, revision = match.groups()
     releases = base / 'releases'
     if action == 'rollback':
@@ -98,11 +186,15 @@ def operate(base, command, stream):
         return
     candidate = Path(tempfile.mkdtemp(prefix='.incoming-', dir=base))
     try:
-        unpack(stream, candidate, revision)
+        unpack(stream, candidate, revision, base, inventory(base))
         target = releases / revision
         if target.exists():
             # An immutable release cannot be replaced by a different archive.
-            if (target / '_deployment.json').read_bytes() != (candidate / '_deployment.json').read_bytes():
+            previous_manifest = json.loads((target / '_deployment.json').read_text())
+            candidate_manifest = json.loads((candidate / '_deployment.json').read_text())
+            old_files = {p.relative_to(target).as_posix(): file_blob_id(p) for p in target.rglob('*') if p.is_file() and p.relative_to(target).as_posix() != '_deployment.json'}
+            new_files = {p.relative_to(candidate).as_posix(): file_blob_id(p) for p in candidate.rglob('*') if p.is_file() and p.relative_to(candidate).as_posix() != '_deployment.json'}
+            if previous_manifest['revision'] != candidate_manifest['revision'] or old_files != new_files:
                 raise ValueError('revision already exists with different content')
         else:
             candidate.rename(target)
