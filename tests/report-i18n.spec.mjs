@@ -32,13 +32,16 @@ test('旧中英日存档保持出局、租金事件与结束类型识别，不�
   await page.goto('/?demo=board');
   const result = await page.evaluate(() => {
     const results = [];
-    for (const source of ['zh', 'en', 'ja']) {
-      switchLang(source);
+    // 固定已发布的旧格式；将来调整译文，不应改变这些历史样本。
+    for (const [outText, rentText, wa, last] of [
+      ['Yuki 账户被暂停（破产）', 'A 付给 B 过路费 $480（EC2）', '六大支柱全部达成', '其他玩家都被暂停了账户'],
+      ["Yuki's account suspended (bankrupt)", 'A paid B $480 in rent (EC2)', 'All six pillars achieved', 'All other players have been suspended'],
+      ['Yuki のアカウント停止（破産）', 'A が B に通行料 $480 を支払い（EC2）', '6 つの柱をすべて達成', '他のプレイヤー全員がアカウント停止']
+    ]) {
       const q = S.players[3]; q.name = 'Yuki'; q.alive = false;
       delete q.outRound; delete S.overKind;
-      const out = { r: 14, t: _tf(3362, '{$0} 账户被暂停（破产）', q.name), w: 99999 };
-      const rent = { r: 6, t: _tf(3099, '{$0} 付给 {$1} 过路费 ${$2}（{$3}{$4}）', 'A', 'B', 480, 'EC2', ''), w: 480 };
-      const wa = _t(2933, '六大支柱全部达成'), last = _t(3654, '其他玩家都被暂停了账户');
+      const out = { r: 14, t: outText, w: 99999 };
+      const rent = { r: 6, t: rentText, w: 480 };
       S.events = [out, rent];
       const original = JSON.stringify(S.events);
       for (const target of ['en', 'ja', 'zh']) {

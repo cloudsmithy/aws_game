@@ -6706,16 +6706,16 @@ const modeName = () => isParty() ? _t(3746, "娱乐模式") : isStudy() ? _t(374
 // 金额：负数用真正的减号（U+2212），和加号、数字等宽，列里右对齐不会错位；sign 时正数也带 +（「与第 1 名」那一列）
 const usd = (v, sign = false) => { v = Math.round(v || 0); return (v < 0 ? '−' : sign && v > 0 ? '+' : '') + '$' + Math.abs(v); };
 // 结束方式：none 没有赢家 / wa 六大支柱 / last 撑到最后 / val 按估值。结束画面、战报、台面中央、导出记录用同一套说法
-// 仅旧存档需要识别历史文字：复用已有翻译表，不能随当前界面语言改变统计。
-const legacyReportMatch = (id, zh, text) => zh.test(text) || Object.values(__I18N).some(a => { const m = (a[id] || '').match(/^re:\/([\s\S]*)\/([a-z]*)$/); return m && new RegExp(m[1], m[2]).test(text); });
-const reportEventIs = (e, kind) => e.kind ? e.kind === kind : kind === 'out' ? legacyReportMatch(3782, /账[号户]被暂停/, e.t) : kind === 'rent' && legacyReportMatch(3773, / 付给 .+ 过路费 /, e.t);
+// 仅旧存档识别已发布的历史格式；不显示新译文，也不依赖会重新生成的词条编号。
+const legacyEndKind = why => /六大支柱|six pillars|6 つの柱/i.test(why) ? 'wa' : /暂停了账[号户]|suspended|アカウント(が|を)?停止/.test(why) ? 'last' : 'val';
+const reportEventIs = (e, kind) => e.kind ? e.kind === kind : kind === 'out' ? /账[号户]被暂停|account (was )?suspended|アカウント(が|を)?停止/.test(e.t) : kind === 'rent' && / 付给 .+ 过路费 | paid .+ rent|が.+に通行料 /.test(e.t);
 const reportOutRound = q => {
   if (q.alive) return null;
   if (Number.isInteger(q.outRound) && q.outRound > 0) return q.outRound;
   const e = (S.events || []).find(e => e.t.startsWith(q.name) && /^(?:\s|'s\b)/.test(e.t.slice(q.name.length)) && reportEventIs({ ...e, t: e.t.slice(q.name.length) }, 'out'));
   return e ? e.r : null;
 };
-const finKind = (w, why) => !w ? 'none' : S.overKind || (legacyReportMatch(3751, /六大支柱/, why) ? 'wa' : legacyReportMatch(3752, /暂停了账[号户]/, why) ? 'last' : 'val');
+const finKind = (w, why) => !w ? 'none' : S.overKind || legacyEndKind(why);
 const finTitle = (w, why) => ({ none: _t(3753, "这一局没有赢家"), wa: _tf(3754, "{$0} 达成六大支柱，提前胜出", w && w.name), last: _tf(3755, "{$0} 撑到最后，赢下这一局", w && w.name), val: _tf(3756, "{$0} 获胜", w && w.name) })[finKind(w, why)];
 // 标题前面是赢家的棋子（和泳道、棋盘上的对得上），名字本身不上座位色；棋子上的座位号不念
 const finTitleHtml = (w, why) => `${w ? `<span class="pawn" aria-hidden="true" style="--pc:${w.color}">${COLORS.indexOf(w.color) + 1}</span>` : ''}<span>${finTitle(w, why)}</span>`;
@@ -6730,7 +6730,7 @@ function finEdge(w) {
 function finSub(w, why) {
   const k = finKind(w, why), e = finEdge(w), base = String(why || '').replace(_tr(3760, "（[−-]?\\$-?\\d+）$", ""), '');
   const lead = e => e.lead > 0 ? _tf(3761, "领先第 2 名 {$0} {$1}{$2}", e.r2.name, usd(e.lead), e.by ? _tf(3686, "，拉开最多的是{$0}（{$1} {$2}）", e.by[0], e.by[2], usd(e.by[1])) : '') : e.lead === 0 ? _tf(3762, "和第 2 名 {$0} 估值持平", e.r2.name) : _tf(3763, "估值上 {$0} 高 {$1}", e.r2.name, usd(-e.lead));
-  if (k === 'none') return (S.overKind === 'last' || legacyReportMatch(3752, /暂停了账[号户]/, base)) ? _t(3764, "所有玩家的账户都被暂停了") : base || _t(3765, "没有玩家留在场上");
+  if (k === 'none') return (S.overKind === 'last' || legacyEndKind(base) === 'last') ? _t(3764, "所有玩家的账户都被暂停了") : base || _t(3765, "没有玩家留在场上");
   if (k === 'last') return _tf(3766, "第 {$0} 轮，其他玩家的账户都被暂停了", S.round);
   // 六大支柱赢的人估值不一定最高：比他高的写出来，说明这一局不比估值
   if (k === 'wa') { const h = _tf(3767, "第 {$0} 轮六大支柱 6/6 达成，按胜利条件直接结束", S.round); return !e ? h : e.lead < 0 ? _tf(3768, "{$0}，不比估值（{$1} 估值多 {$2}）", h, e.r2.name, usd(-e.lead)) : e.lead === 0 ? _tf(3769, "{$0}；和第 2 名 {$1} 估值持平", h, e.r2.name) : _tf(3770, "{$0}；估值也{$1}", h, lead(e)); }
