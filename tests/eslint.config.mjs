@@ -1,4 +1,5 @@
 import html from 'eslint-plugin-html';
+import i18n from './i18n-rules.mjs';
 
 export default [
   // 在仓库根目录跑：npm run lint（tests/ 里）会先 cd ..，下面的路径都按仓库根目录算
@@ -18,5 +19,6 @@ export default [
       'valid-typeof': 'error'
     }
   },
-  { files: ['code/index.html'], languageOptions: { sourceType: 'script' } }
+  { files: ['code/index.html'], languageOptions: { sourceType: 'script' },
+    plugins: { i18n }, rules: { 'i18n/reuse-translations': 'error' } }
 ];

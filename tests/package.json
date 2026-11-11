@@ -7,7 +7,8 @@
     "test:layout": "playwright test",
     "test:content": "playwright test content-layout.spec.mjs",
     "check": "npm run lint && npm run test:movement && npm run test:layout",
-    "test:movement": "node --test verification/movement.check.mjs"
+    "test:movement": "node --test verification/movement.check.mjs",
+    "lint:size": "node size-lint.mjs"
   },
   "engines": {
     "node": ">=24"
