@@ -818,7 +818,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
     <li><span class="tag chg">改</span>联机走棋（合进 PR #5）：房主按结算边界（经过起点、UG）把一段路一次发给客户端，客户端只回放动画、不改对局状态；断线、重连、下一局都会取消还没播完的动画，旧版本客户端照旧逐格收；附带形式化检查和真实浏览器联机测试（<code>tests/verification/</code>、<code>tests/movement.spec.mjs</code>）。</li>
     <li><span class="tag chg">改</span>GitHub Pages（合进 PR #7）：只在上游仓库自动发布；fork 想发布要先开 Pages，再设仓库变量 <code>PAGES_DEPLOY_ENABLED=true</code>。</li>
     <li><span class="tag bug">BUG</span>棋盘文字被裁（合进 PR #15）：左上角「User Group 活动」名字折成两行时，第二行只露出上半截、下面的说明被压住，各种窗口大小都这样。改成四角先给名字和说明留出行高，图标用剩下的高度；上下两排的主人和过路费、两侧格子的名字和价格、左栏牌堆标签也不再被压成半行；附带中英日三语多种窗口的裁切检查（<code>tests/content-layout.spec.mjs</code>，<code>npm run test:content</code>）。对局顶上的标题放不下时整词折行，不再拆成「云 / 上大亨」。</li>
-      <li><span class="tag doc">文档</span>商标用词：封面免责声明从「本游戏模仿了大富翁的玩法……若有侵权，请……告知，我们会立即修改或下架」改成陈述事实的写法——「本游戏为原创作品，规则借鉴了已进入公共领域的经典地产类桌游机制（可追溯至 1904 年的 The Landlord’s Game），与任何第三方品牌无关联、无授权关系」；作者寄语里的「大富翁（也叫「地产大亨」）」改成「经典地产类桌游」（「地产大亨」是他人在中国大陆注册的商标译名）；英文、日文译文里的 Monopoly / モノポリー一并换成 property-trading / 不動産売買 的说法；规则书术语速查和术语对照手册的表头「原版大富翁 / 传统大富翁」改成「传统地产类桌游」。正文里「地产类桌游」这种描述性说法保留。</li>
+      <li><span class="tag doc">文档</span>商标用词：封面免责声明改成陈述事实的写法——「本游戏为原创作品，规则借鉴了已进入公共领域的经典地产类桌游机制（可追溯至 1904 年的 The Landlord’s Game），与任何第三方品牌无关联、无授权关系」，不再写「模仿」和「若有侵权……立即下架」。作者寄语、规则书术语速查、术语对照手册里出现的他人注册商标译名换成「经典地产类桌游 / 传统地产类桌游」；英文、日文译文里对应的商标名换成 property-trading、不動産売買 的说法。正文里「地产类桌游」这种描述性说法保留。</li>
     <li><span class="tag chg">改</span>浏览器里的存储键名从 <code>aws-monopoly-*</code> 改成 <code>aws-tycoon-*</code>（开发者工具里能看到，不出现他人商标）：存档、语言、外观、联机座位都跟着改名。页面开头加了一次性迁移，老键自动搬到新键名再删掉，老玩家的存档和偏好不会丢。</li>
 </ul>
 </section>
