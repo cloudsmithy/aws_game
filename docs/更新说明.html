@@ -189,7 +189,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <h2><i>08</i>文档</h2>
   <ul>
     <li><span class="tag doc">新</span><code>模式手册/</code> 6 本：娱乐、入门、标准、完整、学习、地狱，每本讲适合谁、开局设置、这个模式的规则和数字、怎么赢。</li>
-    <li><span class="tag doc">新</span><code>术语对照.pdf</code>：传统大富翁 ↔ 这个游戏（银行 → 亚马逊云科技、抵押 → 下线、房子 → 升级……）。</li>
+    <li><span class="tag doc">新</span><code>术语对照.pdf</code>：传统地产类桌游 ↔ 这个游戏（银行 → 亚马逊云科技、抵押 → 下线、房子 → 升级……）。</li>
     <li><span class="tag doc">改</span>规则书、玩法手册、速查卡、卡牌、棋盘与配件全部重新生成；README 更新了文件表和测试参数。</li>
     <li><span class="tag doc">改</span>经济模拟加了 <code>act=ai</code>（电脑玩家策略对打）、<code>diff=hell</code>、<code>dlc</code>、<code>rs</code>、<code>learn</code>、<code>acc</code>（答题正确率实验）参数。</li>
   </ul>
@@ -766,7 +766,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
     <li><span class="tag ui">UI</span>开局页 05 DLC 分成四个标签页：玩法拓展、题库、代理商模式、技能包，标签上写这一页勾了几个；04 联机的「联机设置和测试」挪到标题行右边。</li>
     <li><span class="tag bug">BUG</span>有的浏览器装了广告拦截插件，图鉴里的架构图只剩箭头：架构图的类名以 ad- 开头，被插件当成广告藏掉了，改了类名。</li>
     <li><span class="tag bug">BUG</span>User Group 活动那一格底下的说明太长，第二行被格子切掉：改成「经过领 $50 · 停下抽奖或抽卡」，只占一行。</li>
-    <li><span class="tag doc">文档</span>按 <code>code/index.html</code> 把玩法手册、规则书、玩法速览、README、模式手册、速查卡、卡牌和网页里的说明文字对了一遍：升级只能落在自己那块服务上时做，集齐整组后在资产管理里随时能加的是容量；EC2 的多 AZ 在第 2 级「跨 AZ Auto Scaling」（「高可用入口」半价的也是这一级）；卡牌、题目、架构的数量（Health 基础 30 张、re:Invent 基础 38 张，基础题 114 道，48 个架构，一个架构 3 到 7 块）；DLC 小表里几张卡的效果；保留卡补上 Workshop；去掉 EMR、Backup、旧色组的说法；速查卡和角色卡上专属技能的顺序改成先角色技能、再战略并购；娱乐模式手册不再教人下线；术语对照的标题不再带「大富翁」。</li>
+    <li><span class="tag doc">文档</span>按 <code>code/index.html</code> 把玩法手册、规则书、玩法速览、README、模式手册、速查卡、卡牌和网页里的说明文字对了一遍：升级只能落在自己那块服务上时做，集齐整组后在资产管理里随时能加的是容量；EC2 的多 AZ 在第 2 级「跨 AZ Auto Scaling」（「高可用入口」半价的也是这一级）；卡牌、题目、架构的数量（Health 基础 30 张、re:Invent 基础 38 张，基础题 114 道，48 个架构，一个架构 3 到 7 块）；DLC 小表里几张卡的效果；保留卡补上 Workshop；去掉 EMR、Backup、旧色组的说法；速查卡和角色卡上专属技能的顺序改成先角色技能、再战略并购；娱乐模式手册不再教人下线；术语对照的标题不再带他人的商标名。</li>
     <li><span class="tag bug">BUG</span>卡牌.pdf 一直停在 11-08 的内容：整份 100 多张纸一次打印，Chrome 报 Printing failed、不出文件，退出码却是 0，旧文件留着没人发现。现在按牌组分 4 段打再拼起来；所有 PDF 打印前先删旧文件，打完没出文件就重打一次，还不行就停下报错。</li>
     <li><span class="tag bug">BUG</span>Config 第 1、2 级的效果写重了一遍：图鉴、规则书第 8 节和服务卡上第 1 级是「免疫「安全审计没过」；免疫「安全审计没过」」，第 2 级的「S3 桶被设成了公开」也写了两遍。去掉重复的半句，效果没变。规则书附录里的题堆名「边缘与防护」改成和网页、题卡一样的「边缘防护」。认证题库的源文件 <code>tools/qbank/*.json</code> 还是改品牌名以前的写法（88 处「AWS」），按网页里现在的题目写回去，以后跑 <code>inject_qbank.py</code> 不会把「AWS」带回来；顺带去掉 6 处「用 亚马逊云科技账户」这类品牌名前多出来的空格。</li>
   </ul>
@@ -811,7 +811,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
     <li><span class="tag bug">BUG</span>当场切换语言时，开局以后才追加进数据表的条目不跟着换字：开局页「题库」那一栏的三张题库卡片、后来补的 4 张 Health 卡、5 道补的题和 DLC 的题目，会停在打开页面时的语言。改成先声明成小表、再把同一批对象放进原来的表（卡牌和题目的编号、顺序都不变）；切换以后的 50 张数据表和直接用那种语言打开逐张比对，完全一致。</li>
     <li><span class="tag new">新</span>架构讲解和服务知识点的英文版、日文版（<code>code/learn/en/</code>、<code>code/learn/ja/</code>）：48 个架构各两页（讲解视频、图文讲解），38 块服务各一页，字幕、说明卡、练习题和配音都是这种语言，服务介绍、架构、题目和游戏里的译文一致。每页右上角能切换中文 / English / 日本語，打开的是同一页的另一种语言；游戏里点「讲解视频」「图文讲解」「服务知识点」，打开的是游戏当前语言的那一页。配音用本机 VoxCPM2 合成。</li>
     <li><span class="tag bug">BUG</span>「带登录的智能体」里 AgentCore 那一块「在这里干什么」少了半个括号（「只接带有效令牌的请求（入站认证，AgentCore Identity…」），游戏里的悬停说明、讲解视频的字幕和配音都是这样；改成「只接带有效令牌的请求（入站认证）；AgentCore Identity 知道这一次是谁在用」。</li>
-    <li><span class="tag doc">文档</span>封面免责声明：「备注」另起一段；「本游戏模仿了大富翁的玩法，并拓展了云架构方面的功能」改成「……并加入了很多云服务的功能特性和架构知识」（英文、日文、README 同步改）。</li>
+    <li><span class="tag doc">文档</span>封面免责声明：「备注」另起一段；措辞从「模仿……的玩法」改成「加入了很多云服务的功能特性和架构知识」（英文、日文、README 同步改）。</li>
     <li><span class="tag chg">改</span>服务知识点页的练习题，英文、日文版和中文版是同一批题（以前按译文去认服务名挑题，英文版多挑出 3 道）；讲解页的「回到游戏」按这一页的语言打开游戏。</li>
     <li><span class="tag ui">UI</span>讲解页在手机上：讲解视频顶栏不再把标题挤成窄窄一列（小标签收起、标题单独一行）；架构目录的卡片按钮放不下时折行，不再超出屏幕；「练一练」计分那一行去掉逗号前多出来的空隙。</li>
     <li><span class="tag new">新</span>外观（合进 PR #9）：默认跟随系统，开局页「语言」旁边和对局菜单里能选浅色、深色；选择存在本机，不进存档、不影响联机的其他人；界面颜色统一换成变量，深色下的弹窗、日志、辅助界面都跟着换。</li>
