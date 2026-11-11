@@ -1,6 +1,6 @@
 # 英文版术语表和写法（i18n/en.json 的翻译规则）
 
-游戏是 2–4 人的大富翁类桌游，背景是在 Amazon Web Services 上创业。英文版给海外 User Group 和英语用户用：短、口语、准确，和 Amazon Web Services 官方英文用词一致。
+游戏是 2–4 人的地产类桌游，背景是在 Amazon Web Services 上创业。英文版给海外 User Group 和英语用户用：短、口语、准确，和 Amazon Web Services 官方英文用词一致。
 
 ## 品牌和名字
 | 中文 | English |

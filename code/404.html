@@ -30,7 +30,7 @@
     en: ['en', 'Page moved · Amazon Web Services User Group Cloud Tycoon', 'This page is no longer here. It may be an old link.', 'Back to the game'],
     ja: ['ja', 'ページが移動しました · Amazon Web Services User Group クラウドタイクーン', 'このページは見つかりません。古いリンクかもしれません。', 'ゲームに戻る']
   };
-  var l = null; try { l = localStorage.getItem('aws-monopoly-lang'); } catch (e) { }
+  var l = null; try { l = localStorage.getItem('aws-tycoon-lang'); } catch (e) { }
   if (!T[l]) { var n = ((navigator.languages && navigator.languages[0]) || navigator.language || '').toLowerCase(); l = n.indexOf('zh') === 0 ? 'zh' : n.indexOf('ja') === 0 ? 'ja' : 'en'; }
   var t = T[l], a = document.getElementById('home');
   document.documentElement.lang = t[0]; document.title = t[1];
