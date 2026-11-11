@@ -2192,6 +2192,8 @@ tr.gempty td{padding:20px;text-align:center;color:var(--mut2)}
 .hero .cats{grid-template-columns:repeat(5,minmax(0,1fr))}.hero .cat span{overflow:hidden;text-overflow:ellipsis}
 /* 英文版、日文版：字长，对局中间的标题只留「Cloud Tycoon」「クラウドタイクーン」（全名在网页标题和封面上），封面色组名字可以折成两行 */
 html:is([lang=en],[lang=ja]) .c-head .gt-pre{display:none}
+/* 对局顶上的标题放不下时整词折行（「亚马逊云科技 User Group」/「云上大亨」），不把「云上大亨」拆开 */
+.c-head .gtitle h1{word-break:keep-all}
 /* 日文版：汉字用日文字形（别让 PingFang SC 先接住） */
 html[lang=ja]{--sans:'Amazon Ember',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,'Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic UI','Yu Gothic',Meiryo,'Noto Sans JP',sans-serif}
 /* 语言按钮和它的下拉菜单 */
@@ -3153,7 +3155,7 @@ function langMenu(btn) {
   setTimeout(() => { document.addEventListener('pointerdown', out, true); document.addEventListener('keydown', key, true); }, 0);
   m.querySelector('[aria-checked="true"]')?.focus();
 }
-let GAME_VERSION = __rv(() => ({ major: 1, round: 15, name: _t(344, "第十五轮"), title: _t(345, "英文版、日文版、语言菜单、老板键、版本号"), commits: 79, changes: 439, since: '2026-10-20', build: '347f73c', time: '2026-11-11 14:25' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
+let GAME_VERSION = __rv(() => ({ major: 1, round: 15, name: _t(344, "第十五轮"), title: _t(345, "英文版、日文版、语言菜单、老板键、版本号"), commits: 82, changes: 440, since: '2026-10-20', build: 'cde49c0', time: '2026-11-11 15:52' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
 let SQ = __rv(() => (LAYOUT.map(k => SVC[k] ? { t: 'prop', k, icon: k, ...SVC[k] } : UTIL[k] ? { t: 'util', k, icon: k, ...UTIL[k] } : { k, ...SPECIAL[k] })), v => { SQ = v; }, () => SQ);
 // 起点、User Group 活动的说明跟着模式变（地狱模式起点只领 $150，娱乐模式 UG 抽三张）；用的时候才读，这时 BAL、S 都有了
 { const go = SQ.find(q => q.k === 'go'), ug = SQ.find(q => q.k === 'free');

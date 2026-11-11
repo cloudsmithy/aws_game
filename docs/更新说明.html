@@ -817,6 +817,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
     <li><span class="tag new">新</span>外观（合进 PR #9）：默认跟随系统，开局页「语言」旁边和对局菜单里能选浅色、深色；选择存在本机，不进存档、不影响联机的其他人；界面颜色统一换成变量，深色下的弹窗、日志、辅助界面都跟着换。</li>
     <li><span class="tag chg">改</span>联机走棋（合进 PR #5）：房主按结算边界（经过起点、UG）把一段路一次发给客户端，客户端只回放动画、不改对局状态；断线、重连、下一局都会取消还没播完的动画，旧版本客户端照旧逐格收；附带形式化检查和真实浏览器联机测试（<code>tests/verification/</code>、<code>tests/movement.spec.mjs</code>）。</li>
     <li><span class="tag chg">改</span>GitHub Pages（合进 PR #7）：只在上游仓库自动发布；fork 想发布要先开 Pages，再设仓库变量 <code>PAGES_DEPLOY_ENABLED=true</code>。</li>
+    <li><span class="tag bug">BUG</span>棋盘左上角「User Group 活动」名字折成两行时，第二行「活动」只露出上半截，下面的说明也被压住（各种窗口大小都这样，窗口越大越明显）。改成名字折行时缩小图标，名字两行和说明都完整显示；对局顶上的标题放不下时整词折行，不再拆成「云 / 上大亨」。</li>
   </ul>
 </section>
 
