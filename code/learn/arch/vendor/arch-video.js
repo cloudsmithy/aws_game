@@ -22,11 +22,12 @@
     steps.push({ kind: 'slot', k, title: nm(s) + (s.opt ? '（可选）' : ''), text: roles, note: link + note, say: `第 ${k + 1} 块，${nm(s)}。${s.items[0].intro ? s.items[0].intro + '。' : ''}在这个架构里，${roles}。${link}${note}` });
   });
   const req = D.slots.filter(s => !s.opt), opt = D.slots.filter(s => s.opt);
-  const outro = `必须的 ${req.length} 块凑齐就算成了${opt.length ? `，${opt.map(nm).join('、')} 是可选的，有就一起收` : ''}。凑成以后，别人落在这套里你的任意一块，按整套架构所有服务的过路费加起来收。${D.d ? '额外加成：' + D.d : ''}`;
+  const andJoin = a => document.documentElement.lang === 'en' && a.length > 1 ? a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1] : a.join('、');
+  const outro = `必须的 ${req.length} 块凑齐就算成了${opt.length ? `，${andJoin(opt.map(nm))} 是可选的，有就一起收` : ''}。凑成以后，别人落在这套里你的任意一块，按整套架构所有服务的过路费加起来收。${D.d ? '额外加成：' + D.d : ''}`;
   steps.push({ kind: 'outro', title: '整套跑起来', text: outro, say: '整套跑起来。' + outro });
   if (HAVE) {
     const miss = D.slots.flatMap(s => s.items.filter(it => !HAVE.has(it.k)).map(it => ({ it, s }))), add = miss.reduce((a, x) => a + (x.it.rent0 || 0), 0);
-    const t = miss.length ? `和最优架构比，还可以加：${miss.map(x => x.it.n + (x.s.opt ? '（可选）' : '（或的另一块）')).join('、')}。都配上以后，这套每次大约多收 ${add} 美元（按没升级、骰子 7 点估）。` : '这已经是最全的版本：可选的、或的几块都在手上，联合收费拿到最多。';
+    const t = miss.length ? `和最优架构比，还可以加：${miss.map(x => x.it.n + (x.s.opt ? '（可选）' : x.s.items.some(it => HAVE.has(it.k)) ? '（或的另一块）' : '（必须）')).join('、')}。都配上以后，这套每次大约多收 ${add} 美元（按没升级、骰子 7 点估）。` : '这已经是最全的版本：可选的、或的几块都在手上，联合收费拿到最多。';
     steps.push({ kind: 'compare', title: `${WHO}的架构 vs 最优架构`, text: t, say: t });
   }
 
@@ -135,11 +136,11 @@
   const fit = (w, h) => { const f = cam.fov * Math.PI / 180; return Math.max(h / 2 / Math.tan(f / 2), w / 2 / Math.tan(f / 2) / cam.aspect) * 1.1; };
   const AUD = new Audio(); AUD.preload = 'auto';
   const clipsOf = i => { if (!D.clips) return null; const s = steps[i]; return D.clips[s.kind === 'intro' ? 0 : s.kind === 'slot' ? 1 + s.k : s.kind === 'outro' ? 1 + n : 2 + n] || null; };
-  const dur = s => Math.max(4.5, s.say.length * 0.21);
+  const dur = s => Math.max(4.5, s.say.length * (/[\u3040-\u9fff]/.test(s.say) ? 0.21 : 0.07));
   function typeIn(el, text) { clearInterval(typeT); if (RM) { el.textContent = text; return; } let i = 0; el.textContent = ''; typeT = setInterval(() => { i += 2; el.textContent = text.slice(0, i); if (i >= text.length) clearInterval(typeT); }, 28); }
   let pick = null;   // 用户点开的那一块（停在这里看说明）
   // 说明卡：一块服务写全（它是什么、常见用法、为什么用它、在这里干什么）；几选一的那一环每块只写「为什么用它」（它是什么在字幕和配音里讲），「在这里干什么」只写一次，最后是「这一环怎么选」
-  const cut = (s, n) => s && s.length > n ? s.slice(0, n - 1) + '…' : s;
+  const cut = (s, n) => { if (!s) return s; if (!/[\u3040-\u9fff]/.test(s)) n = Math.round(n * 2.6); return s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s; };
   function cardHtml(slot, k, items) {
     const multi = items.length > 1, same = multi && items.every(it => it.role === items[0].role);
     const svc = it => `<div class="sc${HAVE && !HAVE.has(it.k) ? ' no' : ''}"><img src="${D.icons[it.k]}" alt=""><div><b>${it.n}</b><span class="gp">${it.g}组${HAVE ? (HAVE.has(it.k) ? ' · <i class="y">你有</i>' : ' · <i class="n">还没有</i>') : ''}</span>`

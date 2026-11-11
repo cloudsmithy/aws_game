@@ -12,18 +12,19 @@
   const nm = s => s.items.map(it => it.n).join(' または ');
   const steps = [{ kind: 'intro', title: D.n, text: D.use, say: `${D.n}。${D.use}` }];
   D.slots.forEach((s, k) => {
-    const roles = [...new Set(s.items.map(it => it.role).filter(Boolean))].join('、') || 'このアーキテクチャでほかのサービスと連携します';
+    const roles = [...new Set(s.items.map(it => it.role).filter(Boolean))].join('。') || 'このアーキテクチャでほかのサービスと連携します';
     const link = k ? { '⇄': '前のサービスとは、往復でやり取りします。', '+': '前のサービスと連携して動きます。', '←': 'データはこのサービスから前のサービスへ戻ります。' }[s.link] || '' : '';
-    let note = (s.opt ? 'このサービスはオプション：なくても完成扱いになり、あればまとめて請求します。' : s.items.length > 1 ? 'どれか 1 つあればよく、全部持っていればすべてまとめて請求します。' : '');
+    let note = (s.opt ? 'このサービスはオプションです。なくても完成扱いになり、あればまとめて請求します。' : s.items.length > 1 ? 'どれか 1 つあればよく、全部持っていればすべてまとめて請求します。' : '');
     if (HAVE) { const mine = s.items.filter(it => HAVE.has(it.k)).map(it => it.n); note += mine.length ? `${WHO}は ${mine.join('、')} を持っています。` : s.opt ? `${WHO}はこのサービスをまだ持っていません。` : ''; }
     steps.push({ kind: 'slot', k, title: nm(s) + (s.opt ? '（オプション）' : ''), text: roles, note: link + note, say: `${k + 1} つ目のサービスは ${nm(s)} です。${s.items[0].intro ? s.items[0].intro + '。' : ''}このアーキテクチャでは、${roles}。${link}${note}` });
   });
   const req = D.slots.filter(s => !s.opt), opt = D.slots.filter(s => s.opt);
-  const outro = `必須の ${req.length} つのサービスがそろえば完成${opt.length ? `。${opt.map(nm).join('、')} はオプションで、あればまとめて請求します` : ''}。完成すると、ほかのプレイヤーがこのアーキテクチャのうちあなたのどのマスに止まっても、アーキテクチャ全体のすべてのサービスの通行料を合計して請求します。${D.d ? '追加ボーナス：' + D.d : ''}`;
+  const andJoin = a => document.documentElement.lang === 'en' && a.length > 1 ? a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1] : a.join('、');
+  const outro = `必須の ${req.length} つのサービスがそろえば完成です${opt.length ? `。${andJoin(opt.map(nm))} はオプションで、あればまとめて請求します` : ''}。完成すると、ほかのプレイヤーがこのアーキテクチャに含まれるあなたのマスのどれに止まっても、アーキテクチャ全体のすべてのサービスの通行料を合計して請求します。${D.d ? '追加ボーナス：' + D.d : ''}`;
   steps.push({ kind: 'outro', title: '全体が動き出す', text: outro, say: '全体が動き出します。' + outro });
   if (HAVE) {
     const miss = D.slots.flatMap(s => s.items.filter(it => !HAVE.has(it.k)).map(it => ({ it, s }))), add = miss.reduce((a, x) => a + (x.it.rent0 || 0), 0);
-    const t = miss.length ? `最適なアーキテクチャと比べると、まだ追加できるものがあります：${miss.map(x => x.it.n + (x.s.opt ? '（オプション）' : '（「または」の別のサービス）')).join('、')}。すべてそろえると、このアーキテクチャで 1 回あたり約 ${add} ドル多く請求できます（アップグレードなし、サイコロの出目 7 で試算）。` : 'すでに最も充実した構成です：オプションのサービスも「または」のサービスもすべてそろっていて、一括通行料を最も多く受け取れます。';
+    const t = miss.length ? `最適なアーキテクチャと比べると、まだ追加できるものがあります：${miss.map(x => x.it.n + (x.s.opt ? '（オプション）' : x.s.items.some(it => HAVE.has(it.k)) ? '（「または」の別のサービス）' : '（必須）')).join('、')}。すべてそろえると、このアーキテクチャで 1 回あたり約 ${add} ドル多く請求できます（アップグレードなし、サイコロの出目 7 で試算）。` : 'すでに最も充実した構成です：オプションのサービスも「または」のサービスもすべてそろっていて、一括通行料を最も多く受け取れます。';
     steps.push({ kind: 'compare', title: `${WHO}のアーキテクチャ vs 最適なアーキテクチャ`, text: t, say: t });
   }
 
@@ -86,7 +87,7 @@
         const im = await loadImg(D.icons[it.k]); let icon;
         if (im) { const [c, gg] = cvs(256, 256); gg.drawImage(im, 0, 0, 256, 256); icon = plane(tex(c), 0.92, 0.92); } else icon = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 0.92), new THREE.MeshBasicMaterial({ color: 0x334, transparent: true }));
         icon.position.set(0, 0.2, 0.02); icon.userData = { it, opt: s.opt }; g.add(icon);
-        const lab = plane(textTex([it.n, it.g + 'グループ'], { w: 640, h: 200, size: 66 }), 1.8, 0.56); lab.position.set(0, -0.7, 0.02); g.add(lab);
+        const lab = plane(textTex([it.n, it.g + '系'], { w: 640, h: 200, size: 66 }), 1.8, 0.56); lab.position.set(0, -0.7, 0.02); g.add(lab);
         if (s.opt) { const c2 = plane(chipTex('オプション', '#ffb84d'), 0.56, 0.2); c2.position.set(0.56, 0.86, 0.03); g.add(c2); }
         if (miss) { const c3 = plane(chipTex('未保有', '#ff6b6b'), 0.56, 0.2); c3.position.set(-0.56, 0.86, 0.03); g.add(c3); icon.material.opacity = 0.35; lab.material.opacity = 0.5; }
 
@@ -129,14 +130,14 @@
   const fit = (w, h) => { const f = cam.fov * Math.PI / 180; return Math.max(h / 2 / Math.tan(f / 2), w / 2 / Math.tan(f / 2) / cam.aspect) * 1.1; };
   const AUD = new Audio(); AUD.preload = 'auto';
   const clipsOf = i => { if (!D.clips) return null; const s = steps[i]; return D.clips[s.kind === 'intro' ? 0 : s.kind === 'slot' ? 1 + s.k : s.kind === 'outro' ? 1 + n : 2 + n] || null; };
-  const dur = s => Math.max(4.5, s.say.length * 0.21);
+  const dur = s => Math.max(4.5, s.say.length * (/[\u3040-\u9fff]/.test(s.say) ? 0.21 : 0.07));
   function typeIn(el, text) { clearInterval(typeT); if (RM) { el.textContent = text; return; } let i = 0; el.textContent = ''; typeT = setInterval(() => { i += 2; el.textContent = text.slice(0, i); if (i >= text.length) clearInterval(typeT); }, 28); }
   let pick = null;
 
-  const cut = (s, n) => s && s.length > n ? s.slice(0, n - 1) + '…' : s;
+  const cut = (s, n) => { if (!s) return s; if (!/[\u3040-\u9fff]/.test(s)) n = Math.round(n * 2.6); return s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s; };
   function cardHtml(slot, k, items) {
     const multi = items.length > 1, same = multi && items.every(it => it.role === items[0].role);
-    const svc = it => `<div class="sc${HAVE && !HAVE.has(it.k) ? ' no' : ''}"><img src="${D.icons[it.k]}" alt=""><div><b>${it.n}</b><span class="gp">${it.g}グループ${HAVE ? (HAVE.has(it.k) ? ' · <i class="y">保有中</i>' : ' · <i class="n">未保有</i>') : ''}</span>`
+    const svc = it => `<div class="sc${HAVE && !HAVE.has(it.k) ? ' no' : ''}"><img src="${D.icons[it.k]}" alt=""><div><b>${it.n}</b><span class="gp">${it.g}${HAVE ? (HAVE.has(it.k) ? ' · <i class="y">保有中</i>' : ' · <i class="n">未保有</i>') : ''}</span>`
       + (!multi && it.what ? `<p><small>概要</small>${cut(it.what, 110)}</p>` : '') + (!multi && it.uses ? `<p><small>主な用途</small>${it.uses}</p>` : '')
       + (it.why ? `<p><small>使う理由</small>${it.why}</p>` : '') + (same ? '' : `<p class="here"><small>このアーキテクチャでの役割</small>${it.role || 'このアーキテクチャでほかのサービスと連携します'}</p>`) + `<a class="svk" href="../svc/${it.k}.html" target="_blank" rel="noopener">${it.n} のサービスノート ↗</a></div></div>`;
     return `<div class="cw${multi ? ' multi' : ''}"><div class="kick">${k + 1} つ目のサービス · ${slot.opt ? 'オプション' : multi ? 'いずれか 1 つ' : '必須'}</div>`
@@ -172,10 +173,10 @@
   const pb = $('#play'); function sync() { pb.textContent = playing ? '一時停止' : cur >= steps.length - 1 && started ? 'もう一度再生' : '再生'; pb.setAttribute('aria-pressed', playing); }
   pb.onclick = () => (playing ? pause() : play());
   $('#prev').onclick = () => show(cur - 1); $('#next').onclick = () => show(cur + 1);
-  const mb = $('#mute'); mb.onclick = () => { muted = !muted; mb.textContent = muted ? '音声 オフ' : '音声 オン'; if (muted) AUD.pause(); if (playing) show(cur); };
+  const mb = $('#mute'); mb.onclick = () => { muted = !muted; mb.textContent = muted ? '音声：オフ' : '音声：オン'; if (muted) AUD.pause(); if (playing) show(cur); };
   if (!D.clips) { mb.hidden = true; muted = true; }
   const unmute = $('#unmute');
-  if (unmute) unmute.onclick = () => { blocked = false; unmute.hidden = true; muted = false; mb.textContent = '音声 オン'; if (playing) show(cur); else play(); };
+  if (unmute) unmute.onclick = () => { blocked = false; unmute.hidden = true; muted = false; mb.textContent = '音声：オン'; if (playing) show(cur); else play(); };
   $('.prog').onclick = e => { const i = e.target.closest('i'); if (i) show(+i.dataset.i); };
   addEventListener('keydown', e => { if (e.key === ' ') { e.preventDefault(); playing ? pause() : play(); } if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1); });
   sync();

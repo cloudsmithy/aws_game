@@ -13,17 +13,18 @@
   const steps = [{ kind: 'intro', title: D.n, text: D.use, say: `${D.n}. ${D.use}` }];
   D.slots.forEach((s, k) => {
     const roles = [...new Set(s.items.map(it => it.role).filter(Boolean))].join('; ') || 'Works with the other pieces in this architecture';
-    const link = k ? { '⇄': 'Calls go back and forth between it and the previous service. ', '+': 'It works together with the previous service. ', '←': 'Data flows from it back to the previous service. ' }[s.link] || '' : '';
-    let note = (s.opt ? 'This one is optional: the architecture is complete without it, and if you have it, it\'s charged along with the rest. ' : s.items.length > 1 ? 'Any one of these is enough, and if you hold them all, they\'re all charged together. ' : '');
+    const link = k ? { '⇄': 'Calls go back and forth between it and the previous piece. ', '+': 'It works together with the previous piece. ', '←': 'Data flows from it back to the previous piece. ' }[s.link] || '' : '';
+    let note = (s.opt ? 'This one is optional: the architecture is complete without it, and if you own it, its rent is added to the combined rent. ' : s.items.length > 1 ? 'Any one of these is enough, and if you own more than one, all of their rents count. ' : '');
     if (HAVE) { const mine = s.items.filter(it => HAVE.has(it.k)).map(it => it.n); note += mine.length ? `${WHO} has ${mine.join(', ')}. ` : s.opt ? `${WHO} doesn't have this one yet. ` : ''; }
     steps.push({ kind: 'slot', k, title: nm(s) + (s.opt ? ' (optional)' : ''), text: roles, note: link + note, say: `Service ${k + 1}: ${nm(s)}. ${s.items[0].intro ? s.items[0].intro + '. ' : ''}In this architecture, ${roles}. ${link}${note}` });
   });
   const req = D.slots.filter(s => !s.opt), opt = D.slots.filter(s => s.opt);
-  const outro = `With all ${req.length} required services in place, the architecture is complete${opt.length ? `, with ${opt.map(nm).join(', ')} optional and charged together if present` : ''}. After that, when others land on any of your services in this set, they pay the rents of every service in the whole architecture, added together. ${D.d ? 'Extra bonus: ' + D.d : ''}`;
+  const andJoin = a => document.documentElement.lang === 'en' && a.length > 1 ? a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1] : a.join(', ');
+  const outro = `Once the ${req.length} required pieces are in place, the architecture is complete${opt.length ? `, with ${andJoin(opt.map(nm))} optional; any optional piece you own adds to the combined rent` : ''}. After that, when others land on any of your squares in this set, they pay the combined rent of all the services in the architecture. ${D.d ? 'Extra bonus: ' + D.d : ''}`;
   steps.push({ kind: 'outro', title: 'Putting it all together', text: outro, say: 'Putting it all together. ' + outro });
   if (HAVE) {
     const miss = D.slots.flatMap(s => s.items.filter(it => !HAVE.has(it.k)).map(it => ({ it, s }))), add = miss.reduce((a, x) => a + (x.it.rent0 || 0), 0);
-    const t = miss.length ? `Compared with the optimal architecture, you could still add: ${miss.map(x => x.it.n + (x.s.opt ? ' (optional)' : ' (the other option)')).join(', ')}. With all of them in place, this set collects about ${add} dollars more each time (estimated with no upgrades and a roll of 7). ` : 'This is already the most complete version: you have all the optional services and every alternative, so you collect the most combined rent. ';
+    const t = miss.length ? `Compared with the optimal architecture, you could still add: ${miss.map(x => x.it.n + (x.s.opt ? ' (optional)' : x.s.items.some(it => HAVE.has(it.k)) ? ' (the other option)' : ' (required)')).join(', ')}. With all of them in place, this set collects about ${add} dollars more each time (estimated with no upgrades and a roll of 7). ` : 'This is already the most complete version: you have all the optional services and every alternative, so you collect the most combined rent. ';
     steps.push({ kind: 'compare', title: `${WHO}'s architecture vs the optimal architecture`, text: t, say: t });
   }
 
@@ -129,17 +130,17 @@
   const fit = (w, h) => { const f = cam.fov * Math.PI / 180; return Math.max(h / 2 / Math.tan(f / 2), w / 2 / Math.tan(f / 2) / cam.aspect) * 1.1; };
   const AUD = new Audio(); AUD.preload = 'auto';
   const clipsOf = i => { if (!D.clips) return null; const s = steps[i]; return D.clips[s.kind === 'intro' ? 0 : s.kind === 'slot' ? 1 + s.k : s.kind === 'outro' ? 1 + n : 2 + n] || null; };
-  const dur = s => Math.max(4.5, s.say.length * 0.21);
+  const dur = s => Math.max(4.5, s.say.length * (/[\u3040-\u9fff]/.test(s.say) ? 0.21 : 0.07));
   function typeIn(el, text) { clearInterval(typeT); if (RM) { el.textContent = text; return; } let i = 0; el.textContent = ''; typeT = setInterval(() => { i += 2; el.textContent = text.slice(0, i); if (i >= text.length) clearInterval(typeT); }, 28); }
   let pick = null;
 
-  const cut = (s, n) => s && s.length > n ? s.slice(0, n - 1) + '…' : s;
+  const cut = (s, n) => { if (!s) return s; if (!/[\u3040-\u9fff]/.test(s)) n = Math.round(n * 2.6); return s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s; };
   function cardHtml(slot, k, items) {
     const multi = items.length > 1, same = multi && items.every(it => it.role === items[0].role);
     const svc = it => `<div class="sc${HAVE && !HAVE.has(it.k) ? ' no' : ''}"><img src="${D.icons[it.k]}" alt=""><div><b>${it.n}</b><span class="gp">${it.g} group${HAVE ? (HAVE.has(it.k) ? ' · <i class="y">You have it</i>' : ' · <i class="n">Missing</i>') : ''}</span>`
       + (!multi && it.what ? `<p><small>What it is</small>${cut(it.what, 110)}</p>` : '') + (!multi && it.uses ? `<p><small>Common uses</small>${it.uses}</p>` : '')
       + (it.why ? `<p><small>Why use it</small>${it.why}</p>` : '') + (same ? '' : `<p class="here"><small>In this architecture</small>${it.role || 'Works with the other pieces in this architecture'}</p>`) + `<a class="svk" href="../svc/${it.k}.html" target="_blank" rel="noopener">${it.n} service notes ↗</a></div></div>`;
-    return `<div class="cw${multi ? ' multi' : ''}"><div class="kick">Service ${k + 1} · ${slot.opt ? 'Optional' : multi ? 'One of' : 'Required'}</div>`
+    return `<div class="cw${multi ? ' multi' : ''}"><div class="kick">Piece ${k + 1} · ${slot.opt ? 'Optional' : multi ? 'One of' : 'Required'}</div>`
       + (slot.choose && multi ? `<div class="chs"><small>How to choose</small>${slot.choose}</div>` : '') + items.map(svc).join('<div class="or">or</div>')
       + (same ? `<p class="here sh"><small>In this architecture</small>${items[0].role || 'Works with the other pieces in this architecture'}</p>` : '') + '</div>';
   }
