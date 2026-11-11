@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     # 11-11 起 ubuntu-latest 在迁到 Ubuntu 26，playwright install --with-deps 的 apt 安装
     # 从几秒变成 9 分钟以上，10 分钟的上限会让 job 卡在装浏览器那一步，测试一个都跑不到
-    timeout-minutes: 25
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: tests   # package.json 和检查的配置都在 tests/ 里
@@ -37,12 +37,8 @@ jobs:
       # 比整个 job 挂在这一步、测试一个都跑不到要好。
       - name: 系统依赖（apt 失败不阻断）
         continue-on-error: true
-        run: |
-          for i in 1 2 3; do
-            npx playwright install-deps chromium && exit 0
-            echo "apt 第 $i 次失败，等 20 秒重试"; sleep 20
-          done
-          echo '::warning title=系统依赖没装上::apt 解析不到 ubuntu 镜像，CJK 字体可能缺失'
+        timeout-minutes: 5   # 解析不到镜像时 apt 每次要耗 9 分钟才放弃，必须单独掐住；别加重试，三次就把整个 job 的时限吃光了
+        run: npx playwright install-deps chromium
       - name: 体积检查（仅提醒）
         env:
           SIZE_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
