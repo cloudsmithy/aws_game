@@ -5,7 +5,8 @@
   "scripts": {
     "lint": "cd .. && eslint --config tests/eslint.config.mjs . && stylelint --config tests/stylelint.config.mjs code/index.html",
     "test:layout": "playwright test",
-    "check": "npm run lint && npm run test:layout"
+    "check": "npm run lint && npm run test:movement && npm run test:layout",
+    "test:movement": "node --test verification/movement.check.mjs"
   },
   "engines": {
     "node": ">=24"

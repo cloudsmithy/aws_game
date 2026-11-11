@@ -4756,6 +4756,16 @@ async function quiz(g, why, { inline = false } = {}) {
 }
 
 // ================= 移动 =================
+// 展示路径只到下一个结算边界，最多一圈；不掷骰、不修改 S。
+function walkSegment(from, remaining, dir) {
+  const path = [];
+  for (let j = 0; j < Math.min(remaining, N); j++) {
+    const to = (from + dir + N) % N; path.push(to); from = to;
+    if (dir > 0 && (to === 0 || (SQ[to].t === 'free' && j + 1 < remaining))) break;
+    if (dir < 0 && to === N - 1) break;
+  }
+  return path;
+}
 async function moveSteps(p, n) {
   if (p.jail !== null) { log(_tf(1759, "{$0} 在维护窗口里，不移动", nm(p))); return; }   // 被甩来、被逼着抽到移动类的卡：人不动，罚照算
   const dir = n > 0 ? 1 : -1;
@@ -4763,8 +4773,13 @@ async function moveSteps(p, n) {
   // 开头整页画一次（走之前扣的钱、记的日志、出维护窗口都要显示），等这一页画完两帧再起跳：
   // 不然手机上这一帧的排版和绘制要几十毫秒，第一跳的动画按时间算进度，前半段弧线就被跳过了。切到后台没有帧，最多等 100ms
   if (hop) { S.moving = p.id; MOVE_TO = null; fxCast('ws', { p: p.id, from: p.pos }); render(); await new Promise(r => { requestAnimationFrame(() => requestAnimationFrame(r)); setTimeout(r, 100); }); }
+  let batchEnd = 0;
   try {
   for (let k = 0; k < Math.abs(n); k++) {
+    if (hop && k === batchEnd) {
+      const path = walkSegment(p.pos, Math.abs(n) - k, dir); batchEnd += path.length;
+      fxCast('walk', { p: p.id, seq: MP.walkSeq = (MP.walkSeq || 0) + 1, from: p.pos, path, ms: (Math.abs(n) > 10 ? 90 : aiTurn() ? 110 : 150) * animK(), last: batchEnd === Math.abs(n) });
+    }
     p.pos = (p.pos + dir + N) % N;
     if (hop && k === Math.abs(n) - 1) { MOVE_TO = p.pos; hopRender(); }   // 最后一跳前才在终点格放占位，3D 棋子落在占位上
     if (hop) { const ms = (Math.abs(n) > 10 ? 90 : aiTurn() ? 110 : 150) * animK(); fxCast('wh', { p: p.id, from: (p.pos - dir + N) % N, to: p.pos, ms, last: k === Math.abs(n) - 1 }); await FX.pawnHop(p.pos, ms); }
@@ -10244,7 +10259,7 @@ const MP = {
       if (seat == null) { this.send(conn, { t: 'reject', why: _t(4996, "房间满了（最多 4 人）") }); setTimeout(() => conn.close(), 300); return; }
     }
     // key：座位钥匙，每次 welcome 换一把新的（换了设备进来以后旧设备那把就作废）。只放在房主的 MP.seats 和他本人的浏览器里，不能写进 S：S 会推给所有人
-    const skey = this.newKey(); conn._seat = seat; this.seats[seat] = { name, conn, online: true, wb: this.wbIn(m.wb), delta: m.delta === 1, key: skey };   // delta：新版页面，收得了增量状态
+    const skey = this.newKey(); conn._seat = seat; this.seats[seat] = { name, conn, online: true, wb: this.wbIn(m.wb), delta: m.delta === 1, walk: m.walk === 1, key: skey };   // delta：新版页面，收得了增量状态
     this.send(conn, { t: 'welcome', seat, room: this.room, key: skey });
     if (S && S.players) { log(_tf(4997, "🔌 {$0} 重新连上了", nm(S.players[seat]))); render(); this.pushState(true); if (this.cur) { this.send(conn, this.cur.msg); const tk = this.cur.who === seat && this.cur.box.querySelector('[data-mptake]'); if (tk) { tk.hidden = true; if (tk._arm) tk._arm(); const ta = this.cur.box.querySelector('[data-mpall]'); if (ta) ta.hidden = true; } } }
     else this.renderLobby();
@@ -10358,12 +10373,12 @@ const MP = {
       this.watch(conn);
       conn.on('error', () => { if (this.hostConn === conn && !this.role) { clearTimeout(tm); this.hostConn = null; fail(P2P); } });
       // 带上自己的错题本：局里给你出「再练一次」的题按你自己的来。keys：这个浏览器在这个房间里拿过的座位钥匙，开局后用同一个名字顶替还挂着在线的座位，房主只认这个
-      conn.on('open', () => { clearTimeout(tm); this.send(conn, { t: 'hello', name: this.myName, auth: this.auth, wb: wbLoad(), delta: 1, keys: this.seatKeys(room) }); });
-      conn.on('data', m => this.onClientMsg(m));
+      conn.on('open', () => { clearTimeout(tm); this.send(conn, { t: 'hello', name: this.myName, auth: this.auth, wb: wbLoad(), delta: 1, walk: 1, keys: this.seatKeys(room) }); });
+      conn.on('data', m => { if (this.hostConn === conn) this.onClientMsg(m); });
       // 局已结束、远端还开着战报或结束动画时只发 toast：modal() 会先关掉当前弹窗，正在看的战报会被打断（关了能点「查看战报」再开，但别替人关掉）
       // 断线提示是远端自己开的窗口（local）：不带的话正轮到电脑时会被当成电脑的弹窗，按钮灰掉、0.9 秒就被点掉，回原座位的说明一闪就没了
       // 被同一个浏览器的另一个页面接手了（kicked）：说清楚，不写成「房主关掉了页面」。连上了、还没被收下就断了：提示再点「加入」
-      conn.on('close', () => { if (this.hostConn !== conn) return; if (this.gone && this.role === 'client' && !conn._ok) { clearTimeout(tm); this.hostConn = null; this.retryLater(); return; } if (!this.role) { clearTimeout(tm); this.hostConn = null; fail(_t(5023, "和房主的连接断开了，还没进房间。再点「加入」试试")); return; } if (this.role === 'client' && S && S.over && (!$('#modal').hidden || $('#endfx'))) toast(_t(5024, "房主已经离开。想再来一局，等房主建好新房间，拿新的房间号加入")); else if (this.role === 'client' && this.kicked) info(_t(5025, "这个页面不再连着房间"), _t(5026, "<p>你在这台设备的另一个页面里用同一个名字重新加入了，接着在那边玩就行。</p>"), true); else if (this.role === 'client' && S && S.players && !S.over) toast(_t(5027, "和房主断开了，正在自动重连…"), 4000); else if (this.role === 'client') info(_t(4968, "和房主断开了"), S && S.over ? _t(5028, "<p>这一局已经结束了。想再来一局，等房主建好新房间，拿新的房间号加入。</p>") : _tf(5029, "<p>房主关掉了页面或者网络断了。重新打开页面，用你在局里的名字{$0}加入，就能回到原来的座位。</p><p>房主那边刷新过的话房间号会变：房主重新创建房间、点「继续上一局」，你拿新的房间号用这个名字加入，谁先谁后都行。</p>", S && S.players[this.mySeat] ? _tf(2766, "「{$0}」", S.players[this.mySeat].name) : ''), true); if (this.role === 'client') { if (S && S.players) { this.gone = true; if (!$('#game').hidden) render(); if (!S.over && !this.kicked) { this.reN = 0; this.retryLater(); } } else this.role = null; } });   // 开局后 role 留着 'client'：清掉的话存档、结算、「再来一局」都按单机走，会改写甚至删掉这台设备自己的存档；gone 让自己的回合也锁住。还在大厅、没收到房主的局时没什么要护着的，照旧清掉身份：不然在这台设备上点「继续上一局」打自己的局，会被当成远端整个锁住，也不存档
+      conn.on('close', () => { if (this.hostConn !== conn) return; if (this.gone && this.role === 'client' && !conn._ok) { clearTimeout(tm); this.hostConn = null; this.retryLater(); return; } if (!this.role) { clearTimeout(tm); this.hostConn = null; fail(_t(5023, "和房主的连接断开了，还没进房间。再点「加入」试试")); return; } if (this.role === 'client' && S && S.over && (!$('#modal').hidden || $('#endfx'))) toast(_t(5024, "房主已经离开。想再来一局，等房主建好新房间，拿新的房间号加入")); else if (this.role === 'client' && this.kicked) info(_t(5025, "这个页面不再连着房间"), _t(5026, "<p>你在这台设备的另一个页面里用同一个名字重新加入了，接着在那边玩就行。</p>"), true); else if (this.role === 'client' && S && S.players && !S.over) toast(_t(5027, "和房主断开了，正在自动重连…"), 4000); else if (this.role === 'client') info(_t(4968, "和房主断开了"), S && S.over ? _t(5028, "<p>这一局已经结束了。想再来一局，等房主建好新房间，拿新的房间号加入。</p>") : _tf(5029, "<p>房主关掉了页面或者网络断了。重新打开页面，用你在局里的名字{$0}加入，就能回到原来的座位。</p><p>房主那边刷新过的话房间号会变：房主重新创建房间、点「继续上一局」，你拿新的房间号用这个名字加入，谁先谁后都行。</p>", S && S.players[this.mySeat] ? _tf(2766, "「{$0}」", S.players[this.mySeat].name) : ''), true); if (this.role === 'client') { if (S && S.players) { this.gone = true; MPFX.cancel(); if (!$('#game').hidden) render(); if (!S.over && !this.kicked) { this.reN = 0; this.retryLater(); } } else this.role = null; } });   // 开局后 role 留着 'client'：清掉的话存档、结算、「再来一局」都按单机走，会改写甚至删掉这台设备自己的存档；gone 让自己的回合也锁住。还在大厅、没收到房主的局时没什么要护着的，照旧清掉身份：不然在这台设备上点「继续上一局」打自己的局，会被当成远端整个锁住，也不存档
     });
     // 已经进了房间、或者数据通道已经通了：信令服务器断开只发 network，数据通道还好好的，不管它（以前会把提示写进对局里看不到的 #mpstat）。换掉了的旧 Peer 也不管
     peer.on('error', e => { if (peer !== this.peer || (this.role === 'client' && !this.gone) || (this.hostConn && this.hostConn.open)) return; this.hostConn = null; fail(`${e.type === 'peer-unavailable' ? _t(5030, "找不到这个房间。检查一下房间号；房间号没错的话，可能是房主那边网络断了，过一会儿再试，或者请房主刷新后重新创建房间、点「继续上一局」") : _t(5021, "联机出错：") + esc(e.type || String(e))}${e.type === 'network' || e.type === 'server-error' ? _t(5031, "。公司网络可能拦了连接，换个网络试试") : ''}`); });
@@ -10373,12 +10388,13 @@ const MP = {
     if (!m || typeof m !== 'object') return;
     // 被拒后能改了名字再点加入。hostConn 清掉：房主 300ms 后关连接，那次 close 不能再写成「连接断开了」，把「密码不对」盖掉
     if (m.t === 'reject') { this.role = null; this.hostConn = null; $('#mpstat').innerHTML = _tf(5032, "<span class=\"warn\">加入失败：{$0}</span>", esc(String(m.why || ''))); const jb = $('#mpbox .mpform button'); if (jb) jb.disabled = false; return; }
-    if (m.t === 'kicked') { this.kicked = true; return; }
+    if (m.t === 'kicked') { MPFX.cancel(); this.kicked = true; return; }
     // 房主把我移出了房间：不再自动重连；还在大厅里的，回到能重新填房间号的样子
-    if (m.t === 'removed') { this.kicked = true; this.removed = true; if (!(S && S.players)) { this.role = null; this.hostConn = null; $('#mpstat').innerHTML = _t(5033, "<span class=\"warn\">房主把你移出了房间</span>"); const jb = $('#mpbox .mpform button'); if (jb) jb.disabled = false; } else info(_t(5034, "你被移出了房间"), _t(5035, "<p>房主把你移出了这个房间，你的座位交给电脑接着打。</p>"), true); return; }   // 同一个浏览器的另一个页面用这个名字接手了座位，房主马上会关掉这条连接
-    if (m.t === 'welcome') { if (this.hostConn) this.hostConn._ok = true; clearTimeout(this.rjT); if (this.gone) toast(_t(5036, "重新连上房主了")); this.role = 'client'; this.gone = false; this.kicked = false; this.mySeat = m.seat; if (typeof m.key === 'string') this.seatKeys(this.room, m.key.slice(0, 64)); try { sessionStorage.setItem('aws-monopoly-lastjoin', JSON.stringify({ room: this.room, name: this.myName })); } catch (e) { } $('#mpstat').innerHTML = _tf(5037, "<span class=\"ok\">已加入房间 {$0}，你是玩家 {$1}。等房主开始游戏…</span>", esc(this.room), m.seat + 1); const sb = $('#startBtn'); if (sb) { sb.disabled = true; sb.textContent = _t(5038, "等房主开始"); } /* hero 和 UG 活动局的开局按钮也要灰掉：平板、矮屏手机首屏只看得到它们，点了会在客户端本地另开一局；「继续上一局」会读这台自己的旧存档 */ document.querySelectorAll('.hero .cta .twin.pri, .ugbar button, #resume button').forEach(b => { b.disabled = true; b.title = _t(5039, "已加入房间，等房主开始"); if (b.classList.contains('twin')) b.textContent = _t(5038, "等房主开始"); }); return; }
+    if (m.t === 'removed') { MPFX.cancel(); this.kicked = true; this.removed = true; if (!(S && S.players)) { this.role = null; this.hostConn = null; $('#mpstat').innerHTML = _t(5033, "<span class=\"warn\">房主把你移出了房间</span>"); const jb = $('#mpbox .mpform button'); if (jb) jb.disabled = false; } else info(_t(5034, "你被移出了房间"), _t(5035, "<p>房主把你移出了这个房间，你的座位交给电脑接着打。</p>"), true); return; }   // 同一个浏览器的另一个页面用这个名字接手了座位，房主马上会关掉这条连接
+    if (m.t === 'welcome') { MPFX.cancel(); MPFX.lastWalk = 0; if (this.hostConn) this.hostConn._ok = true; clearTimeout(this.rjT); if (this.gone) toast(_t(5036, "重新连上房主了")); this.role = 'client'; this.gone = false; this.kicked = false; this.mySeat = m.seat; if (typeof m.key === 'string') this.seatKeys(this.room, m.key.slice(0, 64)); try { sessionStorage.setItem('aws-monopoly-lastjoin', JSON.stringify({ room: this.room, name: this.myName })); } catch (e) { } $('#mpstat').innerHTML = _tf(5037, "<span class=\"ok\">已加入房间 {$0}，你是玩家 {$1}。等房主开始游戏…</span>", esc(this.room), m.seat + 1); const sb = $('#startBtn'); if (sb) { sb.disabled = true; sb.textContent = _t(5038, "等房主开始"); } /* hero 和 UG 活动局的开局按钮也要灰掉：平板、矮屏手机首屏只看得到它们，点了会在客户端本地另开一局；「继续上一局」会读这台自己的旧存档 */ document.querySelectorAll('.hero .cta .twin.pri, .ugbar button, #resume button').forEach(b => { b.disabled = true; b.title = _t(5039, "已加入房间，等房主开始"); if (b.classList.contains('twin')) b.textContent = _t(5038, "等房主开始"); }); return; }
     if (this.role !== 'client') return;
     if (m.t === 'again') {
+      MPFX.cancel();
       S = null; this.gone = false; this.peek = null;
       const ef = $('#endfx'); if (ef) ef.remove();
       if (MODAL_CUR && !$('#modal').hidden) { try { MODAL_CUR.cancel(); } catch (e) { } } try { if (VIEW_CUR) VIEW_CUR.cancel(); } catch (e) { }
@@ -10393,7 +10409,7 @@ const MP = {
       if (typeof m.now === 'number') this.skew = m.now - Date.now();   // 两台设备的时钟差（含一点传输延迟）：限时倒计时按房主的钟算。要在下面增量接不上就 return 之前记
       // 增量：只带了上次之后新增的日志和改过的格子历史，接到手上那份前面。接不上（漏了一份、本机自己记过日志）就请房主补发整份，补到之前的增量都不认
       if (m.delta) {
-        if (this.resync || !S || (S.logSeq || 0) !== m.delta.from) { if (!this.resync) { this.resync = 1; this.send(this.hostConn, { t: 'resync' }); } return; }
+        if (this.resync || !S || (S.logSeq || 0) !== m.delta.from) { if (!this.resync) { MPFX.cancel(); this.resync = 1; this.send(this.hostConn, { t: 'resync' }); } return; }
         m.S.log = (m.delta.log || []).concat(S.log || []).slice(0, 1500); m.S.hist = Object.assign(S.hist || {}, m.delta.hist);
       } else this.resync = 0;
       const first = !S, rolled = S && m.S.rollId && m.S.rollId !== S.rollId, justOver = m.S.over && !(S && S.over); S = m.S; applyBal(); MPFX.stateN++; MPFX.settle(true);
@@ -10467,7 +10483,14 @@ document.addEventListener('click', e => {
 // 远端排成一队按先后播，收消息的地方只管排队、不等动画；状态照常收、照常重画，正在演的那颗棋子按 MOVE_TO 画（见 toksAt）。
 // 本机播不了 3D 的（减少动态效果、WebGL 建不起来、页面在后台）不演，棋子照状态画；气泡和格子动画照旧
 const okSq = i => Number.isInteger(i) && i >= 0 && i < SQ.length;
-const fxCast = (k, d) => { if (MP.role === 'host') MP.broadcast({ t: 'fx', k, ...d }); };
+const fxCast = (k, d) => {
+  if (MP.role !== 'host') return;
+  // 能力协商：旧客户端仍收逐格事件，新客户端只收分段路径；we 两边共用。
+  Object.values(MP.seats).forEach(x => {
+    if (k === 'walk' ? !x.walk : (k === 'ws' || k === 'wh') && x.walk) return;
+    MP.send(x.conn, { t: 'fx', k, ...d });
+  });
+};
 // 房主：小特效、音效、格子气泡、格子动画本机照旧播，同一份发给远端
 function fxAll(m) { MPFX.small(m); fxCast('sm', m); }
 // 游戏逻辑里的音效（买服务、收钱、抽奖、技能、盲盒、破产、重构）：本机照响，同一份发给远端
@@ -10475,11 +10498,11 @@ function sfxAll(k) { sfx(k); fxCast('sm', { s: k }); }
 // 金币从奖池飞到拿钱的人那里（UG 活动抽奖、拿走奖池）
 function fxPot(p, n) { MPFX.pot(p.id, n); fxCast('pot', { p: p.id, n }); }
 const MPFX = {
-  q: [], busy: false, cur: null, wait: [], stateN: 0, tm: 0,
+  q: [], busy: false, cur: null, wait: [], stateN: 0, tm: 0, epoch: 0, lastWalk: 0,
   // mv：正在演的那颗棋子 { id, ghost（DOM 上画成看不见的占位）, to（落点）, done（演完了，等房主收尾）, rx（收到收尾事件时已经收了几份状态）, t（最近一次动静） }
   // pawnOf：3D 棋子（FX.pawn）是谁的；F：座位 → 飞到一半的飞行（起飞到落地 fs、收起 fe 分两条来）
   mv: null, pawnOf: null, F: {},
-  MOVES: ['ws', 'wh', 'we', 'fs', 'fe'], SM: ['block', 'shield', 'shock', 'splash', 'arcs', 'rise'], SND: ['fail', 'magic', 'buy', 'coin', 'pay'],
+  MOVES: ['walk', 'ws', 'wh', 'we', 'fs', 'fe'], SM: ['block', 'shield', 'shock', 'splash', 'arcs', 'rise'], SND: ['fail', 'magic', 'buy', 'coin', 'pay'],
   can() { return FX.ok() && !document.hidden; },
   // 播一份小特效（房主本机、远端重播共用）：3D 的 FX 自己看能不能播；音效、气泡、格子动画照旧
   small(m) {
@@ -10498,16 +10521,21 @@ const MPFX = {
     return { f, a, d: Math.max(0, Math.min(2000, +m.d || 0)), co, sq, s: this.SND.includes(m.s) ? m.s : null };
   },
   push(m) {
-    if (!S || !S.players || $('#game').hidden) return;
+    if (!S || !S.players || $('#game').hidden || MP.gone || MP.kicked || MP.resync) return;
+    if (m.k === 'walk') {
+      if (!this.validWalk(m) || m.seq <= this.lastWalk) return;
+      this.lastWalk = m.seq;
+    }
     if (m.k === 'we' || m.k === 'fe') m.rx = this.stateN;
-    if (this.q.length > 40) { this.q = []; this.release(); }   // 落后太多（页面卡过一阵）：不再一条条补播，收掉正在演的，棋子照状态画
-    this.q.push(m); if (!this.busy) this.pump();
+    if (this.q.length > 40) { this.cancel(); }   // 落后太多（页面卡过一阵）：不再一条条补播，收掉正在演的，棋子照状态画
+    this.q.push({ ...m, epoch: this.epoch }); if (!this.busy) this.pump();
   },
   async pump() {
     this.busy = true;
     while (this.q.length) {
       const m = this.cur = this.q.shift();
-      try { await Promise.race([this.play(m), sleep(8000)]); } catch (e) { }   // 每段最多等 8 秒：哪里卡住了也不让后面的一直排着
+      let timer;
+      try { await Promise.race([this.play(m), new Promise(r => { timer = setTimeout(() => { this.cancel(); r(); }, 8000); })]); } catch (e) { this.cancel(); } finally { clearTimeout(timer); }   // 每段最多等 8 秒：哪里卡住了也不让后面的一直排着
       this.cur = null; this.settle();
     }
     this.busy = false;
@@ -10515,8 +10543,9 @@ const MPFX = {
   },
   // 房主的弹窗是动画播完才弹的：这边还在演就等演完再开，最多等 2.5 秒
   after(fn) {
-    if (!this.busy) return void Promise.resolve().then(fn);
-    let done = false; const go = () => { if (!done) { done = true; fn(); } };
+    const epoch = this.epoch;
+    let done = false; const go = () => { if (!done) { done = true; if (epoch === this.epoch) fn(); } };
+    if (!this.busy) return void Promise.resolve().then(go);
     this.wait.push(go); setTimeout(go, 2500);
   },
   // 这颗棋子交给动画：DOM 上只画在 at 格（null 哪格都不画），ghost 画成看不见的占位。每半秒看一次能不能交回给状态（settle）
@@ -10546,7 +10575,34 @@ const MPFX = {
     const idle = Date.now() - v.t, hostMv = !!S && S.moving === v.id;
     if ((v.done && !hostMv && this.stateN > v.rx) || (!hostMv && idle > 3000) || (idle > 30000 && $('#modal').hidden) || MP.gone) this.release(fromState);
   },
+  // 取消只清展示层；S 始终只由房主 state 消息替换。
+  cancel() { this.epoch++; this.q = []; this.wait = []; this.release(); },
+  validWalk(m) {
+    if (!Number.isSafeInteger(m.seq) || m.seq < 1 || !okSq(m.from) || !Array.isArray(m.path) || !m.path.length || m.path.length > N || !Number.isFinite(m.ms) || m.ms < 1 || m.ms > 600 || typeof m.last !== 'boolean') return false;
+    if (!Number.isInteger(m.p) || !S.players[m.p]) return false;
+    let from = m.from, dir = 0;
+    return m.path.every(to => {
+      if (!okSq(to)) return false;
+      const d = (to - from + N) % N, step = d === 1 ? 1 : d === N - 1 ? -1 : 0;
+      if (!step || (dir && step !== dir)) return false;
+      dir = step; from = to; return true;
+    });
+  },
+  async walk(m) {
+    const live = () => m.epoch === this.epoch && this.can() && !MP.gone && !MP.kicked && !MP.resync && !!S && !!S.players[m.p];
+    if (!live()) return;
+    // 整段本地连续播放，不再等待下一格网络消息，也不修改权威玩家位置。
+    if (this.pawnOf !== m.p || !this.mv || this.mv.to !== m.from) await this.play({ k: 'ws', p: m.p, from: m.from });
+    if (!live() || this.pawnOf !== m.p) return;
+    for (let j = 0; j < m.path.length; j++) {
+      if (m.epoch !== this.epoch) return;
+      if (!live() || !this.mv || this.mv.id !== m.p) { this.drop(m.p); return; }
+      await this.play({ k: 'wh', p: m.p, to: m.path[j], ms: m.ms, last: m.last && j === m.path.length - 1 });
+    }
+  },
   async play(m) {
+    if (m.epoch != null && m.epoch !== this.epoch) return;
+    if (m.k === 'walk') return this.walk(m);
     const id = m.p, q = Number.isInteger(id) ? S.players[id] : null;
     if (this.mv && this.mv.id === id) this.mv.t = Date.now();
     if (m.k === 'rent') { if (S.players[m.to] && Array.isArray(m.arcs)) rentFx(m); return; }
@@ -10557,9 +10613,11 @@ const MPFX = {
     // 走棋：ws 起步，wh 每一跳（最后一跳带 last），we 落地。没赶上起步（中途加入）就从这一跳的起点接着演
     if (m.k === 'ws' || (m.k === 'wh' && this.pawnOf !== id)) {
       if (!okSq(m.from) || !this.can()) return this.drop(id);
+      const epoch = this.epoch;
       this.hold(id, m.from, false);   // 先把 DOM 棋子画在起点（状态里他可能已经往前走了）：3D 棋子照它的位置和大小长出来
       // 房主是骰子落定才起步的；这边的骰子是收到状态才开始转，晚一点停，等它停了再走（最多等 2 秒），后面排着的几跳会跳快一点追上
       for (let t0 = Date.now(); FX.diceSpin && Date.now() - t0 < 2000;) await sleep(30);
+      if (epoch !== this.epoch) return;
       if (!this.can() || !this.mv || this.mv.id !== id) return this.drop(id);
       if (!FX.pawnStart({ ...q, pos: m.from })) return this.drop(id);
       this.pawnOf = id; this.hold(id, null, true);
@@ -10572,10 +10630,11 @@ const MPFX = {
       await FX.pawnHop(m.to, Math.max(30, Math.min(600, +m.ms || 150)) * (more > 1 ? 0.5 : 1)); sfx('step');
       return;
     }
-    if (m.k === 'we') { if (this.pawnOf === id) { this.pawnOf = null; await FX.pawnEnd(); } return this.landed(id, m.rx); }
+    if (m.k === 'we') { const epoch = this.epoch; if (this.pawnOf === id) { this.pawnOf = null; await FX.pawnEnd(); } if (epoch === this.epoch) this.landed(id, m.rx); return; }
     // 飞行：fs 起飞到落地，fe 收起。两条之间房主可能还在结算路过的起点、UG 活动（可能有弹窗），人物停在落点上
     if (m.k === 'fs') {
       if (!okSq(m.from) || !okSq(m.to) || !this.can()) return this.drop(id);
+      const epoch = this.epoch;
       this.hold(id, m.from, false);
       const F = FX.flyStart({ ...q, pos: m.from }); if (!F) return this.drop(id);
       this.F[id] = F; this.mv.to = m.to; this.hold(id, m.to, true); sfx('fly');
@@ -10586,6 +10645,7 @@ const MPFX = {
     if (m.k === 'fe') { const F = this.F[id]; delete this.F[id]; if (F) await FX.flyEnd(F); return this.landed(id, m.rx); }
   },
 };
+document.addEventListener('visibilitychange', () => { if (document.hidden && MP.role === 'client') MPFX.cancel(); });
 // ---- 联机设置和测试 ----
 // 中继服务器（TURN）存在这台设备的 localStorage 里，不进存档、不随状态同步。urls 一行一个，可以写多个（比如 turn:…:3478 和 turns:…:443?transport=tcp）
 const MP_STUN = [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }];
