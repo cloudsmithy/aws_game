@@ -5111,7 +5111,7 @@ async function endTurn() {
 async function nextTurn() {
   pillarLog();
   const p = cur(), wa = waWinner();
-  if (wa) return gameOver(wa, _t(2933, "六大支柱全部达成"));
+  if (wa) return gameOver(wa, _t(2933, "六大支柱全部达成"), 'wa');
   if (winTimed() && Date.now() >= S.endAt) return timedOver();
   if (S.cfg.roundLimit && S.round >= S.cfg.roundLimit && S.cur >= S.players.length - 1 - [...S.players].reverse().findIndex(q => q.alive)) return timedOver(_tf(2934, "打满 {$0} 轮", S.cfg.roundLimit));
   let n = S.cur;
@@ -5428,7 +5428,7 @@ async function payRent(p, i, opts = {}) {
   }
   if (F.balance() && S.round <= BAL.protect && r > 50) { r = 50; notes.push(_t(3097, "新账户保护期封顶 $50")); }
   if (r > 0) { ST(p).rentOut += r; ST(o).rentIn += r; ST(o).maxRent = Math.max(ST(o).maxRent, r); const eb = ST(o).earnBy, hb = ST(o).hitsBy; eb[i] = (eb[i] || 0) + r; hb[i] = (hb[i] || 0) + 1; }
-  if (r >= 100) evt(_tf(3099, "{$0} 付给 {$1} 过路费 ${$2}（{$3}{$4}）", p.name, o.name, r, SQ[i].n, jr ? _tf(3098, " · {$0}{$1}联合收费", jr.cs.map(c => _tf(2766, "「{$0}」", c.n)).join(''), jr.cs.length > 1 ? _t(2767, "串联") : '') : ''), r);
+  if (r >= 100) evt(_tf(3099, "{$0} 付给 {$1} 过路费 ${$2}（{$3}{$4}）", p.name, o.name, r, SQ[i].n, jr ? _tf(3098, " · {$0}{$1}联合收费", jr.cs.map(c => _tf(2766, "「{$0}」", c.n)).join(''), jr.cs.length > 1 ? _t(2767, "串联") : '') : ''), r, 'rent');
   // 请求费按实际能收到的算：对方全卖了也付不起，就只按他付得起的部分交，免得收过路费的人反倒被请求费拖破产
   const canPay = Math.max(0, p.cash) + raiseValue(p), got = Math.min(r, canPay);
   if (got < r) notes.push(_tf(3100, "对方全卖了最多付 ${$0}，请求费按这个算", got));
@@ -5986,7 +5986,8 @@ async function declareBankrupt() {
 // 破产：按欠款比例分资产。每个债主（欠亚马逊云科技、奖池的合成一份）按欠款占比分到对应价值的服务，
 // 服务按价值从高到低一块块分给「还差得最多」的那一份；亚马逊云科技那份的服务退回重新出售；保留卡和标记给欠得最多的玩家
 async function bankrupt(p) {
-  sfxAll('fail'); evt(_tf(3362, "{$0} 账户被暂停（破产）", p.name), 99999);
+  p.outRound = S.round;
+  sfxAll('fail'); evt(_tf(3362, "{$0} 账户被暂停（破产）", p.name), 99999, 'out');
   const owed = {}; let bankOwed = 0;
   p.debt.forEach(d => { if (typeof d.to === 'number' && P(d.to).alive && d.to !== p.id) owed[d.to] = (owed[d.to] || 0) + d.amt; else bankOwed += d.amt; });
   const ids = Object.keys(owed).map(Number).filter(k => owed[k] > 0).sort((a, b) => owed[b] - owed[a]);
@@ -6572,14 +6573,14 @@ const waWinner = () => { if (!winWA()) return null; const c = cur(); return [c, 
 function checkOver() {
   if (S.over) return true;
   const alive = S.players.filter(q => q.alive);
-  if (alive.length <= 1) { gameOver(alive[0], _t(3654, "其他玩家都被暂停了账户")); return true; }
+  if (alive.length <= 1) { gameOver(alive[0], _t(3654, "其他玩家都被暂停了账户"), 'last'); return true; }
   pillarLog();
-  const wa = waWinner(); if (wa) { gameOver(wa, _t(2933, "六大支柱全部达成")); return true; }
+  const wa = waWinner(); if (wa) { gameOver(wa, _t(2933, "六大支柱全部达成"), 'wa'); return true; }
   return false;
 }
 // 每位玩家的战报数据
 // 关键事件：战报里的时间线
-const evt = (t, w = 0) => { if (!S) return; (S.events = S.events || []).push({ r: S.round, t, w }); };
+const evt = (t, w = 0, kind) => { if (!S) return; (S.events = S.events || []).push({ r: S.round, t, w, ...(kind ? { kind } : {}) }); };
 const ST = p => { S.pst = S.pst || {}; return S.pst[p.id] || (S.pst[p.id] = { rentIn: 0, rentOut: 0, inc: 0, hit: 0, imm: 0, quizOk: 0, quizN: 0, buy: 0, upg: 0, fis: 0, maxRent: 0, earnBy: {}, hitsBy: {}, runBy: {}, runTot: 0, salary: 0 }); };
 // 结束复盘：每个人钱花在哪、最赚和最烧钱的服务、凑成的和差一块就能凑成的架构、想赢可以怎么改。
 // 算数（retroData）和排版分开：战报用 retroOf 排成 HTML，导出的对局记录用 retroTxt 写成纯文本，不用再从 HTML 里剥字（以前改一次版式就要改一次剥字的正则）
@@ -6705,7 +6706,16 @@ const modeName = () => isParty() ? _t(3746, "娱乐模式") : isStudy() ? _t(374
 // 金额：负数用真正的减号（U+2212），和加号、数字等宽，列里右对齐不会错位；sign 时正数也带 +（「与第 1 名」那一列）
 const usd = (v, sign = false) => { v = Math.round(v || 0); return (v < 0 ? '−' : sign && v > 0 ? '+' : '') + '$' + Math.abs(v); };
 // 结束方式：none 没有赢家 / wa 六大支柱 / last 撑到最后 / val 按估值。结束画面、战报、台面中央、导出记录用同一套说法
-const finKind = (w, why) => !w ? 'none' : _tr(3751, "六大支柱", "").test(why) ? 'wa' : _tr(3752, "暂停了账[号户]", "").test(why) ? 'last' : 'val';
+// 仅旧存档需要识别历史文字：复用已有翻译表，不能随当前界面语言改变统计。
+const legacyReportMatch = (id, zh, text) => zh.test(text) || Object.values(__I18N).some(a => { const m = (a[id] || '').match(/^re:\/([\s\S]*)\/([a-z]*)$/); return m && new RegExp(m[1], m[2]).test(text); });
+const reportEventIs = (e, kind) => e.kind ? e.kind === kind : kind === 'out' ? legacyReportMatch(3782, /账[号户]被暂停/, e.t) : kind === 'rent' && legacyReportMatch(3773, / 付给 .+ 过路费 /, e.t);
+const reportOutRound = q => {
+  if (q.alive) return null;
+  if (Number.isInteger(q.outRound) && q.outRound > 0) return q.outRound;
+  const e = (S.events || []).find(e => e.t.startsWith(q.name) && /^(?:\s|'s\b)/.test(e.t.slice(q.name.length)) && reportEventIs({ ...e, t: e.t.slice(q.name.length) }, 'out'));
+  return e ? e.r : null;
+};
+const finKind = (w, why) => !w ? 'none' : S.overKind || (legacyReportMatch(3751, /六大支柱/, why) ? 'wa' : legacyReportMatch(3752, /暂停了账[号户]/, why) ? 'last' : 'val');
 const finTitle = (w, why) => ({ none: _t(3753, "这一局没有赢家"), wa: _tf(3754, "{$0} 达成六大支柱，提前胜出", w && w.name), last: _tf(3755, "{$0} 撑到最后，赢下这一局", w && w.name), val: _tf(3756, "{$0} 获胜", w && w.name) })[finKind(w, why)];
 // 标题前面是赢家的棋子（和泳道、棋盘上的对得上），名字本身不上座位色；棋子上的座位号不念
 const finTitleHtml = (w, why) => `${w ? `<span class="pawn" aria-hidden="true" style="--pc:${w.color}">${COLORS.indexOf(w.color) + 1}</span>` : ''}<span>${finTitle(w, why)}</span>`;
@@ -6720,7 +6730,7 @@ function finEdge(w) {
 function finSub(w, why) {
   const k = finKind(w, why), e = finEdge(w), base = String(why || '').replace(_tr(3760, "（[−-]?\\$-?\\d+）$", ""), '');
   const lead = e => e.lead > 0 ? _tf(3761, "领先第 2 名 {$0} {$1}{$2}", e.r2.name, usd(e.lead), e.by ? _tf(3686, "，拉开最多的是{$0}（{$1} {$2}）", e.by[0], e.by[2], usd(e.by[1])) : '') : e.lead === 0 ? _tf(3762, "和第 2 名 {$0} 估值持平", e.r2.name) : _tf(3763, "估值上 {$0} 高 {$1}", e.r2.name, usd(-e.lead));
-  if (k === 'none') return _tr(3752, "暂停了账[号户]", "").test(base) ? _t(3764, "所有玩家的账户都被暂停了") : base || _t(3765, "没有玩家留在场上");
+  if (k === 'none') return (S.overKind === 'last' || legacyReportMatch(3752, /暂停了账[号户]/, base)) ? _t(3764, "所有玩家的账户都被暂停了") : base || _t(3765, "没有玩家留在场上");
   if (k === 'last') return _tf(3766, "第 {$0} 轮，其他玩家的账户都被暂停了", S.round);
   // 六大支柱赢的人估值不一定最高：比他高的写出来，说明这一局不比估值
   if (k === 'wa') { const h = _tf(3767, "第 {$0} 轮六大支柱 6/6 达成，按胜利条件直接结束", S.round); return !e ? h : e.lead < 0 ? _tf(3768, "{$0}，不比估值（{$1} 估值多 {$2}）", h, e.r2.name, usd(-e.lead)) : e.lead === 0 ? _tf(3769, "{$0}；和第 2 名 {$1} 估值持平", h, e.r2.name) : _tf(3770, "{$0}；估值也{$1}", h, lead(e)); }
@@ -6730,9 +6740,9 @@ function finSub(w, why) {
 function finLede(w, why) {
   const s = [finSub(w, why)], ev = S.events || [], topR = Math.max(0, ...S.players.map(q => ST(q).rentIn));
   if (topR > 0) s.push(_tf(3772, "过路费 {$0} 收得最多（${$1}）", S.players.filter(q => ST(q).rentIn === topR).map(q => q.name).join(_t(349, "、")), topR));
-  const big = ev.filter(e => _tr(3773, " 付给 .+ 过路费 ", "").test(e.t)).sort((a, b) => b.w - a.w)[0];
+  const big = ev.filter(e => reportEventIs(e, 'rent')).sort((a, b) => b.w - a.w)[0];
   if (big) s.push(_tf(3774, "单笔最大的一笔 ${$0} 出在第 {$1} 轮", big.w, big.r));
-  const gone = finalRank(w).filter(q => !q.alive).map(q => { const e = ev.find(x => x.t.startsWith(q.name + _t(3775, " 账户被暂停")) || x.t.startsWith(q.name + _t(3776, " 账号被暂停"))); return e ? _tf(3777, "{$0} 第 {$1} 轮出局", q.name, e.r) : _tf(3778, "{$0} 出局", q.name); });
+  const gone = finalRank(w).filter(q => !q.alive).map(q => { const r = reportOutRound(q); return r != null ? _tf(3777, "{$0} 第 {$1} 轮出局", q.name, r) : _tf(3778, "{$0} 出局", q.name); });
   if (gone.length) s.push(gone.join(_t(2698, "，")));
   return s.filter(Boolean).join(_t(408, "；")) + _t(2991, "。");
 }
@@ -6764,10 +6774,10 @@ function repExtra() {
 // 事件立在那一轮的正中，过路费越大越高越亮，出局的是红色、顶到最高；编号对应下面的列表。编号、刻度、出局棋子要按实际像素躲开彼此，在 repLayout 里排。
 // 图只给眼睛看，读屏念一句走势和列表
 function repTimeline(w, rank, X) {
-  const R = Math.max(1, S.round), x1 = R + 1, px = x => ((Math.min(x1, Math.max(1, x)) - 1) / R * 100).toFixed(2), isOut = e => _tr(3782, "账[号户]被暂停", "").test(e.t), num = y => typeof y === 'number' && isFinite(y);
+  const R = Math.max(1, S.round), x1 = R + 1, px = x => ((Math.min(x1, Math.max(1, x)) - 1) / R * 100).toFixed(2), isOut = e => reportEventIs(e, 'out'), num = y => typeof y === 'number' && isFinite(y);
   // 取分量最重的 8 件事（和正式版同一个口径），再按轮次排；同一轮里按发生的先后（S.events 里的下标），压垮人的那笔过路费排在破产前面
-  const ev = (S.events || []).map((e, i) => ({ r: e.r, t: e.t, w: e.w, i })).sort((a, b) => b.w - a.w).slice(0, 8).sort((a, b) => a.r - b.r || a.i - b.i);
-  const outR = q => { if (q.alive) return null; const e = (S.events || []).find(x => x.t.startsWith(q.name + _t(3775, " 账户被暂停")) || x.t.startsWith(q.name + _t(3776, " 账号被暂停"))); return e ? e.r : null; };
+  const ev = (S.events || []).map((e, i) => ({ ...e, i })).sort((a, b) => b.w - a.w).slice(0, 8).sort((a, b) => a.r - b.r || a.i - b.i);
+  const outR = reportOutRound;
   let chart = '', sr = '';
   if (X.vh.length >= 2) {
     // 每人一条线。出局以后记的是空值：线从最后一个有数的点落到出局那一轮正中（和事件条上的红竖线同一处）的 $0，红叉打在那里
@@ -7030,7 +7040,7 @@ function valSnap() { if (!S || !S.players) return; (S.valHist = S.valHist || [])
 let GAIN_N = __rv(() => ({ rent: _t(3852, "过路费"), salary: _t(3693, "起点 Credits"), card: _t(3694, "卡牌和技能"), sell: _t(3695, "卖回和下线"), other: _t(3696, "其他") }), v => { GAIN_N = v; }, () => GAIN_N);
 function reportStats(w) {
   const rank = finalRank(w), pst = S.pst || {}, T = q => pst[q.id] || {}, full = !(S.mFrom > 1), r1 = v => Math.round(v * 10) / 10;
-  const outAt = q => { if (q.alive) return null; const e = (S.events || []).find(x => x.t.startsWith(q.name + _t(3775, " 账户被暂停")) || x.t.startsWith(q.name + _t(3776, " 账号被暂停"))); return e ? e.r : null; };
+  const outAt = reportOutRound;
   const minutes = S.t0 && S.t1 ? Math.max(1, Math.round((S.t1 - S.t0 - (S.tOff || 0)) / 60000)) : null;
   // 估值走势：至少两个点才画；最后一项是 gameOver 记的终局值
   const H = (Array.isArray(S.valHist) ? S.valHist : []).filter(h => Array.isArray(h) && h.length > 1);
@@ -7069,8 +7079,8 @@ function statTxt(w) {
   if (x.trend) out.push(_t(3901, "估值走势（每轮开始时，最后一行是终局；出局以后写「—」）："), ...x.trend.pts.map((p, k) => _tf(3904, "　{$0}　{$1}", p.end ? _t(3902, "终局") : _tf(3903, "第 {$0} 轮", p.r), x.trend.lines.map(l => `${l.q.name} ${l.v[k] == null ? '—' : m(l.v[k])}`).join(_t(3338, "　")))));
   return out.length ? [_t(3905, "数据："), ...out, ''] : [];
 }
-function gameOver(w, why) {
-  S.over = true; S.phase = 'over'; S.winner = w ? w.id : null; S.overWhy = why;   // 结束原因跟着状态同步，远端拿它出战报
+function gameOver(w, why, kind = 'val') {
+  S.over = true; S.phase = 'over'; S.winner = w ? w.id : null; S.overWhy = why; S.overKind = kind;   // 结束原因跟着状态同步，远端拿它出战报
   if (!S.t1) { S.t1 = Date.now(); valSnap(); }   // 战报：对局用时、估值走势的终局值
   if (w) log(_tf(3906, "🏆 {$0} 获胜：{$1}", nm(w), why));
   // 只删自己存的那份：演示局、机器人局、被别的标签页接手了的旧页面，删掉的是别人还在打的局

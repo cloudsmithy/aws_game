@@ -13,6 +13,8 @@ jobs:
         working-directory: tests   # package.json 和检查的配置都在 tests/ 里
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -20,6 +22,20 @@ jobs:
           cache-dependency-path: tests/package-lock.json
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - name: 体积检查（仅提醒）
+        env:
+          SIZE_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          if [[ -z "$SIZE_BASE_REF" || "$SIZE_BASE_REF" =~ ^0+$ ]]; then
+            SIZE_BASE_REF="$DEFAULT_BRANCH"
+          fi
+          if ! git cat-file -e "$SIZE_BASE_REF:code/index.html" 2>/dev/null; then
+            if git fetch --no-tags --depth=1 origin "$SIZE_BASE_REF"; then
+              SIZE_BASE_REF=FETCH_HEAD
+            fi
+          fi
+          npm run lint:size -- "$SIZE_BASE_REF"
       - run: npm run check
       - uses: actions/upload-artifact@v4
         if: failure()
