@@ -1,4 +1,4 @@
-:root{--ink:#16191f;--ink2:#232f3e;--mut:#5f6b7a;--line:#d5dbdb;--line2:#eaeded;--org:#ec7211;--blue:#0972d3}
+html[lang=ja] body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif}:root{--ink:#16191f;--ink2:#232f3e;--mut:#5f6b7a;--line:#d5dbdb;--line2:#eaeded;--org:#ec7211;--blue:#0972d3}
 *{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;font:15px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;color:var(--ink);background:#f7f9fb}
 a{color:var(--blue)}a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .top{display:flex;align-items:center;gap:18px;padding:10px 24px;background:#232f3e;color:#fff;font-size:14px}.top a{color:#fff;text-decoration:none;font-weight:600}.top a:hover{text-decoration:underline}.top .brand{flex:1;color:#d5dbdb}
@@ -70,4 +70,4 @@ body.video #card{top:46px}
   #card.m{position:static;width:auto;max-height:none;margin-top:12px;opacity:1;transform:none;pointer-events:auto;backdrop-filter:none;background:rgba(8,14,26,.9)}#card.m:not(.on){display:none}
   .ctrl{flex-wrap:wrap}.ctrl button{padding:8px 12px;min-height:40px}}
 /* 视频页最下面：免责声明和价格说明，小字 */
-.vdisc{margin:14px 0 0;font-size:12px;line-height:1.75;color:#7f97b2}.vdisc span{display:block}
+.vdisc{margin:14px 0 0;font-size:12px;line-height:1.75;color:#7f97b2}.vdisc span{display:block}.lnav{display:flex;align-items:center;gap:10px;margin-left:6px;white-space:nowrap}.lnav a{color:#8d9aab!important;font-size:12.5px;font-weight:600;text-decoration:none!important;border:0!important}.lnav a:hover{color:#fff!important}.lnav a[aria-current]{color:#fff!important}.lnav{margin-left:4px;padding-left:14px;border-left:1px solid rgba(255,255,255,.16)}@media (max-width:760px){.lnav{display:none}}html[lang=ja] :is(h1,h2,h3,.node small){word-break:auto-phrase}

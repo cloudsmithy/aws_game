@@ -798,7 +798,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
     <li><span class="tag new">新</span>命令行（不在输入框里时按 :）：<code>:help</code> 列出全部命令，<code>:lang</code>、<code>:sound</code>、<code>:speed</code>、<code>:arch</code>、<code>:rules</code>、<code>:gallery</code>、<code>:roles</code>、<code>:keys</code>、<code>:tour</code>、<code>:assets</code>、<code>:trade</code>、<code>:w</code>、<code>:q</code>、<code>:wq</code>、<code>:new</code>、<code>:changelog</code>、<code>:issue</code>、<code>:repo</code>、<code>:boss</code>；Tab 补全、↑ ↓ 翻历史，输到一半灰字提示能补成什么，右边写这条命令干什么。</li>
     <li><span class="tag new">新</span>作弊码：<code>:money</code>（加减钱，一次最多 $300，可以给别人）、<code>:dice</code>（定下一次的点数）、<code>:upgrade</code>（名下服务升满）、<code>:jail</code>（把人送进维护窗口）、<code>:free</code>（自己出维护窗口）、<code>:grab</code>（随机抢一块地，抢到别人的照付过路费）。规则：现金高于 $1000 不能用；每人每回合一次、一局最多 3 次；每次都写进日志，旁边有「举报」，一轮以内被举报直接进维护窗口，过了一轮举报无效、作弊得逞；用的当下有 1/3 概率被 CloudTrail 审计发现（场上有别人买了 CloudTrail 是 2/3），技术债 +1（没开技术债的罚 $100），开了高速部署再扣 3 个部署点数。联机时远端发给房主执行，房主用 <code>:cheats off</code> 关掉。</li>
     <li><span class="tag ui">UI</span>玩法速览、玩法手册的窗口换成科技风深色（和版本窗一个样式）；角落格的名字最多两行、放不下就省略号，英文版字收小，下面一行说明照样露出来；显示不全的字，鼠标停上去能看全文。</li>
-    <li><span class="tag doc">文档</span>封面下半部分重新排：个人的话都放进「作者寄语」，第一段是开发者儿时和小伙伴玩大富翁、念念不忘、二十年后的夜晚有了用游戏分享架构知识的灵感，最后一段带上「水平有限，还请多多包涵」；制作信息只留项目地址和「反馈」（规则疑问、游戏 bug 都在这里提 issue，网址直接写出来）；最后一行「免责声明」把生成式 AI 说明、价格备注、模仿和侵权说明连成一段。宽屏时作者寄语和制作信息跟上面的架构图一样宽。README 开头同一套说法。</li>
+    <li><span class="tag doc">文档</span>封面下半部分精简：「作者寄语」不再整段放在封面上，制作信息里多了一行「关于 · 作者寄语」，点开是一封航空信（红蓝斜纹边、邮票、邮戳，Esc 或点信外面收起）；制作信息只留关于、项目地址、「反馈」（规则疑问、游戏 bug 都在这里提 issue，网址直接写出来），最后一行「免责声明」把生成式 AI 说明、价格备注、模仿和侵权说明连成一段。宽屏时制作信息和上面的架构图一样宽。README 开头放的是同样的寄语和说明。</li>
     <li><span class="tag chg">改</span>合进 PR #3 的开发检查：README 的「开发检查」一节、两行 eslint 注释、.gitignore 里测试产物目录都搬进了本机副本，同步时不会冲掉。</li>
     <li><span class="tag new">新</span>日文版（日本語）：界面、服务介绍、卡牌、角色、架构、题库、玩法手册和速览都翻成了日文（5200 条，<code>i18n/ja.json</code>；术语表 <code>i18n/GLOSSARY.ja.md</code>，服务名照写英文，支柱名用官方日文「運用上の優秀性」等）。语言菜单多了「日本語」，网址 <code>/ja/</code> 直接用日文打开。汉字用日文字形（Hiragino、Yu Gothic），对局中间和英文版一样收紧；封面标题一行放下，色组排成三列不在词中间折行。</li>
     <li><span class="tag chg">改</span>日文版的电脑玩家、日志和卡牌：电脑认按钮用的字和正则单独手翻、和按钮对得上；日志里钱数的红绿按金额后面的动词判断（日文是「$200 を支払う」）；卡牌倍率不乘「$500 未満」这类门槛。日文版跑 6 局电脑对局 0 错误；中日两版各模拟 60 局，中位轮数 38.5 / 39，最高过路费、第一次破产的轮数接近。</li>
@@ -809,6 +809,8 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
     <li><span class="tag new">新</span>封面加了「作者寄语」（署名 User Group 云上大亨小组）：去年玩过 BuildCards 以后想做一款本土化、规则更丰富的游戏，童年喜欢的地产大亨，用自己所学的知识和积累做出亚马逊云科技版，也可以和 BuildCards 联动、用它的卡片摆出手上服务组成的架构；最后一段感谢 UG 的小伙伴：虫虫陪着测试游戏功能、找 bug、提需求、做了一部分美工，辣条贡献了一堆修复的 PR，Damo 架设了本土化的服务器降低访问延迟，Yuki 在开发前期提了很多优化建议。中英日三版都有，README 开头也放了这一段。</li>
     <li><span class="tag ui">UI</span>404 页（旧链接跳转页）按游戏里选的语言显示中文、英文、日文；没选过就按浏览器语言。</li>
     <li><span class="tag bug">BUG</span>当场切换语言时，开局以后才追加进数据表的条目不跟着换字：开局页「题库」那一栏的三张题库卡片、后来补的 4 张 Health 卡、5 道补的题和 DLC 的题目，会停在打开页面时的语言。改成先声明成小表、再把同一批对象放进原来的表（卡牌和题目的编号、顺序都不变）；切换以后的 50 张数据表和直接用那种语言打开逐张比对，完全一致。</li>
+    <li><span class="tag new">新</span>架构讲解和服务知识点的英文版、日文版（<code>code/learn/en/</code>、<code>code/learn/ja/</code>）：48 个架构各两页（讲解视频、图文讲解），38 块服务各一页，字幕、说明卡、练习题和配音都是这种语言，服务介绍、架构、题目和游戏里的译文一致。每页右上角能切换中文 / English / 日本語，打开的是同一页的另一种语言；游戏里点「讲解视频」「图文讲解」「服务知识点」，打开的是游戏当前语言的那一页。配音用本机 VoxCPM2 合成。</li>
+    <li><span class="tag bug">BUG</span>「带登录的智能体」里 AgentCore 那一块「在这里干什么」少了半个括号（「只接带有效令牌的请求（入站认证，AgentCore Identity…」），游戏里的悬停说明、讲解视频的字幕和配音都是这样；改成「只接带有效令牌的请求（入站认证）；AgentCore Identity 知道这一次是谁在用」。</li>
   </ul>
 </section>
 
