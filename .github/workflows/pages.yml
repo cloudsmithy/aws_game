@@ -15,6 +15,10 @@ concurrency:
   cancel-in-progress: false
 jobs:
   publish:
+    # 上游默认发布；fork 需先配置 Pages（GitHub Actions），再设置仓库变量 PAGES_DEPLOY_ENABLED=true。
+    if: >-
+      github.repository == 'cloudsmithy/aws_game' ||
+      vars.PAGES_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
