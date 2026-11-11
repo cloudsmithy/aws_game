@@ -2728,6 +2728,16 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 :root[data-theme=dark]{color-scheme:dark;--ink:#e7edf5;--ink2:#c1cedf;--mut:#b7c4d4;--mut2:#9eafc3;--line:#4b5f76;--line2:#304258;--bg:#0c1420;--surface:#172333;--surface-soft:#202f43;--surface-muted:#101c2b;--info-bg:#17324b;--success-bg:#173629;--danger-bg:#3d252c;--warning-bg:#3c2c1b;--purple-bg:#302443;--control-border:#7d93ac;--blue:#85c7ff;--red:#ff9f93;--green:#94d883;--focus:#9ed3ff;--warning-ink:#ffbf79;--player-0:#ff9ea3;--player-1:#99c6ff;--player-2:#8cdda9;--player-3:#cbb0ff;--group-text-storage:#bddb70;--group-text-iaas:#ffb56b;--group-text-net:#c5a2ff;--group-text-ctr:#f2ce65;--group-text-integ:#ff8dc3;--group-text-db:#ed98f5;--group-text-ana:#91bfff;--group-text-sec:#ff9ba9;--group-text-ai:#67d7c2;--group-text-util:#aebdce}
 :root[data-theme=dark] #mbar{background:var(--surface);border-color:var(--line)}
 :root[data-theme=dark] img.awsi[data-icon=users]{filter:brightness(0) invert(1);opacity:.9}
+/* 老板键的编辑器和命令栏也随本机外观切换。 */
+:root[data-theme=dark] #boss{background:var(--surface-muted);color:var(--ink)}
+:root[data-theme=dark] #boss :is(.bs-top,.bs-act,.bs-side,.bs-tabs2,.bs-th){background:var(--surface-soft);border-color:var(--line2)}
+:root[data-theme=dark] #boss :is(.bs-file,.bs-sh,.bs-ti,.bs-crumb,.bs-th,.bs-term pre,.ln code,.ln.cur i){color:var(--ink)}
+:root[data-theme=dark] #boss :is(.bs-ti.on,.bs-tabs2 span.on,.ln.cur){background:var(--info-bg);color:var(--ink)}
+:root[data-theme=dark] #boss :is(.bs-tabs2 span,.ln i){color:var(--mut2)}
+:root[data-theme=dark] #boss :is(.bs-crumb,.bs-term,.bs-tabs2,.bs-tabs2 span){border-color:var(--line2)}
+:root[data-theme=dark] #boss .kw{color:#9dcbff}:root[data-theme=dark] #boss .st{color:#e9bd9e}:root[data-theme=dark] #boss .cm{color:#a4c99b}:root[data-theme=dark] #boss .ty{color:#7cd8ce}:root[data-theme=dark] #boss .nu{color:#b7dfa9}
+:root[data-theme=dark] #vimcmd{background:var(--surface);color:var(--ink);border-color:var(--line)}
+:root[data-theme=dark] #vimcmd.err{color:var(--red)}:root[data-theme=dark] #vimcmd .hint{color:var(--mut2)}:root[data-theme=dark] #vimcmd .cur{background:var(--ink)}
 :root[data-theme=dark] .modal{background:rgba(5,10,18,.8)}
 :root[data-theme=dark] .tile::before{background:var(--surface)}
 :root[data-theme=dark] .sq .pawn{box-shadow:0 0 0 .15cqw var(--surface)}
@@ -4113,7 +4123,7 @@ function showLedger(id) {
   const t = ST(p), v = valBreak(p);
   const rows = ownedBy(p).map(i => { const pr = S.props[i], s = SQ[i]; return `<tr><td>${awsImg(s.icon)}${s.n}</td><td>${pr.spot ? (spotMine(i) ? `Spot $${pr.spotPaid}` : _t(2587, "Spot（出价看不到）")) : `$${pr.paid ?? s.p}`}</td><td>${s.upg ? lvFull(i, pr.level) : '—'}${pr.cap ? _tf(2588, " · {$0} 个{$1}", pr.cap, capU(s.k)) : ''}${pr.offline ? _t(2589, " · 已下线") : ''}${pr.impaired ? ' · Impaired' : ''}</td><td>\$${upPaidSum(i) + (pr.cap || 0) * capCost(i)}</td><td><b>\$${t.earnBy[i] || 0}</b>${t.hitsBy[i] ? _tf(2590, "<small>（{$0} 次）</small>", t.hitsBy[i]) : ''}</td><td>${_tf(2593, "${$0}/圈 · 累计 ${$1}", runCost(i), t.runBy[i] || 0)}</td><td>${(sr => sr.txt + (sr.cap ? _tf(2591, "（保护期封顶，之后 {$0}）", sr.fullTxt) : '') + (sr.jr ? _t(2592, "（架构联合）") : ''))(shownRent(i))}</td></tr>`; }).join('');
   const sold = Object.keys(t.earnBy).map(Number).filter(i => !owns(p, i) && t.earnBy[i]);
-  const logs = S.log.filter(l => l.includes(nm(p)) || l.includes(`<b style="color:${p.color}">${p.name}</b>`)).slice(0, 120).map(logRow).join('');
+  const logs = S.log.filter(l => l.includes(nm(p)) || l.includes(`<b style="color:${p.color}">${p.name}</b>`) || l.includes(`<b style="color:${INK[p.color]}">${p.name}</b>`)).slice(0, 120).map(logRow).join('');
   ask({ local: true, cancelable: true, view: true, cls: 'wide', title: _tf(2594, "{$0} 的明细", p.name), html: `<div class="ledger">
     <div class="lsum"><div>${_tf(2599, "<small>现金</small><b>${$0}</b>", p.cash)}</div><div>${_tf(2600, "<small>总资产</small><b>${$0}</b>", v.net)}</div><div title="${valTip(p)}">${_tf(2601, "<small>估值</small><b>${$0}</b>", v.val)}</div><div>${_tf(2602, "<small>收过路费</small><b>${$0}</b>", t.rentIn)}</div><div>${_tf(2603, "<small>付过路费</small><b>${$0}</b>", t.rentOut)}</div><div>${_tf(2604, "<small>领 Credits</small><b>${$0}</b>", t.salary)}</div><div>${_tf(2605, "<small>交运行费</small><b>${$0}</b>", t.runTot)}</div></div>
     <h4>${_t(2606, "每块服务的收费明细")}</h4>

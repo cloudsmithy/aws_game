@@ -94,3 +94,28 @@ test('图鉴、玩法、事件卡与手机布局支持黑夜模式，外观文�
   expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
   expect(errors).toEqual([]);
 });
+
+
+test('旧存档的玩家名颜色仍能匹配明细日志', async ({ page }) => {
+  await page.goto('/?demo=board');
+  await page.evaluate(() => {
+    const p = cur();
+    S.log.unshift(`<b style="color:${INK[p.color]}">${p.name}</b> 兼容旧存档明细 $123`);
+    GameTheme.set('dark');
+    showLedger(p.id);
+  });
+  await expect(page.locator('#vmodal')).toContainText('兼容旧存档明细');
+});
+
+
+test('老板键在黑夜模式下使用可读的深色编辑器', async ({ page }) => {
+  await page.goto('/?demo=board');
+  await page.evaluate(() => { GameTheme.set('dark'); toggleBoss(); });
+  await expect(page.locator('#boss')).toBeVisible();
+  const colors = await page.locator('#boss').evaluate(e => {
+    const s = getComputedStyle(e);
+    return { background:s.backgroundColor.match(/\d+/g).slice(0,3).map(Number), foreground:s.color.match(/\d+/g).slice(0,3).map(Number) };
+  });
+  expect(Math.max(...colors.background)).toBeLessThan(80);
+  expect(Math.min(...colors.foreground)).toBeGreaterThan(180);
+});
