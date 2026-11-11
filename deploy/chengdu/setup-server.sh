@@ -2,7 +2,7 @@
 # Run locally on the server as root after review. Does not change Nginx or the live site.
 set -eu
 if [ "$(id -u)" != 0 ] || [ "$#" -ne 1 ]; then
-    echo "Usage: sudo sh deploy/setup-server.sh /path/to/dedicated-public-key.pub" >&2
+    echo "Usage: sudo sh deploy/chengdu/setup-server.sh /path/to/dedicated-public-key.pub" >&2
     exit 1
 fi
 command -v python3 >/dev/null

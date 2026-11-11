@@ -14,13 +14,20 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
+      - name: Fetch deployment scripts and Git tree only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init .
+          git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
+          git sparse-checkout init --cone
+          git sparse-checkout set deploy/chengdu
+          git -c protocol.version=2 fetch --depth=1 --filter=blob:none origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
       - name: Test release validation and rollback
         run: python3 -m unittest discover -s deploy/chengdu -p 'test_*.py' -v
-      - name: Build static release
-        run: python3 deploy/chengdu/package.py --revision "$GITHUB_SHA" --output /tmp/aws-game.tar.gz
+      - name: Validate deployment paths without downloading assets
+        run: python3 deploy/chengdu/incremental.py --revision "$GITHUB_SHA" --plan
 
   deploy:
     needs: validate
@@ -37,11 +44,16 @@ jobs:
       group: chengdu-aws-game-production
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-      - name: Build static release
-        run: python3 deploy/chengdu/package.py --revision "$GITHUB_SHA" --output /tmp/aws-game.tar.gz
+      - name: Fetch deployment scripts and Git tree only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init .
+          git remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
+          git sparse-checkout init --cone
+          git sparse-checkout set deploy/chengdu
+          git -c protocol.version=2 fetch --depth=1 --filter=blob:none origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
       - name: Publish and verify, or roll back
         env:
           DEPLOY_HOST: ${{ secrets.CHENGDU_HOST }}
@@ -50,7 +62,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -n "$DEPLOY_HOST" && test -n "$DEPLOY_KEY" && test -n "$DEPLOY_KNOWN_HOSTS"
+          for name in DEPLOY_HOST DEPLOY_KEY DEPLOY_KNOWN_HOSTS; do
+            if [[ -z "${!name}" ]]; then echo "Missing deployment secret: $name" >&2; exit 1; fi
+          done
           [[ "$DEPLOY_HOST" =~ ^[A-Za-z0-9][A-Za-z0-9.-]*$ ]]
           mkdir -p "$RUNNER_TEMP/aws-game-ssh"
           chmod 700 "$RUNNER_TEMP/aws-game-ssh"
@@ -63,6 +77,11 @@ jobs:
           remote=(ssh -T -p 22 -i "$key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$hosts" -o ConnectTimeout=20 "aws-game-deploy@$DEPLOY_HOST")
           cleanup() { rm -f "$key" "$hosts"; }
           trap cleanup EXIT
+          echo 'Reading verified inventory from chengdu (requires incremental receiver upgrade)'
+          "${remote[@]}" status > "$RUNNER_TEMP/aws-game-baseline.json"
+          python3 deploy/chengdu/incremental.py --revision "$GITHUB_SHA" \
+            --baseline "$RUNNER_TEMP/aws-game-baseline.json" --output /tmp/aws-game-delta.tar.gz \
+            --stats "$RUNNER_TEMP/aws-game-stats.json"
           rollback() {
             trap - ERR
             echo 'Deployment or health check failed; restoring previous release if this revision is current.'
@@ -70,9 +89,11 @@ jobs:
             exit 1
           }
           trap rollback ERR
-          "${remote[@]}" "deploy $GITHUB_SHA" < /tmp/aws-game.tar.gz
+          python3 deploy/chengdu/send.py /tmp/aws-game-delta.tar.gz -- "${remote[@]}" "deploy $GITHUB_SHA"
           base='https://aws-game.usergroup.cn'
           curl --fail --silent --show-error --retry 3 --retry-all-errors --max-time 30 "$base/_deployment.json?revision=$GITHUB_SHA" -o "$RUNNER_TEMP/aws-game-manifest.json"
           python3 -c 'import json,os,sys; assert json.load(open(sys.argv[1]))["revision"] == os.environ["GITHUB_SHA"], "unexpected live revision"' "$RUNNER_TEMP/aws-game-manifest.json"
           curl --fail --silent --show-error --retry 3 --max-time 30 "$base/index.html?revision=$GITHUB_SHA" -o /dev/null
           echo "Deployed $GITHUB_SHA to $base/" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Incremental transfer statistics:' >> "$GITHUB_STEP_SUMMARY"
+          cat "$RUNNER_TEMP/aws-game-stats.json" >> "$GITHUB_STEP_SUMMARY"
