@@ -2210,6 +2210,18 @@ html[lang=ja] .hero .cats{grid-template-columns:repeat(3,minmax(0,1fr))}html[lan
 /* 角落格：名字最多两行，放不下就省略号；英文名字长，字收小一点，下面一行说明照样露得出来（全文在格子的悬停提示里） */
 .corner .nm{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-align:center}
 html:is([lang=en],[lang=ja]) .corner .nm{font-size:.92cqw;line-height:1.12}html:is([lang=en],[lang=ja]) .sq.corner .pr{font-size:.72cqw}
+/* 四角先保留标题和说明的行高，图标使用剩余高度；棋盘铺满窗口时不能按宽度把文字挤扁。 */
+.sq.corner{display:grid;grid-template-rows:minmax(0,1fr) auto auto;justify-items:center;padding:min(.6cqw,6px);gap:min(.3cqw,4px)}
+.corner .art{height:100%;min-height:0;max-width:100%;display:flex;align-items:center;justify-content:center}
+.corner .art img.awsi{max-height:100%;max-width:100%;object-fit:contain}
+.corner .nm,.sq.corner .pr{max-width:100%;min-width:0;margin:0}
+.sq .nm{overflow-wrap:anywhere}
+@media (min-width:1201px) and (min-height:501px){
+  .corner .nm{font-size:min(1.15cqw,1.8vh)}
+  .sq.corner .pr{font-size:min(.74cqw,1.3vh)}
+  html:is([lang=en],[lang=ja]) .corner .nm{font-size:min(.92cqw,1.8vh)}
+  html:is([lang=en],[lang=ja]) .sq.corner .pr{font-size:min(.72cqw,1.3vh)}
+}
 /* 英文版对局中间：帮助按钮收紧一点，让左边的对局信息少折几行；玩家条去掉中间的箭头，四个人尽量一行放下 */
 html:is([lang=en],[lang=ja]) .c-head .tgrp button,html:is([lang=en],[lang=ja]) .c-head .gmenu summary{padding-left:8px;padding-right:8px}
 html:is([lang=en],[lang=ja]) .c-head .sub{font-size:12px;line-height:1.45}
@@ -2509,6 +2521,31 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
   /* 名字离格子上边只剩 3cqw 出头，3 级加容量那一列再收一点 */
   .sq.t .lvh,.sq.b .lvh{top:.25cqw;gap:.1cqw}
   .sq.t .lvh i,.sq.b .lvh i{width:.5cqw;height:.5cqw}
+}
+/* 上下两排和四角一样先给文字留空间，避免主人、过路费被 Flex 压成半行。 */
+@media (min-width:901px) and (min-height:501px){
+  .sq.t,.sq.b{display:grid;grid-template-rows:minmax(0,1fr) auto;justify-items:center;padding:2px min(.4cqw,4px);gap:2px}
+  .sq.t .art,.sq.b .art{height:100%;min-height:0;display:flex;align-items:center;justify-content:center}
+  .sq.t .art img.awsi,.sq.b .art img.awsi{max-height:100%;max-width:100%;object-fit:contain}
+  .sq.t .txt,.sq.b .txt{width:100%}
+  /* 等级已有图标旁的方块表示，矮屏不再重复占一行。 */
+  @media (max-height:1000px),(min-aspect-ratio:2/1){.sq.t .lv,.sq.b .lv,.sq.l .lv,.sq.r .lv,.sq.l .cap,.sq.r .cap{display:none!important}}
+  /* 两侧名字、价格优先；类型可在详情中查看，避免留下半行。 */
+  @media (max-height:1000px),(min-aspect-ratio:2/1){
+    .sq.l .bill,.sq.r .bill{display:none}
+    .sq.l,.sq.r{padding-top:2px;padding-bottom:2px}
+    .sq.l .txt,.sq.r .txt{gap:1px}
+    .sq.l .txt>*,.sq.r .txt>*{flex-shrink:0}
+  }
+}
+/* 英文、日文较长的牌堆标签不能撑破左栏；空间不足时折行并在栏内滚动。 */
+.cleft{grid-template-columns:repeat(2,minmax(0,1fr));align-content:safe center}
+.cleft .stack b,.cleft .stack span{white-space:normal;overflow-wrap:anywhere;max-width:100%}
+.cleft .potbox{flex-wrap:wrap;min-width:0}
+.cleft .lastcard{min-width:0;overflow-wrap:anywhere}
+@media (min-width:901px) and (min-height:501px){
+  .c-head{flex-wrap:wrap}
+  .c-head .gtitle{flex-basis:24em}
 }
 /* 中间右栏「这回合还能做什么」放不下时可以滚，底部淡出提示下面还有 */
 @media (min-width:901px){
