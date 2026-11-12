@@ -197,7 +197,11 @@ def operate(base, command, stream):
             if previous_manifest['revision'] != candidate_manifest['revision'] or old_files != new_files:
                 raise ValueError('revision already exists with different content')
         else:
+            # mkdtemp creates 0700; Nginx must be able to traverse the verified release.
+            candidate.chmod(0o755)
             candidate.rename(target)
+        # Also repair a previously published immutable release on an idempotent retry.
+        target.chmod(0o755)
         current = base / 'current'
         if current.is_symlink() and current.resolve() != target:
             switch(base, 'previous', os.readlink(current))

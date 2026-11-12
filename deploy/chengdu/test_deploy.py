@@ -53,6 +53,7 @@ class DeploymentTests(unittest.TestCase):
     def test_real_layout_unicode_and_audio_preserved(self):
         self.deploy('a' * 40)
         current = self.base / 'current'
+        self.assertEqual(current.stat().st_mode & 0o777, 0o755)
         self.assertEqual((current / 'docs/更新说明.html').read_bytes(), b'content')
         self.assertTrue((current / 'audio/voice.m4a').is_file())
         # Only pages and audio are published: no PDFs, no translation tables
@@ -97,7 +98,9 @@ class DeploymentTests(unittest.TestCase):
 
     def test_same_revision_is_idempotent_but_immutable(self):
         self.deploy('a' * 40)
+        (self.base / 'current').chmod(0o700)
         self.deploy('a' * 40)
+        self.assertEqual((self.base / 'current').stat().st_mode & 0o777, 0o755)
         (self.source / 'code/index.html').write_bytes(b'different')
         with self.assertRaisesRegex(ValueError, 'different content'):
             self.deploy('a' * 40)
