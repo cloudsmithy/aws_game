@@ -1,5 +1,10 @@
-# 只在开发目录里用的：生成脚本、宣传片、参考素材
-tools/
+# 只在开发目录里用的：生成脚本、宣传片、参考素材（/tools/ 只管根目录那个，宣传片网页/tools/ 要收进仓库）
+/tools/
+# 宣传片网页/ 收进仓库（网页成品 + 宣传片网页/tools/ 里的生成、导出脚本），导出的 mp4 和配音缓存不收
+宣传片网页/*.mp4
+宣传片网页/tools/promo/out/tts_cache/
+宣传片网页/tools/promo/out/tts_voxcpm/
+宣传片网页/tools/promo/mexp_out/tts_cache/
 宣传片/
 参考素材/
 # 生成过程的中间文件（仓库里的 code/index.html 已经是生成好的多语言页面）

@@ -1,0 +1,102 @@
+/* full 宣传片序章「云上危机 · 拯救行动」：任务界面（和正片同一套深蓝 + 橙），盖在 style.css 之后 */
+.hudf{inset:0;z-index:5}
+.hudf i{position:absolute;width:46px;height:46px;border:3px solid rgba(255,153,0,.85);filter:drop-shadow(0 0 6px rgba(255,153,0,.6))}
+.hudf .c1{left:26px;top:26px;border-right:0;border-bottom:0}.hudf .c2{right:26px;top:26px;border-left:0;border-bottom:0}
+.hudf .c3{left:26px;bottom:26px;border-right:0;border-top:0}.hudf .c4{right:26px;bottom:26px;border-left:0;border-top:0}
+.hudf b{position:absolute;top:34px;font:700 19px 'SF Mono',Menlo,monospace;letter-spacing:.18em;color:#ffb36b;text-shadow:0 2px 8px rgba(0,0,0,.8);padding:5px 12px;background:rgba(11,17,28,.6)}
+.hudf .tl{left:84px;display:flex;align-items:center;gap:10px}.hudf .tl s{width:11px;height:11px;border-radius:50%;background:#ff3b30;box-shadow:0 0 10px #ff3b30}
+.hudf .tr{right:84px;color:#dfe5ec}
+.scan{inset:0;z-index:4;background:repeating-linear-gradient(0deg,rgba(0,0,0,0) 0 3px,rgba(0,0,0,.16) 3px 4px)}
+.bsep i{height:14px;background:repeating-linear-gradient(-45deg,#ff9900 0 18px,#0b111c 18px 36px);box-shadow:0 0 0 2px rgba(11,17,28,.9),0 0 22px rgba(255,153,0,.45)}
+/* 任务界面面板：深色底 + 四角橙色折角 */
+.hudp{background:linear-gradient(#ff9900,#ff9900) left top/16px 3px no-repeat,linear-gradient(#ff9900,#ff9900) left top/3px 16px no-repeat,
+  linear-gradient(#ff9900,#ff9900) right top/16px 3px no-repeat,linear-gradient(#ff9900,#ff9900) right top/3px 16px no-repeat,
+  linear-gradient(#ff9900,#ff9900) left bottom/16px 3px no-repeat,linear-gradient(#ff9900,#ff9900) left bottom/3px 16px no-repeat,
+  linear-gradient(#ff9900,#ff9900) right bottom/16px 3px no-repeat,linear-gradient(#ff9900,#ff9900) right bottom/3px 16px no-repeat,
+  linear-gradient(180deg,rgba(16,24,38,.93),rgba(8,12,20,.93))!important;border:1px solid rgba(255,153,0,.28)!important;border-radius:4px!important;box-shadow:0 16px 40px rgba(0,0,0,.5)!important}
+.dossier{left:0;top:0;z-index:3;width:660px;padding:16px 22px 16px}
+.dossier .dh{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid rgba(255,153,0,.35);padding-bottom:8px;margin-bottom:8px}
+.dossier .dh b{font:800 22px 'PingFang SC',sans-serif;color:#ffb36b;letter-spacing:.1em}.dossier .dh em{margin-left:auto;font:700 16px 'SF Mono',Menlo,monospace;font-style:normal;color:#93a1b1;letter-spacing:.2em}
+.dossier .dn{position:absolute;right:22px;top:52px;font:900 44px 'PingFang SC',sans-serif;color:#fff;opacity:.9}
+.dossier ul{list-style:none;margin:0;padding:0;columns:1}
+.dossier li{display:flex;align-items:center;gap:12px;font:700 25px/1 'PingFang SC',sans-serif;color:#f2f4f7;padding:7px 0}
+.dossier li img{width:34px;height:34px;background:#fff;border-radius:7px;padding:3px}
+.dossier .stamp{position:absolute;right:30px;bottom:24px;padding:6px 16px;border:4px solid #ff3b30;border-radius:8px;font:900 40px 'PingFang SC',sans-serif;color:#ff3b30;letter-spacing:.08em;box-shadow:inset 0 0 0 2px rgba(255,59,48,.35);text-shadow:0 0 12px rgba(255,59,48,.5)}
+.cnt{padding:10px 18px!important}.cnt em{display:block;font:700 15px 'SF Mono',Menlo,monospace;font-style:normal;letter-spacing:.2em;color:#93a1b1;margin-bottom:2px}
+.ctag span{display:inline-flex;align-items:center;gap:8px;padding:6px 14px 6px 12px;border-radius:4px;background:rgba(11,17,28,.88);border:1px solid rgba(255,255,255,.18);border-left:5px solid var(--c,#ff9900);color:#fff;font:800 24px 'PingFang SC',sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.ctag em,.lbl.otag em{font:700 15px 'SF Mono',Menlo,monospace;font-style:normal;letter-spacing:.14em;color:#93a1b1;margin-right:8px}
+.lbl.otag{border-radius:4px;padding:7px 14px;font-size:24px;background:rgba(11,17,28,.9);border:1px solid rgba(255,153,0,.5)}
+.lbl.otag::before,.lbl.otag::after{display:none}
+.bubble{border-color:#ff5f4f!important}
+.threat{left:0;top:0;z-index:3;display:flex;align-items:center;gap:12px;padding:6px 16px;background:repeating-linear-gradient(-45deg,rgba(229,72,77,.92) 0 14px,rgba(120,10,16,.92) 14px 28px);border:1px solid #ff6b5e;font:800 22px 'PingFang SC',sans-serif;color:#fff;letter-spacing:.06em;box-shadow:0 0 24px rgba(255,59,48,.55)}
+.threat b{padding:2px 10px;background:#fff;color:#c4121a;font-size:20px;border-radius:3px}.threat i{font-style:normal;color:#ffd29a;letter-spacing:.1em}
+.alarm{left:0;top:0;width:1920px;height:356px;z-index:2;background:radial-gradient(ellipse at 50% 50%,rgba(255,40,30,0) 30%,rgba(255,40,30,.55) 100%);mix-blend-mode:screen}
+.mkt .mh em{font:700 15px 'SF Mono',Menlo,monospace;font-style:normal;letter-spacing:.2em;color:#93a1b1}
+.cdown{left:50%;top:44%;z-index:6;font:900 300px/1 'SF Mono',Menlo,monospace;color:#fff;text-align:center;text-shadow:0 0 40px rgba(255,153,0,.95),0 0 90px rgba(255,153,0,.6),0 10px 0 rgba(0,0,0,.45);white-space:nowrap}
+.cdown small{display:block;font:700 26px 'SF Mono',Menlo,monospace;letter-spacing:.5em;color:#ffb36b;margin-bottom:10px}
+.cdown:has(small){font:900 120px/1 'PingFang SC',sans-serif;background:linear-gradient(100deg,#ffd29a,#ff9900 45%,#ff5f3d);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 6px 30px rgba(255,153,0,.55))}
+.opcode{display:inline-block;margin-bottom:12px;padding:6px 18px;font:700 24px 'SF Mono',Menlo,monospace;letter-spacing:.3em;color:#ffb36b;border:1px solid rgba(255,153,0,.6);background:rgba(11,17,28,.7)}
+
+/* 序章短剧版：底部大字幕、角色定格名牌、「三年后……」、对话气泡 */
+/* 字幕三层：小字 kicker 34 / 主句 88 / 副句 48（≈ 0.39 : 1 : 0.55），描边跟字号走（3 / 6 / 4px，小字原来也是 6px，糊成一团），层间距都约 17px；
+   关键字一律金色 #ffd23f。过场字「直到那一天——」「三年后……」同一套：76px、800、字距 .2em 起。
+   标点（promo_open.js 的 tp() 只套 span、不改字）：省略号「……」不加字距、抬到字身中间（苹方的省略号贴着基线），破折号「——」不加字距连成一条，
+   行尾的「！」「？」和连用的「？！」取半角宽（halt），居中的字幕不会因为标点右半边的空白往左偏 */
+.tpe{position:relative;top:-.3em;letter-spacing:0}
+.tpd{letter-spacing:0}
+.tpq{letter-spacing:0;font-feature-settings:'halt'}
+/* 序章不加电影遮幅（11/09 用户定：和正片一样用完整的 16:9）。层次：3D 画面、暗角 dvig(2)、闪光 oflash(6) < 黑场 later(7) < 「直到那一天」dturn(8)、字幕 dcap / 名牌 dname / 气泡 dbub(8) < 表情头像 oface、序章大标题 otitle.dtl(9)。
+   字幕底边和正片字幕条（style.css .cap 的 bottom 84）对齐；名牌回到加遮幅以前的位置（带头像的 top 70，头像 330×284） */
+.otitle.dtl{z-index:9}
+/* 序章标题卡「序章 · 韩叔的出师考」：电影片头那种克制的一行小字——左边一道细金线，字距拉开，盖在开场的黑场上面（9）。11/09 去掉遮幅：top 182（上黑边 138 + 44）→ 100 */
+.dchap{left:104px;top:100px;z-index:9;display:flex;align-items:center;gap:22px;white-space:nowrap}
+.dchap s{display:block;width:72px;height:2px;background:linear-gradient(90deg,rgba(255,210,63,0),rgba(255,210,63,.95));transform-origin:0 50%}
+.dchap b{font:500 26px/1 'PingFang SC',sans-serif;color:rgba(255,255,255,.95);letter-spacing:.38em;text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 10px rgba(0,0,20,.75),0 0 26px rgba(0,0,20,.55)}   /* 压在亮蓝天、白云上也看得清（11/05 复核：原来的阴影太淡） */
+.dchap b em{font-style:normal;font-weight:600;color:#ffd23f}
+.dchap b i{font-style:normal;letter-spacing:.15em;margin-left:-.23em;color:rgba(255,255,255,.55)}   /* 「 · 」两边不再各加一份字距（原来点两边空得比字距还大） */
+.dvig{inset:0;z-index:2;background:radial-gradient(ellipse 75% 70% at 50% 45%,rgba(0,0,0,0) 55%,rgba(0,0,0,.55) 100%)}
+.dcap{left:50%;bottom:84px;z-index:8;text-align:center;white-space:nowrap;transform-origin:50% 100%}
+.dcap small{display:block;font:800 34px/1.2 'PingFang SC',sans-serif;color:#ffe9a8;letter-spacing:.12em;margin-bottom:10px;text-shadow:1.5px 0.0px 0 #000,1.3px 0.7px 0 #000,0.8px 1.3px 0 #000,0.0px 1.5px 0 #000,-0.7px 1.3px 0 #000,-1.3px 0.7px 0 #000,-1.5px 0.0px 0 #000,-1.3px -0.7px 0 #000,-0.8px -1.3px 0 #000,0.0px -1.5px 0 #000,0.8px -1.3px 0 #000,1.3px -0.8px 0 #000,3.0px 0.0px 0 #000,2.8px 1.1px 0 #000,2.1px 2.1px 0 #000,1.1px 2.8px 0 #000,0.0px 3.0px 0 #000,-1.1px 2.8px 0 #000,-2.1px 2.1px 0 #000,-2.8px 1.1px 0 #000,-3.0px 0.0px 0 #000,-2.8px -1.1px 0 #000,-2.1px -2.1px 0 #000,-1.1px -2.8px 0 #000,0.0px -3.0px 0 #000,1.1px -2.8px 0 #000,2.1px -2.1px 0 #000,2.8px -1.1px 0 #000,0 4px 10px rgba(0,0,0,.55)}
+.dcap b{display:block;font:900 88px/1.08 'PingFang SC',sans-serif;color:#fff;letter-spacing:.04em;text-shadow:2.0px 0.0px 0 #000,1.8px 0.8px 0 #000,1.4px 1.4px 0 #000,0.8px 1.8px 0 #000,0.0px 2.0px 0 #000,-0.8px 1.8px 0 #000,-1.4px 1.4px 0 #000,-1.8px 0.8px 0 #000,-2.0px 0.0px 0 #000,-1.8px -0.8px 0 #000,-1.4px -1.4px 0 #000,-0.8px -1.8px 0 #000,-0.0px -2.0px 0 #000,0.8px -1.8px 0 #000,1.4px -1.4px 0 #000,1.8px -0.8px 0 #000,4.0px 0.0px 0 #000,3.7px 1.5px 0 #000,2.8px 2.8px 0 #000,1.5px 3.7px 0 #000,0.0px 4.0px 0 #000,-1.5px 3.7px 0 #000,-2.8px 2.8px 0 #000,-3.7px 1.5px 0 #000,-4.0px 0.0px 0 #000,-3.7px -1.5px 0 #000,-2.8px -2.8px 0 #000,-1.5px -3.7px 0 #000,-0.0px -4.0px 0 #000,1.5px -3.7px 0 #000,2.8px -2.8px 0 #000,3.7px -1.5px 0 #000,6.0px 0.0px 0 #000,5.8px 1.6px 0 #000,5.2px 3.0px 0 #000,4.2px 4.2px 0 #000,3.0px 5.2px 0 #000,1.6px 5.8px 0 #000,0.0px 6.0px 0 #000,-1.6px 5.8px 0 #000,-3.0px 5.2px 0 #000,-4.2px 4.2px 0 #000,-5.2px 3.0px 0 #000,-5.8px 1.6px 0 #000,-6.0px 0.0px 0 #000,-5.8px -1.6px 0 #000,-5.2px -3.0px 0 #000,-4.2px -4.2px 0 #000,-3.0px -5.2px 0 #000,-1.6px -5.8px 0 #000,-0.0px -6.0px 0 #000,1.6px -5.8px 0 #000,3.0px -5.2px 0 #000,4.2px -4.2px 0 #000,5.2px -3.0px 0 #000,5.8px -1.6px 0 #000,0 8px 18px rgba(0,0,0,.6)}
+.dcap b em,.dcap i em,.dcap small em{font-style:normal;color:#ffd23f}
+.dcap i{display:block;font:900 48px/1.2 'PingFang SC',sans-serif;font-style:normal;color:#fff;margin-top:8px;letter-spacing:.04em;text-shadow:2.0px 0.0px 0 #000,1.8px 0.8px 0 #000,1.4px 1.4px 0 #000,0.8px 1.8px 0 #000,0.0px 2.0px 0 #000,-0.8px 1.8px 0 #000,-1.4px 1.4px 0 #000,-1.8px 0.8px 0 #000,-2.0px 0.0px 0 #000,-1.8px -0.8px 0 #000,-1.4px -1.4px 0 #000,-0.8px -1.8px 0 #000,0.0px -2.0px 0 #000,0.8px -1.8px 0 #000,1.4px -1.4px 0 #000,1.8px -0.8px 0 #000,4.0px 0.0px 0 #000,3.7px 1.5px 0 #000,2.8px 2.8px 0 #000,1.5px 3.7px 0 #000,0.0px 4.0px 0 #000,-1.5px 3.7px 0 #000,-2.8px 2.8px 0 #000,-3.7px 1.5px 0 #000,-4.0px 0.0px 0 #000,-3.7px -1.5px 0 #000,-2.8px -2.8px 0 #000,-1.5px -3.7px 0 #000,0.0px -4.0px 0 #000,1.5px -3.7px 0 #000,2.8px -2.8px 0 #000,3.7px -1.5px 0 #000,0 6px 14px rgba(0,0,0,.6)}
+.dname{left:90px;top:330px;z-index:8;transform-origin:0 50%}
+.dname .nbar{display:inline-block;padding:10px 48px 10px 26px;background:linear-gradient(90deg,var(--c),rgba(0,0,0,0) 135%);transform:skewX(-14deg);box-shadow:-10px 0 0 #fff}
+.dname .nbar b{display:inline-block;transform:skewX(14deg);font:900 92px/1 'PingFang SC',sans-serif;color:#fff;text-shadow:2.0px 0.0px 0 #000,1.8px 0.8px 0 #000,1.4px 1.4px 0 #000,0.8px 1.8px 0 #000,0.0px 2.0px 0 #000,-0.8px 1.8px 0 #000,-1.4px 1.4px 0 #000,-1.8px 0.8px 0 #000,-2.0px 0.0px 0 #000,-1.8px -0.8px 0 #000,-1.4px -1.4px 0 #000,-0.8px -1.8px 0 #000,-0.0px -2.0px 0 #000,0.8px -1.8px 0 #000,1.4px -1.4px 0 #000,1.8px -0.8px 0 #000,4.0px 0.0px 0 #000,3.7px 1.5px 0 #000,2.8px 2.8px 0 #000,1.5px 3.7px 0 #000,0.0px 4.0px 0 #000,-1.5px 3.7px 0 #000,-2.8px 2.8px 0 #000,-3.7px 1.5px 0 #000,-4.0px 0.0px 0 #000,-3.7px -1.5px 0 #000,-2.8px -2.8px 0 #000,-1.5px -3.7px 0 #000,-0.0px -4.0px 0 #000,1.5px -3.7px 0 #000,2.8px -2.8px 0 #000,3.7px -1.5px 0 #000,6.0px 0.0px 0 #000,5.8px 1.6px 0 #000,5.2px 3.0px 0 #000,4.2px 4.2px 0 #000,3.0px 5.2px 0 #000,1.6px 5.8px 0 #000,0.0px 6.0px 0 #000,-1.6px 5.8px 0 #000,-3.0px 5.2px 0 #000,-4.2px 4.2px 0 #000,-5.2px 3.0px 0 #000,-5.8px 1.6px 0 #000,-6.0px 0.0px 0 #000,-5.8px -1.6px 0 #000,-5.2px -3.0px 0 #000,-4.2px -4.2px 0 #000,-3.0px -5.2px 0 #000,-1.6px -5.8px 0 #000,-0.0px -6.0px 0 #000,1.6px -5.8px 0 #000,3.0px -5.2px 0 #000,4.2px -4.2px 0 #000,5.2px -3.0px 0 #000,5.8px -1.6px 0 #000,0 8px 18px rgba(0,0,0,.6)}
+.dname p{margin:12px 0 0 14px;font:800 32px/1.35 'PingFang SC',sans-serif;color:#fff;text-shadow:1.5px 0.0px 0 #000,1.3px 0.7px 0 #000,0.8px 1.3px 0 #000,0.0px 1.5px 0 #000,-0.7px 1.3px 0 #000,-1.3px 0.7px 0 #000,-1.5px 0.0px 0 #000,-1.3px -0.7px 0 #000,-0.8px -1.3px 0 #000,0.0px -1.5px 0 #000,0.8px -1.3px 0 #000,1.3px -0.8px 0 #000,3.0px 0.0px 0 #000,2.8px 1.1px 0 #000,2.1px 2.1px 0 #000,1.1px 2.8px 0 #000,0.0px 3.0px 0 #000,-1.1px 2.8px 0 #000,-2.1px 2.1px 0 #000,-2.8px 1.1px 0 #000,-3.0px 0.0px 0 #000,-2.8px -1.1px 0 #000,-2.1px -2.1px 0 #000,-1.1px -2.8px 0 #000,0.0px -3.0px 0 #000,1.1px -2.8px 0 #000,2.1px -2.1px 0 #000,2.8px -1.1px 0 #000,0 4px 10px rgba(0,0,0,.55)}
+.later{inset:0;z-index:7;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.later b{font:800 76px/1.2 'PingFang SC',sans-serif;color:#f6f3ec;letter-spacing:.24em;text-shadow:0 0 28px rgba(255,236,200,.22)}
+/* 「三年后……」底下的细金线：promo_open.js 让它从中间向两边展开 */
+.later i{display:block;width:460px;height:2px;margin-top:30px;background:linear-gradient(90deg,rgba(255,210,63,0),rgba(255,210,63,.95) 50%,rgba(255,210,63,0))}
+.dbub{left:0;top:0;z-index:8;padding:16px 24px;border-radius:18px;background:#fff;border:4px solid #111;font:900 34px/1.35 'PingFang SC',sans-serif;color:#111;white-space:nowrap;transform-origin:0 50%;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.dbub::after{content:'';position:absolute;left:-34px;top:50%;margin-top:-14px;border:14px solid transparent;border-right:22px solid #111}
+.oflash.hitw{background:radial-gradient(circle at 50% 40%,rgba(255,250,230,1),rgba(255,200,90,.85) 45%,rgba(255,120,30,.4) 80%)}
+.oflash.boltw{background:rgba(200,180,255,.9)}
+
+.bossbar{left:auto!important;right:90px;width:720px!important;margin-left:0!important}
+
+.dturn{left:50%;top:44%;z-index:8;font:800 76px/1.2 'PingFang SC',sans-serif;color:#fff;letter-spacing:.2em;white-space:nowrap;text-shadow:0 0 30px rgba(255,80,60,.6),0 4px 16px rgba(0,0,0,.6)}
+.oflash.redw{background:radial-gradient(circle at 50% 40%,rgba(255,120,80,.9),rgba(180,20,10,.85) 60%,rgba(60,0,0,.9))}
+/* 11/11（fixA）：主陨石还在画外时照在画面右上角的火光（runMain 的 mfire，T 13.75–16.1），叠加成光，不盖住东西 */
+.oflash.mfire{z-index:5;mix-blend-mode:screen;background:radial-gradient(circle at 100% 0%,rgba(255,96,44,.72) 0,rgba(240,64,30,.4) 240px,rgba(200,40,24,.15) 520px,rgba(160,30,20,0) 860px)}
+/* 名牌上方的角色头像（从角色设定图的立绘里裁的），下沿淡出 */
+.dname.pic{top:70px}   /* 带头像的名牌整体往上提、头像缩小一点：虫虫跑进来时正好从名牌下面经过，原来的位置字压在她头发上。
+   名字条、三行字从 326 起（70 + 头像 284 − 28）；加遮幅那几天头像缩到 238×204、top 150，11/09 去掉遮幅以后回到 330×284、top 70 */
+/* 头像四周留 44px 内边距：mask 只作用在元素框里，原来 22px 的彩色外发光一碰到框边就被切成一个硬边方块（8K 下很明显）；图本身画在内容框里，位置和大小跟原来一样 */
+.dname .npic{display:block;box-sizing:content-box;width:330px;height:284px;padding:44px 44px 0;margin:-44px 0 -28px -54px;background:left bottom/contain no-repeat content-box;filter:drop-shadow(4px 0 0 #fff) drop-shadow(-4px 0 0 #fff) drop-shadow(0 4px 0 #fff) drop-shadow(0 -4px 0 #fff) drop-shadow(0 0 22px var(--c));-webkit-mask-image:linear-gradient(transparent 0,#000 38px,#000 248px,transparent 322px);mask-image:linear-gradient(transparent 0,#000 38px,#000 248px,transparent 322px)}
+/* 头像图在原设定图里被切到边的那一侧（韩叔右边的王座、Damo 左右两边的披风）跟底边一样淡出，不留一条带白描边的竖直切口 */
+.dname .npic.np-han{-webkit-mask-image:linear-gradient(transparent 0,#000 38px,#000 248px,transparent 322px),linear-gradient(90deg,#000 332px,transparent 358px);mask-image:linear-gradient(transparent 0,#000 38px,#000 248px,transparent 322px),linear-gradient(90deg,#000 332px,transparent 358px);-webkit-mask-composite:source-in;mask-composite:intersect}
+.dname .npic.np-damo{-webkit-mask-image:linear-gradient(transparent 0,#000 38px,#000 248px,transparent 322px),linear-gradient(90deg,transparent 44px,#000 58px,#000 350px,transparent 374px);mask-image:linear-gradient(transparent 0,#000 38px,#000 248px,transparent 322px),linear-gradient(90deg,transparent 44px,#000 58px,#000 350px,transparent 374px);-webkit-mask-composite:source-in;mask-composite:intersect}
+/* 表情小头像（设定图「表情设计」）：圆角方块，白边 + 角色色描边和外发光，跟名牌头像一个路数；底下一层角色色渐变底，头像顶着上边放（王冠、头顶的火不被切掉） */
+.oface{left:0;top:0;z-index:9;width:150px;height:150px}
+.oface.lg{width:172px;height:172px}.oface.sm{width:128px;height:128px}
+.oface i,.dbub .bfc{display:block;position:relative;width:100%;height:100%;box-sizing:border-box;border-radius:26%;border:6px solid #fff;overflow:hidden;
+  background:radial-gradient(circle at 50% 42%,rgba(255,255,255,.5),rgba(255,255,255,0) 62%),linear-gradient(160deg,var(--c),#0b111c 125%);box-shadow:0 0 0 4px var(--c),0 0 26px 4px var(--c),0 12px 26px rgba(0,0,0,.55)}
+.oface b,.dbub .bfc b{position:absolute;left:0;right:0;top:5%;bottom:0;background:50% 0/100% auto no-repeat}
+/* 名牌名字条右边的小徽章（设定图「细节元素」）：白描边 + 角色色光晕，和名牌头像一样 */
+.dname .nbdg{display:inline-block;vertical-align:middle;width:100px;height:100px;margin-left:26px;background:50% 50%/contain no-repeat;
+  filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 0 16px var(--c))}
+.dname .nbdg.ncmp{width:92px;height:92px;margin-left:16px}
+/* 台词气泡左边的头像 */
+.dbub.wf{display:flex;align-items:center;gap:16px;padding-left:14px}
+.dbub .bfc{flex:none;width:88px;height:88px;border-width:4px;box-shadow:0 0 0 3px var(--c),0 0 14px 2px var(--c)}

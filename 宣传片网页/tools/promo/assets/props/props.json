@@ -1,0 +1,498 @@
+{
+"han_crown": {
+"w": 414,
+"h": 312,
+"f": "webp",
+"who": "han",
+"label": "王冠",
+"kind": "prop"
+},
+"han_scepter": {
+"w": 200,
+"h": 512,
+"f": "webp",
+"who": "han",
+"label": "权杖",
+"kind": "prop"
+},
+"han_cape": {
+"w": 512,
+"h": 460,
+"f": "webp",
+"who": "han",
+"label": "披风",
+"kind": "prop"
+},
+"han_shades": {
+"w": 423,
+"h": 245,
+"f": "webp",
+"who": "han",
+"label": "墨镜",
+"kind": "prop"
+},
+"han_chain": {
+"w": 325,
+"h": 271,
+"f": "webp",
+"who": "han",
+"label": "金链",
+"kind": "prop"
+},
+"han_trophy": {
+"w": 389,
+"h": 459,
+"f": "webp",
+"who": "han",
+"label": "冠军奖杯",
+"kind": "prop"
+},
+"han_minion": {
+"w": 388,
+"h": 464,
+"f": "webp",
+"who": "han",
+"label": "暗影小弟",
+"kind": "prop"
+},
+"han_flame": {
+"w": 350,
+"h": 457,
+"f": "webp",
+"who": "han",
+"label": "魔法特效",
+"kind": "fx"
+},
+"han_pawn": {
+"w": 277,
+"h": 458,
+"f": "webp",
+"who": "han",
+"label": "云上大亨棋子",
+"kind": "prop"
+},
+"han_exp_confident": {
+"w": 217,
+"h": 257,
+"f": "webp",
+"who": "han",
+"label": "自信",
+"kind": "exp"
+},
+"han_exp_laugh": {
+"w": 219,
+"h": 259,
+"f": "webp",
+"who": "han",
+"label": "大笑",
+"kind": "exp"
+},
+"han_exp_proud": {
+"w": 217,
+"h": 256,
+"f": "webp",
+"who": "han",
+"label": "得意",
+"kind": "exp"
+},
+"han_exp_angry": {
+"w": 214,
+"h": 257,
+"f": "webp",
+"who": "han",
+"label": "生气",
+"kind": "exp"
+},
+"han_exp_smug": {
+"w": 219,
+"h": 258,
+"f": "webp",
+"who": "han",
+"label": "阴险坏笑",
+"kind": "exp"
+},
+"han_exp_surprised": {
+"w": 216,
+"h": 259,
+"f": "webp",
+"who": "han",
+"label": "惊讶",
+"kind": "exp"
+},
+"han_exp_think": {
+"w": 221,
+"h": 259,
+"f": "webp",
+"who": "han",
+"label": "思考",
+"kind": "exp"
+},
+"han_exp_gentle": {
+"w": 217,
+"h": 259,
+"f": "webp",
+"who": "han",
+"label": "温柔微笑",
+"kind": "exp"
+},
+"damo_badge": {
+"w": 377,
+"h": 334,
+"f": "webp",
+"who": "damo",
+"label": "领队徽章",
+"kind": "prop"
+},
+"damo_cloudpawn": {
+"w": 419,
+"h": 351,
+"f": "webp",
+"who": "damo",
+"label": "云朵棋子",
+"kind": "prop"
+},
+"damo_cape": {
+"w": 454,
+"h": 512,
+"f": "webp",
+"who": "damo",
+"label": "英雄披风",
+"kind": "prop"
+},
+"damo_glove": {
+"w": 250,
+"h": 367,
+"f": "webp",
+"who": "damo",
+"label": "手套",
+"kind": "prop"
+},
+"damo_belt": {
+"w": 459,
+"h": 238,
+"f": "webp",
+"who": "damo",
+"label": "腰带",
+"kind": "prop"
+},
+"damo_boot": {
+"w": 273,
+"h": 474,
+"f": "webp",
+"who": "damo",
+"label": "战靴",
+"kind": "prop"
+},
+"damo_fireball": {
+"w": 451,
+"h": 512,
+"f": "webp",
+"who": "damo",
+"label": "一拳特效",
+"kind": "fx"
+},
+"damo_dice": {
+"w": 343,
+"h": 385,
+"f": "webp",
+"who": "damo",
+"label": "云上大亨骰子",
+"kind": "prop"
+},
+"damo_exp_confident": {
+"w": 234,
+"h": 254,
+"f": "webp",
+"who": "damo",
+"label": "自信",
+"kind": "exp"
+},
+"damo_exp_laugh": {
+"w": 240,
+"h": 258,
+"f": "webp",
+"who": "damo",
+"label": "大笑",
+"kind": "exp"
+},
+"damo_exp_serious": {
+"w": 218,
+"h": 264,
+"f": "webp",
+"who": "damo",
+"label": "认真",
+"kind": "exp"
+},
+"damo_exp_fire": {
+"w": 242,
+"h": 295,
+"f": "webp",
+"who": "damo",
+"label": "热血",
+"kind": "exp"
+},
+"damo_exp_surprised": {
+"w": 222,
+"h": 253,
+"f": "webp",
+"who": "damo",
+"label": "惊讶",
+"kind": "exp"
+},
+"damo_exp_think": {
+"w": 224,
+"h": 259,
+"f": "webp",
+"who": "damo",
+"label": "思考",
+"kind": "exp"
+},
+"damo_exp_encourage": {
+"w": 248,
+"h": 254,
+"f": "webp",
+"who": "damo",
+"label": "鼓励",
+"kind": "exp"
+},
+"damo_exp_determined": {
+"w": 239,
+"h": 264,
+"f": "webp",
+"who": "damo",
+"label": "坚定",
+"kind": "exp"
+},
+"chong_hairpin": {
+"w": 285,
+"h": 337,
+"f": "webp",
+"who": "chong",
+"label": "发饰",
+"kind": "prop"
+},
+"chong_compass": {
+"w": 281,
+"h": 374,
+"f": "webp",
+"who": "chong",
+"label": "指南针",
+"kind": "prop"
+},
+"chong_scroll": {
+"w": 364,
+"h": 411,
+"f": "webp",
+"who": "chong",
+"label": "地图卷轴",
+"kind": "prop"
+},
+"chong_bag": {
+"w": 430,
+"h": 450,
+"f": "webp",
+"who": "chong",
+"label": "背包",
+"kind": "prop"
+},
+"chong_smile": {
+"w": 238,
+"h": 232,
+"f": "webp",
+"who": "chong",
+"label": "笑脸徽章",
+"kind": "prop"
+},
+"chong_shoe": {
+"w": 395,
+"h": 482,
+"f": "webp",
+"who": "chong",
+"label": "鞋子",
+"kind": "prop"
+},
+"chong_exp_happy": {
+"w": 270,
+"h": 257,
+"f": "webp",
+"who": "chong",
+"label": "开心",
+"kind": "exp"
+},
+"chong_exp_amazed": {
+"w": 269,
+"h": 258,
+"f": "webp",
+"who": "chong",
+"label": "惊喜",
+"kind": "exp"
+},
+"chong_exp_serious": {
+"w": 271,
+"h": 257,
+"f": "webp",
+"who": "chong",
+"label": "认真",
+"kind": "exp"
+},
+"chong_exp_playful": {
+"w": 271,
+"h": 260,
+"f": "webp",
+"who": "chong",
+"label": "调皮",
+"kind": "exp"
+},
+"chong_exp_think": {
+"w": 253,
+"h": 259,
+"f": "webp",
+"who": "chong",
+"label": "思考",
+"kind": "exp"
+},
+"chong_exp_cheer": {
+"w": 303,
+"h": 260,
+"f": "webp",
+"who": "chong",
+"label": "加油",
+"kind": "exp"
+},
+"chong_exp_surprised": {
+"w": 277,
+"h": 259,
+"f": "webp",
+"who": "chong",
+"label": "惊讶",
+"kind": "exp"
+},
+"yuki_bag": {
+"w": 512,
+"h": 512,
+"f": "webp",
+"who": "yuki",
+"label": "背包",
+"kind": "prop"
+},
+"yuki_compass": {
+"w": 370,
+"h": 512,
+"f": "webp",
+"who": "yuki",
+"label": "指南针徽章",
+"kind": "prop"
+},
+"yuki_scarf": {
+"w": 512,
+"h": 398,
+"f": "webp",
+"who": "yuki",
+"label": "围巾 / 短披风",
+"kind": "prop"
+},
+"yuki_gloves": {
+"w": 403,
+"h": 346,
+"f": "webp",
+"who": "yuki",
+"label": "手套",
+"kind": "prop"
+},
+"yuki_boots": {
+"w": 472,
+"h": 347,
+"f": "webp",
+"who": "yuki",
+"label": "登山靴",
+"kind": "prop"
+},
+"yuki_scroll": {
+"w": 461,
+"h": 392,
+"f": "webp",
+"who": "yuki",
+"label": "地图卷轴",
+"kind": "prop"
+},
+"yuki_buddy": {
+"w": 452,
+"h": 512,
+"f": "webp",
+"who": "yuki",
+"label": "小伙伴",
+"kind": "prop"
+},
+"yuki_dice": {
+"w": 380,
+"h": 418,
+"f": "webp",
+"who": "yuki",
+"label": "游戏骰子",
+"kind": "prop"
+},
+"yuki_exp_happy": {
+"w": 230,
+"h": 257,
+"f": "webp",
+"who": "yuki",
+"label": "开心",
+"kind": "exp"
+},
+"yuki_exp_confident": {
+"w": 208,
+"h": 259,
+"f": "webp",
+"who": "yuki",
+"label": "自信",
+"kind": "exp"
+},
+"yuki_exp_surprised": {
+"w": 210,
+"h": 264,
+"f": "webp",
+"who": "yuki",
+"label": "惊讶",
+"kind": "exp"
+},
+"yuki_exp_serious": {
+"w": 205,
+"h": 263,
+"f": "webp",
+"who": "yuki",
+"label": "认真",
+"kind": "exp"
+},
+"yuki_exp_think": {
+"w": 216,
+"h": 262,
+"f": "webp",
+"who": "yuki",
+"label": "思考",
+"kind": "exp"
+},
+"yuki_exp_playful": {
+"w": 222,
+"h": 258,
+"f": "webp",
+"who": "yuki",
+"label": "调皮",
+"kind": "exp"
+},
+"yuki_exp_cheer": {
+"w": 208,
+"h": 260,
+"f": "webp",
+"who": "yuki",
+"label": "加油",
+"kind": "exp"
+},
+"yuki_exp_determined": {
+"w": 220,
+"h": 258,
+"f": "webp",
+"who": "yuki",
+"label": "坚定",
+"kind": "exp"
+}
+}
