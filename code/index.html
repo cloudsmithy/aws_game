@@ -8911,7 +8911,13 @@ const FX = {
   // 以前每段 run 各开一个 requestAnimationFrame、各画各的，架构联合收费这种几段一起播的，同一帧要整屏重画好几遍
   // 切到后台时 requestAnimationFrame 停了，靠 setTimeout 兜底收尾，免得游戏（联机时是整桌）卡在等动画
   // 动画某一帧出错也要收尾（只吞这一帧的错），不然 await 永远不返回，整局卡住
-  run(dur, step) { return new Promise(res => { const j = { t0: performance.now(), dur, step, res }; this.jobs.push(j); this.jobStep(j, 0); setTimeout(() => { if (this.jobs.includes(j)) { this.jobEnd(j); this.redraw(); } }, dur + 400); this.loop(); }); },
+  // 页面在后台时 rAF 不跑：直接当成「已经播完」，别再等 dur+400ms 的兜底。
+  // 以前房主切到后台，每一跳都白等 400ms，而 moveSteps 在 await 它，全桌跟着慢：10 格从 1.5s 变成 5.5s。
+  // 走棋逻辑只用动画的起点和终点，跳过中间帧是安全的；状态、事件照常推进。
+  run(dur, step) {
+    if (document.hidden) { try { step(1); } catch (e) { } return Promise.resolve(); }
+    return new Promise(res => { const j = { t0: performance.now(), dur, step, res }; this.jobs.push(j); this.jobStep(j, 0); setTimeout(() => { if (this.jobs.includes(j)) { this.jobEnd(j); this.redraw(); } }, dur + 400); this.loop(); });
+  },
   jobStep(j, k) { try { j.step(k); } catch (e) { if (!this.runErr) { this.runErr = 1; console.error(e); } } },
   jobEnd(j) { const i = this.jobs.indexOf(j); if (i < 0) return; this.jobs.splice(i, 1); this.jobStep(j, 1); j.res(); },
   // 删了物体、换了棋子这种一次性的改动马上补画一遍，和同一时刻网页上的改动（DOM 棋子藏起来、露出来）同一帧上屏；每帧都要画的交给 loop()
@@ -8968,6 +8974,8 @@ const FX = {
   },
   async dice(d) {
     if (BOT || SIM) return;
+    // 后台标签页 rAF 不跑，3D 骰子也画不出来：直接跳过，别让 doRoll 卡在这里等动画
+    if (document.hidden) return;
     // 手机布局的主按钮固定在屏幕底部，玩家常是滚到下面看完玩家卡再点掷骰子，骰子和走棋都画在屏幕外，只看到「结算中…」。
     // 轮到本机真人掷时先把棋盘顶部滚进来：必须瞬间滚，下面只量一次骰子的位置，滚动途中量会画歪；电脑和别人掷不拉，免得打断正在往下看的人
     if (PHONE_MQ.matches && S && S.players && !isAI(S.cur) && (MP.role === 'client' ? S.cur === MP.mySeat : !MP.isRemote(S.cur))) {
@@ -10167,7 +10175,8 @@ document.addEventListener('keydown', e => {
 const MP = {
   role: null, peer: null, room: '', auth: '', mySeat: null, actor: null,
   seats: {},        // 房主：座位号 → { name, conn, online }
-  cur: null, mid: 0, closeLocal: null, sendT: 0,
+  cur: null, mid: 0, closeLocal: null,
+  dirty: false, pushIv: 0,   // 房主：状态脏标记 + 推送心跳（和渲染频率解耦，见 afterRender）
   full: false,      // 房主：这次合并的 60ms 里有没有整页重画（没有的话远端也只重画棋盘）
   resync: 0,        // 远端：增量接不上，正在等房主补发整份
   isRemote(seat) { return this.role === 'host' && seat != null && !!this.seats[seat]; },
@@ -10223,6 +10232,7 @@ const MP = {
   send(conn, msg) { try { if (conn && conn.open) conn.send(msg); } catch (e) { } },
   // 房主接手连着却不动的远端这一个回合（只管这一回合；他自己再点照样算）
   again() {
+    clearInterval(this.pushIv); this.pushIv = 0; this.dirty = false;   // 回开局页：停掉推送心跳
     for (const k of Object.keys(this.seats)) {
       const x = this.seats[k];
       if (!x.online) { delete this.seats[k]; const el = $('#nm' + k), ai = $('#ai' + k); if (el) { el.readOnly = false; el.value = ''; } if (ai) { ai.disabled = false; ai.title = ''; } continue; }
@@ -10253,14 +10263,23 @@ const MP = {
     }
     if (this.role === 'host') {
       if (!lite) this.full = true;
-      if (this.sendT) return;
-      this.sendT = setTimeout(() => { this.sendT = 0; this.pushState(); }, 60);
+      // 推送节奏和渲染解耦：以前是「渲染完才起一个 60ms 定时器」，房主渲染慢（弱机、动画卡）
+      // 推送机会就少，全桌延迟。现在主机挂一个 60ms 心跳，状态脏了就推，和渲染频率无关。
+      this.dirty = true;
+      if (!this.pushIv) this.pushIv = setInterval(() => this.flushPush(), 60);
     } else if (this.role === 'client') this.lockUI();
+  },
+  // 主机推送心跳：只有状态变了才推；pushState 自己还会按座位去重（内容没变不发）。
+  // 心跳在渲染之外跑，房主渲染慢、动画卡的时候也不会少推；页面隐藏时浏览器会节流定时器，属于浏览器限制。
+  flushPush() {
+    if (this.role !== 'host') { clearInterval(this.pushIv); this.pushIv = 0; this.dirty = false; return; }
+    if (!this.dirty) return;
+    this.dirty = false;
+    this.pushState();
   },
   // 把状态推给每个远端。日志和格子历史占整份状态的九成，认得增量的远端只发它上次收到之后新增的那些；
   // 同样的内容只序列化一次，大家共用一个字符串；跟上次发给这个人的一样就不发（本机只是重画了一下）。full：远端要整页重画（弹窗前、重连）
   pushState(full) {
-    if (this.sendT) { clearTimeout(this.sendT); this.sendT = 0; }
     const lite = !full && !this.full; this.full = false;
     if (!S || !S.players) return;
     // 只有房主这台知道的也带给远端：电脑暂停了没有、哪些联机座位掉线了（远端据此写「已暂停」「掉线了」）。每次推都按此刻重算，进了 core，只按了暂停也会推过去。
