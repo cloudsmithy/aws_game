@@ -28,12 +28,23 @@ const IMG = { crown: uri(path.join(A, 'props', 'han_crown.webp')), board: uri(pa
 //   奖杯连光晕、影子再往左挪 36（原来杯耳刚好碰着韩叔头发）：离韩叔约 18px、离虫虫 43px、离 Damo 32px，杯身上的「User Group」整行露出来；虫虫的马尾离「控账单」标签约 35px。
 //   竖版 Damo 往右挪 35、高度 412：鞋底离画框底边约 10px，离韩叔 26px、离虫虫 25px、离 Yuki 35px；虫虫 left 为负，马尾出画框约 10px，不贴着左边框；
 //   竖版 Yuki 的背包有意出右边框约 37px（原来 55px，切掉一截像被裁）
-const logo = size => `<div class="logo" style="font-size:${size}px"><span class="ext">云上大亨</span><span class="fill">云上大亨</span><span class="shine">云上大亨</span>
-  <img class="deco" src="${CLOUD}" style="left:-.06em;top:-.3em;width:.82em"><img class="deco" src="${IMG.crown}" style="left:3.3em;top:-.3em;width:.56em;transform:rotate(14deg)"></div>`;
+// 11/12：英文版、日文版封面（node tools/promo/cover.mjs en|ja，只出横版 full宣传片封面_en.jpg / _ja.jpg）；不写语言就是中文，横版竖版都出，和原来一样。
+//   译名照 i18n/GLOSSARY*.md：云上大亨 = Cloud Tycoon / クラウドタイクーン，亚马逊云科技 User Group = Amazon Web Services User Group
+const LANG = ['en', 'ja'].includes(process.argv[2]) ? process.argv[2] : 'zh';
+const TXT = {
+  zh: { rib: '谁能捧走冠军奖杯？', ug: '亚马逊云科技 User Group', logo: ['云上大亨'], slog: '令人怀念的经典桌游玩法，<em>搬到云上</em>', tags: ['买服务', '组架构', '扛事故', '控账单'],
+    logoSize: 190, crown: 'left:3.3em;top:-.3em;width:.56em', slogSize: 46, tagSize: 40, font: "'PingFang SC','Hiragino Sans GB',sans-serif" },
+  en: { rib: 'Who will take home the trophy?', ug: 'Amazon Web Services User Group', logo: ['Cloud', 'Tycoon'], slog: 'The classic board game you know<br><em>Now in the cloud</em>', tags: ['Buy services', 'Build architectures', 'Survive incidents', 'Control the bill'],
+    logoSize: 150, crown: 'left:3.02em;top:-.36em;width:.6em', slogSize: 40, tagSize: 30, ugSize: 52, font: "'Helvetica Neue','PingFang SC',sans-serif" },
+  ja: { rib: '優勝トロフィーを手にするのは誰だ？', ug: 'Amazon Web Services User Group', logo: ['クラウド', 'タイクーン'], slog: 'なつかしの定番ボードゲームが、<br><em>クラウドにやってきた</em>', tags: ['サービス購入', 'アーキテクチャ構築', '障害を乗り切る', '請求を抑える'],
+    logoSize: 128, crown: 'left:3.3em;top:-.34em;width:.58em', slogSize: 38, tagSize: 30, ugSize: 46, font: "'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif" },
+}[LANG];
+const logo = size => { const t = TXT.logo.join('<br>'); return `<div class="logo" style="font-size:${size}px"><span class="ext">${t}</span><span class="fill">${t}</span><span class="shine">${t}</span>
+  <img class="deco" src="${CLOUD}" style="left:-.06em;top:-.3em;width:.82em"><img class="deco" src="${IMG.crown}" style="${TXT.crown};transform:rotate(14deg)"></div>`; };
 
 const css = `
 *{margin:0;padding:0;box-sizing:border-box}
-body{width:var(--w);height:var(--h);overflow:hidden;background:#070b16;font-family:'PingFang SC','Hiragino Sans GB',sans-serif}
+body{width:var(--w);height:var(--h);overflow:hidden;background:#070b16;font-family:${TXT.font}}
 .c{position:relative;width:100%;height:100%;overflow:hidden}
 .bg{position:absolute;inset:0;background:url(${IMG.board}) var(--bgpos)/cover no-repeat}
 .shade{position:absolute;inset:0;background:var(--shade)}
@@ -79,11 +90,11 @@ const wide = `
   <!-- 标签行 margin-top 84：人群右移以后左下角空得多，把标签往下撑一点，画面重心别全压在右上。
        角标 48px、标签 40px（手机上全宽看横版，原来的 40 / 30 太小）；角标变高 11px，整块 top 从 108 提到 97，标语还在原来的位置（离虫虫头发约 13px） -->
   <div class="t" style="left:110px;top:97px;width:900px">
-    <div class="rib" style="font-size:48px;padding:10px 34px;margin-bottom:26px"><span>谁能捧走冠军奖杯？</span></div>
-    <div class="ug" style="font-size:60px">亚马逊云科技 User Group</div>
-    <div style="margin:62px 0 34px -6px">${logo(190)}</div>
-    <div class="slog" style="font-size:46px">令人怀念的经典桌游玩法，<em>搬到云上</em></div>
-    <div class="tags" style="gap:12px;margin-top:84px;width:760px">${['买服务', '组架构', '扛事故', '控账单'].map(s => `<b style="font-size:40px;padding:8px 18px">${s}</b>`).join('')}</div>
+    <div class="rib" style="font-size:48px;padding:10px 34px;margin-bottom:26px"><span>${TXT.rib}</span></div>
+    <div class="ug" style="font-size:${TXT.ugSize || 60}px;white-space:nowrap">${TXT.ug}</div>
+    <div style="margin:${LANG === 'zh' ? '62px 0 34px -6px' : '58px 0 30px -6px'}">${logo(TXT.logoSize)}</div>
+    <div class="slog" style="font-size:${TXT.slogSize}px;line-height:1.45">${TXT.slog}</div>
+    <div class="tags" style="gap:12px;margin-top:${LANG === 'zh' ? 84 : 44}px;width:${LANG === 'zh' ? 760 : 700}px">${TXT.tags.map(s => `<b style="font-size:${TXT.tagSize}px;padding:8px 18px">${s}</b>`).join('')}</div>
   </div>
 </div>`;
 // 竖版 3:4：上面标题，中间奖杯，下面四个人
@@ -114,7 +125,7 @@ const shot = async (html, w, h, vars, out) => {
   await P.shot(`<!doctype html><html><head><meta charset="utf-8"><style>:root{--w:${w}px;--h:${h}px;${vars}}${css}</style></head><body>${html}</body></html>`, w, h, out);
   console.log(path.relative(ROOT, out));
 };
-await shot(wide, 1920, 1080, '--bgpos:62% 50%;--shade:linear-gradient(90deg,rgba(5,8,18,.92) 0%,rgba(5,8,18,.72) 34%,rgba(5,8,18,.15) 60%,rgba(5,8,18,0) 80%),linear-gradient(0deg,rgba(5,8,18,.55),rgba(5,8,18,0) 30%)', path.join(OUT, 'full宣传片封面.jpg'));
+await shot(wide, 1920, 1080, '--bgpos:62% 50%;--shade:linear-gradient(90deg,rgba(5,8,18,.92) 0%,rgba(5,8,18,.72) 34%,rgba(5,8,18,.15) 60%,rgba(5,8,18,0) 80%),linear-gradient(0deg,rgba(5,8,18,.55),rgba(5,8,18,0) 30%)', path.join(OUT, LANG === 'zh' ? 'full宣传片封面.jpg' : `full宣传片封面_${LANG}.jpg`));
 // 竖版底图 13%（原来 18%）：标语整行落在深色底上；18% 时「搬到云上」的「云上」压在棋盘左上角 EFS、EC2 那几个白格上，看不清
-await shot(tall, 1080, 1440, '--bgpos:13% 50%;--shade:linear-gradient(180deg,rgba(5,8,18,.92) 0%,rgba(5,8,18,.7) 30%,rgba(5,8,18,.12) 52%,rgba(5,8,18,.35) 100%)', path.join(OUT, 'full宣传片封面_竖版.jpg'));
+if (LANG === 'zh') await shot(tall, 1080, 1440, '--bgpos:13% 50%;--shade:linear-gradient(180deg,rgba(5,8,18,.92) 0%,rgba(5,8,18,.7) 30%,rgba(5,8,18,.12) 52%,rgba(5,8,18,.35) 100%)', path.join(OUT, 'full宣传片封面_竖版.jpg'));
 P.close(); setTimeout(() => process.exit(0), 400);
