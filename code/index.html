@@ -3734,7 +3734,8 @@ async function flyTo(p, target, why = '', { passGo = true, backward = false } = 
   if (p.jail !== null) { log(_tf(1759, "{$0} 在维护窗口里，不移动", nm(p))); return; }
   const from = p.pos, fwd = (target - from + N) % N;
   const fl = !SIM && FX.flyStart(p), mt0 = MOVE_TO;
-  if (fl) { S.moving = p.id; MOVE_TO = target; fxCast('fs', { p: p.id, from, to: target, why: String(why), back: !!backward }); render(); }   // 联机：远端照着飞（见 MPFX）
+  if (!SIM) fxCast('fs', { p: p.id, from, to: target, why: String(why), back: !!backward });   // 联机：远端照着飞（见 MPFX）；本机能不能播由远端自己判断
+  if (fl) { S.moving = p.id; MOVE_TO = target; render(); }
   sfx('fly');
   try {
     if (fl) await FX.flyGo(fl, target, why, backward);
@@ -3749,7 +3750,7 @@ async function flyTo(p, target, why = '', { passGo = true, backward = false } = 
       if (viaGo) await passStart(p);
       if (viaUG && !ugFirst) await passUG(p);
     }
-  } finally { if (fl) { fxCast('fe', { p: p.id }); await FX.flyEnd(fl); S.moving = null; MOVE_TO = mt0; } render(); }
+  } finally { if (!SIM) fxCast('fe', { p: p.id }); if (fl) { await FX.flyEnd(fl); S.moving = null; MOVE_TO = mt0; } render(); }
   log(`🛰 ${nm(p)} ${why}${backward ? _t(1760, "退回") : _t(1761, "飞到")} ${sqn(target)}`);
   if (backward && target > from) reGoLog(p);
 }
@@ -4835,19 +4836,26 @@ async function moveSteps(p, n) {
   if (p.jail !== null) { log(_tf(1759, "{$0} 在维护窗口里，不移动", nm(p))); return; }   // 被甩来、被逼着抽到移动类的卡：人不动，罚照算
   const dir = n > 0 ? 1 : -1;
   const hop = !SIM && n !== 0 && FX.pawnStart(p), mt0 = MOVE_TO;
+  const stepMs = (Math.abs(n) > 10 ? 90 : aiTurn() ? 110 : 150) * animK();   // 3D 棋子每一跳的时长
+  const paceMs = hop ? stepMs : Math.max(1, 70);   // 本机没播 3D 时的真实节拍，远端照这个速度走
+  // 走棋事件和「本机能不能播 3D」解耦：本机演不演都照发，由每台远端用 MPFX.can() 自己决定演不演。
+  // 以前套在 if (hop) 里，房主一台播不了（手机、减少动态效果、WebGL 不可用），整桌就都没棋子（issue #31）。
+  if (!SIM && n !== 0) fxCast('ws', { p: p.id, from: p.pos });
   // 开头整页画一次（走之前扣的钱、记的日志、出维护窗口都要显示），等这一页画完两帧再起跳：
   // 不然手机上这一帧的排版和绘制要几十毫秒，第一跳的动画按时间算进度，前半段弧线就被跳过了。切到后台没有帧，最多等 100ms
-  if (hop) { S.moving = p.id; MOVE_TO = null; fxCast('ws', { p: p.id, from: p.pos }); render(); await new Promise(r => { requestAnimationFrame(() => requestAnimationFrame(r)); setTimeout(r, 100); }); }
+  if (hop) { S.moving = p.id; MOVE_TO = null; render(); await new Promise(r => { requestAnimationFrame(() => requestAnimationFrame(r)); setTimeout(r, 100); }); }
   let batchEnd = 0;
   try {
   for (let k = 0; k < Math.abs(n); k++) {
-    if (hop && k === batchEnd) {
+    if (k === batchEnd) {
       const path = walkSegment(p.pos, Math.abs(n) - k, dir); batchEnd += path.length;
-      fxCast('walk', { p: p.id, seq: MP.walkSeq = (MP.walkSeq || 0) + 1, from: p.pos, path, ms: (Math.abs(n) > 10 ? 90 : aiTurn() ? 110 : 150) * animK(), last: batchEnd === Math.abs(n) });
+      fxCast('walk', { p: p.id, seq: MP.walkSeq = (MP.walkSeq || 0) + 1, from: p.pos, path, ms: paceMs, last: batchEnd === Math.abs(n) });
     }
     p.pos = (p.pos + dir + N) % N;
     if (hop && k === Math.abs(n) - 1) { MOVE_TO = p.pos; hopRender(); }   // 最后一跳前才在终点格放占位，3D 棋子落在占位上
-    if (hop) { const ms = (Math.abs(n) > 10 ? 90 : aiTurn() ? 110 : 150) * animK(); fxCast('wh', { p: p.id, from: (p.pos - dir + N) % N, to: p.pos, ms, last: k === Math.abs(n) - 1 }); await FX.pawnHop(p.pos, ms); }
+    // 老版本客户端只认逐格的 ws/wh，两种分支都要发；本机能不能播只影响下面那行 pawnHop
+    if (!SIM) fxCast('wh', { p: p.id, from: (p.pos - dir + N) % N, to: p.pos, ms: paceMs, last: k === Math.abs(n) - 1 });
+    if (hop) await FX.pawnHop(p.pos, stepMs);
     S.lastSq = p.pos;
     let paid = false;   // 经过起点、UG 领了钱：现金和日志变了，这一格要整页重画
     if (dir > 0 && p.pos === 0) { await passStart(p); paid = true; }
@@ -4859,7 +4867,7 @@ async function moveSteps(p, n) {
     if (paid || (!hop && (k === 0 || k === Math.abs(n) - 1))) render(); else hopRender();
     if (!hop) await sleep(SIM ? 0 : 70); if (!SIM) sfx('step');
   }
-  } finally { if (hop) { fxCast('we', { p: p.id }); await FX.pawnEnd(); S.moving = null; MOVE_TO = mt0; render(); } }
+  } finally { if (!SIM && n !== 0) fxCast('we', { p: p.id }); if (hop) { await FX.pawnEnd(); S.moving = null; MOVE_TO = mt0; render(); } }
 }
 async function moveTo(p, target) { await moveSteps(p, (target - p.pos + N) % N); }
 // 被送进维护窗口、不交钱要停几轮：传统企业上云 2 轮，其他角色 1 轮（11-06 起不再掷对子出狱）
@@ -5110,7 +5118,7 @@ async function land0(p, opts = {}) {
     case 'rei': await drawReinvent(p); break;
     case 'free': {
       // 停在上面二选一：抽奖池（最少 $100，奖池不够亚马逊云科技补齐），或抽 3 张 re:Invent 卡选一张（11-08 起各模式都是三选一）；经过只领 $50
-      if (!BOT && !SIM) { if (FX.ok()) fxCast('ug', { p: p.id, i }); await FX.ug(p, i); }
+      if (!BOT && !SIM) { fxCast('ug', { p: p.id, i }); await FX.ug(p, i); }   // FX.ug 自己判能不能播，事件照样发
       const hi = Math.max(100, S.pot);
       const nz = _t(2946, "三");
       const v = await ask({ title: _tf(2947, "{$0} 参加 User Group 活动", p.name), html: _tf(2951, "<p>二选一：</p><p>· <b>抽奖</b>：{$0}<br>· <b>抽{$1}张 re:Invent 卡，选一张用</b></p><p class=\"muted\">经过 UG 活动（没停在上面）的领取 $50。</p>", hi > 100 ? _tf(2948, "随机拿 $100～${$0}。奖池现在 ${$1}，运气好整个拿走", hi, S.pot) : _tf(2950, "拿 $100（奖池现在 ${$0}{$1}）。奖池超过 $100 以后，抽奖改成随机拿 $100～整个奖池", S.pot, S.pot < 100 ? _t(2949, "，不够的部分亚马逊云科技补上") : ''), nz),
