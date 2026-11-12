@@ -86,6 +86,30 @@ test('房主实际移动：新旧消息路径、起点/UG 收支、反向计数�
   }
 });
 
+test('房主本机播不了 3D 时：走棋事件照样发，远端仍能逐格看到（issue #31）', async () => {
+  for (const hopOk of [true, false]) {
+    const h = harness(), { ctx } = h;
+    ctx.MP.role = 'host'; ctx.MP.seats = { 1: { conn: 'new', walk: true }, 2: { conn: 'old' } };
+    ctx.FX.ok = () => hopOk;
+    if (!hopOk) ctx.FX.pawnStart = () => false;   // 手机/减少动态效果/WebGL 不可用
+    const p = ctx.S.players[0]; p.pos = 1;
+    const done = ctx.move(p, 5); await h.advance(20000); await done;
+    const newMsgs = h.messages.filter(x => x.conn === 'new').map(x => x.m);
+    const oldMsgs = h.messages.filter(x => x.conn === 'old').map(x => x.m);
+    // 不管本机能不能播，两条通路都要拿到完整路径和收尾
+    assert.deepEqual(plain(newMsgs.filter(m => m.k === 'walk').flatMap(m => m.path)), [2, 3, 4, 5, 6]);
+    assert.deepEqual(oldMsgs.filter(m => m.k === 'wh').map(m => m.to), [2, 3, 4, 5, 6]);
+    assert.ok(newMsgs.some(m => m.k === 'we'), '新客户端必须收到收尾');
+    assert.ok(oldMsgs.some(m => m.k === 'we'), '老客户端必须收到收尾');
+    assert.ok(oldMsgs.some(m => m.k === 'ws'), '老客户端必须收到起步事件');
+    assert.equal(p.pos, 6);
+    // 本机播不了时不置 moving：本机的圆点照旧逐格画，但事件必须照发
+    assert.equal(ctx.S.moving, hopOk ? null : 0);
+    // 本机没播 3D 时按本机真实节拍（70ms）发，远端才不会越播越落后
+    assert.ok(newMsgs.filter(m => m.k === 'walk').every(m => m.ms === (hopOk ? 150 : 70)));
+  }
+});
+
 test('弱网 A/B：相同逐格事件延迟，实际回放器的消息数、总时长和跳间空闲', async () => {
   const metrics = [];
   for (const mode of ['legacy', 'batch']) {
