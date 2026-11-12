@@ -27,6 +27,7 @@ function harness() {
     clearTimeout: id => timers.delete(id), setInterval: () => 1, clearInterval: () => {},
     renderBoard: () => {}, sfx: () => {}, rentFx: () => {},
     requestAnimationFrame: fn => ctx.setTimeout(fn, 16),
+    waitAnim: (p, dur) => Promise.race([p, ctx.sleep(dur)]),   // 动画封顶：测试里用同一套假时钟
     SIM: false, aiTurn: () => false, animK: () => 1, render: () => {}, hopRender: () => {},
     passStart: async p => { p.cash += 200; ctx.S.log.push('start'); },
     passUG: async p => { p.cash += 50; ctx.S.log.push('ug'); },

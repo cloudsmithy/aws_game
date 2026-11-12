@@ -2892,7 +2892,24 @@ let MY_REV = -1, STALE = false;
 let SAVE_FAIL = false;
 const revNow = () => { try { return +localStorage.getItem(REV_KEY) || 0; } catch (e) { return 0; } };
 const $ = s => document.querySelector(s);
-const sleep = ms => new Promise(r => setTimeout(r, BOT ? 0 : ms));
+// 后台标签页里 setTimeout / setInterval 会被节流到 1s（藏 5 分钟后更狠），而对局的节奏全靠定时器，
+// 房主一切走整桌就跟着卡。用一个专用 Worker 的定时器当钟：Worker 里的定时器不受页面隐藏的节流影响。
+// Worker 建不起来（file:// 打开、策略禁止 blob）就退回普通 setTimeout，行为不变。
+const CLK = (() => {
+  let w = null, seq = 0; const wait = new Map();
+  try {
+    const src = 'const t=new Map();onmessage=e=>{const d=e.data;if(d.set){t.set(d.id,setTimeout(()=>{t.delete(d.id);postMessage(d.id)},d.ms));}else{clearTimeout(t.get(d.id));t.delete(d.id);}};';
+    w = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
+    w.onmessage = e => { const f = wait.get(e.data); if (f) { wait.delete(e.data); f(); } };
+  } catch (e) { w = null; }
+  return {
+    ok: !!w,
+    set(ms) { if (!w) return new Promise(r => setTimeout(r, ms)); return new Promise(r => { const id = ++seq; wait.set(id, r); w.postMessage({ set: 1, id, ms }); }); },
+  };
+})();
+const sleep = ms => BOT ? Promise.resolve() : CLK.set(ms);
+// 动画最多等 dur：房主机器慢、掉帧时逻辑不跟着等，宁可让动画追帧，全桌节奏不再被房主显卡拖住
+const waitAnim = (p, dur) => Promise.race([p, CLK.set(dur)]);
 const rnd = n => Math.floor(Math.random() * n);
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -3738,7 +3755,7 @@ async function flyTo(p, target, why = '', { passGo = true, backward = false } = 
   if (fl) { S.moving = p.id; MOVE_TO = target; render(); }
   sfx('fly');
   try {
-    if (fl) await FX.flyGo(fl, target, why, backward);
+    if (fl) await waitAnim(FX.flyGo(fl, target, why, backward), 1400);
     p.pos = target; S.lastSq = target;
     // 往回飞绕过了起点（「DNS 解析配错了」从第 12、31 格退到第 37 格）：等于退回上一圈，下次往前经过起点不算新的一圈（见 passStart）。
     // 不记这一笔的话，退回去反而离起点更近（从第 12 格要走 36 格，退到第 37 格只要 11 格），还照常领钱，罚卡变成了快进卡
@@ -3750,7 +3767,7 @@ async function flyTo(p, target, why = '', { passGo = true, backward = false } = 
       if (viaGo) await passStart(p);
       if (viaUG && !ugFirst) await passUG(p);
     }
-  } finally { if (!SIM) fxCast('fe', { p: p.id }); if (fl) { await FX.flyEnd(fl); S.moving = null; MOVE_TO = mt0; } render(); }
+  } finally { if (!SIM) fxCast('fe', { p: p.id }); if (fl) { await waitAnim(FX.flyEnd(fl), 400); S.moving = null; MOVE_TO = mt0; } render(); }
   log(`🛰 ${nm(p)} ${why}${backward ? _t(1760, "退回") : _t(1761, "飞到")} ${sqn(target)}`);
   if (backward && target > from) reGoLog(p);
 }
@@ -4855,7 +4872,7 @@ async function moveSteps(p, n) {
     if (hop && k === Math.abs(n) - 1) { MOVE_TO = p.pos; hopRender(); }   // 最后一跳前才在终点格放占位，3D 棋子落在占位上
     // 老版本客户端只认逐格的 ws/wh，两种分支都要发；本机能不能播只影响下面那行 pawnHop
     if (!SIM) fxCast('wh', { p: p.id, from: (p.pos - dir + N) % N, to: p.pos, ms: paceMs, last: k === Math.abs(n) - 1 });
-    if (hop) await FX.pawnHop(p.pos, stepMs);
+    if (hop) await waitAnim(FX.pawnHop(p.pos, stepMs), stepMs + 100);
     S.lastSq = p.pos;
     let paid = false;   // 经过起点、UG 领了钱：现金和日志变了，这一格要整页重画
     if (dir > 0 && p.pos === 0) { await passStart(p); paid = true; }
@@ -4867,7 +4884,7 @@ async function moveSteps(p, n) {
     if (paid || (!hop && (k === 0 || k === Math.abs(n) - 1))) render(); else hopRender();
     if (!hop) await sleep(SIM ? 0 : 70); if (!SIM) sfx('step');
   }
-  } finally { if (!SIM && n !== 0) fxCast('we', { p: p.id }); if (hop) { await FX.pawnEnd(); S.moving = null; MOVE_TO = mt0; render(); } }
+  } finally { if (!SIM && n !== 0) fxCast('we', { p: p.id }); if (hop) { await waitAnim(FX.pawnEnd(), 300); S.moving = null; MOVE_TO = mt0; render(); } }
 }
 async function moveTo(p, target) { await moveSteps(p, (target - p.pos + N) % N); }
 // 被送进维护窗口、不交钱要停几轮：传统企业上云 2 轮，其他角色 1 轮（11-06 起不再掷对子出狱）
@@ -4983,7 +5000,7 @@ async function doRoll() {
   S.phase = 'busy'; render();
   try {
     let d = rollDice(p), adj = 0;
-    render(); await FX.dice(d);
+    render(); await waitAnim(FX.dice(d), 1700);
     if (dlcOn('speed')) ({ d, adj } = await speedRoll(p, d));
     const dbl = d[0] === d[1];
     if (dbl) S.doubles++;
@@ -6106,7 +6123,7 @@ async function speedRoll(p, d) {
     const v = await ask({ who: p.id, title: _tf(3414, "{$0} 掷出 {$1}：部署点数 {$2}/{$3}", p.name, n, p.speed, SPEED_MAX), html: _t(3415, "<p>可以花点数调整这一步。对子只看骰子本身，多走少走不影响。</p>"), buttons: b });
     if (v === 'go') return { d, adj: 0 };
     if (v === 'm' || v === 'p') { speedSpend(p, 1, _tf(3418, "灰度发布，{$0}走 1 步", v === 'm' ? _t(3416, "少") : _t(3417, "多"))); return { d, adj: v === 'm' ? -1 : 1 }; }
-    speedSpend(p, 2, _t(3419, "回滚重发，重掷一次")); d = rollDice(p); render(); await FX.dice(d);
+    speedSpend(p, 2, _t(3419, "回滚重发，重掷一次")); d = rollDice(p); render(); await waitAnim(FX.dice(d), 1700);
   }
 }
 // 能打的服务：对手已上线的服务，不能连着两次打同一个人；轻 DDoS 还要求现在没 Impaired
@@ -8924,7 +8941,7 @@ const FX = {
   // 走棋逻辑只用动画的起点和终点，跳过中间帧是安全的；状态、事件照常推进。
   run(dur, step) {
     if (document.hidden) { try { step(1); } catch (e) { } return Promise.resolve(); }
-    return new Promise(res => { const j = { t0: performance.now(), dur, step, res }; this.jobs.push(j); this.jobStep(j, 0); setTimeout(() => { if (this.jobs.includes(j)) { this.jobEnd(j); this.redraw(); } }, dur + 400); this.loop(); });
+    return new Promise(res => { const j = { t0: performance.now(), dur, step, res }; this.jobs.push(j); this.jobStep(j, 0); CLK.set(dur + 400).then(() => { if (this.jobs.includes(j)) { this.jobEnd(j); this.redraw(); } }); this.loop(); });
   },
   jobStep(j, k) { try { j.step(k); } catch (e) { if (!this.runErr) { this.runErr = 1; console.error(e); } } },
   jobEnd(j) { const i = this.jobs.indexOf(j); if (i < 0) return; this.jobs.splice(i, 1); this.jobStep(j, 1); j.res(); },
@@ -9017,7 +9034,7 @@ const FX = {
       // 切到后台时 requestAnimationFrame 会停，游戏不能卡在这里等动画：最多等 T + 0.5 秒
       await new Promise(res => {
         let done = false; const fin = () => { if (!done) { done = true; res(); } };
-        setTimeout(fin, T + 500);
+        CLK.set(T + 500).then(fin);
         const tick = now => {
           if (done) return;
           const u = this.diceSkip ? 1 : Math.min(1, (now - t0) / T);   // 点了跳过：直接画落定的样子
@@ -9080,7 +9097,7 @@ const FX = {
         if (!all && list[0].w.isConnected) requestAnimationFrame(tick); else res();
       };
       requestAnimationFrame(tick);
-      setTimeout(res, T + 900);   // 切到后台时 requestAnimationFrame 停了，也要收尾
+      CLK.set(T + 900).then(res);   // 切到后台时 requestAnimationFrame 停了，也要收尾
     });
     this.diceSpin = false;
     list.forEach(x => { x.el.innerHTML = pips(x.n); x.el.setAttribute('aria-label', _tf(3819, "{$0} 点", x.n)); if (x.w.isConnected) x.w.replaceWith(x.el); });
@@ -10240,7 +10257,7 @@ const MP = {
   send(conn, msg) { try { if (conn && conn.open) conn.send(msg); } catch (e) { } },
   // 房主接手连着却不动的远端这一个回合（只管这一回合；他自己再点照样算）
   again() {
-    clearInterval(this.pushIv); this.pushIv = 0; this.dirty = false;   // 回开局页：停掉推送心跳
+    this.pushIv = 0; this.dirty = false;   // 回开局页：停掉推送心跳
     for (const k of Object.keys(this.seats)) {
       const x = this.seats[k];
       if (!x.online) { delete this.seats[k]; const el = $('#nm' + k), ai = $('#ai' + k); if (el) { el.readOnly = false; el.value = ''; } if (ai) { ai.disabled = false; ai.title = ''; } continue; }
@@ -10274,16 +10291,22 @@ const MP = {
       // 推送节奏和渲染解耦：以前是「渲染完才起一个 60ms 定时器」，房主渲染慢（弱机、动画卡）
       // 推送机会就少，全桌延迟。现在主机挂一个 60ms 心跳，状态脏了就推，和渲染频率无关。
       this.dirty = true;
-      if (!this.pushIv) this.pushIv = setInterval(() => this.flushPush(), 60);
+      if (!this.pushIv) { this.pushIv = 1; this.pumpPush(); }
     } else if (this.role === 'client') this.lockUI();
   },
   // 主机推送心跳：只有状态变了才推；pushState 自己还会按座位去重（内容没变不发）。
   // 心跳在渲染之外跑，房主渲染慢、动画卡的时候也不会少推；页面隐藏时浏览器会节流定时器，属于浏览器限制。
   flushPush() {
-    if (this.role !== 'host') { clearInterval(this.pushIv); this.pushIv = 0; this.dirty = false; return; }
+    if (this.role !== 'host') { this.pushIv = 0; this.dirty = false; return; }
     if (!this.dirty) return;
     this.dirty = false;
     this.pushState();
+  },
+  // 推送心跳：60ms 一拍，用 Worker 时钟自循环（隐藏标签页里 setInterval 会被压到 1s）
+  pumpPush() {
+    if (this.role !== 'host' || !this.pushIv) return;
+    this.flushPush();
+    CLK.set(60).then(() => this.pumpPush());
   },
   // 把状态推给每个远端。日志和格子历史占整份状态的九成，认得增量的远端只发它上次收到之后新增的那些；
   // 同样的内容只序列化一次，大家共用一个字符串；跟上次发给这个人的一样就不发（本机只是重画了一下）。full：远端要整页重画（弹窗前、重连）
