@@ -2741,11 +2741,17 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 button.pri,button.pri:hover:not(:disabled){color:var(--on-accent)}
 button.danger{background:var(--danger-fill);border-color:var(--danger-fill)}
 .dlctabs .dlcn{color:var(--on-accent)}
-.theme-control{display:inline-flex;align-items:center;gap:5px;align-self:center;color:var(--mut);flex:none;font-size:12px}
-.theme-control>svg{width:16px;height:16px}
-.theme-control select{font:inherit;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid var(--control-border);border-radius:4px;min-height:30px;max-width:130px;padding:3px 5px;cursor:pointer}
-.theme-control select:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+/* 外观控件做成和旁边「语言」一样的小按钮：同样的边框、圆角、高度、字重，右边一个 ▾；图标放进框里，原生下拉箭头去掉 */
+.theme-control{display:inline-flex;align-items:center;gap:5px;align-self:center;flex:none;position:relative;font-size:12px;font-weight:600;color:var(--mut);background:var(--surface);border:1px solid var(--mut);border-radius:2px;min-height:26px;padding:1px 22px 1px 12px;cursor:pointer}
+.theme-control:hover{background:var(--surface-soft);color:var(--ink);border-color:var(--ink)}
+.theme-control:has(select:focus-visible){outline:2px solid var(--focus);outline-offset:2px}
+.theme-control>svg{width:16px;height:16px;flex:none}
+.theme-control select{appearance:none;-webkit-appearance:none;font:inherit;font-weight:600;color:inherit;background:transparent;border:0;border-radius:0;margin:0;padding:0;min-height:0;max-width:130px;cursor:pointer;outline:none}
+.theme-control select option{color:var(--ink);background:var(--surface)}
+.theme-control::after{content:'▾';position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:10px;color:var(--mut2)}
+@media (pointer:coarse){.theme-control{min-height:40px;padding:4px 22px 4px 12px}}
 .setup-head .theme-control{margin-left:0}
+.setup-head .hctl{margin-left:auto;align-self:center;display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 @media print{.theme-control{display:none}}
 </style>
 <style id="i18n-css">html[lang=en] .tile.lock::after{content:"Required for Hell Mode"}
@@ -3102,7 +3108,7 @@ function langMenu(btn) {
   setTimeout(() => { document.addEventListener('pointerdown', out, true); document.addEventListener('keydown', key, true); }, 0);
   m.querySelector('[aria-checked="true"]')?.focus();
 }
-let GAME_VERSION = __rv(() => ({ major: 1, round: 15, name: _t(344, "第十五轮"), title: _t(345, "英文版、日文版、语言菜单、老板键、版本号"), commits: 108, changes: 442, since: '2026-10-20', build: '9bdf450', time: '2026-11-12 01:02' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
+let GAME_VERSION = __rv(() => ({ major: 1, round: 15, name: _t(344, "第十五轮"), title: _t(345, "英文版、日文版、语言菜单、老板键、版本号"), commits: 112, changes: 442, since: '2026-10-20', build: 'b1ee3f6', time: '2026-11-12 16:14' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
 let SQ = __rv(() => (LAYOUT.map(k => SVC[k] ? { t: 'prop', k, icon: k, ...SVC[k] } : UTIL[k] ? { t: 'util', k, icon: k, ...UTIL[k] } : { k, ...SPECIAL[k] })), v => { SQ = v; }, () => SQ);
 // 起点、User Group 活动的说明跟着模式变（地狱模式起点只领 $150，娱乐模式 UG 抽三张）；用的时候才读，这时 BAL、S 都有了
 { const go = SQ.find(q => q.k === 'go'), ug = SQ.find(q => q.k === 'free');
@@ -10892,9 +10898,9 @@ function themeControl() {
   return `<label class="theme-control"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M10 3a7 7 0 0 0 0 14Z" fill="currentColor" stroke="none"/></svg><span class="sr-only">${text[0]}</span><select data-theme-select aria-label="${text[0]}">${['auto', 'light', 'dark'].map((value, i) => `<option value="${value}" ${GameTheme.preference === value ? 'selected' : ''}>${text[i + 1]}</option>`).join('')}</select></label>`;
 }
 function renderHero() {
-  document.querySelectorAll('.setup-head .theme-control').forEach(el => el.remove());
-  document.querySelector('.setup-head .langsw')?.remove();
-  document.querySelector('.setup-head')?.insertAdjacentHTML('beforeend', langBtn('sm') + themeControl());
+  document.querySelectorAll('.setup-head .hctl, .setup-head .theme-control, .setup-head .langsw').forEach(el => el.remove());
+  // 语言、外观两个按钮包成一组，一起靠右；放不下时整组换到下一行，不会只把「外观」挤到左边
+  document.querySelector('.setup-head')?.insertAdjacentHTML('beforeend', `<span class="hctl">${langBtn('sm')}${themeControl()}</span>`);
   const fgt = document.querySelector('.frame > .gt'); if (fgt) fgt.remove();
   document.querySelector('.frame').insertAdjacentHTML('afterbegin', _tf(5126, "<div class=\"gt\">{$0}亚马逊云科技</div>", awsImg('cloud')));
   const flow = ['route53', 'cloudfront', 'elb', 'ec2', 'rds'].map(k => `<div class="node">${awsImg(k)}<span>${SQ[IX[k]].n}</span></div>`).join('<div class="link"></div>');
