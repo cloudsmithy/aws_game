@@ -2509,9 +2509,6 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
   .sq.b:not(.g){padding-top:1.2cqw}
   .sq.t,.sq.b{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) max(4.3cqw,46px)}
   .sq.t .txt,.sq.b .txt{height:100%;justify-content:flex-start}
-  /* 名字留两行的高度：不然名字换行的那一格（NAT Gateway 账单）价格和类型跟着往下掉 20~28px，
-     一排里只有它的价格不在一条线上 */
-  .sq.t .nm,.sq.b .nm{min-height:2.4em}
   /* 等级已有图标旁的方块表示，矮屏不再重复占一行。 */
   @media (max-height:1000px),(min-aspect-ratio:2/1){.sq.t .lv,.sq.b .lv,.sq.l .lv,.sq.r .lv,.sq.l .cap,.sq.r .cap{display:none!important}}
   /* 两侧名字、价格优先；类型可在详情中查看，避免留下半行。 */
