@@ -168,7 +168,7 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:var(--surface-soft
 
 .meta{display:flex}
 .dice{display:flex;gap:10px}
-.die{border:1.5px solid var(--ink2);border-radius:4px;background:#fff;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr)}
+.die{border:1.5px solid var(--ink2);border-radius:4px;background:var(--surface);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr)}
 .die i{border-radius:50%;background:var(--ink2);place-self:center;visibility:hidden}
 .die i.on{visibility:visible}
 .dice.idle .die{opacity:.35}
@@ -957,7 +957,7 @@ table.mpnet tr.bad td.st{color:var(--red)}
 .turnbar .tb{padding-top:3px;padding-bottom:3px}
 .turnbar .tb.cur{border-color:var(--orange);box-shadow:inset 0 -3px 0 var(--orange)}
 .turnbar .tb.dead{opacity:.45}
-.turnbar .tbar{color:#aab7b8;font-size:12px}
+.turnbar .tbar{color:var(--mut2);font-size:12px}
 .turnbar .pawn{width:18px;height:18px;font-size:10px}
 /* 上下两排格子：内容别挤到底部色条上 */
 .sq.t,.sq.b{justify-content:flex-start;padding-top:.8cqw}
@@ -2150,7 +2150,7 @@ html[lang=ja]{--sans:'Amazon Ember',-apple-system,BlinkMacSystemFont,'Helvetica 
 .langsw{display:inline-flex;align-items:center;gap:5px}.langsw .lc{font-style:normal;font-size:10px;color:var(--mut2)}
 #langmenu{position:fixed;z-index:2147481000;min-width:168px;padding:4px;background:var(--surface);border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,28,36,.18)}
 #langmenu button{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:34px;padding:6px 12px;border:0;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;text-align:left;cursor:pointer}
-#langmenu button:hover,#langmenu button:focus-visible{background:var(--info-bg);outline:none}#langmenu button[aria-checked=true]{font-weight:700}#langmenu button i{font-style:normal;color:var(--blue)}
+#langmenu button:hover{background:var(--info-bg);outline:none}#langmenu button:focus-visible{background:var(--info-bg);outline:2px solid var(--focus);outline-offset:-2px}#langmenu button[aria-checked=true]{font-weight:700}#langmenu button i{font-style:normal;color:var(--blue)}
 @media (pointer:coarse){#langmenu button{min-height:44px}}
 html:is([lang=en],[lang=ja]) .hero .cat span{white-space:normal;overflow:visible;line-height:1.15;font-size:12px}
 /* 日文版封面：片假名的标题一行放下（不在词中间折行）；色组排三列，名字一行放得下，不在词中间折行（再窄就省略号，悬停看全名） */
@@ -2259,7 +2259,8 @@ button:disabled,button.pri:disabled{color:var(--mut2);background:var(--surface-m
   #center>.c-head .sub .dls{display:none}
 }
 /* 触屏手机没有键盘，「快捷键」说明用不上；藏掉后 390px 宽的手机上帮助按钮和「对局」能放进一行 */
-@media (hover:none) and (pointer:coarse){.tgrp button[title="键盘快捷键"]{display:none}}
+/* 触屏上不显示键盘快捷键：原来按 title 选中，而 title 是翻译过的，英日版选不中、按钮一直留在屏幕上。改挂 class */
+@media (hover:none) and (pointer:coarse){.tgrp button.keyshelp{display:none}}
 /* 手机上顶栏在标题下面单独一行：帮助按钮跟标题左对齐；「对局」始终贴右，下拉菜单（right:0）往里开，不会出屏 */
 @media (max-width:900px),(max-height:500px) and (orientation:landscape){
   #center>.c-head .meta{justify-content:flex-start}
@@ -2305,6 +2306,8 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 .fxchip .warn{color:var(--red)}
 
 .psneed{margin:0 0 6px;padding:5px 9px;border-radius:6px;background:var(--success-bg);border:1px solid #9fd38a;color:#1d6b00;font-weight:700;font-size:13px}
+/* 深色模式：#1d6b00 是浅色底上的深绿，配深色的 --success-bg 只有 1.98:1 */
+:root[data-theme=dark] .psneed{color:var(--green);border-color:#2f6b3f}
 /* 日志上色（logRow）：人名是主人颜色的底色小块，比钱数、服务名都显眼；钱数绿是进账、红是花出去；获胜、破产、支柱达标整行带底色 */
 /* 名字：照主人的颜色写，粗体；只有 1 号位的红色不用在名字上（像报错），这几处写成深色。不加框、不加圆点。旧存档里的日志也是 <b style="color:…">，一起管 */
 .log b[style^="color:"],#modal .box:not(.rep) .mb b[style^="color:"],#vmodal .mb b[style^="color:"],#sqpop b[style^="color:"]{font-weight:800;white-space:nowrap}
@@ -2598,6 +2601,9 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 #side .pl .pacc{padding:10px 14px 2px}
 #side .pl .gb{padding:6px 14px 10px;gap:7px}
 #side .pl .pacc .pn{flex:1 1 auto;max-width:none;min-width:0}
+/* 名字太长时省略号截断，不要盖到右边的现金上：.pnm 是 nowrap 的，没有 overflow 就会直接溢出 */
+#side .pl .pacc .pn b{min-width:0}
+#side .pl .pacc .pn .pnm{overflow:hidden;text-overflow:ellipsis;min-width:0}
 #side .pl .pacc .pn b{align-items:baseline;column-gap:6px}
 #side .pl .pacc .pla{display:inline-block;width:13px;font-size:12px;font-weight:400;color:var(--mut)}
 #side .pl .pacc .pme{margin-left:-5px;font-size:13px;font-weight:400;color:var(--ink2);white-space:nowrap}
@@ -2766,7 +2772,7 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 }
 .tbar{color:var(--mut2)}
 .pawn{color:var(--pawn-ink,#fff);font-weight:800}
-.die:not(.red) i{background:#232f3e}
+.die:not(.red) i{background:var(--ink2)}   /* 原来写死 #232f3e，骰子面改成主题色后深色模式下点和面只有 1.17:1；--ink2 在浅色里就是 #232f3e，深色里是亮色 */
 button.pri,button.pri:hover:not(:disabled){color:var(--on-accent)}
 button.danger{background:var(--danger-fill);border-color:var(--danger-fill)}
 .dlctabs .dlcn{color:var(--on-accent)}
@@ -3155,7 +3161,7 @@ function langMenu(btn) {
   setTimeout(() => { document.addEventListener('pointerdown', out, true); document.addEventListener('keydown', key, true); }, 0);
   m.querySelector('[aria-checked="true"]')?.focus();
 }
-let GAME_VERSION = __rv(() => ({ major: 1, round: 16, name: _t(344, "第十六轮"), title: _t(345, "受邀观战、联机鉴权、棋盘对齐、下线改规则"), commits: 135, changes: 453, since: '2026-10-20', build: '7ed1167', time: '2026-11-13 09:40' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
+let GAME_VERSION = __rv(() => ({ major: 1, round: 16, name: _t(344, "第十六轮"), title: _t(345, "受邀观战、联机鉴权、棋盘对齐、下线改规则"), commits: 134, changes: 457, since: '2026-10-20', build: 'e771db4', time: '2026-11-13 17:38' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
 let SQ = __rv(() => (LAYOUT.map(k => SVC[k] ? { t: 'prop', k, icon: k, ...SVC[k] } : UTIL[k] ? { t: 'util', k, icon: k, ...UTIL[k] } : { k, ...SPECIAL[k] })), v => { SQ = v; }, () => SQ);
 // 起点、User Group 活动的说明跟着模式变（地狱模式起点只领 $150，娱乐模式 UG 抽三张）；用的时候才读，这时 BAL、S 都有了
 { const go = SQ.find(q => q.k === 'go'), ug = SQ.find(q => q.k === 'free');
@@ -7538,7 +7544,7 @@ function renderCenter() {
   $('#center').innerHTML = `
     <div class="c-head">
       <div class="gtitle"><div><h1>${_t(4111, "<span class=\"gt-pre\">亚马逊云科技 User Group </span>云上大亨")}</h1><div class="sub">${meta}</div></div></div>
-      <div class="meta"><div class="tgrp" role="group" aria-label="${_t(4112, "帮助")}"><button class="sm" onclick="showManual()">${_t(4113, "玩法")}</button><button class="sm" onclick="gallery()">${_t(4114, "图鉴")}</button><button class="sm" onclick="playerGallery()" title="${_t(4115, "玩家图鉴：所有角色卡的起始资金、能力、弱点、专属技能")}">${_t(4116, "角色")}</button><button class="sm" onclick="maybeTour(true)">${_t(4117, "新手引导")}</button><button class="sm" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'?'}))" title="${_t(4118, "键盘快捷键")}">${_t(4119, "快捷键")}</button><button class="sm" onclick="toggleSfx()" title="${_t(4120, "掷骰子、抽卡、收钱的音效")}" aria-pressed="${SFX.on}">${_tf(4121, "音效：{$0}", SFX.on ? _t(4092, "开") : _t(4093, "关"))}</button>${langBtn('sm')}</div><details class="gmenu" ${GMENU.open ? 'open' : ''}><summary>${_t(4122, "对局")}</summary><div class="gm">${themeControl()}${MP.role === 'host' ? `<span data-mp-members>${MP.viewerUI()}</span>` : ''}<button class="sm" onclick="renameDialog()" title="${_t(4123, "给自己（同一台电脑上谁都行）换个名字")}">${_t(4124, "改名字")}</button><button class="sm" onclick="toggleBoss()" title="${_t(4125, "整页换成代码编辑器（云架构学习笔记）；再按一次 ` 键或者双击最上面的文件名回来")}">${_t(4126, "老板键（`）")}</button><button class="sm" onclick="toggleArchTip()" aria-pressed="${!archTipOff()}" title="${_t(4127, "凑成有效架构时问要不要看讲解：自己凑成弹窗，别人凑成在右下角提示")}">${_tf(4128, "架构提示：{$0}", archTipOff() ? _t(4093, "关") : _t(4092, "开"))}</button>${MP.role === 'client' ? `<button class="sm off" aria-disabled="true" onclick="toast('动画速度由房主设置')" title="${_t(4097, "动画速度由房主设置，大家一起变")}">${_tf(4098, "动画速度：{$0}（房主设）", S.cfg.anim === 'fast' ? _t(4094, "快") : _t(4095, "标准"))}</button>${over ? '' : _t(4096, "<button class=\"sm\" onclick=\"MP.proposeEnd()\" title=\"请房主现在按估值结算这一局\">提议现在结算</button>")}<button class="sm" onclick="MP.leave()" title="${_t(4099, "离开这个房间：房主会把你的座位标成掉线，可以替你操作，你用同一个名字还能加回来")}">${_t(4100, "离开房间")}</button>` : _tf(4102, "<button class=\"sm\" onclick=\"toggleAnim()\" aria-pressed=\"{$0}\" title=\"骰子、走棋、飞行都更快，画面不变；联机时房主改，大家一起变\">动画速度：{$1}</button>{$2}", S.cfg.anim === 'fast', S.cfg.anim === 'fast' ? _t(4094, "快") : _t(4095, "标准"), MP.role === 'host' && !over && Object.keys(MP.seats).length ? _t(4101, "<button class=\"sm\" onclick=\"MP.kickDialog()\" title=\"把联机玩家移出房间，他的座位交给电脑接着打\">移出玩家</button>") : '')}<button class="sm" onclick="quitGame()" title="${SAVE_FAIL ? _t(4103, "浏览器存储写不进去，这局没存上，退出就回不到现在这一步") : _t(4104, "对局自动保存，回开局页点「继续上一局」能接着玩")}">${_t(4129, "退出到开局页")}</button><button class="sm" onclick="confirmNew()">${_t(4130, "新游戏")}</button>${over || MP.role === 'client' ? '' : idle ? _t(4105, "<button class=\"sm\" onclick=\"endNow()\" title=\"时间到了、不想打了：现在按估值排名结束这一局\">现在结算</button>") : _t(4106, "<button class=\"sm off\" aria-disabled=\"true\" onclick=\"toast('结算中，等这一步做完再结算')\">现在结算</button>")}${bk}</div></details></div>
+      <div class="meta"><div class="tgrp" role="group" aria-label="${_t(4112, "帮助")}"><button class="sm" onclick="showManual()">${_t(4113, "玩法")}</button><button class="sm" onclick="gallery()">${_t(4114, "图鉴")}</button><button class="sm" onclick="playerGallery()" title="${_t(4115, "玩家图鉴：所有角色卡的起始资金、能力、弱点、专属技能")}">${_t(4116, "角色")}</button><button class="sm" onclick="maybeTour(true)">${_t(4117, "新手引导")}</button><button class="sm keyshelp" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'?'}))" title="${_t(4118, "键盘快捷键")}">${_t(4119, "快捷键")}</button><button class="sm" onclick="toggleSfx()" title="${_t(4120, "掷骰子、抽卡、收钱的音效")}" aria-pressed="${SFX.on}">${_tf(4121, "音效：{$0}", SFX.on ? _t(4092, "开") : _t(4093, "关"))}</button>${langBtn('sm')}</div><details class="gmenu" ${GMENU.open ? 'open' : ''}><summary>${_t(4122, "对局")}</summary><div class="gm">${themeControl()}${MP.role === 'host' ? `<span data-mp-members>${MP.viewerUI()}</span>` : ''}<button class="sm" onclick="renameDialog()" title="${_t(4123, "给自己（同一台电脑上谁都行）换个名字")}">${_t(4124, "改名字")}</button><button class="sm" onclick="toggleBoss()" title="${_t(4125, "整页换成代码编辑器（云架构学习笔记）；再按一次 ` 键或者双击最上面的文件名回来")}">${_t(4126, "老板键（`）")}</button><button class="sm" onclick="toggleArchTip()" aria-pressed="${!archTipOff()}" title="${_t(4127, "凑成有效架构时问要不要看讲解：自己凑成弹窗，别人凑成在右下角提示")}">${_tf(4128, "架构提示：{$0}", archTipOff() ? _t(4093, "关") : _t(4092, "开"))}</button>${MP.role === 'client' ? `<button class="sm off" aria-disabled="true" onclick="toast('动画速度由房主设置')" title="${_t(4097, "动画速度由房主设置，大家一起变")}">${_tf(4098, "动画速度：{$0}（房主设）", S.cfg.anim === 'fast' ? _t(4094, "快") : _t(4095, "标准"))}</button>${over ? '' : _t(4096, "<button class=\"sm\" onclick=\"MP.proposeEnd()\" title=\"请房主现在按估值结算这一局\">提议现在结算</button>")}<button class="sm" onclick="MP.leave()" title="${_t(4099, "离开这个房间：房主会把你的座位标成掉线，可以替你操作，你用同一个名字还能加回来")}">${_t(4100, "离开房间")}</button>` : _tf(4102, "<button class=\"sm\" onclick=\"toggleAnim()\" aria-pressed=\"{$0}\" title=\"骰子、走棋、飞行都更快，画面不变；联机时房主改，大家一起变\">动画速度：{$1}</button>{$2}", S.cfg.anim === 'fast', S.cfg.anim === 'fast' ? _t(4094, "快") : _t(4095, "标准"), MP.role === 'host' && !over && Object.keys(MP.seats).length ? _t(4101, "<button class=\"sm\" onclick=\"MP.kickDialog()\" title=\"把联机玩家移出房间，他的座位交给电脑接着打\">移出玩家</button>") : '')}<button class="sm" onclick="quitGame()" title="${SAVE_FAIL ? _t(4103, "浏览器存储写不进去，这局没存上，退出就回不到现在这一步") : _t(4104, "对局自动保存，回开局页点「继续上一局」能接着玩")}">${_t(4129, "退出到开局页")}</button><button class="sm" onclick="confirmNew()">${_t(4130, "新游戏")}</button>${over || MP.role === 'client' ? '' : idle ? _t(4105, "<button class=\"sm\" onclick=\"endNow()\" title=\"时间到了、不想打了：现在按估值排名结束这一局\">现在结算</button>") : _t(4106, "<button class=\"sm off\" aria-disabled=\"true\" onclick=\"toast('结算中，等这一步做完再结算')\">现在结算</button>")}${bk}</div></details></div>
     </div>
     ${over ? '' : `<div class="turnbar">${S.players.map(q => _tf(4110, "<span class=\"tb {$0} {$1} {$2}\" title=\"{$3}：现金 ${$4}，总资产 ${$5}\" onclick=\"jumpPl({$6})\">{$7}<b>{$8}</b><span class=\"tbm\"><i>${$9}</i><small class=\"tba\" title=\"总资产：现金 − 欠款 + 服务买价 + 升级和容量的投入\">资产 ${$10}</small></span>{$11}</span>", q.id === S.cur && !over ? 'cur' : '', q.alive ? '' : 'dead', GAIN[q.id] > Date.now() ? 'gain' : '', q.name, q.cash, netWorth(q), q.id, PAWN(q.color), q.name, q.cash, netWorth(q), q.jail !== null ? _t(4107, "<em>维护窗口</em>") : q.skip ? _t(4108, "<em>停一轮</em>") : !q.alive ? _t(4109, "<em>已出局</em>") : '')).join('<span class="tbar">→</span>')}</div>`}
     <div class="cmain">
