@@ -52,6 +52,10 @@ test('真实 Git 仓库：盖章、累计数、漏更新、构建来源和轮次
     commit('new page');
     assert.throws(() => check(cwd, base), /未覆盖/);
     stamp(cwd); commit('page stamp'); check(cwd, base);
+    const shallow = join(cwd, 'shallow');
+    execFileSync('git', ['clone', '--quiet', '--depth=1', `file://${cwd}`, shallow]);
+    assert.throws(() => check(shallow, 'HEAD'), /完整 Git 历史/);
+    assert.throws(() => stamp(shallow), /完整 Git 历史/);
     writeFileSync(join(cwd, 'docs/更新说明.html'), '<section id="r17">');
     assert.throws(() => check(cwd, base), /最新轮次/);
     writeFileSync(join(cwd, 'docs/更新说明.html'), '<section id="r16">');

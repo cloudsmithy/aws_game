@@ -36,6 +36,9 @@ function git(cwd, ...args) {
   return execFileSync('git', args, { cwd, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }).trimEnd();
 }
 export function check(cwd, baseRef) {
+  if (git(cwd, 'rev-parse', '--is-shallow-repository') === 'true') {
+    throw new Error('版本检查需要完整 Git 历史，请先 git fetch --unshallow');
+  }
   const html = readFileSync(resolve(cwd, 'code/index.html'), 'utf8');
   const current = readVersion(html);
   const log = readFileSync(resolve(cwd, 'docs/更新说明.html'), 'utf8');
@@ -64,6 +67,9 @@ export function check(cwd, baseRef) {
   console.log(`版本检查通过：v${current.major}.${current.round}.${current.commits} (${current.build})`);
 }
 export function stamp(cwd) {
+  if (git(cwd, 'rev-parse', '--is-shallow-repository') === 'true') {
+    throw new Error('盖章需要完整 Git 历史，请先 git fetch --unshallow');
+  }
   if (git(cwd, 'status', '--porcelain', '--', 'code')) {
     throw new Error('请先提交 code/ 的内容，再盖章；盖章后另行提交版本元数据');
   }
