@@ -12,7 +12,8 @@
     "lint:size": "node size-lint.mjs",
     "lint:version": "node version.mjs",
     "version:stamp": "node version.mjs stamp",
-    "test:version": "node --test verification/version.check.mjs"
+    "test:version": "node --test verification/version.check.mjs",
+    "test:ci": "node ci-shard.mjs"
   },
   "engines": {
     "node": ">=24"
