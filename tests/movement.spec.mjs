@@ -7,7 +7,7 @@ test('房主和两个客户端：真实 WebRTC、3D 回放、UG 结算与状态�
   const context = await browser.newContext({ reducedMotion: 'no-preference', viewport: { width: 1440, height: 900 } });
   try {
     const host = await context.newPage(), clients = [await context.newPage(), await context.newPage()], errors = [];
-    for (const page of [host, ...clients]) { page.on('pageerror', e => errors.push(e.message)); await page.goto('http://127.0.0.1:8878/?demo=board'); }
+    for (const page of [host, ...clients]) { page.on('pageerror', e => errors.push(e.message)); await page.goto(`http://127.0.0.1:${process.env.AWS_GAME_TEST_PORT || 8878}/?demo=board`); }
     await host.evaluate(() => { window.links = []; });
     for (const [index, client] of clients.entries()) {
       // 本机交换 SDP，跳过公网信令 / STUN；DataChannel 和游戏收发处理器是真实的。

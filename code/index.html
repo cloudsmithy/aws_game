@@ -820,6 +820,8 @@ table.mpnet tr.bad td.st{color:var(--red)}
 .archl td button.sm{white-space:normal;max-width:100%;margin:2px 0}
 @media (max-width:640px){table.mpnet th{width:auto}.mpturn{grid-template-columns:1fr}}
 .mpform label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut)}
+.mpform .mp-watch-option{flex-direction:row;align-items:center;color:var(--ink);gap:6px}
+.mpform .mp-watch-option input{padding:0;margin:0}
 .mpform input{font:inherit;border:1px solid var(--control-border);border-radius:2px;padding:5px 8px}
 #mpstat{margin-top:10px;font-size:13px}
 #mpstat .ok{color:var(--green)}
@@ -7505,7 +7507,7 @@ function renderCenter() {
   $('#center').innerHTML = `
     <div class="c-head">
       <div class="gtitle"><div><h1>${_t(4111, "<span class=\"gt-pre\">亚马逊云科技 User Group </span>云上大亨")}</h1><div class="sub">${meta}</div></div></div>
-      <div class="meta"><div class="tgrp" role="group" aria-label="${_t(4112, "帮助")}"><button class="sm" onclick="showManual()">${_t(4113, "玩法")}</button><button class="sm" onclick="gallery()">${_t(4114, "图鉴")}</button><button class="sm" onclick="playerGallery()" title="${_t(4115, "玩家图鉴：所有角色卡的起始资金、能力、弱点、专属技能")}">${_t(4116, "角色")}</button><button class="sm" onclick="maybeTour(true)">${_t(4117, "新手引导")}</button><button class="sm" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'?'}))" title="${_t(4118, "键盘快捷键")}">${_t(4119, "快捷键")}</button><button class="sm" onclick="toggleSfx()" title="${_t(4120, "掷骰子、抽卡、收钱的音效")}" aria-pressed="${SFX.on}">${_tf(4121, "音效：{$0}", SFX.on ? _t(4092, "开") : _t(4093, "关"))}</button>${langBtn('sm')}</div><details class="gmenu" ${GMENU.open ? 'open' : ''}><summary>${_t(4122, "对局")}</summary><div class="gm">${themeControl()}<button class="sm" onclick="renameDialog()" title="${_t(4123, "给自己（同一台电脑上谁都行）换个名字")}">${_t(4124, "改名字")}</button><button class="sm" onclick="toggleBoss()" title="${_t(4125, "整页换成代码编辑器（云架构学习笔记）；再按一次 ` 键或者双击最上面的文件名回来")}">${_t(4126, "老板键（`）")}</button><button class="sm" onclick="toggleArchTip()" aria-pressed="${!archTipOff()}" title="${_t(4127, "凑成有效架构时问要不要看讲解：自己凑成弹窗，别人凑成在右下角提示")}">${_tf(4128, "架构提示：{$0}", archTipOff() ? _t(4093, "关") : _t(4092, "开"))}</button>${MP.role === 'client' ? `<button class="sm off" aria-disabled="true" onclick="toast('动画速度由房主设置')" title="${_t(4097, "动画速度由房主设置，大家一起变")}">${_tf(4098, "动画速度：{$0}（房主设）", S.cfg.anim === 'fast' ? _t(4094, "快") : _t(4095, "标准"))}</button>${over ? '' : _t(4096, "<button class=\"sm\" onclick=\"MP.proposeEnd()\" title=\"请房主现在按估值结算这一局\">提议现在结算</button>")}<button class="sm" onclick="MP.leave()" title="${_t(4099, "离开这个房间：房主会把你的座位标成掉线，可以替你操作，你用同一个名字还能加回来")}">${_t(4100, "离开房间")}</button>` : _tf(4102, "<button class=\"sm\" onclick=\"toggleAnim()\" aria-pressed=\"{$0}\" title=\"骰子、走棋、飞行都更快，画面不变；联机时房主改，大家一起变\">动画速度：{$1}</button>{$2}", S.cfg.anim === 'fast', S.cfg.anim === 'fast' ? _t(4094, "快") : _t(4095, "标准"), MP.role === 'host' && !over && Object.keys(MP.seats).length ? _t(4101, "<button class=\"sm\" onclick=\"MP.kickDialog()\" title=\"把联机玩家移出房间，他的座位交给电脑接着打\">移出玩家</button>") : '')}<button class="sm" onclick="quitGame()" title="${SAVE_FAIL ? _t(4103, "浏览器存储写不进去，这局没存上，退出就回不到现在这一步") : _t(4104, "对局自动保存，回开局页点「继续上一局」能接着玩")}">${_t(4129, "退出到开局页")}</button><button class="sm" onclick="confirmNew()">${_t(4130, "新游戏")}</button>${over || MP.role === 'client' ? '' : idle ? _t(4105, "<button class=\"sm\" onclick=\"endNow()\" title=\"时间到了、不想打了：现在按估值排名结束这一局\">现在结算</button>") : _t(4106, "<button class=\"sm off\" aria-disabled=\"true\" onclick=\"toast('结算中，等这一步做完再结算')\">现在结算</button>")}${bk}</div></details></div>
+      <div class="meta"><div class="tgrp" role="group" aria-label="${_t(4112, "帮助")}"><button class="sm" onclick="showManual()">${_t(4113, "玩法")}</button><button class="sm" onclick="gallery()">${_t(4114, "图鉴")}</button><button class="sm" onclick="playerGallery()" title="${_t(4115, "玩家图鉴：所有角色卡的起始资金、能力、弱点、专属技能")}">${_t(4116, "角色")}</button><button class="sm" onclick="maybeTour(true)">${_t(4117, "新手引导")}</button><button class="sm" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'?'}))" title="${_t(4118, "键盘快捷键")}">${_t(4119, "快捷键")}</button><button class="sm" onclick="toggleSfx()" title="${_t(4120, "掷骰子、抽卡、收钱的音效")}" aria-pressed="${SFX.on}">${_tf(4121, "音效：{$0}", SFX.on ? _t(4092, "开") : _t(4093, "关"))}</button>${langBtn('sm')}</div><details class="gmenu" ${GMENU.open ? 'open' : ''}><summary>${_t(4122, "对局")}</summary><div class="gm">${themeControl()}${MP.role === 'host' ? `<span data-mp-members>${MP.viewerUI()}</span>` : ''}<button class="sm" onclick="renameDialog()" title="${_t(4123, "给自己（同一台电脑上谁都行）换个名字")}">${_t(4124, "改名字")}</button><button class="sm" onclick="toggleBoss()" title="${_t(4125, "整页换成代码编辑器（云架构学习笔记）；再按一次 ` 键或者双击最上面的文件名回来")}">${_t(4126, "老板键（`）")}</button><button class="sm" onclick="toggleArchTip()" aria-pressed="${!archTipOff()}" title="${_t(4127, "凑成有效架构时问要不要看讲解：自己凑成弹窗，别人凑成在右下角提示")}">${_tf(4128, "架构提示：{$0}", archTipOff() ? _t(4093, "关") : _t(4092, "开"))}</button>${MP.role === 'client' ? `<button class="sm off" aria-disabled="true" onclick="toast('动画速度由房主设置')" title="${_t(4097, "动画速度由房主设置，大家一起变")}">${_tf(4098, "动画速度：{$0}（房主设）", S.cfg.anim === 'fast' ? _t(4094, "快") : _t(4095, "标准"))}</button>${over ? '' : _t(4096, "<button class=\"sm\" onclick=\"MP.proposeEnd()\" title=\"请房主现在按估值结算这一局\">提议现在结算</button>")}<button class="sm" onclick="MP.leave()" title="${_t(4099, "离开这个房间：房主会把你的座位标成掉线，可以替你操作，你用同一个名字还能加回来")}">${_t(4100, "离开房间")}</button>` : _tf(4102, "<button class=\"sm\" onclick=\"toggleAnim()\" aria-pressed=\"{$0}\" title=\"骰子、走棋、飞行都更快，画面不变；联机时房主改，大家一起变\">动画速度：{$1}</button>{$2}", S.cfg.anim === 'fast', S.cfg.anim === 'fast' ? _t(4094, "快") : _t(4095, "标准"), MP.role === 'host' && !over && Object.keys(MP.seats).length ? _t(4101, "<button class=\"sm\" onclick=\"MP.kickDialog()\" title=\"把联机玩家移出房间，他的座位交给电脑接着打\">移出玩家</button>") : '')}<button class="sm" onclick="quitGame()" title="${SAVE_FAIL ? _t(4103, "浏览器存储写不进去，这局没存上，退出就回不到现在这一步") : _t(4104, "对局自动保存，回开局页点「继续上一局」能接着玩")}">${_t(4129, "退出到开局页")}</button><button class="sm" onclick="confirmNew()">${_t(4130, "新游戏")}</button>${over || MP.role === 'client' ? '' : idle ? _t(4105, "<button class=\"sm\" onclick=\"endNow()\" title=\"时间到了、不想打了：现在按估值排名结束这一局\">现在结算</button>") : _t(4106, "<button class=\"sm off\" aria-disabled=\"true\" onclick=\"toast('结算中，等这一步做完再结算')\">现在结算</button>")}${bk}</div></details></div>
     </div>
     ${over ? '' : `<div class="turnbar">${S.players.map(q => _tf(4110, "<span class=\"tb {$0} {$1} {$2}\" title=\"{$3}：现金 ${$4}，总资产 ${$5}\" onclick=\"jumpPl({$6})\">{$7}<b>{$8}</b><span class=\"tbm\"><i>${$9}</i><small class=\"tba\" title=\"总资产：现金 − 欠款 + 服务买价 + 升级和容量的投入\">资产 ${$10}</small></span>{$11}</span>", q.id === S.cur && !over ? 'cur' : '', q.alive ? '' : 'dead', GAIN[q.id] > Date.now() ? 'gain' : '', q.name, q.cash, netWorth(q), q.id, PAWN(q.color), q.name, q.cash, netWorth(q), q.jail !== null ? _t(4107, "<em>维护窗口</em>") : q.skip ? _t(4108, "<em>停一轮</em>") : !q.alive ? _t(4109, "<em>已出局</em>") : '')).join('<span class="tbar">→</span>')}</div>`}
     <div class="cmain">
@@ -10201,6 +10203,72 @@ document.addEventListener('keydown', e => {
 const MP = {
   role: null, peer: null, room: '', auth: '', mySeat: null, actor: null,
   seats: {},        // 房主：座位号 → { name, conn, online }
+  viewers: {}, pendingJoins: {}, watching: false, watchToken: '', watchLimit: 4,
+  // 观众与座位完全分开；邀请是独立随机凭证，不包含玩家房间密码或座位钥匙。
+  recipients() { return [...Object.values(this.seats), ...Object.values(this.viewers)]; },
+  reject(conn, why) { conn._closed = true; this.send(conn, { t: 'reject', why }); setTimeout(() => conn.close(), 300); },
+  viewerUI() {
+    if (this.role !== 'host') return '';
+    return `<button type="button" class="sm" onclick="MP.watchDialog()">受邀观战（${Object.keys(this.viewers).length}/${this.watchLimit}）</button>` + Object.entries(this.pendingJoins).map(([id, x]) => `<button type="button" class="sm" onclick="MP.reviewJoin('${id}')">确认入座：${esc(x.m.name)}</button>`).join('');
+  },
+  refreshMembers() {
+    if (S && S.players) {
+      // 开局后大厅只是隐藏，两处成员区都要更新，不能把审批请求留在隐藏大厅。
+      document.querySelectorAll('[data-mp-members]').forEach(box => { box.innerHTML = this.viewerUI(); });
+    } else if (this.role === 'host') this.renderLobby();
+  },
+  dropViewer(id) {
+    const x = this.viewers[id]; if (!x) return;
+    delete this.viewers[id]; x.conn._closed = true;
+    this.send(x.conn, { t: 'removed' }); try { x.conn.close({ flush: true }); } catch (e) { }
+    setTimeout(() => { try { x.conn.close(); } catch (e) { } }, 300);
+    this.refreshMembers();
+  },
+  setWatching(on) {
+    if (this.role !== 'host') return;
+    this.watchToken = on ? this.newKey() : '';
+    Object.keys(this.viewers).forEach(id => this.dropViewer(id));
+    this.refreshMembers();
+  },
+  async copyWatchInvite() {
+    if (this.role !== 'host' || !this.watchToken) return;
+    const text = `房间号：${this.room}\n观战邀请码：${this.watchToken}\n在「加入房间」选择「受邀观战」加入。`;
+    try { await navigator.clipboard.writeText(text); toast('已复制观战邀请'); }
+    catch (e) { toast('无法自动复制，请手动选择上面的房间号和观战邀请码'); }
+  },
+  async watchDialog() {
+    if (this.role !== 'host') return;
+    const token = this.watchToken;
+    const v = await ask({ local: true, view: true, cancelable: true, title: '受邀观战',
+      html: `<p>最多 ${this.watchLimit} 位解说，不占玩家座位。观众能看完整当前局面和决策弹窗，不能操作对局。请只把邀请发给受信任的人。</p>` + (token ? `<p>房间号：<b>${esc(this.room)}</b><br>观战邀请码：<code style="overflow-wrap:anywhere;user-select:all">${esc(token)}</code></p><p>对方选择「受邀观战」，填写房间号和邀请码。关闭或更新邀请会断开所有观众，旧邀请立即失效。单独移出只断开当前连接；要撤销已有邀请，请更新邀请。</p>` : '<p>观战尚未开启。</p>'),
+      buttons: [{ label: token ? '更新邀请并断开观众' : '开启受邀观战', value: 'on', cls: 'pri' }, ...(token ? [{ label: '关闭观战', value: 'off' }] : []), ...Object.entries(this.viewers).map(([id, x]) => ({ label: `移出观众：${esc(x.name)}`, value: id })), { label: '关闭窗口', value: false }] });
+    if (this.role !== 'host' || this.watchToken !== token) return;
+    if (v === 'on' || v === 'off') { this.setWatching(v === 'on'); if (v === 'on') this.watchDialog(); }
+    else if (typeof v === 'string' && this.viewers[v]) this.dropViewer(v);
+  },
+  requestSeat(conn, m, seat, previous) {
+    if (Object.keys(this.pendingJoins).length >= 4) return this.reject(conn, '待确认请求已满，请稍后再试');
+    const id = this.newKey(), x = { conn, m, seat, previous, game: S };
+    this.pendingJoins[id] = x; conn._pending = id;
+    this.send(conn, { t: 'pending', why: '没有该座位的钥匙，等待房主确认身份。请联系房主确认入座请求。' });
+    x.timer = setTimeout(() => { if (this.pendingJoins[id] === x) { delete this.pendingJoins[id]; this.reject(conn, '入座确认超时，请重试'); this.refreshMembers(); } }, 60000);
+    this.refreshMembers();
+  },
+  async reviewJoin(id) {
+    const x = this.pendingJoins[id]; if (this.role !== 'host' || !x) return;
+    const ok = await ask({ local: true, view: true, cancelable: true, title: '确认玩家身份', html: `<p>${esc(x.m.name)} 请求接管玩家 ${x.seat + 1}，但没有原座位钥匙。请通过语音或其他已知渠道确认是本人；仅名字相同不能证明身份。</p>`, buttons: [{ label: '已确认本人，允许入座', value: true, cls: 'pri' }, { label: '拒绝', value: false }] });
+    if (this.pendingJoins[id] !== x) return;
+    clearTimeout(x.timer); delete this.pendingJoins[id]; delete x.conn._pending;
+    if (!ok || this.role !== 'host' || !x.conn.open || x.conn._closed || S !== x.game || (this.seats[x.seat] || null) !== x.previous || (x.previous && x.previous.online)) this.reject(x.conn, '入座未获批准或座位已变化，请重试');
+    else this.admit(x.conn, x.m, x);
+    this.refreshMembers();
+  },
+  closed(conn) {
+    conn._closed = true;
+    if (conn._pending) { const x = this.pendingJoins[conn._pending]; if (x) clearTimeout(x.timer); delete this.pendingJoins[conn._pending]; this.refreshMembers(); }
+    const id = conn._viewer;
+    if (id && this.viewers[id] && this.viewers[id].conn === conn) { delete this.viewers[id]; this.refreshMembers(); }
+  },
   cur: null, mid: 0, closeLocal: null,
   dirty: false, pushIv: 0, pushGen: 0,   // 房主：状态脏标记 + 推送心跳（和渲染频率解耦，见 afterRender）。pushGen 每起一次心跳 +1：回开局页时上一拍还在路上，新一局起的心跳和它会并着跑，靠这个让旧的那拍认出自己过期、不再续
   full: false,      // 房主：这次合并的 60ms 里有没有整页重画（没有的话远端也只重画棋盘）
@@ -10228,13 +10296,13 @@ const MP = {
   async kickDialog() {
     const ks = Object.keys(this.seats).map(Number).filter(k => this.seats[k]); if (!ks.length) return void toast(_t(4959, "现在没有联机玩家"));
     const nmOf = k => S && S.players && S.players[k] ? unesc(S.players[k].name) : this.seats[k].name;
-    const k = await ask({ local: true, cancelable: true, title: _t(4960, "移出哪位联机玩家？"), html: _t(4961, "<p>移出后连接断开，他的座位交给电脑接着打；用这个名字不能再进这个房间。</p>"), buttons: [...ks.map(k => ({ label: _tf(4963, "移出 {$0}{$1}", nmOf(k), this.seats[k].online ? '' : _t(4962, "（已断开）")), value: k })), { label: _t(2465, "取消"), value: -1 }] });
+    const k = await ask({ local: true, cancelable: true, title: _t(4960, "移出哪位联机玩家？"), html: _t(4961, "<p>移出后连接断开，他的座位交给电脑接着打；用这个名字不能再进这个房间。</p>"), buttons: [...ks.map(k => ({ label: _tf(4963, "移出 {$0}{$1}", esc(nmOf(k)), this.seats[k].online ? '' : _t(4962, "（已断开）")), value: k })), { label: _t(2465, "取消"), value: -1 }] });
     if (Number.isInteger(k) && k >= 0) this.kick(k);
   },
   // 房主点了「他回来之前都由我来选」、人也确实没连着：这个座位的弹窗在房主这台直接选。不改 isRemote：错题本记给谁、能不能合成一个窗还按远端座位算
   hostPlays(seat) { const x = this.role === 'host' && seat != null && this.seats[seat]; return !!(x && x.hp && !x.online); },
   // 远端：这个浏览器在各个房间里拿过的座位钥匙，[[房间号, [钥匙…]], …]，最近的在前，只留 10 个房间。add：收到 welcome 时记一把新的。
-  // 按房间存、不按名字：开局后改过名、用新名字重进的也带得上。禁用存储、写满时照样能玩，只是同名顶替要等房主发现掉线
+  // 按房间存、不按名字：开局后改过名、用新名字重进的也带得上。禁用存储、写满时照样能玩，重连时由房主核实身份
   seatKeys(room, add) {
     let a = []; try { a = JSON.parse(localStorage.getItem('aws-tycoon-seatkeys')) || []; } catch (e) { }
     if (!Array.isArray(a)) a = [];
@@ -10255,7 +10323,7 @@ const MP = {
     const cfg = t ? { config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, MP_PEERJS_TURN, t], sdpSemantics: 'unified-plan' } } : {};
     return h ? { ...cfg, host: h, port: +(q.get('peerport') || 443), path: q.get('peerpath') || '/', secure: q.get('peerport') !== '80' } : cfg;
   },
-  send(conn, msg) { try { if (conn && conn.open) conn.send(msg); } catch (e) { } },
+  send(conn, msg) { if (this.role === 'client' && this.watching && conn === this.hostConn && !['hello', 'resync'].includes(msg.t)) return; try { if (conn && conn.open) conn.send(msg); } catch (e) { } },
   // 房主接手连着却不动的远端这一个回合（只管这一回合；他自己再点照样算）
   again() {
     this.pushIv = 0; this.dirty = false;   // 回开局页：停掉推送心跳
@@ -10265,6 +10333,7 @@ const MP = {
       delete x.hp; delete x.idleTake; x.base = null; if (S && S.players[k]) x.name = unesc(S.players[k].name);   // 局里改过名的按新名字坐回去
       this.send(x.conn, { t: 'again' });
     }
+    Object.values(this.viewers).forEach(x => { x.base = null; this.send(x.conn, { t: 'again' }); });
     this.cur = null; S = null;
     if (MODAL_CUR && !$('#modal').hidden) { try { MODAL_CUR.cancel(); } catch (e) { } } try { if (VIEW_CUR) VIEW_CUR.cancel(); } catch (e) { }
     const ef = $('#endfx'); if (ef) ef.remove();
@@ -10272,10 +10341,10 @@ const MP = {
     renderNames(); this.renderLobby(); scrollTo(0, 0);
   },
   // 远端：离开房间；提议现在结算（房主确认）
-  leave() { ask({ local: true, cancelable: true, title: _t(4967, "离开房间？"), html: _t(4968, "<p>房主会把你的座位标成掉线，可以替你操作。你用同一个房间号和局里的名字还能加回来。</p>"), buttons: [{ label: _t(4969, "离开"), value: true, cls: 'pri' }, { label: _t(2465, "取消"), value: false }] }).then(v => { if (!v) return; this.kicked = true; try { this.hostConn && this.hostConn.close(); } catch (e) { } location.href = location.pathname; }); },
+  leave() { ask({ local: true, cancelable: true, title: _t(4967, "离开房间？"), html: this.watching ? '<p>离开观战不会影响玩家和对局；邀请有效时可以再次加入。</p>' : _t(4968, "<p>房主会把你的座位标成掉线，可以替你操作。你用同一个房间号和局里的名字还能加回来。</p>"), buttons: [{ label: _t(4969, "离开"), value: true, cls: 'pri' }, { label: _t(2465, "取消"), value: false }] }).then(v => { if (!v) return; this.kicked = true; try { this.hostConn && this.hostConn.close(); } catch (e) { } location.href = location.pathname; }); },
   proposeEnd() { if (!S || S.over) return; this.send(this.hostConn, { t: 'endask' }); toast(_t(4970, "已经请房主现在结算")); },
   idleTake() { const x = S && this.seats[S.cur]; if (!x || !this.isRemote(S.cur)) return; x.idleTake = S.turnStartAt; log(_tf(4971, "{$0} 半天没动，房主替他操作这一回合", nm(cur()))); this.send(x.conn, { t: 'toast', msg: _t(4972, "你半天没动，房主替你操作了这一回合") }); render(); },
-  broadcast(msg) { Object.values(this.seats).forEach(x => this.send(x.conn, msg)); },
+  broadcast(msg) { this.recipients().forEach(x => this.send(x.conn, msg)); },
   // 房主：每次渲染后把状态推给大家（合并 60ms 内的多次渲染）。lite：走棋时只重画了棋盘，60ms 里全是 lite 的话远端也只重画棋盘
   afterRender(lite) {
     if (this.role === 'host' && S && S.players && this.isRemote(S.cur) && this.seats[S.cur].online && this.seats[S.cur].idleTake !== S.turnStartAt) {
@@ -10311,14 +10380,14 @@ const MP = {
   },
   // 把状态推给每个远端。日志和格子历史占整份状态的九成，认得增量的远端只发它上次收到之后新增的那些；
   // 同样的内容只序列化一次，大家共用一个字符串；跟上次发给这个人的一样就不发（本机只是重画了一下）。full：远端要整页重画（弹窗前、重连）
-  pushState(full) {
-    const lite = !full && !this.full; this.full = false;
+  pushState(full, only) {
+    const lite = !full && !this.full; if (!only) this.full = false;
     if (!S || !S.players) return;
     // 只有房主这台知道的也带给远端：电脑暂停了没有、哪些联机座位掉线了（远端据此写「已暂停」「掉线了」）。每次推都按此刻重算，进了 core，只按了暂停也会推过去。
     // now：房主此刻的时间，远端拿来对齐限时倒计时；不放进 core，不影响「内容没变就不发」
     S.aiPause = AI_PAUSE || undefined; { const off = Object.keys(this.seats).map(Number).filter(k => !this.seats[k].online && S.players[k]); S.mpOff = off.length ? off : undefined; }
     const seq = S.logSeq || 0, core = JSON.stringify({ ...S, log: undefined, hist: undefined, diceQ: undefined }), out = {};   // 掷骰前定好的点数（diceQ）不发给远端
-    Object.values(this.seats).forEach(x => {
+    (only ? [only] : this.recipients()).forEach(x => {
       if (!x.conn || !x.conn.open) return;
       const b = x.base && x.base.S === S ? x.base : null;   // 没发过、换了一局（新开、读档）、远端要求补发：发整份
       if (b && b.seq === seq && b.core === core && (lite || !b.lite)) return;
@@ -10351,13 +10420,20 @@ const MP = {
   },
   ONCLICK: { 'doRoll()': 'roll', 'endTurn()': 'end', "jailAct('stay')": 'jail:stay', "jailAct('pay')": 'jail:pay', "jailAct('es')": 'jail:es',
     'uiAction(()=>manage(cur()))': 'manage', 'uiAction(trade)': 'trade', 'uiAction(edpDialog)': 'sp', 'uiAction(activeAction)': 'action', 'uiAction(declareBankrupt)': 'bankrupt', 'uiAction(buyReinvent)': 'buyrei', 'uiAction(refactorDebt)': 'refactor', 'uiAction(useRoleSkill)': 'skill', 'uiAction(wildDialog)': 'wild', 'uiAction(quizChallenge)': 'challenge', 'uiAction(quizAll)': 'challengeall', 'uiAction(incOne)': 'incone', 'uiAction(incRand)': 'incrand', 'uiAction(incAll)': 'incall', 'uiAction(upHere)': 'uphere', 'uiAction(capHere)': 'caphere', 'uiAction(speedMenu)': 'speed', 'uiAction(setRsRate)': 'rsrate' },
+  scalar(value) { return value == null || ['string', 'number', 'boolean'].includes(typeof value); },
   onHostMsg(conn, m) {
-    if (!m || typeof m !== 'object') return;
+    if (this.role !== 'host' || !conn.open || conn._closed || !m || typeof m !== 'object') return;
     const seat = conn._seat;
+    // 观众只允许补发状态；伪造 seat、who、角色或游戏消息都不进入玩家处理器。
+    const viewer = this.viewers[conn._viewer];
+    if (viewer && viewer.conn === conn) {
+      if (m.t === 'resync') { viewer.base = null; this.pushState(true, viewer); }
+      return;
+    }
     if (m.t === 'hello') return this.admit(conn, m);
-    if (seat == null || !this.seats[seat]) return;
-    if (m.t === 'resync') { this.seats[seat].base = null; this.pushState(true); return; }   // 远端的增量接不上了：给他补一份整的
-    if (m.t === 'act' && S && S.cur === seat && Object.prototype.hasOwnProperty.call(this.ACTS, m.a)) {
+    if (seat == null || !this.seats[seat] || this.seats[seat].conn !== conn || !this.seats[seat].online) return;
+    if (m.t === 'resync') { this.seats[seat].base = null; this.pushState(true, this.seats[seat]); return; }   // 远端的增量接不上了：给他补一份整的
+    if (m.t === 'act' && typeof m.a === 'string' && S && S.cur === seat && Object.prototype.hasOwnProperty.call(this.ACTS, m.a)) {
       // 这一下能不能执行：和 doRoll / jailAct / uiAction / endTurn 开头查的阶段一样
       const a = m.a, p = cur(), ok = a === 'end' ? S.phase === 'post' : a === 'roll' ? S.phase === 'roll' && p.jail === null : /^jail:/.test(a) ? S.phase === 'roll' && p.jail !== null : S.phase === 'roll' || S.phase === 'post';
       // 房主自己开着看的窗口（玩法、图鉴、明细、大图、改名字……）会挡住这些操作，远端点了却毫无反应：真能执行时先替房主关掉。「轮到下一位」不看弹窗，不用关；
@@ -10371,42 +10447,57 @@ const MP = {
     else if (m.t === 'aipause' && S && !S.over) { toggleAiPause(); toast(`${unesc(S.players[seat].name)} ${AI_PAUSE ? _t(4978, "暂停了电脑") : _t(4979, "让电脑接着跑")}`); }
     else if (m.t === 'endask' && S && !S.over) { const n = unesc(S.players[seat].name); if (S.phase === 'roll' || S.phase === 'post') ask({ local: true, cancelable: true, title: _tf(4980, "{$0} 提议现在结算", n), html: _t(4981, "<p>按每家的估值排名，估值最高的赢。结算后这一局就结束了，不能接着打。</p>"), buttons: [{ label: _t(4719, "现在结算"), value: true, cls: 'pri' }, { label: _t(4982, "接着打"), value: false }] }).then(v => { if (v && S && !S.over) { log(_tf(4983, "🏁 {$0} 提议、房主同意现在结算", n)); timedOver(_t(4722, "大家决定现在结算")); } else this.send(conn, { t: 'toast', msg: _t(4984, "房主选了接着打") }); }); else this.send(conn, { t: 'toast', msg: _t(4985, "房主那边还在结算，等一下再提") }); }
     else if (m.t === 'rename' && S && !S.over && typeof m.name === 'string') { const why = applyRename(seat, m.name); if (why) this.send(conn, { t: 'renameFail', why }); }
-    else if (m.t === 'cheat' && S && !S.over && typeof m.c === 'string' && Array.isArray(m.a)) { const why = applyCheat(seat, m.c, m.a.slice(0, 3).map(x => String(x).slice(0, 20))); if (why) this.send(conn, { t: 'toast', msg: why }); }
+    else if (m.t === 'cheat' && S && !S.over && typeof m.c === 'string' && Array.isArray(m.a) && m.a.slice(0, 3).every(x => this.scalar(x))) { const why = applyCheat(seat, m.c, m.a.slice(0, 3).map(x => String(x).slice(0, 20))); if (why) this.send(conn, { t: 'toast', msg: why }); }
     else if (m.t === 'report' && S && !S.over && Number.isInteger(m.id)) { const why = reportCheat(m.id, seat); if (why) this.send(conn, { t: 'toast', msg: why }); }
     else if (m.t === 'ans' && this.cur && m.id === this.cur.id && this.cur.who === seat) {
+      if (m.inp != null && (typeof m.inp !== 'object' || Array.isArray(m.inp) || !Object.values(m.inp).every(x => this.scalar(x)))) return;
       const ans = Number.isInteger(m.k) ? { k: m.k } : typeof m.v === 'string' ? { v: m.v.slice(0, 80) } : null;
       if (ans) this.cur.onAnswer(ans, m.inp && typeof m.inp === 'object' ? m.inp : {});
     }
   },
-  async admit(conn, m) {
-    const name = String(m.name || '').trim().slice(0, 12) || _t(3861, "玩家");
-    if (m.auth !== this.auth) { this.send(conn, { t: 'reject', why: _t(4986, "密码不对") }); setTimeout(() => conn.close(), 300); return; }
-    if (this.banned && this.banned.has(name.replace(/\s+/g, ' ').trim())) { this.send(conn, { t: 'reject', why: _t(4987, "房主把你移出了这个房间") }); setTimeout(() => conn.close(), 300); return; }
-    // 断线重连：按名字回到原来的座位
+  async admit(conn, m, approval) {
+    if (this.role !== 'host' || !conn.open || conn._closed || conn._admitted || conn._pending) return;
+    if (m.name != null && typeof m.name !== 'string') return this.reject(conn, '名字必须是文字');
+    const name = (m.name || '').replace(/\s+/g, ' ').trim().slice(0, 12) || _t(3861, "玩家");
+    if (m.mode === 'spectator') {
+      if (!this.watchToken || m.invite !== this.watchToken) return this.reject(conn, '观战邀请无效或已关闭');
+      if (Object.keys(this.viewers).length >= this.watchLimit) return this.reject(conn, '观战人数已满');
+      const id = this.newKey(); conn._viewer = id; conn._admitted = true;
+      this.viewers[id] = { name, conn, online: true, delta: m.delta === 1, walk: m.walk === 1 };
+      this.send(conn, { t: 'welcome', mode: 'spectator', seat: null, room: this.room });
+      this.pushState(true, this.viewers[id]); if (this.cur) this.send(conn, this.cur.msg);
+      this.refreshMembers(); return;
+    }
+    if (m.mode != null && m.mode !== 'player') return this.reject(conn, '不支持的入房身份');
+    if (m.auth !== this.auth) { this.reject(conn, _t(4986, "密码不对")); return; }
+    if (this.banned && this.banned.has(name.replace(/\s+/g, ' ').trim())) { this.reject(conn, _t(4987, "房主把你移出了这个房间")); return; }
+    // 名字定位座位，钥匙或房主确认鉴权后再认回。
     let seat = this.seatFor(name);
-    // 开局后同名的人又来了、座位却还挂着在线：可能是原来那台掉线了还没被发现（锁屏、断网），也可能是另一台设备随手填了同一个名字。
-    // 只认同一个浏览器：welcome 时发过座位钥匙，存在他自己的浏览器里，刷新、崩溃后重开都带着，可以马上顶替；钥匙对不上就拒绝，免得把在线的人顶下线。
-    // 座位上没钥匙也拒绝（不然老版本页面不带 keys，两边都空也算对上）。原来那台真没了的话，watch 十几秒后标成离线，再按名字进的老路照样能走
-    if (seat == null && S && S.players && (seat = this.seatFor(name, true)) != null) {
-      const x = this.seats[seat];
-      if (!x.key || !Array.isArray(m.keys) || !m.keys.slice(0, 8).includes(x.key)) { this.send(conn, { t: 'reject', why: _tf(4988, "{$0} 还连着。换了设备的话，在原来那台上关掉页面，或者等十几秒它掉线后，再用这个名字加入", name) }); setTimeout(() => conn.close(), 300); return; }
-      // 旧连接先解绑座位：它的 close 和迟到的消息都不再算数，不然会把刚接上的座位又标成离线。先告诉它是被同一个浏览器的另一个页面接手了再关，不发 reject（远端收到会清掉身份）。
-      // 用 flush 关：关闭请求排在 kicked 后面走数据通道，对方先读到 kicked 再断；直接关的话，后台标签页常常先处理断开、把还没读的 kicked 丢掉。5 秒后对方还没关（页面冻结了）再硬关
-      const old = x.conn; if (old) { old._seat = null; this.send(old, { t: 'kicked' }); try { old.close({ flush: true }); } catch (e) { } setTimeout(() => { try { old.close(); } catch (e) { } }, 5000); }
+    // 身份由座位钥匙证明，名字只用于定位。离线座位也不能仅凭同名接管。
+    if (seat == null && S && S.players) seat = this.seatFor(name, true);
+    if (seat != null) {
+      const x = this.seats[seat], proven = x.key && Array.isArray(m.keys) && m.keys.slice(0, 8).includes(x.key);
+      if (!proven && !(approval && approval.seat === seat && approval.previous === x)) {
+        if (x.online) return this.reject(conn, '该玩家仍在线；请使用原浏览器，或等其离线后由房主确认身份');
+        return this.requestSeat(conn, { ...m, name }, seat, x);
+      }
+      const old = x.conn; if (old) { old._seat = null; old._closed = true; this.send(old, { t: 'kicked' }); try { old.close({ flush: true }); } catch (e) { } setTimeout(() => { try { old.close(); } catch (e) { } }, 5000); }
     }
     if (seat == null) {
-      if (S && S.players) { const left = this.waiting(); this.send(conn, { t: 'reject', why: left.length ? _tf(4989, "游戏已经开始。原来的玩家用局里的名字重新加入：{$0}", left.join(_t(349, "、"))) : _t(4990, "游戏已经开始，座位都有人了") }); setTimeout(() => conn.close(), 300); return; }
+      if (S && S.players) { const left = this.waiting(); this.reject(conn, left.length ? _tf(4989, "游戏已经开始。原来的玩家用局里的名字重新加入：{$0}", left.join(_t(349, "、"))) : _t(4990, "游戏已经开始，座位都有人了")); return; }
       // 大厅里不收重名：开局会把后来的改成「小李 2」，两人都掉线时按名字就分不清谁是谁，重连会坐到对方的座位上。
       // 不像开局后那样同名顶替：大厅里分不清是本人掉线重进还是另一个人重名，顶替会把先来的踢掉。本人没正常关页面就重进的，等 watch 发现旧连接断了、座位删掉再进
       const key = name.replace(/\s+/g, ' ');
-      if (Object.values(this.seats).some(x => x.name.replace(/\s+/g, ' ') === key)) { this.send(conn, { t: 'reject', why: _tf(4991, "已经有人叫 {$0} 了，换个名字再加入（刚才是你自己掉线的话，等十几秒再用这个名字进）", name) }); setTimeout(() => conn.close(), 300); return; }
+      if (Object.values(this.seats).some(x => x.name.replace(/\s+/g, ' ') === key)) { this.reject(conn, _tf(4991, "已经有人叫 {$0} 了，换个名字再加入（刚才是你自己掉线的话，等十几秒再用这个名字进）", name)); return; }
       const used = new Set(Object.keys(this.seats).map(Number));
       // 房主刷新后还没点「继续上一局」：存档里的联机玩家按名字先坐回原座位，大厅和 welcome 里的座位号就和局里一致；对不上的照旧按先后排
-      seat = this.savedSeat(name, used) ?? [1, 2, 3].find(k => !used.has(k));
-      if (seat == null) { this.send(conn, { t: 'reject', why: _t(4992, "房间满了（最多 4 人）") }); setTimeout(() => conn.close(), 300); return; }
+      const saved = this.savedSeat(name, used);
+      if (saved != null && !(approval && approval.seat === saved && approval.previous === null)) return this.requestSeat(conn, { ...m, name }, saved, null);
+      seat = saved ?? [1, 2, 3].find(k => !used.has(k));
+      if (seat == null) { this.reject(conn, _t(4992, "房间满了（最多 4 人）")); return; }
     }
     // key：座位钥匙，每次 welcome 换一把新的（换了设备进来以后旧设备那把就作废）。只放在房主的 MP.seats 和他本人的浏览器里，不能写进 S：S 会推给所有人
-    const skey = this.newKey(); conn._seat = seat; this.seats[seat] = { name, conn, online: true, wb: this.wbIn(m.wb), delta: m.delta === 1, walk: m.walk === 1, key: skey };   // delta：新版页面，收得了增量状态
+    const skey = this.newKey(); conn._admitted = true; conn._seat = seat; this.seats[seat] = { name, conn, online: true, wb: this.wbIn(m.wb), delta: m.delta === 1, walk: m.walk === 1, key: skey };   // delta：新版页面，收得了增量状态
     this.send(conn, { t: 'welcome', seat, room: this.room, key: skey });
     if (S && S.players) { log(_tf(4993, "🔌 {$0} 重新连上了", nm(S.players[seat]))); render(); this.pushState(true); if (this.cur) { this.send(conn, this.cur.msg); const tk = this.cur.who === seat && this.cur.box.querySelector('[data-mptake]'); if (tk) { tk.hidden = true; if (tk._arm) tk._arm(); const ta = this.cur.box.querySelector('[data-mpall]'); if (ta) ta.hidden = true; } } }
     else this.renderLobby();
@@ -10443,40 +10534,47 @@ const MP = {
   // 远端玩家答了一道题：发给他记进自己的错题本，房主这边的副本也跟着改
   wbMark(seat, id, ok) { const x = this.seats[seat]; this.send(x.conn, { t: 'wb', id, ok: !!ok }); return wbApply(x.wb || (x.wb = {}), id, ok); },
   renderLobby() {
+    const watch = $('#mpallowwatch'); if (watch) { watch.checked = !!this.watchToken; watch.disabled = true; }
     const n = 1 + Math.max(0, ...Object.keys(this.seats).map(Number));   // 按最大的座位号算：按存档排座时可能只有 3 号位有人，按人数算会把玩家 4 截掉
     if (npVal() < n) { const r = document.querySelector(`input[name=np][value="${Math.min(4, n)}"]`); if (r) { r.checked = true; renderNames(); } }
     Object.entries(this.seats).forEach(([k, x]) => { const el = $('#nm' + k), ai = $('#ai' + k); if (el) { el.value = x.name; el.readOnly = true; el.title = x.online ? _t(4996, "联机玩家") : _t(4997, "联机玩家（已断开）"); } if (ai) { ai.checked = false; ai.disabled = true; ai.title = _t(4998, "联机玩家，不能交给电脑"); } });   // 「电脑」灰掉只是给房主看的，开局时 startFromSetup 照样把联机座位算成真人
     const list = [_tf(5000, "<li><b>玩家 1</b>：{$0}（你，房主，本机）</li>", esc((($('#nm0') || {}).value || '').trim() || _t(4999, "玩家 1")))].concat([1, 2, 3].map(k => this.seats[k] ? _tf(5001, "<li><b>玩家 {$0}</b>：{$1}{$2} <button type=\"button\" class=\"sm\" onclick=\"MP.kick({$3})\" title=\"把他移出房间，这个名字不能再进\">移出</button></li>", k + 1, esc(this.seats[k].name), this.seats[k].online ? '' : _t(4962, "（已断开）"), k) : _tf(5002, "<li class=\"muted\">玩家 {$0}：空位（不来人就在本机轮流玩）</li>", k + 1)));
-    $('#mpstat').innerHTML = _tf(5003, "<div class=\"mproom\">房间号 <b>{$0}</b><span class=\"muted\">把房间号和密码发给朋友，他们在自己的设备上打开这个页面，点「加入房间」</span></div><ul class=\"mpseats\">{$1}</ul>", this.room, list.slice(0, Math.max(npVal(), n)).join(''));
+    const watchers = Object.values(this.viewers);
+    const invitation = this.watchToken ? `<div class="mpwatch"><p><b>受邀观战已开启</b> · 最多 ${this.watchLimit} 位观众，不占玩家座位</p><p>观战邀请码：<code data-watch-code style="overflow-wrap:anywhere;user-select:all">${esc(this.watchToken)}</code> <button type="button" class="sm" onclick="MP.copyWatchInvite()">复制观战邀请</button></p><p class="muted">将房间号和观战邀请码发给解说，选择「加入房间 → 受邀观战」，现在就能进来等待开赛。</p><p>已到场观众（${watchers.length}/${this.watchLimit}）：${watchers.length ? watchers.map(x => esc(x.name)).join('、') : '暂无'}</p></div>` : '';
+    $('#mpstat').innerHTML = _tf(5003, "<div class=\"mproom\">房间号 <b>{$0}</b><span class=\"muted\">把房间号和密码发给朋友，他们在自己的设备上打开这个页面，点「加入房间」</span></div><ul class=\"mpseats\">{$1}</ul>", this.room, list.slice(0, Math.max(npVal(), n)).join('')) + `<div data-mp-members>${this.viewerUI()}</div>${invitation}`;
   },
   // 对方没正常关页面就没了（锁屏、断网、浏览器被系统杀掉）：数据通道不会自己关，PeerJS 只认 ICE 的 failed，Chrome 上 ICE 一直停在 disconnected。
   // 整条连接 failed（浏览器十几秒收不到对方的连通性确认）就回不来了，主动关掉，走正常的断线流程。不支持 connectionState 的浏览器照旧
   watch(conn) { const pc = conn.peerConnection; if (pc) pc.addEventListener('connectionstatechange', () => { if (pc.connectionState === 'failed') conn.close(); }); },
+  onHostClose(conn) { this.closed(conn); const x = this.seats[conn._seat]; if (x && x.conn === conn) { x.online = false; if (S && S.players) { const tk = this.cur && this.cur.who === conn._seat && this.cur.box.querySelector('[data-mptake]'); if (tk) { tk.textContent = _t(5008, "对方掉线了，我来替他选"); tk.hidden = false; const ta = this.cur.box.querySelector('[data-mpall]'); if (ta) ta.hidden = false; } log(_tf(5009, "🔌 {$0} 断线了，可以用同一个名字重新加入", nm(S.players[conn._seat]))); render(); } else { delete this.seats[conn._seat]; const el = $('#nm' + conn._seat), ai = $('#ai' + conn._seat); if (el) { el.readOnly = false; el.value = ''; } if (ai) { ai.disabled = false; ai.title = ''; } this.renderLobby(); } } },
   async hash(t) {
     try { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join(''); }
     catch (e) { return 'plain:' + t; }
   },
   ready() { if (typeof Peer === 'undefined') { info(_t(5004, "联机不可用"), _t(5005, "<p>联机组件没有加载成功。</p>")); return false; } return true; },
-  async host(pwd) {
+  async host(pwd, allowWatching = false) {
     if (!this.ready()) return;
     const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     this.room = Array.from({ length: 6 }, () => A[Math.floor(Math.random() * A.length)]).join('');
     this.auth = await this.hash(this.room + ':' + pwd);
+    this.viewers = {}; this.pendingJoins = {}; this.watchToken = ''; this.watching = false;
     $('#mpstat').innerHTML = _t(5006, "<span class=\"muted\">正在创建房间…</span>");
     this.hosting = true;   // resumeGame 用它分清「房间还在创建」和「正在加入」
     if (this.peer && !this.role) { try { this.peer.destroy(); } catch (e) { } }   // 上次没建成（连不上信令服务器）又点了一次：旧的 Peer 关掉，免得留着好几个
     // opened 挂在这一个 Peer 上：重试时新建的 Peer 有自己的第一次 open，旧 Peer 迟到的重连计时器也认得出不是自己
     const peer = this.peer = new Peer('amono-' + this.room.toLowerCase(), this.peerOpts()); let opened = false, idLost = false;
     peer.on('open', () => {
+      if (peer !== this.peer) return;
       // 断开后重连成功会再来一次 open：只在第一次排座位，不然对局中会把座位重新排一遍
       if (opened) { this.reN = 0; if (!(S && S.players)) this.renderLobby(); else toast(_t(5007, "联机服务器连回来了，掉线的人可以重新加入")); return; }
-      opened = true; this.reN = 0; this.role = 'host'; this.renderLobby(); if (S && S.players && !S.over) this.reseat();   // 读档比房间建好早：这时再按存档排联机座位
+      opened = true; this.reN = 0; this.role = 'host'; this.watchToken = allowWatching === true ? this.newKey() : ''; this.renderLobby(); if (S && S.players && !S.over) this.reseat();   // 读档比房间建好早：这时再按存档排联机座位
     });
     this.peer.on('connection', conn => {
+      if (peer !== this.peer || this.role !== 'host') { conn.close(); return; }
       this.watch(conn);
       conn.on('data', m => this.onHostMsg(conn, m));
       // 掉线时正开着等他选的弹窗：把「对方掉线了，我来替他选」露出来
-      conn.on('close', () => { const x = this.seats[conn._seat]; if (x && x.conn === conn) { x.online = false; if (S && S.players) { const tk = this.cur && this.cur.who === conn._seat && this.cur.box.querySelector('[data-mptake]'); if (tk) { tk.textContent = _t(5008, "对方掉线了，我来替他选"); tk.hidden = false; const ta = this.cur.box.querySelector('[data-mpall]'); if (ta) ta.hidden = false; } log(_tf(5009, "🔌 {$0} 断线了，可以用同一个名字重新加入", nm(S.players[conn._seat]))); render(); } else { delete this.seats[conn._seat]; const el = $('#nm' + conn._seat), ai = $('#ai' + conn._seat); if (el) { el.readOnly = false; el.value = ''; } if (ai) { ai.disabled = false; ai.title = ''; } this.renderLobby(); } } });
+      conn.on('close', () => this.onHostClose(conn));
     });
     // 和信令服务器断开（Wi-Fi 抖动、换网络、服务器重启）：已经连着的人照常玩，可这之后掉线的人就连不回来了（「找不到这个房间」），所以自己重连，间隔 2、4、8、16、30 秒。
     // 每次重连失败都会再来一对 error(network) + disconnected：只在第一次断开时提示，连回来再说一声
@@ -10496,12 +10594,13 @@ const MP = {
       if (this.role !== 'host') { const hb = $('#mpbox .mpform button'); if (hb) hb.disabled = false; }
     });
   },
-  async join(room, pwd, name, auth) {
+  async join(room, pwd, name, auth, watching = this.watching) {
     if (!this.ready()) return;
     room = room.trim().toUpperCase();
     // 上一次没连上又点了「加入」：旧连接先解绑（它迟到的 close 不再算数），旧 Peer 关掉，免得重试时留下好几个
     if (this.peer && (!this.role || this.gone)) { this.hostConn = null; try { this.peer.destroy(); } catch (e) { } }
-    this.room = room; this.auth = auth || await this.hash(room + ':' + pwd); this.myName = name.trim().slice(0, 12) || _t(3861, "玩家");
+    this.watching = !!watching; if (this.watching && !this.gone) this.invite = pwd.trim();
+    this.room = room; this.auth = this.watching ? '' : auth || await this.hash(room + ':' + pwd); this.myName = name.trim().slice(0, 12) || _t(3861, "玩家");
     if (!this.gone) $('#mpstat').innerHTML = _t(5015, "<span class=\"muted\">正在连接房间…</span>");
     this.hosting = false;
     // 还没被房主收下就失败了（房间号错、点对点打不通、信令服务器连不上）：写原因，「加入」能再点。已经在局里的不管：信令断了不影响数据通道
@@ -10520,12 +10619,12 @@ const MP = {
       this.watch(conn);
       conn.on('error', () => { if (this.hostConn === conn && !this.role) { clearTimeout(tm); this.hostConn = null; fail(P2P); } });
       // 带上自己的错题本：局里给你出「再练一次」的题按你自己的来。keys：这个浏览器在这个房间里拿过的座位钥匙，开局后用同一个名字顶替还挂着在线的座位，房主只认这个
-      conn.on('open', () => { clearTimeout(tm); this.send(conn, { t: 'hello', name: this.myName, auth: this.auth, wb: wbLoad(), delta: 1, walk: 1, keys: this.seatKeys(room) }); });
+      conn.on('open', () => { clearTimeout(tm); this.send(conn, { t: 'hello', name: this.myName, mode: this.watching ? 'spectator' : 'player', ...(this.watching ? { invite: this.invite } : { auth: this.auth, wb: wbLoad(), keys: this.seatKeys(room) }), delta: 1, walk: 1 }); });
       conn.on('data', m => { if (this.hostConn === conn) this.onClientMsg(m); });
       // 局已结束、远端还开着战报或结束动画时只发 toast：modal() 会先关掉当前弹窗，正在看的战报会被打断（关了能点「查看战报」再开，但别替人关掉）
       // 断线提示是远端自己开的窗口（local）：不带的话正轮到电脑时会被当成电脑的弹窗，按钮灰掉、0.9 秒就被点掉，回原座位的说明一闪就没了
       // 被同一个浏览器的另一个页面接手了（kicked）：说清楚，不写成「房主关掉了页面」。连上了、还没被收下就断了：提示再点「加入」
-      conn.on('close', () => { if (this.hostConn !== conn) return; if (this.gone && this.role === 'client' && !conn._ok) { clearTimeout(tm); this.hostConn = null; this.retryLater(); return; } if (!this.role) { clearTimeout(tm); this.hostConn = null; fail(_t(5019, "和房主的连接断开了，还没进房间。再点「加入」试试")); return; } if (this.role === 'client' && S && S.over && (!$('#modal').hidden || $('#endfx'))) toast(_t(5020, "房主已经离开。想再来一局，等房主建好新房间，拿新的房间号加入")); else if (this.role === 'client' && this.kicked) info(_t(5021, "这个页面不再连着房间"), _t(5022, "<p>你在这台设备的另一个页面里用同一个名字重新加入了，接着在那边玩就行。</p>"), true); else if (this.role === 'client' && S && S.players && !S.over) toast(_t(5023, "和房主断开了，正在自动重连…"), 4000); else if (this.role === 'client') info(_t(4964, "和房主断开了"), S && S.over ? _t(5024, "<p>这一局已经结束了。想再来一局，等房主建好新房间，拿新的房间号加入。</p>") : _tf(5025, "<p>房主关掉了页面或者网络断了。重新打开页面，用你在局里的名字{$0}加入，就能回到原来的座位。</p><p>房主那边刷新过的话房间号会变：房主重新创建房间、点「继续上一局」，你拿新的房间号用这个名字加入，谁先谁后都行。</p>", S && S.players[this.mySeat] ? _tf(2766, "「{$0}」", S.players[this.mySeat].name) : ''), true); if (this.role === 'client') { if (S && S.players) { this.gone = true; MPFX.cancel(); if (!$('#game').hidden) render(); if (!S.over && !this.kicked) { this.reN = 0; this.retryLater(); } } else this.role = null; } });   // 开局后 role 留着 'client'：清掉的话存档、结算、「再来一局」都按单机走，会改写甚至删掉这台设备自己的存档；gone 让自己的回合也锁住。还在大厅、没收到房主的局时没什么要护着的，照旧清掉身份：不然在这台设备上点「继续上一局」打自己的局，会被当成远端整个锁住，也不存档
+      conn.on('close', () => { if (this.hostConn !== conn) return; if (this.gone && this.role === 'client' && !conn._ok) { clearTimeout(tm); this.hostConn = null; this.retryLater(); return; } if (!this.role) { clearTimeout(tm); this.hostConn = null; fail(_t(5019, "和房主的连接断开了，还没进房间。再点「加入」试试")); return; } if (this.role === 'client' && S && S.over && (!$('#modal').hidden || $('#endfx'))) toast(_t(5020, "房主已经离开。想再来一局，等房主建好新房间，拿新的房间号加入")); else if (this.role === 'client' && this.kicked && !this.removed) info(_t(5021, "这个页面不再连着房间"), _t(5022, "<p>你在这台设备的另一个页面里用同一个名字重新加入了，接着在那边玩就行。</p>"), true); else if (this.role === 'client' && this.removed) { /* 保留 removed 消息里的原因。 */ } else if (this.role === 'client' && S && S.players && !S.over) toast(_t(5023, "和房主断开了，正在自动重连…"), 4000); else if (this.role === 'client') info(_t(4964, "和房主断开了"), S && S.over ? _t(5024, "<p>这一局已经结束了。想再来一局，等房主建好新房间，拿新的房间号加入。</p>") : _tf(5025, "<p>房主关掉了页面或者网络断了。重新打开页面，用你在局里的名字{$0}加入，就能回到原来的座位。</p><p>房主那边刷新过的话房间号会变：房主重新创建房间、点「继续上一局」，你拿新的房间号用这个名字加入，谁先谁后都行。</p>", S && S.players[this.mySeat] ? _tf(2766, "「{$0}」", S.players[this.mySeat].name) : ''), true); if (this.role === 'client') { if (S && S.players) { this.gone = true; MPFX.cancel(); if (!$('#game').hidden) render(); if (!S.over && !this.kicked) { this.reN = 0; this.retryLater(); } } else this.role = null; } });   // 开局后 role 留着 'client'：清掉的话存档、结算、「再来一局」都按单机走，会改写甚至删掉这台设备自己的存档；gone 让自己的回合也锁住。还在大厅、没收到房主的局时没什么要护着的，照旧清掉身份：不然在这台设备上点「继续上一局」打自己的局，会被当成远端整个锁住，也不存档
     });
     // 已经进了房间、或者数据通道已经通了：信令服务器断开只发 network，数据通道还好好的，不管它（以前会把提示写进对局里看不到的 #mpstat）。换掉了的旧 Peer 也不管
     peer.on('error', e => { if (peer !== this.peer || (this.role === 'client' && !this.gone) || (this.hostConn && this.hostConn.open)) return; this.hostConn = null; fail(`${e.type === 'peer-unavailable' ? _t(5026, "找不到这个房间。检查一下房间号；房间号没错的话，可能是房主那边网络断了，过一会儿再试，或者请房主刷新后重新创建房间、点「继续上一局」") : _t(5017, "联机出错：") + esc(e.type || String(e))}${e.type === 'network' || e.type === 'server-error' ? _t(5027, "。公司网络可能拦了连接，换个网络试试") : ''}`); });
@@ -10534,11 +10633,12 @@ const MP = {
     if (typeof m === 'string') { try { m = JSON.parse(m); } catch (e) { return; } }   // 新版房主发的状态是 JSON 字符串（序列化一次发给所有人）
     if (!m || typeof m !== 'object') return;
     // 被拒后能改了名字再点加入。hostConn 清掉：房主 300ms 后关连接，那次 close 不能再写成「连接断开了」，把「密码不对」盖掉
-    if (m.t === 'reject') { this.role = null; this.hostConn = null; $('#mpstat').innerHTML = _tf(5028, "<span class=\"warn\">加入失败：{$0}</span>", esc(String(m.why || ''))); const jb = $('#mpbox .mpform button'); if (jb) jb.disabled = false; return; }
+    if (m.t === 'reject') { const inGame = this.role === 'client' && S && S.players; this.role = inGame ? 'client' : null; if (inGame) { this.gone = true; this.kicked = true; MPFX.cancel(); render(); info('加入失败', `<p>${esc(String(m.why || ''))}</p>`, true); } this.hostConn = null; $('#mpstat').innerHTML = _tf(5028, "<span class=\"warn\">加入失败：{$0}</span>", esc(String(m.why || ''))); const jb = $('#mpbox .mpform button'); if (jb) jb.disabled = false; return; }
     if (m.t === 'kicked') { MPFX.cancel(); this.kicked = true; return; }
     // 房主把我移出了房间：不再自动重连；还在大厅里的，回到能重新填房间号的样子
-    if (m.t === 'removed') { MPFX.cancel(); this.kicked = true; this.removed = true; if (!(S && S.players)) { this.role = null; this.hostConn = null; $('#mpstat').innerHTML = _t(5029, "<span class=\"warn\">房主把你移出了房间</span>"); const jb = $('#mpbox .mpform button'); if (jb) jb.disabled = false; } else info(_t(5030, "你被移出了房间"), _t(5031, "<p>房主把你移出了这个房间，你的座位交给电脑接着打。</p>"), true); return; }   // 同一个浏览器的另一个页面用这个名字接手了座位，房主马上会关掉这条连接
-    if (m.t === 'welcome') { MPFX.cancel(); MPFX.lastWalk = 0; if (this.hostConn) this.hostConn._ok = true; clearTimeout(this.rjT); if (this.gone) toast(_t(5032, "重新连上房主了")); this.role = 'client'; this.gone = false; this.kicked = false; this.mySeat = m.seat; if (typeof m.key === 'string') this.seatKeys(this.room, m.key.slice(0, 64)); try { sessionStorage.setItem('aws-tycoon-lastjoin', JSON.stringify({ room: this.room, name: this.myName })); } catch (e) { } $('#mpstat').innerHTML = _tf(5033, "<span class=\"ok\">已加入房间 {$0}，你是玩家 {$1}。等房主开始游戏…</span>", esc(this.room), m.seat + 1); const sb = $('#startBtn'); if (sb) { sb.disabled = true; sb.textContent = _t(5034, "等房主开始"); } /* hero 和 UG 活动局的开局按钮也要灰掉：平板、矮屏手机首屏只看得到它们，点了会在客户端本地另开一局；「继续上一局」会读这台自己的旧存档 */ document.querySelectorAll('.hero .cta .twin.pri, .ugbar button, #resume button').forEach(b => { b.disabled = true; b.title = _t(5035, "已加入房间，等房主开始"); if (b.classList.contains('twin')) b.textContent = _t(5034, "等房主开始"); }); return; }
+    if (m.t === 'removed') { MPFX.cancel(); this.kicked = true; this.removed = true; this.gone = true; if (!(S && S.players)) { this.role = null; this.hostConn = null; $('#mpstat').innerHTML = _t(5029, "<span class=\"warn\">房主把你移出了房间</span>"); const jb = $('#mpbox .mpform button'); if (jb) jb.disabled = false; } else info(_t(5030, "你被移出了房间"), this.watching ? '<p>房主已结束你的观战或更新了邀请。请联系房主获取新邀请。</p>' : _t(5031, "<p>房主把你移出了这个房间，你的座位交给电脑接着打。</p>"), true); return; }   // 同一个浏览器的另一个页面用这个名字接手了座位，房主马上会关掉这条连接
+    if (m.t === 'pending') { if ($('#mpstat')) $('#mpstat').textContent = String(m.why || '等待房主确认'); return; }
+    if (m.t === 'welcome') { this.watching = m.mode === 'spectator'; MPFX.cancel(); MPFX.lastWalk = 0; if (this.hostConn) this.hostConn._ok = true; clearTimeout(this.rjT); if (this.gone) toast(_t(5032, "重新连上房主了")); this.role = 'client'; this.gone = false; this.kicked = false; this.removed = false; this.mySeat = m.seat; if (!this.watching && typeof m.key === 'string') this.seatKeys(this.room, m.key.slice(0, 64)); try { sessionStorage.setItem('aws-tycoon-lastjoin', JSON.stringify({ room: this.room, name: this.myName, watching: this.watching })); } catch (e) { } $('#mpstat').innerHTML = this.watching ? `已加入房间 ${esc(this.room)}，你是只读观众，等待房主开始…` : _tf(5033, "<span class=\"ok\">已加入房间 {$0}，你是玩家 {$1}。等房主开始游戏…</span>", esc(this.room), m.seat + 1); const sb = $('#startBtn'); if (sb) { sb.disabled = true; sb.textContent = _t(5034, "等房主开始"); } /* hero 和 UG 活动局的开局按钮也要灰掉：平板、矮屏手机首屏只看得到它们，点了会在客户端本地另开一局；「继续上一局」会读这台自己的旧存档 */ document.querySelectorAll('.hero .cta .twin.pri, .ugbar button, #resume button').forEach(b => { b.disabled = true; b.title = _t(5035, "已加入房间，等房主开始"); if (b.classList.contains('twin')) b.textContent = _t(5034, "等房主开始"); }); return; }
     if (this.role !== 'client') return;
     if (m.t === 'again') {
       MPFX.cancel();
@@ -10547,7 +10647,7 @@ const MP = {
       if (MODAL_CUR && !$('#modal').hidden) { try { MODAL_CUR.cancel(); } catch (e) { } } try { if (VIEW_CUR) VIEW_CUR.cancel(); } catch (e) { }
       $('#game').hidden = true; $('#setup').hidden = false; $('#setup').style.display = '';
       if (!$('#mpstat')) mpUI('join');
-      $('#mpstat').innerHTML = _tf(5036, "<span class=\"ok\">房主开了下一局，你还在房间 {$0}，是玩家 {$1}。等房主开始…</span>", esc(this.room), this.mySeat + 1);
+      $('#mpstat').innerHTML = this.watching ? `房主开了下一局，你仍是房间 ${esc(this.room)} 的只读观众，等待开始…` : _tf(5036, "<span class=\"ok\">房主开了下一局，你还在房间 {$0}，是玩家 {$1}。等房主开始…</span>", esc(this.room), this.mySeat + 1);
       const sb = $('#startBtn'); if (sb) { sb.disabled = true; sb.textContent = _t(5034, "等房主开始"); }
       document.querySelectorAll('.hero .cta .twin.pri, .ugbar button, #resume button').forEach(b => { b.disabled = true; b.title = _t(5035, "已加入房间，等房主开始"); if (b.classList.contains('twin')) b.textContent = _t(5034, "等房主开始"); });
       return;
@@ -10591,7 +10691,7 @@ const MP = {
     let html = typeof m.spec.html === 'string' ? m.spec.html.replace(/class="deal (inc|rei|fis)( fx)?"/g, (s, kd) => `class="deal ${kd}${FX.ok() ? ' fx' : ''}"`) : m.spec.html;
     // 自己答的题：结果窗里写「你选的」「错题本」，不写自己的名字（房主那份是按第三人称写给大家看的）
     if (m.who === this.mySeat && /\bquiz\b/.test(m.spec.cls || '') && S && S.players[this.mySeat]) { const me = S.players[this.mySeat].name; html = String(html || '').split(_tf(5038, "{$0} 选的", me)).join(_t(5039, "你选的")).split(_tf(2446, " {$0} 的错题本", me)).join(_t(2447, "错题本")).split(_tf(5040, "{$0} 的错题本", me)).join(_t(2447, "错题本")); }
-    modal({ ...m.spec, html, who: m.who, _mp: { id: m.id, interactive: m.who === this.mySeat } }); this.openMid = m.id; if (k) setTimeout(() => FX.dealIn(), 0);
+    modal({ ...m.spec, html, who: m.who, _mp: { id: m.id, interactive: !this.watching && m.who === this.mySeat } }); this.openMid = m.id; if (k) setTimeout(() => FX.dealIn(), 0);
   },
   // 自己的窗口关掉了：刚才没顶上来的只读窗还开着就补上；又开了别的窗口（手册切完整版）就接着等它也关掉
   showPeek() {
@@ -10601,7 +10701,7 @@ const MP = {
   },
   // 远端：没轮到自己时按钮都不能点；轮到自己时点按钮变成发给房主
   lockUI() {
-    const mine = S && S.cur === this.mySeat && !this.gone;   // 房主走了：自己的回合也锁住，点了也没人接
+    const mine = !this.watching && S && S.cur === this.mySeat && !this.gone;   // 房主走了：自己的回合也锁住，点了也没人接
     if (this.gone && S && !S.over) { const st = $('#center .stage .st'); if (st) { if (this.kicked) st.textContent = this.removed ? _t(5041, "房主把你移出了房间") : _t(5042, "这个页面不再连着房间：接着在另一个页面里玩"); else st.innerHTML = _t(5043, "和房主断开了，正在自动重连… <button type=\"button\" class=\"sm\" data-rejoin onclick=\"MP.reN = 0; MP.rejoin()\">现在重新连接</button>"); } }
     const an = $('#modal [data-aipn]'); if (an) an.textContent = aiPaused() ? _t(2725, "已暂停") : _t(2726, "在选…");   // 房主暂停 / 继续电脑：开着的电脑弹窗跟着改（每次收到状态重画后都走到这里）
     document.querySelectorAll('#center button[onclick], #mbar button[onclick]').forEach(b => {
@@ -10609,7 +10709,10 @@ const MP = {
       if (a) { if (!mine) b.disabled = true; }
       else if (/confirmNew|quitGame|backToSetup/.test(b.getAttribute('onclick'))) b.hidden = true;
     });
-    const t = $('.c-head .sub'); if (t && !t.querySelector('.mpme')) t.insertAdjacentHTML('beforeend', _tf(5044, " · <span class=\"mpme\">联机 · 你是 {$0}</span>", S.players[this.mySeat] ? S.players[this.mySeat].name : ''));
+    if (this.watching) document.querySelectorAll('#game button[onclick], #mbar button[onclick]').forEach(b => {
+      if (/aipause|proposeEnd|renameDialog|cheat|reportCheat|maybeTour/.test(b.getAttribute('onclick'))) b.hidden = true;
+    });
+    const t = $('.c-head .sub'); if (t && !t.querySelector('.mpme')) t.insertAdjacentHTML('beforeend', this.watching ? ' · <span class="mpme">受邀观战 · 只读</span>' : _tf(5044, " · <span class=\"mpme\">联机 · 你是 {$0}</span>", S.players[this.mySeat] ? S.players[this.mySeat].name : ''));
   },
 };
 // 远端：截住游戏操作按钮，改成发给房主
@@ -10633,7 +10736,7 @@ const okSq = i => Number.isInteger(i) && i >= 0 && i < SQ.length;
 const fxCast = (k, d) => {
   if (MP.role !== 'host') return;
   // 能力协商：旧客户端仍收逐格事件，新客户端只收分段路径；we 两边共用。
-  Object.values(MP.seats).forEach(x => {
+  [...Object.values(MP.seats), ...Object.values(MP.viewers || {})].forEach(x => {
     if (k === 'walk' ? !x.walk : (k === 'ws' || k === 'wh') && x.walk) return;
     MP.send(x.conn, { t: 'fx', k, ...d });
   });
@@ -10931,14 +11034,14 @@ function mpHostName() {
 }
 function mpUI(kind) {
   const box = $('#mpbox');
-  if (kind === 'host') { box.innerHTML = `<div class="mpform"><label>${_t(5115, "房间密码")} <input id="mppwd" type="password" maxlength="32" autocomplete="off" placeholder="${_t(5116, "至少 4 位")}"></label><label>${_t(5117, "你的名字")} <input id="mphname" maxlength="12" autocomplete="off" placeholder="${_t(4999, "玩家 1")}"></label><button class="pri" onclick="if ($('#mppwd').value.length < 4) { $('#mpstat').innerHTML = '<span class=warn>密码至少 4 位</span>'; } else { mpHostName(); MP.host($('#mppwd').value); this.disabled = true; }">${_t(5118, "创建房间")}</button></div><div id="mpstat"></div>`;
+  if (kind === 'host') { box.innerHTML = `<div class="mpform"><label>${_t(5115, "房间密码")} <input id="mppwd" type="password" maxlength="32" autocomplete="off" placeholder="${_t(5116, "至少 4 位")}"></label><label>${_t(5117, "你的名字")} <input id="mphname" maxlength="12" autocomplete="off" placeholder="${_t(4999, "玩家 1")}"></label><label class="mp-watch-option" title="允许观众在开赛前进入大厅，观战邀请码与玩家密码分开"><input id="mpallowwatch" type="checkbox">开启受邀观战</label><button class="pri" onclick="if ($('#mppwd').value.length < 4) { $('#mpstat').innerHTML = '<span class=warn>密码至少 4 位</span>'; } else { mpHostName(); MP.host($('#mppwd').value, $('#mpallowwatch').checked); this.disabled = true; }">${_t(5118, "创建房间")}</button></div><div id="mpstat"></div>`;
     // 房主的名字就是玩家 1 的名字：两个框填的是同一个，这里改了写回名字栏（照常存进开局设置），大厅名单跟着改
     const hn = $('#mphname'), n0 = $('#nm0'); if (n0 && !_tr(5119, "^玩家 ?1$", "").test(n0.value.trim())) hn.value = n0.value;
     hn.addEventListener('input', () => { mpHostName(); if (MP.role === 'host' && !(S && S.players)) MP.renderLobby(); });
     // 反过来：在上面名字栏里改玩家 1 的名字，这个框也跟着变（#names 每次重画都还是同一个容器，挂一次就行）
     const nb = $('#names'); if (nb && !nb._mpn) { nb._mpn = true; nb.addEventListener('input', e => { const h = $('#mphname'); if (e.target.id === 'nm0' && h && document.activeElement !== h) { h.value = e.target.value; if (MP.role === 'host' && !(S && S.players)) MP.renderLobby(); } }); } }
-  else box.innerHTML = `<div class="mpform"><label>${_t(5120, "房间号")} <input id="mproom" maxlength="6" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" style="text-transform:uppercase;width:7.5em"></label><label>${_t(5112, "密码")} <input id="mppwd" type="password" maxlength="32" autocomplete="off"></label><label>${_t(5117, "你的名字")} <input id="mpname" maxlength="12"></label><button class="pri" onclick="MP.join($('#mproom').value, $('#mppwd').value, $('#mpname').value); this.disabled = true;">${_t(5121, "加入")}</button></div><div id="mpstat"></div>`;
-  if (kind !== 'host') { let lj = null; try { lj = JSON.parse(sessionStorage.getItem('aws-tycoon-lastjoin')); } catch (e) { } if (lj && typeof lj.room === 'string') { $('#mproom').value = lj.room.slice(0, 6); $('#mpname').value = String(lj.name || '').slice(0, 12); $('#mppwd').focus(); } }
+  else box.innerHTML = `<div class="mpform"><label>${_t(5120, "房间号")} <input id="mproom" maxlength="6" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" style="text-transform:uppercase;width:7.5em"></label><label>加入身份 <select id="mpmode"><option value="player">玩家</option><option value="spectator">受邀观战</option></select></label><label>房间密码 / 观战邀请码 <input id="mppwd" type="password" maxlength="32" autocomplete="off"></label><label>${_t(5117, "你的名字")} <input id="mpname" maxlength="12"></label><button class="pri" onclick="MP.join($('#mproom').value, $('#mppwd').value, $('#mpname').value, undefined, $('#mpmode').value === 'spectator'); this.disabled = true;">${_t(5121, "加入")}</button></div><div id="mpstat"></div>`;
+  if (kind !== 'host') { let lj = null; try { lj = JSON.parse(sessionStorage.getItem('aws-tycoon-lastjoin')); } catch (e) { } if (lj && typeof lj.room === 'string') { $('#mproom').value = lj.room.slice(0, 6); $('#mpname').value = String(lj.name || '').slice(0, 12); $('#mpmode').value = lj.watching ? 'spectator' : 'player'; $('#mppwd').focus(); } }
 }
 
 // ================= 启动 =================
