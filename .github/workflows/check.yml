@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -45,14 +45,27 @@ jobs:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           if [[ -z "$SIZE_BASE_REF" || "$SIZE_BASE_REF" =~ ^0+$ ]]; then
-            SIZE_BASE_REF="$DEFAULT_BRANCH"
+            SIZE_BASE_REF="origin/$DEFAULT_BRANCH"
           fi
           if ! git cat-file -e "$SIZE_BASE_REF:code/index.html" 2>/dev/null; then
-            if git fetch --no-tags --depth=1 origin "$SIZE_BASE_REF"; then
+            if git fetch --no-tags origin "$SIZE_BASE_REF"; then
               SIZE_BASE_REF=FETCH_HEAD
             fi
           fi
           npm run lint:size -- "$SIZE_BASE_REF"
+      - name: 版本比较基线
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BASE: ${{ github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          base="$PR_BASE"
+          if [[ -z "$base" ]]; then base="$PUSH_BASE"; fi
+          if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
+            base=$(git merge-base HEAD "origin/$DEFAULT_BRANCH")
+          fi
+          git cat-file -e "$base:code/index.html"
+          echo "VERSION_BASE_REF=$base" >> "$GITHUB_ENV"
       - run: npm run check
       - uses: actions/upload-artifact@v4
         if: failure()
