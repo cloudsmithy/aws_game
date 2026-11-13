@@ -3411,7 +3411,6 @@
  "<b>卖回亚马逊云科技</b>：买价、升级、容量的实付按 {$0}拿回。": "<b>Sell back to Amazon Web Services</b>: get back what you paid for the purchase, upgrades and capacity at {$0}. ",
  "「自动变卖」先拆升级、容量{$0}，不够才整块卖。宣告破产：账户被暂停出局，服务连同升级按欠款比例分给各个债主（欠亚马逊云科技的那份退回亚马逊云科技）。": "“Auto-liquidate” strips upgrades and capacity first{$0}, and only sells a whole service if that isn't enough. Declaring bankruptcy: the account is suspended and you are eliminated, and your services with their upgrades are split among your creditors in proportion to the debt (the share owed to Amazon Web Services goes back to Amazon Web Services). ",
  "<p class=\"warnline\">全卖了也不够还：选「自动变卖」会直接破产，服务连同升级按欠款比例分给各个债主（欠亚马逊云科技的那份退回亚马逊云科技）。</p>": "<p class=\"warnline\">Even selling everything won't cover it: choosing “Auto-liquidate” goes straight to bankruptcy, and services with their upgrades are split among creditors in proportion to the debt (the share owed to Amazon Web Services goes back to Amazon Web Services).</p>",
- "<li><b>下线</b>（EC2、RDS、Aurora、Redshift、ECS）：先拿回买价一半周转，服务还是你的，以后上线要还这一半加 10%。</li>": "<li><b>Take offline</b> (EC2, RDS, Aurora, Redshift, ECS): get half the purchase price back as working capital; the service is still yours, and bringing it back online later means repaying that half plus 10%.</li>",
  "、下线": ", taking offline",
  "管理资产": "Manage assets",
  "自动变卖": "Auto-liquidate",
@@ -3598,7 +3597,6 @@
  " {$0} 这几块": " for {$0}",
  "<li>前面往回绕过了起点：{$0}经过 Startup 扶持不算新的一圈，不领 Credits、不交运行费。</li>": "<li>You moved backward past the start earlier: {$0} you pass Startup Credits won't count as a new lap, with no Credits and no running cost.</li>",
  "<li>还记着一次免费换 Graviton：EC2 升 Graviton 这一级时不花钱。</li>": "<li>A free Graviton swap is still noted: upgrading EC2 to the Graviton level costs nothing.</li>",
- "<li>缺钱时 EC2、RDS、Aurora、Redshift、ECS 可以<b>下线</b>：拿回买价一半，不收过路费，运行费只剩存储费；以后还这一半加 10% 上线，期间别人可以付原价拉走。</li>": "<li>When short of cash, EC2, RDS, Aurora, Redshift and ECS can be <b>taken offline</b>: get half the purchase price back, no rent is charged, and the running cost is only the storage fee; later you repay that half plus 10% to bring it online, and meanwhile others can pay full price to take it away.</li>",
  "{$0} 的资产 · 现金 ${$1}{$2}": "{$0}'s assets · cash ${$1}{$2}",
  " · 欠款 ${$0}": " · Debt ${$0}",
  "把 {$0} 卖回亚马逊云科技？": "Sell {$0} back to Amazon Web Services?",
@@ -4310,7 +4308,6 @@
  "别人猜的价比你多出原价 10% 就能抢走": "Another player can snatch it by guessing a price at least 10% of the full price above yours",
  "出价多少看不到，猜得够高就能抢走": "You can't see the bid; guess high enough and you can snatch it",
  "下线": "Offline",
- "下线就是抵押：只有 EC2、RDS、Aurora、Redshift、ECS 能下线，下线时拿回买价的一半（Spot 按出价）。下线期间不收过路费，也不算持有（不凑整组、架构和支柱），运行费只交存储费；至少下线 3 轮，之后主人还这一半再加原价的 10% 就能重新上线；没上线前别人落上来，付原价给亚马逊云科技就能拉走，主人不再拿钱": "Offline works like a mortgage: only EC2, RDS, Aurora, Redshift and ECS can go offline, and you get half the purchase price back (Spot: based on the bid). While offline it collects no rent and doesn't count as owned (not for color groups, architectures or pillars), and running cost is only the storage fee; it must stay offline at least 3 rounds, after which the owner can bring it back online by repaying that half plus 10% of the full price; until then, another player who lands on it can take it by paying the full price to Amazon Web Services, and the owner gets no money",
  "Impaired：暂停收过路费，到主人下回合开始时恢复": "Impaired: rent paused until the start of the owner's next turn",
  "被 DDoS：不收过路费，运行费照交，也不算持有（不凑整组、架构和支柱），到攻击的人第 2 个自己的回合开始时恢复": "DDoSed: no rent collected, running cost is still paid, and it doesn't count as owned (not for color groups, architectures or pillars); recovers at the start of the attacker's 2nd own turn",
  "Spot：按出价买的，别人落上来出价比你多出原价的 10% 就能抢走（抢的人不付这次的过路费，你拿回出价的一半）；不能升级、不能加容量": "Spot: bought by bid; another player who lands on it can snatch it by bidding 10% of the full price more than you (the snatcher doesn't pay rent this time, and you get half your bid back); cannot be upgraded or have capacity added",
@@ -4626,7 +4623,6 @@
  "到主人的下一个回合开始时自动恢复；Spot 被抢走、破产分给债主、主人把它下线时直接清除": "Recovers automatically at the start of the owner's next turn; cleared immediately if a Spot service is taken, it goes to a creditor in bankruptcy, or the owner takes it offline",
  "<b>已下线</b>": "<b>Offline</b>",
  "暂时停机，相当于抵押。只有 EC2、RDS、Aurora、Redshift、ECS 能下线：先拿回买价的一半周转；下线期间不收过路费，也不算持有（不凑整组、不凑架构、不算支柱），运行费只剩存储费（EC2、RDS、Aurora、Redshift 每圈 $5，ECS 不收）。": "Temporarily shut down, like putting it up as collateral. Only EC2, RDS, Aurora, Redshift, and ECS can go offline: you get half the purchase price back to stay afloat. While offline it collects no rent and doesn't count as owned (not for a color group, an architecture, or a pillar), and the running cost drops to a storage fee only ($5 per lap for EC2, RDS, Aurora, and Redshift; none for ECS). ",
- "至少下线 3 轮，之后主人在资产管理里还那一半再加原价 10% 重新上线；下线期间别人落上来，可以付原价把它拉走归自己": "Offline for at least 3 rounds; after that the owner pays back the half plus 10% of the original price in Assets to bring it back online. While it is offline, anyone who lands on it can pay the full price to take it for themselves",
  "<b>被 DDoS 下线</b>": "<b>Offline from DDoS</b>",
  "被对手用 DDoS 打下线：不收过路费、不算持有，运行费照交。": "Knocked offline by an opponent's DDoS: no rent, doesn't count as owned, and you still pay the running cost. ",
  "到发动的人第 2 个回合开始时恢复；有 Shield Advanced 或 CloudFront 的打不动": "Recovers at the start of the attacker's 2nd turn; it can't be hit if it has Shield Advanced or CloudFront",
@@ -5357,5 +5353,9 @@
  "过路费明细": "Rent breakdown",
  "合计 ${$0}": "Total ${$0}",
  "{$0}整套架构一起收：别人落在其中任意一块，都按下面这些加起来付": "{$0} is billed as one architecture: whoever lands on any of its services pays the sum below",
- "<em>×{$0}</em>": "<em>×{$0}</em>"
+ "<em>×{$0}</em>": "<em>×{$0}</em>",
+ "下线就是抵押：只有 EC2、RDS、Aurora、Redshift、ECS 能下线，下线时拿回买价的一半（Spot 按出价），这笔钱不用还。下线期间不收过路费，也不算持有（不凑整组、架构和支柱），运行费只交存储费；下线固定 3 轮，满 3 轮在主人回合开始时自动恢复，主人自己落到这一格可以提前免费拉起来；没恢复前别人落上来，付原价给亚马逊云科技就能买走，主人不再拿钱": "Going offline is a mortgage: only EC2, RDS, Aurora, Redshift and ECS can go offline, and doing so returns half the purchase price (half the bid for Spot), which is not repaid. While offline it collects no rent and doesn't count as owned (not for color groups, architectures or pillars), and the running cost is only the storage fee. It stays offline for exactly 3 rounds and then comes back automatically at the start of the owner's turn; the owner can bring it back early for free by landing on it. Before that, anyone else who lands on it can pay the full price to Amazon Web Services and buy it, and the owner gets nothing.",
+ "<li><b>下线</b>（EC2、RDS、Aurora、Redshift、ECS）：先拿回买价一半周转，这笔钱不用还，服务还是你的；固定 3 轮后自动恢复。</li>": "<li><b>Take offline</b> (EC2, RDS, Aurora, Redshift, ECS): you get half the purchase price back as working cash and don't repay it; the service stays yours and comes back automatically after 3 rounds.</li>",
+ "<li>缺钱时 EC2、RDS、Aurora、Redshift、ECS 可以<b>下线</b>：拿回买价一半（不用还），不收过路费，运行费只剩存储费；固定 3 轮后自动恢复，自己落到这一格可以提前免费拉起来，期间别人可以付原价买走。</li>": "<li>When short of cash, EC2, RDS, Aurora, Redshift and ECS can be <b>taken offline</b>: you get half the purchase price back (not repaid), no rent is charged and the running cost is only the storage fee. It comes back automatically after 3 rounds, landing on it yourself brings it back early for free, and meanwhile anyone else who lands on it can buy it at full price.</li>",
+ "下线固定 3 轮，满 3 轮在主人回合开始时自动恢复，拿回的钱不用还；没满 3 轮时主人自己落到这一格可以提前免费拉起来。下线期间别人落上来，可以付原价把它买走归自己": "It stays offline for exactly 3 rounds and comes back automatically at the start of the owner's turn, with the money taken out not repaid; before that, the owner can bring it back early for free by landing on it. While it is offline, anyone else who lands on it can pay the full price and buy it."
 }
