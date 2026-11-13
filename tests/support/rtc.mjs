@@ -19,8 +19,9 @@ export async function connectRTC(host, client, hello) {
     const pc = new RTCPeerConnection({ iceServers: [] }); rtcPeers.push(pc);
     pc.ondatachannel = e => {
       const channel = window.rtcChannel = e.channel;
-      const conn = { open: true, send: m => { sent.push(m); channel.send(typeof m === 'string' ? m : JSON.stringify(m)); }, close: () => channel.close() };
+      const conn = { open: channel.readyState === 'open', send: m => { sent.push(m); channel.send(typeof m === 'string' ? m : JSON.stringify(m)); }, close: () => channel.close() };
       MP.hostConn = conn;
+      channel.onopen = () => { conn.open = true; };
       channel.onmessage = e => { if (MP.hostConn !== conn) return; const m = JSON.parse(e.data); received.push(m); MP.onClientMsg(m); };
       channel.onclose = () => { if (MP.hostConn !== conn) return; conn.open = false; MP.gone = true; MPFX.cancel(); if (S && S.players) render(); };
     };
@@ -29,8 +30,18 @@ export async function connectRTC(host, client, hello) {
     await pc.setLocalDescription(await pc.createAnswer()); await gathered; return pc.localDescription.toJSON();
   }, offer);
   await host.evaluate(({ index, answer }) => rtcLinks[index].pc.setRemoteDescription(answer), { index, answer });
-  await expect.poll(() => host.evaluate(i => rtcLinks[i].conn.open, index)).toBe(true);
-  await expect.poll(() => client.evaluate(() => rtcChannel?.readyState)).toBe('open');
+  // DCEP 握手两端并非同时 open；CI 已出现房主 open 后客户端仍 connecting 超过默认 5 秒。
+  // 仅为真实握手留出 15 秒，不重试建连；超时报告双端 ICE/连接/通道状态。
+  await expect.poll(async () => {
+    const [hostState, clientState] = await Promise.all([
+      host.evaluate(i => { const { pc, channel, conn } = rtcLinks[i]; return { ice: pc.iceConnectionState, connection: pc.connectionState, channel: channel.readyState, open: conn.open }; }, index),
+      client.evaluate(() => { const pc = rtcPeers.at(-1); return { ice: pc.iceConnectionState, connection: pc.connectionState, channel: window.rtcChannel?.readyState ?? 'absent', open: !!MP.hostConn?.open }; })
+    ]);
+    return { host: hostState, client: clientState };
+  }, { timeout: 15_000, message: '等待真实 WebRTC 双端通道完成握手' }).toMatchObject({
+    host: { connection: 'connected', channel: 'open', open: true },
+    client: { connection: 'connected', channel: 'open', open: true }
+  });
   await client.evaluate(hello => { MP.myName = hello.name; MP.room = 'ABCDEF'; MP.watching = hello.mode === 'spectator'; MP.send(MP.hostConn, hello); }, hello);
   return index;
 }
