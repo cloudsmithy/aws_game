@@ -306,3 +306,55 @@ test('真实通道输入校验：畸形入房/操作/答案无副作用，正常
     await joinRoom(viewer, room, invite, true, '正常解说'); await sameState(host, [player, viewer]);
   });
 });
+
+test('建房时开启观战：大厅直接给出邀请，观众先入场且不占座，开始后自动进入只读对局', async ({ browser, request }) => {
+  test.setTimeout(45_000);
+  await peerWorld(browser, async page => {
+    const { createRoom, joinRoom, startRoom } = await import('./support/peerjs.mjs');
+    const { host, room } = await createRoom(page, undefined, true);
+    await expect(host.getByLabel('开启受邀观战', { exact: true })).toBeDisabled();
+    const invite = await host.locator('#mpstat [data-watch-code]').innerText();
+    expect(invite).toMatch(/^[0-9a-f]{32}$/);
+    await host.setViewportSize({ width: 390, height: 844 });
+    await expect.poll(() => host.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await host.setViewportSize({ width: 1440, height: 900 });
+    // 只替换系统剪贴板边界，不写入测试机的个人剪贴板。
+    await host.evaluate(() => { Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => { window.copiedInvitation = text; } } }); });
+    await host.getByRole('button', { name: '复制观战邀请', exact: true }).click();
+    const copied = await host.evaluate(() => copiedInvitation);
+    expect(copied).toContain(room); expect(copied).toContain(invite); expect(copied).not.toContain('test-room');
+    await host.evaluate(() => { navigator.clipboard.writeText = async () => { throw new Error('denied'); }; });
+    await host.getByRole('button', { name: '复制观战邀请', exact: true }).click();
+    await expect(host.locator('#toast')).toContainText('手动选择');
+    const viewer = await page(); await joinRoom(viewer, room, invite, true, '提前入场的解说');
+    await expect(viewer.locator('#setup')).toBeVisible(); await expect(viewer.locator('#startBtn')).toBeDisabled();
+    expect(await viewer.evaluate(() => ({ state: S, seat: MP.mySeat, role: MP.role, watching: MP.watching }))).toEqual({ state: null, seat: null, role: 'client', watching: true });
+    await expect(host.locator('#mpstat')).toContainText('提前入场的解说');
+    expect(await host.evaluate(() => Object.keys(MP.seats).length)).toBe(0);
+    const peer = await host.evaluate(() => MP.peer.id);
+    await request.post('/__test/signal?peer=' + peer + '&block=0');
+    await expect.poll(() => host.evaluate(() => MP.peer.disconnected)).toBe(true);
+    await expect.poll(() => host.evaluate(() => !MP.peer.disconnected), { timeout: 15000 }).toBe(true);
+    await expect(host.locator('#mpstat [data-watch-code]')).toHaveText(invite);
+    expect(await viewer.evaluate(() => netTrace.filter(m => m.t === 'welcome').length)).toBe(1);
+    const player = await page(); await joinRoom(player, room, 'test-room', false, '玩家');
+    expect(await player.evaluate(() => MP.mySeat)).toBe(1);
+    await startRoom(host); await sameState(host, [player, viewer]);
+    await expect(viewer.locator('#game')).toBeVisible(); await expect(viewer.locator('.mpme')).toHaveText('受邀观战 · 只读');
+    expect(await viewer.evaluate(() => MP.mySeat)).toBe(null);
+    expect(await host.evaluate(() => S.players.length)).toBe(2);
+  });
+});
+
+test('建房默认不开观战：不显示邀请，观众不能凭玩家密码提前入场', async ({ browser }) => {
+  await peerWorld(browser, async page => {
+    const { createRoom, joinRoom } = await import('./support/peerjs.mjs');
+    const { host, room } = await createRoom(page);
+    await expect(host.getByLabel('开启受邀观战', { exact: true })).not.toBeChecked();
+    expect(await host.evaluate(() => MP.watchToken)).toBe('');
+    await expect(host.locator('#mpstat [data-watch-code]')).toHaveCount(0);
+    const viewer = await page(); await joinRoom(viewer, room, 'test-room', true, '未受邀解说', false);
+    await expect.poll(() => viewer.evaluate(() => netTrace.some(m => m.t === 'reject'))).toBe(true);
+    expect(await host.evaluate(() => ({ seats: Object.keys(MP.seats).length, viewers: Object.keys(MP.viewers).length, state: S }))).toEqual({ seats: 0, viewers: 0, state: null });
+  });
+});

@@ -28,12 +28,13 @@ export async function configureLocalPeer(p) {
     }, Number(process.env.AWS_GAME_SIGNAL_PORT || 8879));
 }
 
-export async function createRoom(page, existingHost) {
+export async function createRoom(page, existingHost, allowWatching = false) {
   const host = existingHost || await page();
   await host.locator('input[name=np][value="2"]').locator('..').click();
   await host.locator('input[name=diff][value="basic"]').locator('..').click();
   await host.locator('#ai0').uncheck(); await host.locator('#ai1').uncheck();
   await host.evaluate(() => mpUI('host'));
+  if (allowWatching) await host.getByLabel('开启受邀观战', { exact: true }).check({ timeout: 5000 });
   await host.locator('#mphname').fill('房主'); await host.locator('#mppwd').fill('test-room');
   await host.locator('#mpbox .mpform button').click();
   await expect.poll(() => host.evaluate(() => MP.role)).toBe('host');

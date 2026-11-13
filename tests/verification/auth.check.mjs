@@ -207,3 +207,14 @@ test('已认证玩家的畸形操作名、作弊参数和弹窗输入不得触�
   h.mp.onHostMsg(c, { t: 'ans', id: 8, k: 0, inp: { amount: 5, note: '正常', agree: true } });
   assert.deepEqual(plain(h.effects), [{ ans: { k: 0 }, inp: { amount: 5, note: '正常', agree: true } }]);
 });
+
+test('建房观战选项：仅成功建房后生效，默认关闭，信令重新 open 不轮换邀请', async () => {
+  for (const enabled of [false, true]) {
+    const h = harness(false), Peer = fakePeer(h); h.mp.role = null;
+    await h.mp.host('password', enabled); assert.equal(h.mp.watchToken, '');
+    const peer = Peer.instances.at(-1); peer.emit('open');
+    const token = h.mp.watchToken; assert.equal(token.length, enabled ? 32 : 0);
+    peer.emit('open'); assert.equal(h.mp.watchToken, token);
+    assert.equal(Object.keys(h.mp.viewers).length, 0);
+  }
+});

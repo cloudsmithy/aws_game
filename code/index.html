@@ -820,6 +820,8 @@ table.mpnet tr.bad td.st{color:var(--red)}
 .archl td button.sm{white-space:normal;max-width:100%;margin:2px 0}
 @media (max-width:640px){table.mpnet th{width:auto}.mpturn{grid-template-columns:1fr}}
 .mpform label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut)}
+.mpform .mp-watch-option{flex-direction:row;align-items:center;color:var(--ink);gap:6px}
+.mpform .mp-watch-option input{padding:0;margin:0}
 .mpform input{font:inherit;border:1px solid var(--control-border);border-radius:2px;padding:5px 8px}
 #mpstat{margin-top:10px;font-size:13px}
 #mpstat .ok{color:var(--green)}
@@ -10228,6 +10230,12 @@ const MP = {
     Object.keys(this.viewers).forEach(id => this.dropViewer(id));
     this.refreshMembers();
   },
+  async copyWatchInvite() {
+    if (this.role !== 'host' || !this.watchToken) return;
+    const text = `房间号：${this.room}\n观战邀请码：${this.watchToken}\n在「加入房间」选择「受邀观战」加入。`;
+    try { await navigator.clipboard.writeText(text); toast('已复制观战邀请'); }
+    catch (e) { toast('无法自动复制，请手动选择上面的房间号和观战邀请码'); }
+  },
   async watchDialog() {
     if (this.role !== 'host') return;
     const token = this.watchToken;
@@ -10526,11 +10534,14 @@ const MP = {
   // 远端玩家答了一道题：发给他记进自己的错题本，房主这边的副本也跟着改
   wbMark(seat, id, ok) { const x = this.seats[seat]; this.send(x.conn, { t: 'wb', id, ok: !!ok }); return wbApply(x.wb || (x.wb = {}), id, ok); },
   renderLobby() {
+    const watch = $('#mpallowwatch'); if (watch) { watch.checked = !!this.watchToken; watch.disabled = true; }
     const n = 1 + Math.max(0, ...Object.keys(this.seats).map(Number));   // 按最大的座位号算：按存档排座时可能只有 3 号位有人，按人数算会把玩家 4 截掉
     if (npVal() < n) { const r = document.querySelector(`input[name=np][value="${Math.min(4, n)}"]`); if (r) { r.checked = true; renderNames(); } }
     Object.entries(this.seats).forEach(([k, x]) => { const el = $('#nm' + k), ai = $('#ai' + k); if (el) { el.value = x.name; el.readOnly = true; el.title = x.online ? _t(4996, "联机玩家") : _t(4997, "联机玩家（已断开）"); } if (ai) { ai.checked = false; ai.disabled = true; ai.title = _t(4998, "联机玩家，不能交给电脑"); } });   // 「电脑」灰掉只是给房主看的，开局时 startFromSetup 照样把联机座位算成真人
     const list = [_tf(5000, "<li><b>玩家 1</b>：{$0}（你，房主，本机）</li>", esc((($('#nm0') || {}).value || '').trim() || _t(4999, "玩家 1")))].concat([1, 2, 3].map(k => this.seats[k] ? _tf(5001, "<li><b>玩家 {$0}</b>：{$1}{$2} <button type=\"button\" class=\"sm\" onclick=\"MP.kick({$3})\" title=\"把他移出房间，这个名字不能再进\">移出</button></li>", k + 1, esc(this.seats[k].name), this.seats[k].online ? '' : _t(4962, "（已断开）"), k) : _tf(5002, "<li class=\"muted\">玩家 {$0}：空位（不来人就在本机轮流玩）</li>", k + 1)));
-    $('#mpstat').innerHTML = _tf(5003, "<div class=\"mproom\">房间号 <b>{$0}</b><span class=\"muted\">把房间号和密码发给朋友，他们在自己的设备上打开这个页面，点「加入房间」</span></div><ul class=\"mpseats\">{$1}</ul>", this.room, list.slice(0, Math.max(npVal(), n)).join('')) + `<div data-mp-members>${this.viewerUI()}</div>`;
+    const watchers = Object.values(this.viewers);
+    const invitation = this.watchToken ? `<div class="mpwatch"><p><b>受邀观战已开启</b> · 最多 ${this.watchLimit} 位观众，不占玩家座位</p><p>观战邀请码：<code data-watch-code style="overflow-wrap:anywhere;user-select:all">${esc(this.watchToken)}</code> <button type="button" class="sm" onclick="MP.copyWatchInvite()">复制观战邀请</button></p><p class="muted">将房间号和观战邀请码发给解说，选择「加入房间 → 受邀观战」，现在就能进来等待开赛。</p><p>已到场观众（${watchers.length}/${this.watchLimit}）：${watchers.length ? watchers.map(x => esc(x.name)).join('、') : '暂无'}</p></div>` : '';
+    $('#mpstat').innerHTML = _tf(5003, "<div class=\"mproom\">房间号 <b>{$0}</b><span class=\"muted\">把房间号和密码发给朋友，他们在自己的设备上打开这个页面，点「加入房间」</span></div><ul class=\"mpseats\">{$1}</ul>", this.room, list.slice(0, Math.max(npVal(), n)).join('')) + `<div data-mp-members>${this.viewerUI()}</div>${invitation}`;
   },
   // 对方没正常关页面就没了（锁屏、断网、浏览器被系统杀掉）：数据通道不会自己关，PeerJS 只认 ICE 的 failed，Chrome 上 ICE 一直停在 disconnected。
   // 整条连接 failed（浏览器十几秒收不到对方的连通性确认）就回不来了，主动关掉，走正常的断线流程。不支持 connectionState 的浏览器照旧
@@ -10541,7 +10552,7 @@ const MP = {
     catch (e) { return 'plain:' + t; }
   },
   ready() { if (typeof Peer === 'undefined') { info(_t(5004, "联机不可用"), _t(5005, "<p>联机组件没有加载成功。</p>")); return false; } return true; },
-  async host(pwd) {
+  async host(pwd, allowWatching = false) {
     if (!this.ready()) return;
     const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     this.room = Array.from({ length: 6 }, () => A[Math.floor(Math.random() * A.length)]).join('');
@@ -10556,7 +10567,7 @@ const MP = {
       if (peer !== this.peer) return;
       // 断开后重连成功会再来一次 open：只在第一次排座位，不然对局中会把座位重新排一遍
       if (opened) { this.reN = 0; if (!(S && S.players)) this.renderLobby(); else toast(_t(5007, "联机服务器连回来了，掉线的人可以重新加入")); return; }
-      opened = true; this.reN = 0; this.role = 'host'; this.renderLobby(); if (S && S.players && !S.over) this.reseat();   // 读档比房间建好早：这时再按存档排联机座位
+      opened = true; this.reN = 0; this.role = 'host'; this.watchToken = allowWatching === true ? this.newKey() : ''; this.renderLobby(); if (S && S.players && !S.over) this.reseat();   // 读档比房间建好早：这时再按存档排联机座位
     });
     this.peer.on('connection', conn => {
       if (peer !== this.peer || this.role !== 'host') { conn.close(); return; }
@@ -11023,7 +11034,7 @@ function mpHostName() {
 }
 function mpUI(kind) {
   const box = $('#mpbox');
-  if (kind === 'host') { box.innerHTML = `<div class="mpform"><label>${_t(5115, "房间密码")} <input id="mppwd" type="password" maxlength="32" autocomplete="off" placeholder="${_t(5116, "至少 4 位")}"></label><label>${_t(5117, "你的名字")} <input id="mphname" maxlength="12" autocomplete="off" placeholder="${_t(4999, "玩家 1")}"></label><button class="pri" onclick="if ($('#mppwd').value.length < 4) { $('#mpstat').innerHTML = '<span class=warn>密码至少 4 位</span>'; } else { mpHostName(); MP.host($('#mppwd').value); this.disabled = true; }">${_t(5118, "创建房间")}</button></div><div id="mpstat"></div>`;
+  if (kind === 'host') { box.innerHTML = `<div class="mpform"><label>${_t(5115, "房间密码")} <input id="mppwd" type="password" maxlength="32" autocomplete="off" placeholder="${_t(5116, "至少 4 位")}"></label><label>${_t(5117, "你的名字")} <input id="mphname" maxlength="12" autocomplete="off" placeholder="${_t(4999, "玩家 1")}"></label><label class="mp-watch-option" title="允许观众在开赛前进入大厅，观战邀请码与玩家密码分开"><input id="mpallowwatch" type="checkbox">开启受邀观战</label><button class="pri" onclick="if ($('#mppwd').value.length < 4) { $('#mpstat').innerHTML = '<span class=warn>密码至少 4 位</span>'; } else { mpHostName(); MP.host($('#mppwd').value, $('#mpallowwatch').checked); this.disabled = true; }">${_t(5118, "创建房间")}</button></div><div id="mpstat"></div>`;
     // 房主的名字就是玩家 1 的名字：两个框填的是同一个，这里改了写回名字栏（照常存进开局设置），大厅名单跟着改
     const hn = $('#mphname'), n0 = $('#nm0'); if (n0 && !_tr(5119, "^玩家 ?1$", "").test(n0.value.trim())) hn.value = n0.value;
     hn.addEventListener('input', () => { mpHostName(); if (MP.role === 'host' && !(S && S.players)) MP.renderLobby(); });
