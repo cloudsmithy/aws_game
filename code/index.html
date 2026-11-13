@@ -3161,7 +3161,7 @@ function langMenu(btn) {
   setTimeout(() => { document.addEventListener('pointerdown', out, true); document.addEventListener('keydown', key, true); }, 0);
   m.querySelector('[aria-checked="true"]')?.focus();
 }
-let GAME_VERSION = __rv(() => ({ major: 1, round: 16, name: _t(344, "第十六轮"), title: _t(345, "受邀观战、联机鉴权、棋盘对齐、下线改规则"), commits: 134, changes: 457, since: '2026-10-20', build: 'e771db4', time: '2026-11-13 17:38' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
+let GAME_VERSION = __rv(() => ({ major: 1, round: 16, name: _t(344, "第十六轮"), title: _t(345, "受邀观战、联机鉴权、棋盘对齐、下线改规则"), commits: 139, changes: 457, since: '2026-10-20', build: 'aac61e0', time: '2026-11-13 09:47' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
 let SQ = __rv(() => (LAYOUT.map(k => SVC[k] ? { t: 'prop', k, icon: k, ...SVC[k] } : UTIL[k] ? { t: 'util', k, icon: k, ...UTIL[k] } : { k, ...SPECIAL[k] })), v => { SQ = v; }, () => SQ);
 // 起点、User Group 活动的说明跟着模式变（地狱模式起点只领 $150，娱乐模式 UG 抽三张）；用的时候才读，这时 BAL、S 都有了
 { const go = SQ.find(q => q.k === 'go'), ug = SQ.find(q => q.k === 'free');
@@ -10149,7 +10149,7 @@ function vimHelp() {
   const rows = VIM_CMDS.map(c => `<dt><code>:${c.n}</code>${(c.a || []).map(x => ` <code class="al">:${esc(x)}</code>`).join('')}${c.arg ? ` <small>${esc(c.arg)}</small>` : ''}</dt><dd>${esc(c.d)}${c.cheat ? _t(4934, " <small class=\"ch\">作弊码</small>") : c.game ? _t(4935, " <small class=\"gm\">对局里</small>") : ''}</dd>`).join('');
   ask({ local: true, cancelable: true, view: true, cls: 'verbox cmds', title: _t(4936, "命令"), html: `<div class="ver"><p class="ver-tip">${_t(4937, "不在输入框里时按 <code>:</code> 打开命令行，输完回车；Tab 补全，↑ ↓ 翻之前输过的命令，Esc 取消。")}</p><div class="ver-term"><div class="ver-cmd"><span>$</span>:help</div><dl class="cmdl">${rows}</dl></div></div>`, buttons: [{ label: _t(2478, "知道了"), value: true, cls: 'pri' }] });
 }
-// 版本号：v1.<第几轮>.<第几次提交>，见 tools/stamp_version.py
+// 版本号：v1.<第几轮>.<第几次提交>，见 tests/version.mjs（npm run version:stamp）
 const verNo = (V = GAME_VERSION) => `v${V.major || 1}.${V.round}${V.commits ? '.' + V.commits : ''}`;
 function showVersion() {
   const V = GAME_VERSION, nSvc = SQ.filter(x => x.t === 'prop').length, nCard = INC.length - 1 + REI.length - 1, nQ = Object.values(QUIZ).flat().length + Object.values(QBANK).reduce((t, b) => t + b.qs.length, 0);
