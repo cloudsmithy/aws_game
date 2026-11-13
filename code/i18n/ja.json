@@ -2809,7 +2809,7 @@
  "下面有个窗口在等你选{$0}。看完点「去处理」，或者直接关掉这个窗口": "下のウィンドウがあなたの選択を待っています{$0}。確認が済んだら「対応する」を押すか、このウィンドウをそのまま閉じてください",
  "：「{$0}」": "：「{$0}」",
  "<span class=\"lvb reg\">{$0}<span>多区域</span></span>": "<span class=\"lvb reg\">{$0}<span>マルチリージョン</span></span>",
- "<div class=\"pim imm\"><b>免疫</b><span class=\"gb\">{$0}</span></div>": "<div class=\"pim imm\"><b>免疫</b><span class=\"gb\">{$0}</span></div>",
+ "<div class=\"pim imm\"><b>免疫条件</b><span class=\"gb\">{$0}</span></div>": "<div class=\"pim imm\"><b>免疫条件</b><span class=\"gb\">{$0}</span></div>",
  "<div class=\"pt tip\"><b>知识点：</b>{$0}</div>": "<div class=\"pt tip\"><b>ノート：</b>{$0}</div>",
  "re:/(不超过|低于|超过|原价|价格|以内|以上|最多|最少|高于|满)\\s*$/": "re:/(最大|最小|最低|最高|上限|下限|定価|価格)\\s*$/",
  "re:/^\\s*(未満|以下|以上|を超え|以内|まで)/": "re:/^\\s*(未満|以下|以上|を超え|以内|まで)/",
