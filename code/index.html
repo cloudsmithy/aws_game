@@ -208,7 +208,9 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:var(--surface-soft
 .pl{flex:none}
 .pl>.gt{top:-2px;left:-2px;color:var(--ink)}
 
-.pl.dead{opacity:.5;filter:grayscale(1)}
+/* 原来还有 opacity:.5，把整张卡的对比度砍半：小字名义 5.03:1，合成后只剩约 2:1。
+   卡上本来就写着「已出局（破产）」，灰度足够表达出局，去掉透明度让字能看清 */
+.pl.dead{filter:grayscale(1);background:var(--surface-soft)}
 .pl .gb{display:flex;flex-direction:column;gap:8px}
 .pl .now{font-size:12px;font-weight:700;margin-left:4px}
 .debt{color:var(--red);font-weight:700}
@@ -2384,6 +2386,9 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 .lvt th{white-space:nowrap}
 .lvt td:nth-child(n+3){text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .lvt td:nth-child(3){font-weight:700}.lvt td:last-child{font-weight:400}
+/* 窄屏：等级表按内容宽 358px，比弹窗内容区（320 宽时 286px）宽，原来是整个弹窗横向
+   平移 103px，吸顶的标题和按钮跟着被拖出屏幕。改成表格自己横向滚 */
+@media (max-width:480px){.lvt,.pstat{display:block;overflow-x:auto;max-width:100%}}
 .lvt tr.hi td{background:var(--info-bg)}
 .pscb{padding:2px 0;cursor:help}.pscb.done{color:var(--green)}.pscb.done b{color:var(--green)}
 
@@ -3161,7 +3166,7 @@ function langMenu(btn) {
   setTimeout(() => { document.addEventListener('pointerdown', out, true); document.addEventListener('keydown', key, true); }, 0);
   m.querySelector('[aria-checked="true"]')?.focus();
 }
-let GAME_VERSION = __rv(() => ({ major: 1, round: 16, name: _t(344, "第十六轮"), title: _t(345, "受邀观战、联机鉴权、棋盘对齐、下线改规则"), commits: 134, changes: 457, since: '2026-10-20', build: 'e771db4', time: '2026-11-13 17:38' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
+let GAME_VERSION = __rv(() => ({ major: 1, round: 16, name: _t(344, "第十六轮"), title: _t(345, "受邀观战、联机鉴权、棋盘对齐、下线改规则"), commits: 135, changes: 459, since: '2026-10-20', build: '4f589f4', time: '2026-11-13 17:57' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
 let SQ = __rv(() => (LAYOUT.map(k => SVC[k] ? { t: 'prop', k, icon: k, ...SVC[k] } : UTIL[k] ? { t: 'util', k, icon: k, ...UTIL[k] } : { k, ...SPECIAL[k] })), v => { SQ = v; }, () => SQ);
 // 起点、User Group 活动的说明跟着模式变（地狱模式起点只领 $150，娱乐模式 UG 抽三张）；用的时候才读，这时 BAL、S 都有了
 { const go = SQ.find(q => q.k === 'go'), ug = SQ.find(q => q.k === 'free');

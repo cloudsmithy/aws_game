@@ -837,6 +837,8 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
     <li><span class="tag bug">BUG</span>触屏上「键盘快捷键」按钮在英文版、日文版不隐藏：那条 CSS 按翻译过的 <code>title</code> 选中按钮，换语言就选不中了，改成挂一个固定的 class。</li>
     <li><span class="tag bug">BUG</span>右栏玩家卡里 12 个汉字的名字会压到现金数字上（实测 1440 宽重叠 19px）：名字是 nowrap 又没有 overflow，现在超长就用省略号截断。</li>
     <li><span class="tag bug">BUG</span>深色模式三处颜色写死在浅色上：「补齐架构」提示 1.98:1、回合顺序箭头 2.06:1（它还把后面主题化的规则盖掉了）、骰子面是纯白所以边框只有 1.6:1。都换成主题色，现在分别是 7.77:1、5.03:1、9.94:1。顺带把骰子点也换成主题色，不然面一变深点就看不见了。</li>
+    <li><span class="tag bug">BUG</span>破产玩家卡整张 <code>opacity:.5</code>，把上面所有文字的对比度一起砍半（公司名名义 5.03:1，合成后只剩约 2:1）。卡上本来就写着「已出局（破产）」，灰度足够表达出局，去掉透明度：浅色 4.82:1、深色 6.05:1。</li>
+    <li><span class="tag bug">BUG</span>320 宽的手机上打开地契，整个弹窗要横向拖 103px，吸顶的标题和「收起看棋盘」跟着被拖出屏幕。原因是等级表和数据表按内容宽（358px、315px）超过了弹窗内容区（286px）。改成窄屏下两张表各自横向滚，弹窗本身不再平移（横向溢出 0）。</li>
     <li><span class="tag bug">BUG</span>语言菜单的 hover 和键盘焦点共用一条规则，<code>outline:none</code> 把焦点框一起去掉了，用键盘翻菜单看不出选到哪一项。拆开，焦点单独给框。</li>
     <li><span class="tag bug">BUG</span>右栏「这回合还能做什么」里按钮组参差不齐：按钮挤不下换行后被 <code>margin-left:auto</code> 钉在右边，而按钮多、填满一行的那几行看着是左对齐的。去掉以后换行的按钮组一律从左边起。</li>
   </ul>
