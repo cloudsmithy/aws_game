@@ -148,7 +148,9 @@ npm run check
 - `npm run test:content`：仅运行内部裁切专项（先 `cd tests`），复用页面遍历尺寸，弹窗采用代表组合，供本地快速检查；已随 `npm run check` 自动进入 CI，无需新增工作流或依赖。
 - `npm run test:movement`：走棋路径、动画隔离、有界模型与弱网指标；`npm run test:auth`：实际房主协议的观众权限和座位鉴权回归。
 - 浏览器检查还覆盖深浅主题、真实 WebRTC 走棋及受邀观战；生产 PeerJS 建房/自动重连使用本机官方 PeerServer 测试。详细范围与未覆盖条件见 [受邀观战验证说明](tests/verification/spectator.md)。
-- GitHub Actions 在 push 和 PR 时执行以上检查；失败时保留截图和 trace，可用 `npx playwright show-trace <trace.zip>` 查看。
+- GitHub Actions 在 PR、`master` / `dev` 的 push 和手动运行时执行以上检查；功能分支通过 PR 检查，避免同一提交重复运行。新提交会取消同一 PR / 分支的旧运行。`Lint and logic` 独立运行版本、JS/CSS 和逻辑检查，不安装浏览器；`Browser 1/3` 至 `3/3` 将全部浏览器用例按文件内用例顺序轮流分散到三台机器，每台仅一个 worker，不缩短联机测试时长。体积提醒只执行一次；最终 `check` 要求快速检查和全部分片成功，继续供分支保护使用。失败分片分别保留截图和 trace，可用 `npx playwright show-trace <trace.zip>` 查看。
+
+本地复现 CI 分片：在 `tests/` 执行 `npm run test:ci -- 1/3`，将 `1/3` 换成 `2/3`、`3/3` 可运行另外两片。`npm run check` 仍按原顺序执行全部本地检查。
 
 版本号沿用 `v<主版本>.<更新轮次>.<仓库累计提交数>`，例如 `v1.16.133`，不是 SemVer：主版本由维护者决定；第二位对应 `docs/更新说明.html` 最新的 `rN` 更新轮次；第三位是构建源提交的 `git rev-list --count`，包含合并提交，换轮或升主版本都不清零。
 
