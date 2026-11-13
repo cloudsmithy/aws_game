@@ -2907,7 +2907,8 @@ const CLK = (() => {
     set(ms) { if (!w) return new Promise(r => setTimeout(r, ms)); return new Promise(r => { const id = ++seq; wait.set(id, r); w.postMessage({ set: 1, id, ms }); }); },
   };
 })();
-const sleep = ms => BOT ? Promise.resolve() : CLK.set(ms);
+// 机器人自测和模拟还是走 setTimeout(0)：等条件的循环（MPFX 里等骰子停那种）靠它把事件循环让出去，换成微任务会把主线程占死
+const sleep = ms => BOT ? new Promise(r => setTimeout(r, 0)) : CLK.set(ms);
 // 动画最多等 dur：房主机器慢、掉帧时逻辑不跟着等，宁可让动画追帧，全桌节奏不再被房主显卡拖住
 const waitAnim = (p, dur) => Promise.race([p, CLK.set(dur)]);
 const rnd = n => Math.floor(Math.random() * n);
@@ -8940,7 +8941,7 @@ const FX = {
   // 以前房主切到后台，每一跳都白等 400ms，而 moveSteps 在 await 它，全桌跟着慢：10 格从 1.5s 变成 5.5s。
   // 走棋逻辑只用动画的起点和终点，跳过中间帧是安全的；状态、事件照常推进。
   run(dur, step) {
-    if (document.hidden) { try { step(1); } catch (e) { } return Promise.resolve(); }
+    if (document.hidden) { this.jobStep({ step }, 1); return Promise.resolve(); }   // 这一帧出错照旧记一笔（jobStep 里会 console.error），别悄悄吞掉
     return new Promise(res => { const j = { t0: performance.now(), dur, step, res }; this.jobs.push(j); this.jobStep(j, 0); CLK.set(dur + 400).then(() => { if (this.jobs.includes(j)) { this.jobEnd(j); this.redraw(); } }); this.loop(); });
   },
   jobStep(j, k) { try { j.step(k); } catch (e) { if (!this.runErr) { this.runErr = 1; console.error(e); } } },
@@ -10201,7 +10202,7 @@ const MP = {
   role: null, peer: null, room: '', auth: '', mySeat: null, actor: null,
   seats: {},        // 房主：座位号 → { name, conn, online }
   cur: null, mid: 0, closeLocal: null,
-  dirty: false, pushIv: 0,   // 房主：状态脏标记 + 推送心跳（和渲染频率解耦，见 afterRender）
+  dirty: false, pushIv: 0, pushGen: 0,   // 房主：状态脏标记 + 推送心跳（和渲染频率解耦，见 afterRender）。pushGen 每起一次心跳 +1：回开局页时上一拍还在路上，新一局起的心跳和它会并着跑，靠这个让旧的那拍认出自己过期、不再续
   full: false,      // 房主：这次合并的 60ms 里有没有整页重画（没有的话远端也只重画棋盘）
   resync: 0,        // 远端：增量接不上，正在等房主补发整份
   isRemote(seat) { return this.role === 'host' && seat != null && !!this.seats[seat]; },
@@ -10291,7 +10292,7 @@ const MP = {
       // 推送节奏和渲染解耦：以前是「渲染完才起一个 60ms 定时器」，房主渲染慢（弱机、动画卡）
       // 推送机会就少，全桌延迟。现在主机挂一个 60ms 心跳，状态脏了就推，和渲染频率无关。
       this.dirty = true;
-      if (!this.pushIv) { this.pushIv = 1; this.pumpPush(); }
+      if (!this.pushIv) { this.pushIv = 1; this.pumpPush(++this.pushGen); }
     } else if (this.role === 'client') this.lockUI();
   },
   // 主机推送心跳：只有状态变了才推；pushState 自己还会按座位去重（内容没变不发）。
@@ -10303,10 +10304,10 @@ const MP = {
     this.pushState();
   },
   // 推送心跳：60ms 一拍，用 Worker 时钟自循环（隐藏标签页里 setInterval 会被压到 1s）
-  pumpPush() {
-    if (this.role !== 'host' || !this.pushIv) return;
+  pumpPush(gen) {
+    if (gen !== this.pushGen || this.role !== 'host' || !this.pushIv) return;   // 过期的那一拍（期间回过开局页、又开了新的一局）就地停掉，不然心跳越开越多
     this.flushPush();
-    CLK.set(60).then(() => this.pumpPush());
+    CLK.set(60).then(() => this.pumpPush(gen));
   },
   // 把状态推给每个远端。日志和格子历史占整份状态的九成，认得增量的远端只发它上次收到之后新增的那些；
   // 同样的内容只序列化一次，大家共用一个字符串；跟上次发给这个人的一样就不发（本机只是重画了一下）。full：远端要整页重画（弹窗前、重连）
