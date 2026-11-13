@@ -150,6 +150,20 @@ npm run check
 - 浏览器检查还覆盖深浅主题、真实 WebRTC 走棋及受邀观战；生产 PeerJS 建房/自动重连使用本机官方 PeerServer 测试。详细范围与未覆盖条件见 [受邀观战验证说明](tests/verification/spectator.md)。
 - GitHub Actions 在 push 和 PR 时执行以上检查；失败时保留截图和 trace，可用 `npx playwright show-trace <trace.zip>` 查看。
 
+版本号沿用 `v<主版本>.<更新轮次>.<仓库累计提交数>`，例如 `v1.16.133`，不是 SemVer：主版本由维护者决定；第二位对应 `docs/更新说明.html` 最新的 `rN` 更新轮次；第三位是构建源提交的 `git rev-list --count`，包含合并提交，换轮或升主版本都不清零。
+
+修改 `code/` 后，先提交网页内容（需要换轮时，一并维护更新说明、`GAME_VERSION` 的轮次、名称、标题和对应译文），再在 `tests/` 执行：
+
+```bash
+npm run version:stamp  # 只填写累计提交数、构建 SHA 和内容提交时间（UTC）
+npm run lint:version -- upstream/master
+# 然后将 code/index.html 的版本元数据另行提交
+```
+
+盖章前必须先提交 `code/` 的改动；构建 SHA 指向内容提交，后一个提交只保存版本元数据，避免提交 SHA 自引用。合并上游后若网页内容变化，重新盖章。只改文档、测试或 CI 时无需增加版本。
+
+`npm run check` 包含版本检查与回归用例：禁止三段数字倒退或清零，轮次必须与更新说明一致，累计提交数必须对应构建 SHA，构建必须覆盖当前 `code/` 内容；网页变化时累计提交数必须高于基线。CI 使用 PR 目标提交或 push 前提交作基线，缺失基线会失败；本地默认取 `upstream/master`（或 `origin/master`）的共同祖先，也可显式传入 ref 或设置 `VERSION_BASE_REF`。CI 拉取完整历史，以免浅克隆算错提交数。网页、联机协议和存档格式不使用此版本号判定兼容性。
+
 布局约定：棋盘格保持在左右边界内；矮窗口中央操作区可滚动，手机页面允许纵向滚动。不要用整页 `overflow:hidden` 掩盖溢出。增加布局或内容时，边界及操作可达性场景放在 `tests/layout.spec.mjs`，内部裁切与重叠场景放在 `tests/content-layout.spec.mjs`。
 
 ## 改了规则之后
