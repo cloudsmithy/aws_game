@@ -6,13 +6,13 @@
 <title>亚马逊云科技 User Group 云上大亨</title>
 <meta name="color-scheme" content="light dark">
 <script>
-// 存储键名从 aws-tycoon-* 改成 aws-tycoon-*（2026-11）：一次性把老键搬过来，搬完删掉老的。
+// 存储键名从 aws-monopoly-* 改成 aws-tycoon-*（2026-11）：一次性把老键搬过来，搬完删掉老的。
 // 放在所有读取之前（外观脚本就在下面），这样老玩家的存档、语言、外观都不会丢。
 (() => {
   const move = store => {
     let keys = []; try { keys = Object.keys(store); } catch (e) { return; }
     for (const k of keys) {
-      if (k.indexOf('aws-tycoon-') !== 0) continue;
+      if (k.indexOf('aws-monopoly-') !== 0) continue;
       const nk = 'aws-tycoon-' + k.slice(13);
       try { if (store.getItem(nk) === null) store.setItem(nk, store.getItem(k)); store.removeItem(k); } catch (e) { }
     }

@@ -83,6 +83,24 @@ test('观众可补发整份状态；增量基线独立于玩家及其他观众',
   assert.equal(a.messages.at(-1).delta, undefined); assert.ok(v.base); assert.equal(h.mp.viewers[b._viewer].base, other); assert.equal(h.mp.seats[1].base, player); assert.deepEqual(plain(h.ctx.S), before); assert.ok(p.messages.length);
 });
 
+test('观众单独补发不消耗房主待推送标记，下一拍仍更新玩家和其他观众', async () => {
+  const h = harness(), player = h.player(); h.mp.setWatching(true);
+  const a = h.conn(), b = h.conn(); await h.mp.onHostMsg(a, h.hello()); await h.mp.onHostMsg(b, h.hello());
+  h.mp.pushState(true);
+  const counts = [player.messages.length, b.messages.length];
+  h.ctx.S.players[0].cash -= 10; h.mp.dirty = true; h.mp.full = true;
+  h.mp.onHostMsg(a, { t: 'resync' });
+  assert.equal(h.mp.dirty, true); assert.equal(h.mp.full, true);
+  assert.deepEqual([player.messages.length, b.messages.length], counts);
+  h.mp.flushPush();
+  assert.equal(h.mp.dirty, false); assert.equal(h.mp.full, false);
+  for (const [i, c] of [player, b].entries()) {
+    assert.equal(c.messages.length, counts[i] + 1);
+    assert.equal(c.messages.at(-1).S.players[0].cash, h.ctx.S.players[0].cash);
+    assert.equal(c.messages.at(-1).lite, 0);
+  }
+});
+
 test('离线同名无钥匙必须经房主确认；重复 hello 不新增请求；拒绝不入座', async () => {
   const h = harness(); h.player(false); const c = h.conn(), m = { t: 'hello', name: '小李', auth: 'player-secret' };
   await h.mp.onHostMsg(c, m); assert.equal(c.messages[0].t, 'pending'); assert.equal(c._seat, undefined);
