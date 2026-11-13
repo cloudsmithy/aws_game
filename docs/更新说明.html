@@ -49,7 +49,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <h1>亚马逊云科技 User Group 云上大亨 · 这一轮改了什么</h1>
   <p>从「破产逻辑是不是有问题」开始，一路改到新角色、两个新开关、地狱模式和全套文档。每条改动后面写了为什么改；平衡数字都是用电脑玩家对打模拟出来的。</p>
   <nav>
-    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#todo">待定</a>
+    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#todo">待定</a>
   </nav>
 </header>
 
@@ -823,8 +823,23 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
 </ul>
 </section>
 
+<section id="r16">
+  <h2><i>24</i>第十六轮（11-11～13）：受邀观战、联机鉴权、棋盘对齐、下线改规则</h2>
+  <ul>
+    <li><span class="tag new">新</span>受邀观战：建房时可以开观战，大厅直接给出一条单独的邀请。观众赛前就能入场、不占座，开局后自动进只读对局；中途加入会补发增量，手机上也是只读。观众的昵称按纯文本显示，邀请和审批窗口不广播给其他人。没开观战的房间不显示邀请，观众也不能拿玩家密码提前入场。</li>
+    <li><span class="tag chg">改</span>联机座位鉴权加强：缺钥匙的连接要房主确认，钥匙会轮换，旧连接和重复 hello 都被隔离；审批窗口打开后请求者关页面，旧审批不能复活连接或占座。畸形的入房、操作、答案消息一律无副作用。</li>
+    <li><span class="tag new">新</span>社区题目贡献的 issue 表单。</li>
+    <li><span class="tag chg">改</span>棋盘顶排、底排的图标和名字排成一条线。原来第一行是 <code>minmax(0,1fr)</code>，图标在「文字用剩的空间」里居中，所以文字几行就决定图标多高：re:Invent 和 Health 事件只有一行字，图标比邻居低 20px，娱乐模式的盲盒格也会散开 6px。现在给文字行固定高度（<code>max(4.3cqw,46px)</code>，px 兜底是因为字号有 10px 下限，窗口缩到 1280 宽时字不再跟着缩），再把没有色组条的格子内边距补齐。</li>
+    <li><span class="tag bug">BUG</span>顶排、底排格子里的内容整块朝左偏最多 20px：只写了 <code>grid-template-rows</code>，隐式列按内容宽度收缩并靠左，<code>justify-items:center</code> 只能把内容在那条窄列里居中，所以名字短的格子（EBS、WAF、DMS）偏得最明显。补上 <code>grid-template-columns</code> 让列铺满格子。</li>
+    <li><span class="tag chg">改</span>下线：重新上线不要钱，下线时拿回的那一半也不用还。下线固定 3 轮，满 3 轮在主人回合开始时自动恢复；没满 3 轮时，主人自己落到这一格就能提前免费拉起来。这期间别人落上来照旧付原价把它买走。去掉了回合开始「要不要花钱上线」的弹窗和资产管理里的付费上线按钮。规则书、玩法手册、玩法速览和内嵌的手册、速览（中英日各一份）都跟着改了。</li>
+    <li><span class="tag chg">改</span>一局之内不出重复的题。出过的题号记进存档（联机也跟着同步），每次只从没出过的里挑；某个池子抽空了才清掉重来。实测一局抽 60 次 0 重复，真实一局大约 10–40 题。</li>
+    <li><span class="tag new">新</span>点进服务能看到过路费明细：联合收费是哪几块服务、各多少钱、合计多少，落脚的那一块加框标出。数本来就算好了，以前只写在格子的悬停提示里。</li>
+    <li><span class="tag bug">BUG</span>右栏「这回合还能做什么」里按钮组参差不齐：按钮挤不下换行后被 <code>margin-left:auto</code> 钉在右边，而按钮多、填满一行的那几行看着是左对齐的。去掉以后换行的按钮组一律从左边起。</li>
+  </ul>
+</section>
+
 <section id="todo">
-  <h2><i>24</i>待定 / 已知问题</h2>
+  <h2><i>25</i>待定 / 已知问题</h2>
   <ul>
     <li>代理商在完整局（不限轮数约 16%）和地狱模式 15 轮（约 14%）偏弱，公平是 25%；各模式的数字见规则书第 32 节。</li>
     <li>模拟里的电脑不会刻意凑六大支柱，所以 Well-Architected 的达成率只能当下限看。</li>
@@ -832,7 +847,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <div class="note">改动前的网页备份在上一级目录：<code>index.before-speed.html</code>（加高速部署前）、<code>index.before-roles.html</code>（加角色和代理商前）。</div>
 </section>
 
-<footer>亚马逊云科技 User Group 云上大亨 · 作者：亚马逊云科技 User Group · 问题和建议：<a href="https://github.com/cloudsmithy/aws_game/issues">提 issue</a> · 2026-11-02</footer>
+<footer>亚马逊云科技 User Group 云上大亨 · 作者：亚马逊云科技 User Group · 问题和建议：<a href="https://github.com/cloudsmithy/aws_game/issues">提 issue</a> · 2026-11-13</footer>
 </div>
 </body>
 </html>

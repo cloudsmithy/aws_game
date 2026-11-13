@@ -416,8 +416,6 @@
  "简体中文": "简体中文",
  "日本語": "日本語",
  "<button type=\"button\" class=\"{$0} langsw\" onclick=\"langMenu(this)\" aria-haspopup=\"menu\" aria-expanded=\"false\" title=\"语言 · Language\">{$1}<span>语言</span><i class=\"lc\" aria-hidden=\"true\">▾</i></button>": "<button type=\"button\" class=\"{$0} langsw\" onclick=\"langMenu(this)\" aria-haspopup=\"menu\" aria-expanded=\"false\" title=\"Language\">{$1}<span>Language</span><i class=\"lc\" aria-hidden=\"true\">▾</i></button>",
- "第十五轮": "Round 15",
- "英文版、日文版、语言菜单、老板键、版本号": "English and Japanese versions, language menu, boss key, version number",
  "抽两张": "draw two",
  "抽三张": "draw three",
  "第 {$0} 级 ${$1}": "Level {$0} ${$1}",
@@ -5357,5 +5355,7 @@
  "下线就是抵押：只有 EC2、RDS、Aurora、Redshift、ECS 能下线，下线时拿回买价的一半（Spot 按出价），这笔钱不用还。下线期间不收过路费，也不算持有（不凑整组、架构和支柱），运行费只交存储费；下线固定 3 轮，满 3 轮在主人回合开始时自动恢复，主人自己落到这一格可以提前免费拉起来；没恢复前别人落上来，付原价给亚马逊云科技就能买走，主人不再拿钱": "Going offline is a mortgage: only EC2, RDS, Aurora, Redshift and ECS can go offline, and doing so returns half the purchase price (half the bid for Spot), which is not repaid. While offline it collects no rent and doesn't count as owned (not for color groups, architectures or pillars), and the running cost is only the storage fee. It stays offline for exactly 3 rounds and then comes back automatically at the start of the owner's turn; the owner can bring it back early for free by landing on it. Before that, anyone else who lands on it can pay the full price to Amazon Web Services and buy it, and the owner gets nothing.",
  "<li><b>下线</b>（EC2、RDS、Aurora、Redshift、ECS）：先拿回买价一半周转，这笔钱不用还，服务还是你的；固定 3 轮后自动恢复。</li>": "<li><b>Take offline</b> (EC2, RDS, Aurora, Redshift, ECS): you get half the purchase price back as working cash and don't repay it; the service stays yours and comes back automatically after 3 rounds.</li>",
  "<li>缺钱时 EC2、RDS、Aurora、Redshift、ECS 可以<b>下线</b>：拿回买价一半（不用还），不收过路费，运行费只剩存储费；固定 3 轮后自动恢复，自己落到这一格可以提前免费拉起来，期间别人可以付原价买走。</li>": "<li>When short of cash, EC2, RDS, Aurora, Redshift and ECS can be <b>taken offline</b>: you get half the purchase price back (not repaid), no rent is charged and the running cost is only the storage fee. It comes back automatically after 3 rounds, landing on it yourself brings it back early for free, and meanwhile anyone else who lands on it can buy it at full price.</li>",
- "下线固定 3 轮，满 3 轮在主人回合开始时自动恢复，拿回的钱不用还；没满 3 轮时主人自己落到这一格可以提前免费拉起来。下线期间别人落上来，可以付原价把它买走归自己": "It stays offline for exactly 3 rounds and comes back automatically at the start of the owner's turn, with the money taken out not repaid; before that, the owner can bring it back early for free by landing on it. While it is offline, anyone else who lands on it can pay the full price and buy it."
+ "下线固定 3 轮，满 3 轮在主人回合开始时自动恢复，拿回的钱不用还；没满 3 轮时主人自己落到这一格可以提前免费拉起来。下线期间别人落上来，可以付原价把它买走归自己": "It stays offline for exactly 3 rounds and comes back automatically at the start of the owner's turn, with the money taken out not repaid; before that, the owner can bring it back early for free by landing on it. While it is offline, anyone else who lands on it can pay the full price and buy it.",
+ "第十六轮": "Round 16",
+ "受邀观战、联机鉴权、棋盘对齐、下线改规则": "Invited spectators, online authentication, board alignment, new offline rule"
 }
