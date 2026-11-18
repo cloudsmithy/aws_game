@@ -1,5 +1,7 @@
 # 亚马逊云科技 User Group 云上大亨
 
+[![Cloudflare Pages](https://img.shields.io/github/check-runs/cloudsmithy/aws_game/master?nameFilter=Cloudflare%20Pages&label=Cloudflare%20Pages&logo=cloudflare&logoColor=white)](https://github.com/cloudsmithy/aws_game/commits/master)
+
 作者：亚马逊云科技 User Group · 云上大亨开发小组。规则有疑问、游戏有 bug，都可以在这里反馈给我们：https://github.com/cloudsmithy/aws_game/issues
 
 > **免责声明**：游戏里特定亚马逊云科技生成式人工智能相关的服务仅在亚马逊云科技海外区域可用，亚马逊云科技 User Group 仅为帮助您了解行业前沿技术和发展海外业务选择推介该服务。亚马逊云科技中国区域相关云服务由西云数据和光环新网运营，具体信息以中国区域官网为准。
