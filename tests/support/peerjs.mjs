@@ -86,7 +86,7 @@ export async function rollTurn(host, player, who) {
   const before = await host.evaluate(() => S.rollId || 0);
   // 生产逻辑拒绝回合开始后 300ms 内的连点，等实际可操作后再点击。
   await expect.poll(() => host.evaluate(() => Date.now() - (S.turnStartAt || 0) >= 300)).toBe(true);
-  await actor.locator('#center button[onclick="doRoll()"]').click();
+  await actor.locator('#center button[data-act="doRoll"]').click();
   await expect.poll(() => host.evaluate(() => S.phase)).toBe('busy');
   const until = Date.now() + 15000;
   while (Date.now() < until) {
@@ -98,6 +98,6 @@ export async function rollTurn(host, player, who) {
   }
   expect(await host.evaluate(() => S.phase)).toBe('post');
   expect(await host.evaluate(() => S.rollId)).toBeGreaterThan(before);
-  await actor.locator('#center button[onclick="endTurn()"]').click();
+  await actor.locator('#center button[data-act="endTurn"]').click();
   await expect.poll(() => host.evaluate(() => S.cur)).toBe((who + 1) % 2);
 }

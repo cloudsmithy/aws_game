@@ -26,3 +26,5 @@ test-results/
 .DS_Store
 .vscode/
 .idea/
+# 游戏主体构建的中间产物（最终产物是 code/index.html）
+web/dist/

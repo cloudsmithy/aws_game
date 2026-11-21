@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { PeerServer } from 'peer';
+import { gameFile } from './support/game.mjs';
 
 // 仅本机测试：官方 PeerServer 承担真实信令；控制接口只操作本进程的测试 WebSocket。
 const clients = new Map(), blocked = new Set(), counts = {};
@@ -13,8 +14,8 @@ signal.on('connection', client => {
 signal.on('disconnect', client => { if (clients.get(client.getId()) === client) clients.delete(client.getId()); });
 signal.on('message', (_client, m) => { counts[m.type] = (counts[m.type] || 0) + 1; });
 
-// 网站的根就是 code/：/ 和 /index.html 都是游戏
-const game = new URL('../code/index.html', import.meta.url);
+// 网站的根就是 code/：/ 和 /index.html 都是游戏（GAME_HTML 可换成另一份构建产物，见 support/game.mjs）
+const game = gameFile;
 const server = createServer(async (request, response) => {
   const url = new URL(request.url, 'http://localhost'), path = url.pathname;
   if (path === '/__test/signal') {

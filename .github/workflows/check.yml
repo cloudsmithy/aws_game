@@ -27,6 +27,14 @@ jobs:
           cache: npm
           cache-dependency-path: tests/package-lock.json
       - run: npm ci
+      - name: 游戏主体构建产物和 web/ 源码一致
+        working-directory: web
+        run: |
+          npm ci
+          node tools/i18n.mjs check
+          node tools/check-modules.mjs
+          npm run build
+          git diff --exit-code -- ../code/index.html || { echo "::error::code/index.html 和 web/ 源码不一致：改 web/ 下的源码后跑 cd web && npm run build，再一起提交"; exit 1; }
       - name: 版本比较基线
         env:
           PR_BASE: ${{ github.event.pull_request.base.sha }}
@@ -44,8 +52,8 @@ jobs:
         run: npm run test:version
       - name: JavaScript、CSS 和版本检查
         run: npm run lint
-      - name: 走棋与鉴权逻辑
-        run: npm run test:movement && npm run test:auth
+      - name: 走棋、鉴权与无界面整局
+        run: npm run test:movement && npm run test:auth && npm run test:headless
 
   browser:
     name: Browser ${{ matrix.shard }}/3

@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { gameFile } from './support/game.mjs';
 
-const file = new URL('../code/index.html', import.meta.url).href;
+const file = gameFile.href;
 const select = page => page.locator('[data-theme-select]:visible');
 
 test('本地文件：默认跟随系统，手动切换持久化，恢复自动后继续响应系统', async ({ page }) => {

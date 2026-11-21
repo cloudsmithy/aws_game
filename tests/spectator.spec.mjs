@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { connectRTC, state, sameState, world, hostGame, observerHello } from './support/rtc.mjs';
+import { gameFile } from './support/game.mjs';
 
 test.use({ launchOptions: { args: ['--disable-features=WebRtcHideLocalIpsWithMdns'] } });
 
@@ -89,8 +90,8 @@ test('观战界面：独立邀请、手机只读操作、资料和外观可用�
     await connectRTC(host, a, await observerHello(host)); await sameState(host, [a]); const before = await state(host);
     await expect(a.locator('.mpme')).toHaveText('受邀观战 · 只读');
     await a.locator('#center .gmenu').evaluate(e => { e.open = true; });
-    await expect(a.locator('button[onclick="renameDialog()"]')).toBeHidden();
-    await expect(a.locator('button[onclick="MP.proposeEnd()"]')).toBeHidden();
+    await expect(a.locator('button[data-act="renameDialog"]')).toBeHidden();
+    await expect(a.locator('button[data-act="MP.proposeEnd"]')).toBeHidden();
     await a.locator('[data-theme-select]:visible').selectOption('dark');
     await a.evaluate(() => { showManual(); }); await expect(a.locator('#vmodal')).toBeVisible();
     await a.evaluate(() => { if (VIEW_CUR) VIEW_CUR.cancel(); save(); });
@@ -126,7 +127,7 @@ test('单 index 本地文件：移动中加入与补发收敛，观众动画不�
     await host.evaluate(() => fxCast('walk', { seq: (MP.walkSeq || 0) + 1, p: 0, from: S.players[0].pos, path: [(S.players[0].pos + 1) % N], ms: 50, last: true }));
     await expect.poll(() => a.evaluate(() => received.some(m => m.t === 'fx' && m.k === 'walk'))).toBe(true);
     expect(await state(a)).toEqual(before);
-  }, new URL('../code/index.html', import.meta.url).href);
+  }, gameFile.href);
 });
 
 test('受邀观众昵称按文本显示；决策期间加入只读，邀请与审批窗口不会广播给其他人', async ({ browser }) => {

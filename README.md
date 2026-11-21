@@ -44,6 +44,7 @@
 
 ```
 aws_game/
+├── web/              游戏主体源码（Vite 构建，产物是 code/index.html）
 ├── code/             网站（发布的就是这个文件夹，另加 docs/更新说明.html；对照表 i18n/ 不发布）
 │   ├── index.html    游戏：单文件、多语言（i18n/ 生成），同屏 2–4 人或联机
 │   ├── 404.html      旧链接跳转（以前的 /code/…、/demo/…、/手册/… 地址）
@@ -131,6 +132,50 @@ docker run --rm -p 127.0.0.1:18080:8080 aws-ug-tycoon  # 打开 http://127.0.0.1
 - 端口只发布到本机 `127.0.0.1`，别的电脑访问不到。别写成 `-p 8080:8080`：那样会发布到所有网卡，同一网络里的人都能打开。
 - 用 8080 不用 443：443 是 HTTPS 端口，要配 TLS 证书；本机玩用 HTTP 就够了。要给别人通过网络访问，得先决定开放给谁并配好证书。
 - 别的电脑想玩，直接把 `code/` 文件夹拷过去，用浏览器打开 `code/index.html` 就行，联机走浏览器之间的 WebRTC，不经过这个服务器。
+
+## 改游戏主体（web/ + Vite）
+
+游戏主体的源码在 `web/`：`web/index.html` 是页面骨架，脚本是 `web/src/` 下的 ES module，入口 `src/main.js`（里面 import 的顺序就是加载顺序）：`core/`（多语言运行时、工具、启动）、`rules/`（服务、角色、架构、卡牌、DLC、题库、模式）、`engine/`（状态、金钱、过路费、回合、落点、卡牌结算、破产、技能、交易、胜负、电脑玩家、作弊码）、`ui/`（弹窗、渲染、开局存档、音效、3D、快捷键、老板键）、`net/`（联机）、`dev/`（自测、模拟、演示）、`data/`（翻译表、手册、图标、立绘这类大块 JSON）。`code/index.html` 是构建产物，**不要直接改**；改完源码重新构建，和源码一起提交（CI 会检查两边一致）。
+
+```bash
+cd web
+npm ci            # 第一次
+npm run dev       # 本地开发：浏览器按模块加载，改 src/ 自动刷新；code/ 下的 learn/、i18n/ 照常能访问
+npm run build     # 生成 code/index.html
+node tools/check-modules.mjs   # 每个模块用到的名字都 import 了（CI 也跑）
+node tools/deps.mjs            # 模块之间谁 import 谁；--file ui/27d-side.js 看一个文件
+node tools/fix-imports.mjs     # 挪了代码、拆了文件以后跑：按代码重新生成所有 import，export 按需加减
+```
+
+几条约定：
+
+- **构建不打包**：按 `main.js` 的顺序把各模块拼回一个普通 `<script>`，只去掉 `import` 行和 `export` 关键字，注释、格式、执行顺序都和源码一样（打包器会把代码重新生成、注释全丢，产物没法对照）。
+- **加载时就执行的代码只能用前面的文件**：底层的 `core/01`～`03` 不 import 后面的文件；`core/43-boot.js` 是启动代码，别的文件不 import 它。别的文件要改另一个文件的 `let` 变量（import 进来是只读的），用对方 export 的 `__set_X(值)`。
+- **挪代码、拆文件**：把代码剪到新文件，在 `src/main.js` 里按原来的位置加一行 `import * as mN from './…'`（位置决定执行顺序），跑 `node tools/fix-imports.mjs`，再 `npm run build`。只是按顺序切开的话，构建出来的 `code/index.html` 一个字都不变，可以拿来验证。
+- **分层**：`rules/` 是数据和规则，`engine/` 是游戏逻辑，`ui/` 是界面，`net/` 是联机。engine、rules **不 import ui，也不碰页面**：要开弹窗、重画、放特效时调界面接口 `UI.ask`、`UI.render`、`UI.FX`……（`core/02b-ui-port.js`），实现由 `ui/49-ui-bind.js` 注册进来。电脑玩家的决策 `aiDecide`（`engine/36-ai.js`）只看弹窗的数据，读页面、填输入框由 `ui/10-modal.js` 的 `aiAct` 做。`tests/verification/headless.check.mjs` 在 Node 里换一套无界面的 UI，让电脑把整局打完（CI 也跑）。新加界面调用时，在 `ui/49-ui-bind.js` 里注册，engine 里写 `UI.名字`。
+- **按钮不写 `onclick`**：写 `data-act="动作名"`（可选 `data-arg="参数"`），动作表在 `core/43-boot.js` 的 `ACTS`；还有 `data-act-keydown`、`data-act-change`、`data-act-toggle`。联机代码按 `actKey(按钮)` 认按钮（结果和以前的 onclick 文字一样）。
+- **开发时的全局**：`main.js` 把所有 export 的名字挂到 `window` 上（只读实时值，有 setter 的走 setter），测试的 `page.evaluate` 和控制台照常用 `S`、`MP`……；构建出来的单文件名字本来就是全局的。
+- **图标**：`node tools/optimize-icons.mjs` 压缩 `data/icons.js` 里的 SVG，只去掉 id、空白、多余属性，路径数据不动（改坐标会让细线变形，逐像素比对过）。
+
+`npm run version:stamp` 会同时更新 `code/index.html` 和 `web/src/` 里的版本号。
+
+以后可以做的：
+
+- **界面和游戏用不同的随机数**：现在界面（角色立牌洗牌这类装饰）也用 `Math.random`，和骰子、抽卡共用一个序列，所以同一个种子在 Node 里（没有界面）打出来的局和浏览器里不一样。拆开以后两边能逐局对照，但浏览器里现有的随机序列会变（存档、模拟数字跟着变），要的话单独做。
+
+### 多语言
+
+源码里要翻译的字写成 `_t(编号, "中文")`、`_tf(编号, "带 {$0} 占位符的中文", x)`、`_tr(编号, "正则", "标志")`；译文在 `code/i18n/en.json`、`ja.json`（中文 → 译文），打包进 `web/src/data/i18n-table.js`。新写的字编号先填 `-1`（运行时先显示中文），然后：
+
+```bash
+node web/tools/i18n.mjs ids                    # 分配编号（和已有中文一样的复用老编号）
+node web/tools/i18n.mjs missing en > todo.json # 导出没翻译的，填好后
+node web/tools/i18n.mjs merge en todo.json     # 并进 en.json（ja 同理）
+node web/tools/i18n.mjs build                  # 重新生成翻译表，再 cd web && npm run build
+node web/tools/i18n.mjs check                  # 编号冲突、没翻译、占位符对不上（CI 也跑）
+```
+
+改了中文原文、`en.json` 里还是旧键时，翻译表沿用旧译文，`check` 会列在「沿用旧译文」里，`missing` 导出时会带上旧译文方便改。
 
 ## 开发检查
 

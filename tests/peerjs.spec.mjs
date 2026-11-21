@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { peerWorld, playingRoom, rollTurn } from './support/peerjs.mjs';
 import { sameState } from './support/rtc.mjs';
+import { gameFile } from './support/game.mjs';
 
 test.use({ launchOptions: { args: ['--disable-features=WebRtcHideLocalIpsWithMdns'] } });
 
@@ -139,7 +140,7 @@ test('file:// 单 index：生产 PeerJS 建房、观战与观众刷新后重入�
     await joinRoom(viewer, room, invite, true, '刷新后的解说'); await sameState(host, [player, viewer]);
     expect(await viewer.evaluate(() => location.protocol)).toBe('file:');
     expect(await viewer.evaluate(() => MP.watching && MP.mySeat === null)).toBe(true);
-  }, new URL('../code/index.html', import.meta.url).href);
+  }, gameFile.href);
 });
 
 test('四观众持续同步与周期性断线：实际 PeerJS 重连后状态一致、权限及连接数量不漂移', async ({ browser }, testInfo) => {

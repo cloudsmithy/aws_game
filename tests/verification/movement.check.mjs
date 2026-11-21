@@ -3,7 +3,8 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-const html = readFileSync(new URL('../../code/index.html', import.meta.url), 'utf8');
+import { gameFile } from '../support/game.mjs';
+const html = readFileSync(gameFile, 'utf8');
 const segment = html.slice(html.indexOf('function walkSegment('), html.indexOf('async function moveSteps('));
 const movement = html.slice(html.indexOf('async function moveSteps('), html.indexOf('async function moveTo('));
 const fx = html.slice(html.indexOf('const okSq ='), html.indexOf('// 房主：小特效'));
@@ -17,7 +18,9 @@ function harness() {
   const ctx = vm.createContext({ N, SQ, console,
     S: { players: [{ id: 0, pos: 1, cash: 1000, jail: null }], props: {}, log: [], moving: 0 },
     MP: { role: 'client', seats: {}, send: (conn, m) => messages.push({ conn, m, at: now }) },
-    MOVE_TO: null, document: { hidden: false }, $: () => ({ hidden: false }),
+    MOVE_TO: null, __set_MOVE_TO: v => (ctx.MOVE_TO = v),   // 源码是 ES module，别的文件改 MOVE_TO 要走 setter
+    UI: new Proxy({}, { get: (_, k) => ctx[k] }),   // 游戏逻辑经界面接口（core/02b-ui-port.js）调界面：UI.render、UI.FX… 取这里同名的替身
+    document: { hidden: false }, $: () => ({ hidden: false }),
     FX: { ok: () => true, pawn: null, diceSpin: false,
       pawnStart: () => { ctx.FX.pawn = {}; return true; },
       pawnHop: async (pos, ms) => { const hop = { pos, start: now }; hops.push(hop); await ctx.sleep(ms); hop.end = now; },
