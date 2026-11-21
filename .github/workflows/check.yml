@@ -1,58 +1,32 @@
 name: Lint and layout
 on:
   push:
+    branches: [master, dev]
   pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
-  check:
+  lint:
+    name: Lint and logic
     runs-on: ubuntu-latest
-    # 11-11 起 ubuntu-latest 在迁到 Ubuntu 26，playwright install --with-deps 的 apt 安装
-    # 从几秒变成 9 分钟以上，10 分钟的上限会让 job 卡在装浏览器那一步，测试一个都跑不到
-    timeout-minutes: 15
+    timeout-minutes: 5
     defaults:
       run:
-        working-directory: tests   # package.json 和检查的配置都在 tests/ 里
+        working-directory: tests
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # 版本检查需要真实累计提交数
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
           cache-dependency-path: tests/package-lock.json
       - run: npm ci
-      # 缓存浏览器和它的依赖：命中以后不用再走 apt
-      - uses: actions/cache@v4
-        id: pw-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('tests/package-lock.json') }}
-      # 浏览器本体：只走 playwright 自己的 CDN，不碰 apt
-      - run: npx playwright install chromium
-        if: steps.pw-cache.outputs.cache-hit != 'true'
-      # 系统字体等依赖：跑机偶发解析不到 archive.ubuntu.com / security.ubuntu.com，
-      # apt 会整批 Failed to fetch。重试几次，失败也不阻断——缺字体最多让布局测试报出来，
-      # 比整个 job 挂在这一步、测试一个都跑不到要好。
-      - name: 系统依赖（apt 失败不阻断）
-        continue-on-error: true
-        timeout-minutes: 5   # 解析不到镜像时 apt 每次要耗 9 分钟才放弃，必须单独掐住；别加重试，三次就把整个 job 的时限吃光了
-        run: npx playwright install-deps chromium
-      - name: 体积检查（仅提醒）
-        env:
-          SIZE_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        run: |
-          if [[ -z "$SIZE_BASE_REF" || "$SIZE_BASE_REF" =~ ^0+$ ]]; then
-            SIZE_BASE_REF="origin/$DEFAULT_BRANCH"
-          fi
-          if ! git cat-file -e "$SIZE_BASE_REF:code/index.html" 2>/dev/null; then
-            if git fetch --no-tags origin "$SIZE_BASE_REF"; then
-              SIZE_BASE_REF=FETCH_HEAD
-            fi
-          fi
-          npm run lint:size -- "$SIZE_BASE_REF"
       - name: 版本比较基线
         env:
           PR_BASE: ${{ github.event.pull_request.base.sha }}
@@ -66,9 +40,79 @@ jobs:
           fi
           git cat-file -e "$base:code/index.html"
           echo "VERSION_BASE_REF=$base" >> "$GITHUB_ENV"
-      - run: npm run check
+      - name: 版本回归
+        run: npm run test:version
+      - name: JavaScript、CSS 和版本检查
+        run: npm run lint
+      - name: 走棋与鉴权逻辑
+        run: npm run test:movement && npm run test:auth
+
+  browser:
+    name: Browser ${{ matrix.shard }}/3
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    defaults:
+      run:
+        working-directory: tests
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+      - run: npm ci
+      - uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('tests/package-lock.json') }}
+      - run: npx playwright install chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+      # 系统依赖不在浏览器缓存里；保留安装及五分钟上限。
+      - name: 系统依赖（apt 失败不阻断）
+        continue-on-error: true
+        timeout-minutes: 5
+        run: npx playwright install-deps chromium
+      - name: 体积检查（仅提醒）
+        if: matrix.shard == 1
+        env:
+          SIZE_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          if [[ -z "$SIZE_BASE_REF" || "$SIZE_BASE_REF" =~ ^0+$ ]]; then
+            SIZE_BASE_REF="origin/$DEFAULT_BRANCH"
+          fi
+          if ! git cat-file -e "$SIZE_BASE_REF:code/index.html" 2>/dev/null; then
+            if git fetch --no-tags origin "$SIZE_BASE_REF"; then
+              SIZE_BASE_REF=FETCH_HEAD
+            fi
+          fi
+          npm run lint:size -- "$SIZE_BASE_REF"
+      - name: 浏览器回归（轮流分配用例，每片单 worker）
+        run: npm run test:ci -- ${{ matrix.shard }}/3
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: layout-failures
+          name: layout-failures-${{ matrix.shard }}
           path: tests/test-results/
+
+  # 保留原 check 状态名，避免分支保护只检查到快速 job 而漏掉浏览器失败。
+  check:
+    if: always()
+    needs: [lint, browser]
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: 汇总所有检查
+        env:
+          LINT_RESULT: ${{ needs.lint.result }}
+          BROWSER_RESULT: ${{ needs.browser.result }}
+        run: |
+          [[ "$LINT_RESULT" == success && "$BROWSER_RESULT" == success ]]
