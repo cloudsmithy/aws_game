@@ -1,0 +1,82 @@
+// 入口：按原来的顺序加载（每个文件自己 import 依赖；这里定下执行顺序）。构建时 vite.config.mjs 也按这个顺序把模块拼成一个普通 <script>
+import * as m0 from './data/i18n-table.js';
+import * as m1 from './data/manual-i18n.js';
+import * as m2 from './data/icons.js';
+import * as m3 from './data/manual-zh.js';
+import * as m4 from './data/cast-art.js';
+import * as m5 from './core/01-i18n-runtime.js';
+import * as m6 from './core/02-util.js';
+import * as m7 from './core/02b-ui-port.js';
+import * as m8 from './rules/03-services.js';
+import * as m9 from './ui/03b-lang-menu.js';
+import * as m10 from './rules/04-roles-combos-cards.js';
+import * as m11 from './rules/05-dlc.js';
+import * as m12 from './rules/06-qbank.js';
+import * as m13 from './rules/06b-register.js';
+import * as m14 from './engine/07-state.js';
+import * as m15 from './engine/08-money.js';
+import * as m16 from './ui/08b-ledger.js';
+import * as m17 from './engine/08c-costs.js';
+import * as m18 from './engine/09-rent.js';
+import * as m19 from './ui/10-modal.js';
+import * as m20 from './ui/11-cards-deeds.js';
+import * as m21 from './engine/11b-rent-info.js';
+import * as m22 from './ui/11c-level-table.js';
+import * as m23 from './engine/12-quiz.js';
+import * as m24 from './engine/13-move.js';
+import * as m25 from './engine/14-turn.js';
+import * as m26 from './engine/15-land.js';
+import * as m27 from './engine/16-deck.js';
+import * as m28 from './engine/17-health.js';
+import * as m29 from './engine/18-reinvent.js';
+import * as m30 from './engine/19-balance.js';
+import * as m31 from './engine/20-bankrupt.js';
+import * as m32 from './engine/21-skills.js';
+import * as m33 from './engine/22-speed.js';
+import * as m34 from './engine/23-manage.js';
+import * as m35 from './engine/24-actions.js';
+import * as m36 from './engine/25-trade.js';
+import * as m37 from './engine/26a-pillars-win.js';
+import * as m38 from './engine/26b-retro.js';
+import * as m39 from './ui/26c-report.js';
+import * as m40 from './engine/26d-gameover.js';
+import * as m41 from './ui/26f-over-screens.js';
+import * as m42 from './ui/26e-manual.js';
+import * as m43 from './ui/27a-board.js';
+import * as m44 from './ui/27b-arch-notes.js';
+import * as m45 from './ui/27c-center.js';
+import * as m46 from './ui/27d-side.js';
+import * as m47 from './ui/27e-square-gallery.js';
+import * as m48 from './ui/28-setup-save.js';
+import * as m49 from './dev/29-bot.js';
+import * as m50 from './dev/30-sim.js';
+import * as m51 from './dev/31-demo.js';
+import * as m52 from './ui/32-sfx.js';
+import * as m53 from './ui/33-fx3d.js';
+import * as m54 from './ui/34-cast.js';
+import * as m55 from './rules/35-modes.js';
+import * as m56 from './engine/36-ai.js';
+import * as m57 from './ui/37-keys.js';
+import * as m58 from './engine/38-cheats.js';
+import * as m59 from './ui/38b-cheat-ui.js';
+import * as m60 from './ui/39-bosskey.js';
+import * as m61 from './net/40-host-sync.js';
+import * as m62 from './net/40b-session.js';
+import * as m63 from './net/40c-sync.js';
+import * as m64 from './net/40d-host-msgs.js';
+import * as m65 from './net/40e-connect.js';
+import * as m66 from './net/40f-client.js';
+import * as m67 from './net/41-replay.js';
+import * as m68 from './net/42-setup.js';
+import * as m69 from './ui/49-ui-bind.js';
+import * as m70 from './core/43-boot.js';
+
+// 开发时（npm run dev）的兼容层：拆成模块以前顶层名字都是全局的，测试（page.evaluate）和控制台调试直接用 S、MP、newGame……
+// 这里把每个模块导出的名字挂到 window 上：读的是模块里的实时值，有 __set_X 的变量赋值时走 setter；浏览器自带、不能改的属性跳过。
+// 构建出来的单文件是普通 <script>，名字本来就是全局的，不经过这里。游戏代码自己不依赖这一层。
+for (const ns of [m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16, m17, m18, m19, m20, m21, m22, m23, m24, m25, m26, m27, m28, m29, m30, m31, m32, m33, m34, m35, m36, m37, m38, m39, m40, m41, m42, m43, m44, m45, m46, m47, m48, m49, m50, m51, m52, m53, m54, m55, m56, m57, m58, m59, m60, m61, m62, m63, m64, m65, m66, m67, m68, m69, m70]) for (const k of Object.keys(ns)) {
+  if (k.startsWith('__set_')) continue;
+  const d = Object.getOwnPropertyDescriptor(window, k); if (d && !d.configurable) continue;
+  const set = ns['__set_' + k];
+  Object.defineProperty(window, k, { configurable: true, enumerable: false, get: () => ns[k], set: set ? v => set(v) : v => Object.defineProperty(window, k, { configurable: true, writable: true, value: v }) });
+}

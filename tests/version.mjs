@@ -1,11 +1,11 @@
 // 三段版本沿用 v<主版本>.<更新轮次>.<仓库累计提交数>；不执行网页脚本。
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const declaration = /^let GAME_VERSION = .*$/m;
+const declaration = /^(?:export )?let GAME_VERSION = .*$/m;   // web/src/ 里是 export let，构建产物里是 let
 export function readVersion(html) {
   const line = html.match(declaration)?.[0];
   if (!line) throw new Error('缺少 GAME_VERSION');
@@ -70,8 +70,8 @@ export function stamp(cwd) {
   if (git(cwd, 'rev-parse', '--is-shallow-repository') === 'true') {
     throw new Error('盖章需要完整 Git 历史，请先 git fetch --unshallow');
   }
-  if (git(cwd, 'status', '--porcelain', '--', 'code')) {
-    throw new Error('请先提交 code/ 的内容，再盖章；盖章后另行提交版本元数据');
+  if (git(cwd, 'status', '--porcelain', '--', 'code', 'web/src', 'web/index.html')) {
+    throw new Error('请先提交 code/ 和 web/ 的内容，再盖章；盖章后另行提交版本元数据');
   }
   const file = resolve(cwd, 'code/index.html');
   const html = readFileSync(file, 'utf8');
@@ -81,11 +81,18 @@ export function stamp(cwd) {
   // 使用内容提交时间（UTC），同一提交重复盖章结果不变。
   const time = new Date(Number(git(cwd, 'show', '-s', '--format=%ct', 'HEAD')) * 1000)
     .toISOString().slice(0, 16).replace('T', ' ');
-  const next = html.replace(declaration, line => line
+  const fill = text => text.replace(declaration, line => line
     .replace(/\bcommits:\s*\d+/, `commits: ${count}`)
     .replace(/\bbuild:\s*'[^']*'/, `build: '${build}'`)
     .replace(/\btime:\s*'[^']*'/, `time: '${time}'`));
-  writeFileSync(file, next);
+  writeFileSync(file, fill(html));
+  // 游戏主体的源码在 web/src/，产物 code/index.html 由 vite build 生成；两边一起盖，构建一致性检查才过得去
+  // GAME_VERSION 在哪个文件里不写死（拆文件、挪位置都不用改这里）：找 web/src/ 下含这行声明的那个
+  const src = resolve(cwd, 'web/src');
+  if (existsSync(src)) for (const f of readdirSync(src, { recursive: true })) {
+    const p = resolve(src, f); if (!f.endsWith('.js')) continue;
+    const t = readFileSync(p, 'utf8'); if (declaration.test(t)) writeFileSync(p, fill(t));
+  }
   console.log(`已填写累计提交数 ${count}、构建号 ${build}、提交时间 ${time} UTC`);
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

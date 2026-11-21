@@ -3,8 +3,11 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-const html = readFileSync(new URL('../../code/index.html', import.meta.url), 'utf8');
-const source = html.slice(html.indexOf('const MP = {'), html.indexOf('// 远端：截住游戏操作按钮'));
+import { gameFile } from '../support/game.mjs';
+const html = readFileSync(gameFile, 'utf8');
+// MP 的本体，加上拆到 net/40b～40f 里、用 Object.assign 并回去的那几组方法（到重播模块开头为止）
+const source = html.slice(html.indexOf('const MP = {'), html.indexOf('// 远端：截住游戏操作按钮')) + '\n' +
+  html.slice(html.indexOf('Object.assign(MP, {'), html.indexOf('// ---- 联机：远端照着房主重播动画'));
 const plain = x => JSON.parse(JSON.stringify(x));
 function harness(game = true) {
   const effects = [], timers = new Map(); let nextTimer = 0;

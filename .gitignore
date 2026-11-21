@@ -26,3 +26,7 @@ test-results/
 .DS_Store
 .vscode/
 .idea/
+# 游戏主体构建的中间产物（最终产物是 code/index.html）
+web/dist/
+# 自建联机服务的密码、域名（deploy/peerjs/.env.example 是模板）
+deploy/peerjs/.env
