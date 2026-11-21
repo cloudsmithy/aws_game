@@ -37,7 +37,7 @@ async function roleSkill(p) { return withGain('card', () => roleSkill0(p)); }
 async function roleSkill0(p) {
   // 金额倍数见 skillMul()：跟着流量涨，完整局再 ×1.2，地狱模式不涨
   const r = roleOf(p), m = skillMul(), $m = x => Math.round(x * m), others = S.players.filter(o => o.alive && o.id !== p.id);
-  const freeUp = i => { S.props[i].level++; (S.props[i].upPaid = S.props[i].upPaid || [])[S.props[i].level - 1] = 0; log(_tf(3374, "🔧 {$0} 免费给 {$1} 升到{$2}」", nm(p), sqn(i), lvFull(i, S.props[i].level))); };
+  const freeUp = i => { S.props[i].level++; (S.props[i].upPaid = S.props[i].upPaid || [])[S.props[i].level - 1] = 0; log(_tf(3374, "🔧 {$0} 免费给 {$1} 升到{$2}", nm(p), sqn(i), lvFull(i, S.props[i].level))); };
   const unowned = OWNABLE.filter(i => S.props[i].owner === null && SQ[i].t === 'prop' && !isHidden(i));
   const take = i => { S.props[i].owner = p.id; S.props[i].paid = 0; log(_tf(3375, "📈 {$0} 靠技能拿下 {$1}", nm(p), sqn(i))); };
   p.skillUsed = true; sfxAll('magic'); evt(_tf(3376, "{$0} 发动角色技能「{$1}」", p.name, r.sk.n), 300);

@@ -16,12 +16,12 @@ Object.assign(MP, {
     // 观众只允许补发状态；伪造 seat、who、角色或游戏消息都不进入玩家处理器。
     const viewer = this.viewers[conn._viewer];
     if (viewer && viewer.conn === conn) {
-      if (m.t === 'resync') { viewer.base = null; this.pushState(true, viewer); }
+      if (m.t === 'resync') { viewer.base = null; this.pushState(true, viewer); if (this.cur) this.send(conn, this.cur.msg); }
       return;
     }
     if (m.t === 'hello') return this.admit(conn, m);
     if (seat == null || !this.seats[seat] || this.seats[seat].conn !== conn || !this.seats[seat].online) return;
-    if (m.t === 'resync') { this.seats[seat].base = null; this.pushState(true, this.seats[seat]); return; }   // 远端的增量接不上了：给他补一份整的
+    if (m.t === 'resync') { this.seats[seat].base = null; this.pushState(true, this.seats[seat]); if (this.cur) this.send(conn, this.cur.msg); return; }   // 远端的增量接不上了（或刚切回前台）：补一份整的，连同当前的弹窗（切后台、重同步时排着的弹窗会被 cancel 丢掉）
     if (m.t === 'act' && typeof m.a === 'string' && S && S.cur === seat && Object.prototype.hasOwnProperty.call(this.ACTS, m.a)) {
       // 这一下能不能执行：和 doRoll / jailAct / uiAction / endTurn 开头查的阶段一样
       const a = m.a, p = cur(), ok = a === 'end' ? S.phase === 'post' : a === 'roll' ? S.phase === 'roll' && p.jail === null : /^jail:/.test(a) ? S.phase === 'roll' && p.jail !== null : S.phase === 'roll' || S.phase === 'post';

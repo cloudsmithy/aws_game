@@ -1,5 +1,5 @@
 import { _t, _tf, _tr } from '../core/01-i18n-runtime.js';
-import { BOT, COLORS, PAWN, SIM, awsImg, clean, esc, usd } from '../core/02-util.js';
+import { BOT, COLORS, PAWN, SIM, awsImg, clean, esc, unesc, usd } from '../core/02-util.js';
 import { SQ } from '../rules/03-services.js';
 import { COMBOS, roleOf } from '../rules/04-roles-combos-cards.js';
 import { DLC } from '../rules/05-dlc.js';
@@ -287,12 +287,12 @@ export function printReport() {
 // 导出对局记录：战报 + 完整日志，存成文本文件
 export function downloadLog(w, why) {
   if (BOT || SIM || navigator.webdriver || /HeadlessChrome/.test(navigator.userAgent)) return;   // 机器人自测、模拟和无头浏览器跑的自动化测试不写文件：不然每跑一局「下载」里就多一份对局记录
-  const strip = h => String(h).replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+  const strip = h => String(h).replace(/<[^>]+>/g, '');   // 只去标签；实体（名字存的是转义后的）在写文件前统一 unesc
   const lines = [_t(3870, "亚马逊云科技 User Group 云上大亨 · 对局记录"), _tf(3871, "结果：{$0}；{$1}", finTitle(w, why), why), _tf(3872, "轮数：{$0}　难度：{$1}　DLC：{$2}", S.round, modeName(), (S.cfg.dlc || []).map(k => DLC[k].n).join(_t(349, "、")) || _t(708, "无")), '',
     _t(3873, "排名："), ...finalRank(w).map((q, k) => _tf(3874, "{$0}. {$1}（{$2}）{$3}；收过路费 ${$4}，付 ${$5}，答对 {$6}/{$7}", k + 1, q.name, roleOf(q).n, valTip(q), ST(q).rentIn, ST(q).rentOut, ST(q).quizOk, ST(q).quizN)), '',
     // 复盘直接用 retroTxt 写成纯文本（和战报是同一份数据），不再从战报的 HTML 里剥标签
     _t(3875, "复盘："), ...finalRank(w).map(q => retroTxt(q)),
     ...((S.events || []).length ? [_t(3876, "关键时刻："), ...S.events.map(e => _tf(3877, "第 {$0} 轮　{$1}", e.r, e.t)), ''] : []), ...statTxt(w), _tf(3878, "完整日志（从早到晚，时间是本机时区 {$0}）：", Intl.DateTimeFormat().resolvedOptions().timeZone), ...[...S.log].reverse().map(l => _tf(3879, "{$0}　{$1}", logTime(l), strip(clean(logBody(l)))))];
-  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' }));
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lines.map(unesc).join('\n')], { type: 'text/plain;charset=utf-8' }));
   a.download = _tf(3880, "云上大亨对局记录-{$0}.txt", new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')); document.body.appendChild(a); a.click(); a.remove();
 }

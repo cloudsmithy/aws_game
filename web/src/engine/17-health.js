@@ -258,12 +258,14 @@ export async function incident(p, id) {
       impair(hit); log(_tf(3156, "{$0} 的 {$1} 变成 Impaired", nm(p), hit.map(sqn).join(_t(349, "、")))); break;
     }
     case 18: {
-      await UI.dealNow();
       let k = (p.pos + 1) % N, guard = 0;
       while (!(SQ[k].t === 'prop' && S.props[k].owner !== null) && guard++ < N) k = (k + 1) % N;
-      if (guard >= N) { log(_t(3243, "棋盘上还没有有主的服务，没人受影响")); return; }
+      if (guard >= N) { await UI.dealNow(); log(_t(3243, "棋盘上还没有有主的服务，没人受影响")); return; }
       const g = SQ[k].g;
-      const hit = GRP(g).filter(i => S.props[i].owner !== null && SQ[i].type !== 'glb' && !effActive(i, 'mr') && !S.props[i].impaired);   // 全局服务不在任何一个 Region 里
+      let hit = GRP(g).filter(i => S.props[i].owner !== null && SQ[i].type !== 'glb' && !effActive(i, 'mr') && !S.props[i].impaired);   // 全局服务不在任何一个 Region 里
+      // 抽卡的人自己的服务也在里面：和别的惩罚卡一样可以抵消（Enterprise Support、标记、故障转移、蓝绿）；抵消只护住自己的，别人的照样宕机
+      if (hit.some(i => S.props[i].owner === p.id) && await tryCancel(p, id)) hit = hit.filter(i => S.props[i].owner !== p.id);
+      await UI.dealNow();
       impair(hit);
       await UI.info(_t(726, "某个服务在一个 Region 里宕机了"), _tf(3247, "<p>往前数第一块有主的服务是 {$0}，<b>{$1}</b>宕机。</p><p>{$2}</p>", sqn(k), grpN(g), hit.length ? _t(3244, "变成 Impaired：") + hit.map(i => _tf(3245, "{$0}（{$1}）", sqn(i), nm(P(S.props[i].owner)))).join(_t(349, "、")) : _t(3246, "这个组里的服务都有多区域功能或是全局服务，没受影响。")));
       log(_tf(3250, "{$0}宕机{$1}", grpN(g), hit.length ? _t(2670, "：") + hit.map(sqn).join(_t(349, "、")) + _t(3248, " 变成 Impaired") : _t(3249, "，没人受影响")));

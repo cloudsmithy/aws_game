@@ -8,7 +8,7 @@ const html = readFileSync(gameFile, 'utf8');
 const segment = html.slice(html.indexOf('function walkSegment('), html.indexOf('async function moveSteps('));
 const movement = html.slice(html.indexOf('async function moveSteps('), html.indexOf('async function moveTo('));
 const fx = html.slice(html.indexOf('const okSq ='), html.indexOf('// 房主：小特效'));
-const replay = html.slice(html.indexOf('const MPFX = {'), html.indexOf("document.addEventListener('visibilitychange', () => { if (document.hidden && MP.role === 'client')"));
+const replay = html.slice(html.indexOf('const MPFX = {'), html.indexOf('// 切到后台：收掉动画'));
 const layout = vm.runInNewContext(html.match(/const LAYOUT = (\[[\s\S]*?\]);/)[1]);
 const N = layout.length, SQ = layout.map(t => ({ t }));
 const flush = async () => { for (let i = 0; i < 40; i++) await Promise.resolve(); };

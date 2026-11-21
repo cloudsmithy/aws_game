@@ -182,6 +182,8 @@ export function shownRent(i) {
   let r = jr ? jr.tot : baseRent(i, 7);
   const ra = rsAdj(o, jr, r); r = ra.r;   // 代理商的库存：和 payRent 同一套规则
   if (s.k === 'bedrock' && hasCombo(o, 'rag')) r += 50;
+  // 托管服务商自己的服务 9 折是常驻规则（不是临时倍率），和 payRent 一样算进去
+  if (o.role === 'rs_msp' && pr.via == null) { r = Math.round(r * 0.9); ra.note = [ra.note, _t(3084, "托管服务商自己的服务 9 折")].filter(Boolean).join(_t(408, "；")); }
   // 架构里只要有一块按用量或 token 收，实际金额就随点数浮动，前面带「≈」；没成架构的 Bedrock 照旧写「点数×单价」
   const fl = m => SQ[m].bill === 'req' || SQ[m].bill === 'token' || SQ[m].t === 'util';
   const txt = !r ? '$0' : s.bill === 'token' && !jr ? _tf(3929, "点数×{$0}", tokUnit(i)) : `${(jr ? jr.parts : [i]).some(fl) ? '≈' : ''}$${r}`;

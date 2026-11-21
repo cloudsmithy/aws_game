@@ -176,4 +176,11 @@ export const MPFX = {
     if (m.k === 'fe') { const F = this.F[id]; delete this.F[id]; if (F) await FX.flyEnd(F); return this.landed(id, m.rx); }
   },
 };
-document.addEventListener('visibilitychange', () => { if (document.hidden && MP.role === 'client') MPFX.cancel(); });
+// 切到后台：收掉动画（cancel 也会丢掉排着等动画的弹窗，这是有意的：旧回调不能复活）。切回来要一份整的状态，
+// 房主补状态时连当前的弹窗一起重发，切后台那会儿该我选的窗就不会丢（以前要等 30 秒房主点「我来替他选」）
+document.addEventListener('visibilitychange', () => {
+  if (MP.role !== 'client') return;
+  if (document.hidden) MPFX.cancel();
+  // 只请求、不置 MP.resync：还没入座（审批中、刚重连）时房主不理这条，置了标记就再也收不到增量。整份状态到了照常覆盖
+  else if (MP.hostConn && MP.hostConn.open && !MP.gone && !MP.kicked && S) MP.send(MP.hostConn, { t: 'resync' });
+});

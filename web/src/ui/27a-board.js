@@ -93,7 +93,7 @@ export function hereHtml(p) {
 // 鼠标停在格子上看收费情况：服务格看价格、过路费、运行费和主人；角落格和账单格看收多少、给多少
 export function sqTip(i) {
   const s = SQ[i], pr = S.props[i], L = [s.t === 'prop' ? `${s.n} · ${grpN(s.g)} · ${TYPE_N[s.type]}` : s.n];
-  if (isWild(i)) { const c = pr && pr.wild && COMBOS.find(x => x.id === pr.wild.c); L.push(c ? _tf(3971, "万能服务：已绑到 {$0} 的「{$1}」", P(pr.wild.p).name, c.n) : (SQ[i].k === 'kms' ? _t(3972, "万能服务（只能绑到有存储或数据库的架构）：") : SQ[i].k === 'vpc' ? _t(3973, "万能服务（架构里有一块能接进 VPC 的服务就能绑，只有安全、监控、边缘、应用集成服务的架构不行）：") : _t(3974, "万能服务：")) + _t(3975, "不算进任何架构，主人能把它绑到自己的一个架构上，缺一块就顶上，凑齐了就并进去（只能绑一次）")); }
+  if (isWild(i)) { const c = pr && pr.wild && COMBOS.find(x => x.id === pr.wild.c); L.push(c ? _tf(3971, "万能服务：已绑到 {$0} 的「{$1}」", unesc(P(pr.wild.p).name), c.n) : (SQ[i].k === 'kms' ? _t(3972, "万能服务（只能绑到有存储或数据库的架构）：") : SQ[i].k === 'vpc' ? _t(3973, "万能服务（架构里有一块能接进 VPC 的服务就能绑，只有安全、监控、边缘、应用集成服务的架构不行）：") : _t(3974, "万能服务：")) + _t(3975, "不算进任何架构，主人能把它绑到自己的一个架构上，缺一块就顶上，凑齐了就并进去（只能绑一次）")); }
   if (isHidden(i)) L.push(_t(3976, "盲盒格：落上去随机抽一张 Health 或 re:Invent 卡，效果翻倍"));
   else if (pr && ['prop', 'util'].includes(s.t)) {
     let rent = 0; try { rent = pr.owner === null ? 0 : baseRent(i, 7); } catch (e) { }

@@ -82,7 +82,7 @@ let FIS = __rv(() => ([
 // 同色跳的目标：下一块同色服务，没有能跳的返回 null（colorJump 和落地窗里的「什么都不做，同色跳」共用）
 function jumpInfo(p, i) {
   const g = SQ[i].g; if (!g || !p.alive || p.jail !== null) return null;
-  const list = GRP(g).filter(k => k !== i); if (!list.length) return null;
+  const list = GRP(g).filter(k => k !== i && !isHidden(k)); if (!list.length) return null;
   const t = list.map(k => [k, (k - i + N) % N]).sort((a, b) => a[1] - b[1])[0][0], dist = (t - i + N) % N;
   const pr = S.props[t], whose = pr.owner === null ? _t(2970, "没人买，但跳过去不能买") : pr.owner === p.id ? _t(2971, "你自己的") : _tf(2972, "{$0} 的，要付过路费", P(pr.owner).name);
   return { t, g, dist, whose, note: `${i + dist >= N ? _t(2973, "，会经过 Startup 扶持") : ''}${(IX.free - i + N) % N < dist ? _t(2974, "，路过 User Group 活动领 $50") : ''}` };
@@ -136,7 +136,7 @@ export async function offerLandingUpgrade(p, i, canJump = false) {
   else if (v === 'cap') addCap(p, i);
   else if (v === 'fis') {
     const t = foes.length === 1 ? foes[0].id : await UI.ask({ title: _t(3003, "用 FIS 给谁注入故障？"), html: _tf(3004, "<p>先选对手，再从 FIS 故障牌里抽一张：{$0}。抽到哪张就付哪张的钱，对手当场承受。</p>", FIS.map(x => `${x.n} $${fisCost(x)}`).join(_t(349, "、"))), buttons: foes.map(q => ({ label: q.name, value: q.id })).concat([{ label: _t(3005, "算了"), value: -1 }]) });
-    if (t < 0) return 'did';
+    if (t < 0) { S.landAct.used = false; return 'did'; }   // 算了：这次落地的动作还没用掉，升级、加容量照样能做
     const f = rnd(FIS.length);
     UI.dealSfx('fis'); setTimeout(() => UI.FX.dealIn(), 0);
     await UI.ask({ title: _tf(3006, "{$0} 抽到 FIS 故障牌", p.name), html: UI.dealHtml('fis', UI.pcardHtml('fis', _tf(3007, "FIS 故障注入 · ${$0}", fisCost(FIS[f])), 'cloudwatch', FIS[f].n, _tf(3008, "{$0} 承受「{$1}」", nm(P(t)), INC[FIS[f].inc].n), '', _t(3009, "混沌工程：主动注入故障，提前发现系统哪里扛不住"))), buttons: [{ label: _tf(3010, "付 ${$0}，注入", fisCost(FIS[f])), value: true, cls: 'pri' }] });
@@ -161,7 +161,7 @@ async function offerBuy(p, i, opts = {}) {
     if (canQ && !quizTried) b.push({ label: _tf(3014, "答题争取 {$0}（和其他折扣叠加）", zhe(qd)), value: { k: 'quiz' } });
     if (!opts.discount) {
       if (SPOT_OK.has(s.k)) { const mn = Math.round(s.p * spotR); b.push({ label: _tf(3015, "Spot 购买（自己出价，最低 ${$0}）", mn), value: { k: 'spot', min: mn }, disabled: p.cash < mn }); }
-      if (availCard(p, 'MAP') && s.t === 'prop' && isInst(i)) { const x = Math.round(s.p * rd * 0.7 * qm); b.push({ label: _tf(3016, "用 MAP 卡 ${$0}", x), value: { k: 'map', price: x }, disabled: p.cash < x }); }
+      if (availCard(p, 'MAP') && s.t === 'prop' && isInst(i)) { const x = Math.round(s.p * rd * 0.7 * (p.buyCoupon || 1) * qm); b.push({ label: _tf(3016, "用 MAP 卡 ${$0}", x), value: { k: 'map', price: x }, disabled: p.cash < x }); }
     }
     if (p.cash < base && ownedBy(p).length) b.push({ label: _t(3017, "先去资产管理凑钱"), value: { k: 'raise' } });
     b.push({ label: _t(1599, "不买"), value: { k: 'no' } });
@@ -174,6 +174,7 @@ async function offerBuy(p, i, opts = {}) {
     // 后面紧接着就是买地窗：答题结果放在它顶上，省一个只有「继续」的窗
     if (v.k === 'quiz') { quizTried = true; ({ ok: quizOk, html: qres } = await quiz(qPoolS(s), _tf(3023, "答对可以打 {$0}买", zhe(qd)), { inline: true })); continue; }
     if (v.k === 'no') { log(_tf(3024, "{$0} 没买 {$1}", nm(p), sqn(i))); return; }   // 不买就是不买：不再拿出来让别人竞价（11-06 起）
+    const coupon = v.k !== 'spot';   // Spot 出价不打券；出到全价转成按需时也没打，券要留着
     if (v.k === 'spot') {
       const r = await UI.modal({ title: _tf(3025, "Spot 出价：{$0}（原价 ${$1}）", s.n, s.p), html: `<p>${_tf(3026, "出价越低越便宜。<b>别人看不到你出了多少</b>：落到这里的人只能自己猜，猜的价比你多出原价的 10%（${$0}）以上才抢得走，猜低了就照常付你过路费。出到全价就等于按需购买，没人能抢。", Math.round(s.p * 0.1))}</p><p class="muted">${_t(3027, "同一台电脑上轮流玩的话，出价时请别人先别看屏幕。")}</p><p class="muted">${_t(3028, "被抢时退回你出价的一半。现实里 Spot 已经不用竞价，被收回前只提前 2 分钟通知；游戏用出价模拟「可能被收回」。")}</p>`, inputs: [{ id: 'bid', label: _tf(3029, "出价 $（${$0}–${$1}）", v.min, Math.min(s.p, p.cash)), type: 'number', min: v.min, max: Math.min(s.p, p.cash), step: 10, value: Math.min(Math.max(v.min, Math.round(s.p * 0.5)), p.cash), af: true }], buttons: [{ label: _t(3030, "出价买下"), value: 'ok', cls: 'pri' }, { label: _t(3031, "返回"), value: 'x' }] });
       if (r.v !== 'ok') continue;
@@ -183,7 +184,7 @@ async function offerBuy(p, i, opts = {}) {
       if (bid >= s.p) v.k = 'buy';
     }
     if (v.k === 'map') availCard(p, 'MAP').used = true;
-    pay(p, 'bank', v.price); sfxAll('buy'); ST(p).buy++; ST(p).spendBuy = (ST(p).spendBuy || 0) + v.price; if (p.buyCoupon && v.k !== 'spot') { p.buyCoupon = 0; log(_tf(3032, "{$0} 用掉了 9 折购买券", nm(p))); }
+    pay(p, 'bank', v.price); sfxAll('buy'); ST(p).buy++; ST(p).spendBuy = (ST(p).spendBuy || 0) + v.price; if (p.buyCoupon && coupon) { p.buyCoupon = 0; log(_tf(3032, "{$0} 用掉了 9 折购买券", nm(p))); }
     S.props[i].owner = p.id; S.props[i].paid = v.price;
     if (v.k === 'spot') { S.props[i].spot = true; S.props[i].spotPaid = v.price; }
     log(`🏷️ ${nm(p)} ${v.k === 'spot' ? _t(3033, "用 Spot 出价买下") : _tf(3034, "花 ${$0} 买下", v.price)} ${sqn(i)}${s.t === 'prop' && singleAZ(i) ? _t(3035, "（单 AZ）") : ''}`);

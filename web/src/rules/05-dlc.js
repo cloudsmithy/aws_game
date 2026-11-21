@@ -231,7 +231,8 @@ export let MOVE_REI = __rv(() => ([
 export let NEW_REI = __rv(() => ([
   { n: _t(1808, "请合作伙伴梳理了一遍架构"), e: _t(1809, "你的一块万能服务免费改绑一次：已经绑了的可以换到另一个架构上，还没绑的现在就绑；没有能绑的，或者不想改，领 $100"), tip: _t(1810, "Well-Architected 合作伙伴可以按六大支柱帮你评审工作负载，找出缺的那一环、给出改进方案"), art: 'wat',
     run: async p => {
-      const opts = ownedBy(p).filter(w => isWild(w) && active(p, w)).flatMap(w => { const b = S.props[w].wild, mine = b && b.p === p.id ? b.c : null;
+      // 交易换过手的万能服务还留着前主人的绑定：在别人手里不算数、也不能再绑（规则书万能服务一节，和 wildFree 一致），只有没绑的和自己绑的能改
+      const opts = ownedBy(p).filter(w => isWild(w) && active(p, w) && (!S.props[w].wild || S.props[w].wild.p === p.id)).flatMap(w => { const b = S.props[w].wild, mine = b && b.p === p.id ? b.c : null;
         return COMBOS.filter(c => comboOpen(c) && c.id !== mine && wildFits(w, c) && !wildOf(p, c.id)).map(c => ({ w, c, miss: comboMiss(p, c), from: mine })).filter(x => x.miss.length <= 1); });
       if (!opts.length) { log(_tf(1811, "{$0} 没有能绑的万能服务，改领 ${$1}", nm(p), credit(p, 100))); return; }
       const lose = x => x.from == null ? 0 : (() => { const c0 = COMBOS.find(c => c.id === x.from); return comboMiss(p, c0).length === 1 ? 1e4 + c0.ix.flat().reduce((a, i) => a + (active(p, i) ? baseRent(i, 7) : 0), 0) : 0; })();

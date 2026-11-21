@@ -55,6 +55,7 @@ Object.assign(MP, {
       this.lastMid = m.id;
       MPFX.after(() => {   // 房主那边弹窗是动画播完才弹的：这边还在重播就等播完
         if (this.lastMid !== m.id || (this.closedMid || 0) >= m.id) return;
+        if (this.openMid === m.id && !$('#modal').hidden) return;   // 补状态时重发的同一个窗，已经开着就不重开（填了一半的输入不丢）
         // 自己开着看的窗口（图鉴、玩法、改名字……）时，别人的只读窗先不顶上来，不然翻到一半的图鉴、填了一半的名字都没了：记下来，关掉自己的窗口后还开着就补上。
         // 要我自己选的照旧马上顶上来。MODAL_CUR 可能是早就关掉的只读窗（closeLocal 不清它），所以还要看弹窗是不是真开着。电脑的窗 0.9 秒就关，不提示
         if (m.who !== this.mySeat && MODAL_CUR && MODAL_CUR.local && !$('#modal').hidden) { this.peek = m; const w = S.players[m.who]; if (w && !isAI(m.who)) toast(_tf(5037, "{$0} 在选：{$1}", unesc(w.name), unesc(String(m.spec.title || '').replace(/<[^>]+>/g, '')))); return; }

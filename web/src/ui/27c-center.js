@@ -1,11 +1,11 @@
 import { AWSI } from '../data/icons.js';
 import { LANG, __rv, _t, _tf, _tr } from '../core/01-i18n-runtime.js';
-import { $, PAWN, SAVE_FAIL, awsImg, esc } from '../core/02-util.js';
+import { $, PAWN, SAVE_FAIL, awsImg, esc, unesc } from '../core/02-util.js';
 import { BAL, IX, OWNABLE, SQ, effIn, haTag, isCorner, upCost } from '../rules/03-services.js';
 import { langBtn } from './03b-lang-menu.js';
 import { COMBOS, cLink, comboOpen, roleOf, rsRate, slotOpen } from '../rules/04-roles-combos-cards.js';
 import { DLC, dlcOn } from '../rules/05-dlc.js';
-import { F, P, S, active, availCard, comboMiss, cur, hasCombo, ownedBy, wildOf, winParts } from '../engine/07-state.js';
+import { F, P, S, active, availCard, comboMiss, cur, effActive, hasCombo, ownedBy, wildOf, winParts } from '../engine/07-state.js';
 import { netWorth } from '../engine/08c-costs.js';
 import { sellZhe, trafficMul, zhe } from '../engine/09-rent.js';
 import { minPlace } from './10-modal.js';
@@ -41,7 +41,7 @@ export function renderBoard() {
     d.style.setProperty('--oc', owned ? P(pr.owner).color : 'transparent');
     // 提示和格子内容跟上次写的一样就不再写：格子里的图标都是内嵌的，48 格整个重写一遍有两百多 KB 要重新解析。
     // 上次写的挂在格子元素自己身上，buildBoard 重建格子时跟着作废
-    const tl = sqTip(i).split('\n'), nl = needLine(i, need); if (nl) tl.splice(-1, 0, nl);
+    const tl = sqTip(i).split('\n'), nl = unesc(needLine(i, need)); if (nl) tl.splice(-1, 0, nl);
     const tip = tl.join('\n');
     if (d._t !== tip) { d._t = d.title = tip; d.setAttribute('aria-label', tip.split('\n').slice(0, -1).join(_t(2698, "，"))); }   // 格子、主人、过路费读屏都要念；最后一行「点一下看记录」不用念
     const h = cellHtml(i); if (d._h !== h) { d._h = h; d.innerHTML = h; }
@@ -148,7 +148,7 @@ export let PILLAR_SHORT = __rv(() => ([_t(4151, "运维类服务每块 +1 · 写
 // 第 k 条支柱还能怎么补：[{ i: 服务格（有图标）, t: 做什么, c: 要花多少, g: 加几分, n: 排序用的花费 }]，便宜的在前
 export function pillarItems(p, k) {
   const out = [], owned = ownedBy(p).filter(i => active(p, i) && SQ[i].upg);
-  const up = (eff, g) => owned.forEach(i => { const pr = S.props[i], l = SQ[i].upg.findIndex((u, n) => n >= pr.level && effIn(u[2], eff)); if (l >= 0) { const m = l + 1 - pr.level; out.push({ i, t: _tf(4157, "{$0} 升「{$1}」", SQ[i].n, SQ[i].upg[l][0]), c: _tf(4158, "再升 {$0} 级 · ${$1}", m, Array.from({ length: m }, (_, n) => upCost(i, pr.level + 1 + n)).reduce((a, b) => a + b, 0)), g, n: Array.from({ length: m }, (_, n) => upCost(i, pr.level + 1 + n)).reduce((a, b) => a + b, 0) }); } });
+  const up = (eff, g, only) => (only ? owned.filter(i => only.includes(i)) : owned).forEach(i => { const pr = S.props[i], l = SQ[i].upg.findIndex((u, n) => n >= pr.level && effIn(u[2], eff)); if (l >= 0) { const m = l + 1 - pr.level; out.push({ i, t: _tf(4157, "{$0} 升「{$1}」", SQ[i].n, SQ[i].upg[l][0]), c: _tf(4158, "再升 {$0} 级 · ${$1}", m, Array.from({ length: m }, (_, n) => upCost(i, pr.level + 1 + n)).reduce((a, b) => a + b, 0)), g, n: Array.from({ length: m }, (_, n) => upCost(i, pr.level + 1 + n)).reduce((a, b) => a + b, 0) }); } });
   const buy = (list, g = '+1') => list.forEach(i => { const pr = S.props[i]; if (isHidden(i)) return; if (pr.owner == null) out.push({ i, t: _tf(4159, "买 {$0}", SQ[i].n), c: `$${SQ[i].p}`, g, n: SQ[i].p }); else if (pr.owner !== p.id) out.push({ i, t: `${SQ[i].n}`, c: _tf(4160, "在 {$0} 手上，要交易", S.players[pr.owner].name), g, n: 9000 + SQ[i].p }); });
   const x = pillarParts(p), canSP = (F.full() || dlcOn('finops')) && p.role !== 'indie';
   if (k === 0) { buy([IX.cloudwatch, IX.cloudtrail, IX.sfn, IX.eventbridge].filter(i => !active(p, i))); if (!p.coe.length) out.push({ t: _t(4161, "进一次维护窗口，出来时写复盘"), c: '', g: '+1', n: 50 }); }
@@ -156,7 +156,7 @@ export function pillarItems(p, k) {
   if (k === 2) { up('maz', '+1'); up('mr', '+2'); buy(OWNABLE.filter(i => { const h = haTag(i); return h && (h.k === 'auto' || h.k === 'glb') && !active(p, i); })); }
   if (k === 3) { up('scale', '+1'); COMBOS.filter(comboOpen).filter(c => !hasCombo(p, c.id)).forEach(c => { const miss = c.ix.filter(n => !(Array.isArray(n) ? n : [n]).some(i => active(p, i))); if (miss.length === 1) out.push({ i: slotOpen(miss[0])[0], t: _tf(4164, "凑成「{$0}」", c.n), c: _tf(4165, "再买 {$0}", slotOpen(miss[0]).map(i => SQ[i].n).join(_t(1815, " 或 "))), g: '+1', n: SQ[slotOpen(miss[0])[0]].p }); }); }
   if (k === 4) { up('cost', '+1'); if (!x.commit) out.push({ t: canSP ? _t(4166, "签一次 Savings Plans / RI，或用掉 Cost Explorer 卡") : _t(4167, "用掉 Cost Explorer 卡"), c: '', g: '+1', n: 100 }); if (F.debt() && !p.refactored && p.techDebt) out.push({ t: _t(4168, "重构清掉 1 个技术债"), c: `$${refactorCost(p)}`, g: '+1', n: refactorCost(p) }); }
-  if (k === 5) { buy(OWNABLE.filter(i => SQ[i].type === 'sls' && !active(p, i))); up('ssh', '+1'); if (!x.grav && active(p, IX.ec2)) up('cost', '+1'); }
+  if (k === 5) { buy(OWNABLE.filter(i => SQ[i].type === 'sls' && !active(p, i))); up('ssh', '+1'); if (!x.grav) up('cost', '+1', [IX.ec2]); up('cost', '+1', [IX.s3, IX.efs, IX.opensearch, IX.ebs].filter(i => !effActive(i, 'cost'))); }   // 和 pillarParts 一样：只有 EC2 Graviton 和这几块的数据分层算
   return out.filter((o, n, a) => a.findIndex(y => y.t === o.t) === n).sort((a, b) => a.n - b.n);
 }
 // 第 k 条支柱现在的分是从哪来的：[{ i, t }]

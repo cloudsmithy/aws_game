@@ -9,6 +9,7 @@ import { shownRent } from './09-rent.js';
 import { sendToJail } from './13-move.js';
 import { speedLose } from './22-speed.js';
 import { isHidden } from '../rules/35-modes.js';
+import { localHuman } from './36-ai.js';
 import { MP } from '../net/40-host-sync.js';
 // ================= 作弊码 =================
 // 命令行里的 :money、:dice、:upgrade、:jail、:free、:grab。现金高于 $1000 不能用；给自己用不写玩家；给别人用写座位号或名字（:money -500 2）。
@@ -16,7 +17,9 @@ import { MP } from '../net/40-host-sync.js';
 // 另外用的当下有 1/3 的概率被 CloudTrail 审计发现（场上有别人买了 CloudTrail 是 2/3）：技术债 +1（没开技术债的模式罚 $100 进奖池），开了高速部署再扣 3 个部署点数。
 // 单机随时能用；联机时远端发给房主执行，房主用 :cheats off 关掉（默认开）。只在掷骰子前后能用，结算到一半不行
 export const cheatsOn = () => !(S && S.cfg && S.cfg.cheats === false);
-const mySeat = () => MP.role === 'client' ? MP.mySeat : S.cur;
+// 这台设备上「我」是谁：远端是自己的座位；房主、单机是本机的真人座位——轮到本机真人就是他（同屏轮流玩），
+// 轮到电脑或远端玩家时算本机第一个活着的真人（房主自己）。原来房主直接拿 S.cur，作弊记到正在走的远端玩家或电脑头上
+export const mySeat = () => MP.role === 'client' ? MP.mySeat : !S || !S.players ? null : localHuman(S.players[S.cur]) ? S.cur : S.players.find(q => q.alive && localHuman(q))?.id ?? null;
 function cheatWho(me, ref) {
   if (ref == null || ref === '') return S.players[me];
   const n = +ref; if (Number.isInteger(n) && n >= 1 && n <= S.players.length) return S.players[n - 1];
@@ -87,6 +90,8 @@ export function reportCheat(id, by) {
   const c = S && S.cheats && S.cheats[id]; if (!c) return _t(4877, "这条记录找不到了");
   if (c.rep) return _t(4878, "这一条已经有人举报过了");
   if (cheatExpired(c)) return _t(4879, "超过 1 轮了，举报无效，作弊得逞");
+  // 和 applyCheat 一样只在掷骰子前后：走棋、结算到一半被送进维护窗口，moveSteps 会从维护窗口接着走、land 结算到不相干的格子
+  if (!(S.phase === 'roll' || S.phase === 'post')) return _t(4850, "结算中，等这一步做完再用");
   const q = S.players[c.by]; if (!q || !q.alive) return _t(4880, "这位玩家已经出局了");
   if (by === c.by) return _t(4881, "不能举报自己");
   c.rep = true;

@@ -1,5 +1,5 @@
 import { __rv, _t, _tf, _tr } from '../core/01-i18n-runtime.js';
-import { $, PAWN, awsImg, clean, unesc } from '../core/02-util.js';
+import { $, PAWN, awsImg, clean } from '../core/02-util.js';
 import { BAL, BILL_N, CAP_MAX, DISC_GENAI, DISC_GENAI_SVC, DISC_PRICE, GENAI_K, GROUPS, IX, SQ, TOKEN, TYPE_N, aliasQ, capU, effLabel, grpN, haTag, lvFull, lvName, qNorm, upCost, upCostsTxt } from '../rules/03-services.js';
 import { ARCH_CAT, ARCH_CATS, CATS, COMBOS, INC, REI, ROLES, cAll, cLink, comboOpen, slotOpen } from '../rules/04-roles-combos-cards.js';
 import { P, S, WILD_PARTS, __set_S, active, cur, hasCombo, isWild, logBody } from '../engine/07-state.js';
@@ -120,7 +120,7 @@ function sqPanelHtml(i) {
   const run = runIfMine(i), fee = useFeeTxt(i, pr ? pr.level : 0);
   const kpi = `<div class="sp-kpi">${tile(_t(4477, "价格"), pr && pr.spot && spotMine(i) ? `$${pr.spotPaid}` : `$${s.p}`, pr && pr.spot ? (spotMine(i) ? _t(4478, "你的 Spot 出价") : _t(4479, "Spot 出价看不到")) : '')}${tile(_t(3845, "过路费"), rent, rentN)}${tile(_t(4480, "运行费 / 圈"), `$${run}`, fee ? fee.replace(_t(4481, "收到过路费交 "), _t(4482, "另交收到的 ")) : o ? _t(4483, "经过起点时交") : _t(4484, "买下后，经过起点时交"))}</div>`;
   const chips = o ? svcState(i).map(x => `<span class="sp-chip ${x.k}">${x.head}</span>`).join('') : '';
-  const own = o ? `<div class="sp-own"><span class="sp-who"><i style="background:${o.color}"></i>${unesc(o.name)}</span>${s.upg ? `<span>${lvFull(i, pr.level)}</span>` : ''}${pr.cap ? _tf(4485, "<span>容量 {$0} 个{$1}</span>", pr.cap, capU(s.k)) : ''}${chips}</div>`
+  const own = o ? `<div class="sp-own"><span class="sp-who"><i style="background:${o.color}"></i>${o.name}</span>${s.upg ? `<span>${lvFull(i, pr.level)}</span>` : ''}${pr.cap ? _tf(4485, "<span>容量 {$0} 个{$1}</span>", pr.cap, capU(s.k)) : ''}${chips}</div>`
     : _t(4486, "<div class=\"sp-own none\">没人买，落上来就能买</div>");
   const nl = needLine(i, needSquares());
   const ha = haTag(i), haBox = ha ? `<div class="hatag ${ha.k}"><b>${ha.t}</b><span>${ha.d}</span></div>` : '';
@@ -133,7 +133,7 @@ function sqPanelHtml(i) {
   const upNote = _tf(4494, "升级基础价 {$0}，落在自己的服务上才能升一级；落地时按你的情况可能加钱或减半，弹窗里会写明{$1}", upCostsTxt(i), s.t === 'prop' ? _tf(4492, "。每个{$0} ${$1}，过路费 +25%，最多 {$2} 个{$3}", capU(s.k), capCost(i), CAP_MAX, pr && pr.cap ? _tf(4491, "（现在 {$0} 个）", pr.cap) : '') : _t(4493, "。这一格没有容量可加"));
   return `<div class="sp-sub">${grpN(s.g)}${s.type !== 'token' && !util ? ` · ${TYPE_N[s.type]}` : ''} · ${billTxt}</div>${kpi}${own}${nl ? `<div class="psneed">${nl}</div>` : ''}${introHtml(i)}${haBox}${rentBreakHtml(i)}
     <h5>${_t(4497, "升级路线")}</h5>${lvCardsHtml(i)}<p class="sp-n">${upNote}</p>
-    ${cbs ? _tf(4496, "<h5>关联的有效架构<span class=\"muted\">按{$0}现在持有的算</span></h5><ul class=\"sp-cb\">{$1}</ul>{$2}", o ? ` ${unesc(o.name)} ` : _t(2456, "你"), cbs, (jr => jr && jr.cs.length > 1 ? _tf(4495, "<p class=\"sp-n chain\">别人落在这一块上：{$0} 串在一起收，共用的服务只算一次，按 7 点约 ${$1}</p>", jr.cs.map(c => _tf(2766, "「{$0}」", c.n)).join(' + '), jr.tot) : '')(o && !pr.offline && !pr.impaired && pr.ddos == null ? jointRent(i, 7) : null)) : ''}`;
+    ${cbs ? _tf(4496, "<h5>关联的有效架构<span class=\"muted\">按{$0}现在持有的算</span></h5><ul class=\"sp-cb\">{$1}</ul>{$2}", o ? ` ${o.name} ` : _t(2456, "你"), cbs, (jr => jr && jr.cs.length > 1 ? _tf(4495, "<p class=\"sp-n chain\">别人落在这一块上：{$0} 串在一起收，共用的服务只算一次，按 7 点约 ${$1}</p>", jr.cs.map(c => _tf(2766, "「{$0}」", c.n)).join(' + '), jr.tot) : '')(o && !pr.offline && !pr.impaired && pr.ddos == null ? jointRent(i, 7) : null)) : ''}`;
 }
 export function showSquare(i) {
   if (!S) return;

@@ -2,6 +2,7 @@ import { LANG, __rv, _t, _tf, _tr } from '../core/01-i18n-runtime.js';
 import { COLORS, SIM, clean } from '../core/02-util.js';
 import { GRP, OWNABLE, SQ, effIn, isInst } from '../rules/03-services.js';
 import { COMBOS, cAll, comboOpen } from '../rules/04-roles-combos-cards.js';
+import { isHidden } from '../rules/35-modes.js';
 // ================= 状态 =================
 export let S = null;
 export const P = id => S.players[id];
@@ -59,7 +60,9 @@ export const logBody = l => String(l).replace(/<time data-t="\d+"><\/time>/, '')
 export const owns = (p, i) => S.props[i] && S.props[i].owner === p.id;
 export const active = (p, i) => owns(p, i) && !S.props[i].offline && S.props[i].ddos == null;
 export const ownedBy = p => OWNABLE.filter(i => owns(p, i));
-export const ownsGroup = (p, g) => GRP(g).every(i => active(p, i));
+// 娱乐模式的盲盒格买不到，整组只看买得到的那几块（数据库组少 DMS、安全组少 GuardDuty/Inspector/KMS），不然这两组永远凑不齐；
+// 容器、集成、分析组整组都是盲盒，空集不能算「凑齐」
+export const ownsGroup = (p, g) => { const a = GRP(g).filter(i => !isHidden(i)); return a.length > 0 && a.every(i => active(p, i)); };
 export const availCard = (p, k) => p.cards.find(c => c.id === k && !c.used);
 export const debtOf = p => p.debt.reduce((a, d) => a + d.amt, 0);
 // 某块服务当前生效的功能
@@ -94,8 +97,9 @@ export const combosBrokenBy = (o, i) => comboOn(o, i).filter(c => wildOf(o, c.id
 export function resetProp(i) { S.props[i] = { owner: null, level: 0, cap: 0, spot: false, spotPaid: 0, impaired: false, offline: 0, offCash: 0 }; }
 
 // （以下从 rules/03-services.js 挪来：用到 S、effActive）
-// ECS 服务默认就把任务尽量分散到多个 AZ（Fargate 也是），不算单 AZ
-export const singleAZ = i => isInst(i) && SQ[i].k !== 'ecs' && (S.props[i].level === 0 || SQ[i].k === 'ebs');
+// ECS 服务默认就把任务尽量分散到多个 AZ（Fargate 也是），不算单 AZ；EBS 卷升了也只在一个 AZ。
+// 其他实例型看「多 AZ」那一级有没有升到，不能只看 level>0：EC2 第 1 级是自动 AMI，第 2 级跨 AZ Auto Scaling 才是多 AZ
+export const singleAZ = i => isInst(i) && SQ[i].k !== 'ecs' && (SQ[i].k === 'ebs' || !effActive(i, 'maz'));
 // 下线：拿回买价的一半先周转（Spot 按出价算），这笔钱不用还；重新上线不要钱
 export const offlineCash = i => Math.round((S.props[i].spot ? S.props[i].spotPaid : (S.props[i].paid ?? SQ[i].p)) / 2);
 // 别的文件要改这些变量（import 进来是只读的），走这里

@@ -136,7 +136,7 @@ async function drawReinvent0(p, forced) {
     }
     case 20: {
       const dist = i => (i - p.pos + N) % N || N;
-      const t = OWNABLE.filter(i => S.props[i].owner === null).sort((a, b) => dist(a) - dist(b))[0];
+      const t = OWNABLE.filter(i => S.props[i].owner === null && !isHidden(i)).sort((a, b) => dist(a) - dist(b))[0];
       if (t === undefined) { log(_tf(3317, "{$0} 没有可以去的地方，改领 ${$1}", nm(p), credit(p, 100))); break; }
       await moveTo(p, t); await land(p, { discount: 0.8 });
       // 不买（或者买不起）也不白跑：领卡上写的钱（按这次的卡牌倍率）
