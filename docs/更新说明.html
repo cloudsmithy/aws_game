@@ -49,7 +49,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <h1>亚马逊云科技 User Group 云上大亨 · 这一轮改了什么</h1>
   <p>从「破产逻辑是不是有问题」开始，一路改到新角色、两个新开关、地狱模式和全套文档。每条改动后面写了为什么改；平衡数字都是用电脑玩家对打模拟出来的。</p>
   <nav>
-    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#todo">待定</a>
+    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#r17">第十七轮</a><a href="#todo">待定</a>
   </nav>
 </header>
 
@@ -844,8 +844,36 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   </ul>
 </section>
 
+<section id="r17">
+  <h2><i>25</i>第十七轮（11-21）：Vite 重构、修 17 处 bug、自建联机服务</h2>
+  <ul>
+    <li><span class="tag chg">改</span>游戏主体的源码搬到 <code>web/</code>：脚本拆成 72 个 ES module（<code>core/ rules/ engine/ ui/ net/ dev/ data/</code>），<code>npm run dev</code> 本地开发、改了自动刷新；<code>npm run build</code> 按加载顺序拼回一个普通脚本，产物仍是单文件 <code>code/index.html</code>，部署方式不变。同一随机种子 24 套配置 144 局、电脑决策 40 局、真人流程 1200 步（交易、资产管理、主动行动、技能、改名、读档）和改之前逐条一样，中英日 122 个控件逐个点开截图一样。</li>
+    <li><span class="tag chg">改</span>按钮不再写行内 <code>onclick</code>（翻译串里的也换了），改成 <code>data-act</code> 加一张事件分发表。</li>
+    <li><span class="tag chg">改</span>游戏逻辑和界面分层：<code>engine/</code>、<code>rules/</code> 不直接调界面、不碰页面，经界面接口 <code>UI</code> 开弹窗、重画、放特效；电脑的决策只看弹窗的数据。新增无界面整局测试：Node 里不开浏览器，让电脑把一局打完。</li>
+    <li><span class="tag chg">改</span>服务图标压缩（只去掉多余属性，路径不动，逐像素比对无可见差异），网页 4.05MB → 3.97MB。</li>
+    <li><span class="tag new">新</span>多语言工具 <code>web/tools/i18n.mjs</code>：给新写的字分配编号、导出没翻译的、合并译文、检查编号冲突和占位符；CI 加构建一致性、多语言、模块检查。</li>
+    <li><span class="tag new">新</span>自建联机服务 <code>deploy/peerjs/</code>：PeerJS 信令 + TURN 中继的 docker compose，默认只监听本机；游戏网址带 <code>?peerhost=</code> 就连自己的信令。</li>
+    <li><span class="tag bug">BUG</span>用 MAP 卡买服务没算 9 折购买券，券却被用掉；Spot 出价出到全价也会用掉券。</li>
+    <li><span class="tag bug">BUG</span>Health 卡「某个 Region 宕机」打到自己的服务时不给抵消（Enterprise Support、复盘 / 演练标记、故障转移、蓝绿）；现在能抵消，只护住自己的。</li>
+    <li><span class="tag bug">BUG</span>娱乐模式里「上了 Startup Showcase」和同色跳会落到盲盒格。</li>
+    <li><span class="tag bug">BUG</span>FIS 选目标时点「算了」，这次落地的动作也被占掉，不能再升级、加容量。</li>
+    <li><span class="tag bug">BUG</span>EC2 第 1 级（自动 AMI）被当成多 AZ，躲过 AZ 断电和单点故障；第 2 级跨 AZ Auto Scaling 才是多 AZ。</li>
+    <li><span class="tag bug">BUG</span>娱乐模式里数据库组、安全组带盲盒格，整组永远集不齐。</li>
+    <li><span class="tag bug">BUG</span>「请合作伙伴梳理了一遍架构」能改绑交易换手前、前主人绑过的万能服务。</li>
+    <li><span class="tag bug">BUG</span>格子面板把玩家名字当 HTML 插进去，名字叫 <code>&lt;!--</code> 时后面的内容全没了。</li>
+    <li><span class="tag bug">BUG</span>托管服务商自己的服务，格子上标的过路费没算 9 折，和实际收的对不上。</li>
+    <li><span class="tag bug">BUG</span>可持续性支柱的「还能怎么补」建议了不加分的升级，漏了 S3、EFS 这些的数据分层。</li>
+    <li><span class="tag bug">BUG</span>导出的对局记录、悬停提示里，带撇号的名字显示成 <code>O&amp;#39;Neil</code>。</li>
+    <li><span class="tag bug">BUG</span>技能免费升级的日志多一个「」」。</li>
+    <li><span class="tag bug">BUG</span>英文版「现在不能宣告破产」的提示点了没反应（Can't 的撇号截断了按钮代码）。</li>
+    <li><span class="tag bug">BUG</span>走棋、结算到一半也能举报作弊：被举报的人送进维护窗口后棋子接着走、结算到别的格子。现在只在掷骰子前后受理。</li>
+    <li><span class="tag bug">BUG</span>房主输入作弊码记到了当前轮到的人（远端玩家或电脑）头上；房主的举报记成「有人」、还能举报自己。</li>
+    <li><span class="tag bug">BUG</span>联机时客人切出 App，排着等动画的决策窗被丢掉，整桌要等 30 秒房主代选；现在切回来请求整份状态，房主连当前弹窗一起补发。</li>
+  </ul>
+</section>
+
 <section id="todo">
-  <h2><i>25</i>待定 / 已知问题</h2>
+  <h2><i>26</i>待定 / 已知问题</h2>
   <ul>
     <li>代理商在完整局（不限轮数约 16%）和地狱模式 15 轮（约 14%）偏弱，公平是 25%；各模式的数字见规则书第 32 节。</li>
     <li>模拟里的电脑不会刻意凑六大支柱，所以 Well-Architected 的达成率只能当下限看。</li>
@@ -853,7 +881,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <div class="note">改动前的网页备份在上一级目录：<code>index.before-speed.html</code>（加高速部署前）、<code>index.before-roles.html</code>（加角色和代理商前）。</div>
 </section>
 
-<footer>亚马逊云科技 User Group 云上大亨 · 作者：亚马逊云科技 User Group · 问题和建议：<a href="https://github.com/cloudsmithy/aws_game/issues">提 issue</a> · 2026-11-13</footer>
+<footer>亚马逊云科技 User Group 云上大亨 · 作者：亚马逊云科技 User Group · 问题和建议：<a href="https://github.com/cloudsmithy/aws_game/issues">提 issue</a> · 2026-11-21</footer>
 </div>
 </body>
 </html>

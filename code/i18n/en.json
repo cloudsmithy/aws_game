@@ -5357,5 +5357,7 @@
  "<button class=\"sm\" data-act=\"endNow\" title=\"时间到了、不想打了：现在按估值排名结束这一局\">现在结算</button>": "<button class=\"sm\" data-act=\"endNow\" title=\"Time's up or you don't want to keep playing: end the game now and rank by valuation\">Settle now</button>",
  "<button class=\"sm off\" aria-disabled=\"true\" data-act=\"toast\" data-arg=\"结算中，等这一步做完再结算\">现在结算</button>": "<button class=\"sm off\" aria-disabled=\"true\" data-act=\"toast\" data-arg=\"Settling is in progress; wait for this step to finish\">Settle now</button>",
  "<span class=\"tb {$0} {$1} {$2}\" title=\"{$3}：现金 ${$4}，总资产 ${$5}\" data-act=\"jumpPl\" data-arg=\"{$6}\">{$7}<b>{$8}</b><span class=\"tbm\"><i>${$9}</i><small class=\"tba\" title=\"总资产：现金 − 欠款 + 服务买价 + 升级和容量的投入\">资产 ${$10}</small></span>{$11}</span>": "<span class=\"tb {$0} {$1} {$2}\" title=\"{$3}: cash ${$4}, net worth ${$5}\" data-act=\"jumpPl\" data-arg=\"{$6}\">{$7}<b>{$8}</b><span class=\"tbm\"><i>${$9}</i><small class=\"tba\" title=\"Net worth: cash − debt + service purchase prices + money put into upgrades and capacity\">Worth ${$10}</small></span>{$11}</span>",
- "<div class=\"sp-act\"><button type=\"button\" class=\"sm\" data-act=\"showSquareFull\" data-arg=\"{$0}\">看完整介绍</button>{$1}</div>": "<div class=\"sp-act\"><button type=\"button\" class=\"sm\" data-act=\"showSquareFull\" data-arg=\"{$0}\">Full details</button>{$1}</div>"
+ "<div class=\"sp-act\"><button type=\"button\" class=\"sm\" data-act=\"showSquareFull\" data-arg=\"{$0}\">看完整介绍</button>{$1}</div>": "<div class=\"sp-act\"><button type=\"button\" class=\"sm\" data-act=\"showSquareFull\" data-arg=\"{$0}\">Full details</button>{$1}</div>",
+ "第十七轮": "Round 17",
+ "Vite 重构、修 17 处 bug、自建联机服务": "Vite rebuild, 17 bug fixes, self-hosted multiplayer server"
 }

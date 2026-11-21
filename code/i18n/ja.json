@@ -5297,5 +5297,7 @@
  "<button class=\"sm\" data-act=\"endNow\" title=\"时间到了、不想打了：现在按估值排名结束这一局\">现在结算</button>": "<button class=\"sm\" data-act=\"endNow\" title=\"時間切れ、またはもうやめたいとき：今すぐ評価額で順位を決めてこの対局を終了\">今すぐ終了</button>",
  "<button class=\"sm off\" aria-disabled=\"true\" data-act=\"toast\" data-arg=\"结算中，等这一步做完再结算\">现在结算</button>": "<button class=\"sm off\" aria-disabled=\"true\" data-act=\"toast\" data-arg=\"精算中です。この処理が終わってから終了してください\">今すぐ終了</button>",
  "<span class=\"tb {$0} {$1} {$2}\" title=\"{$3}：现金 ${$4}，总资产 ${$5}\" data-act=\"jumpPl\" data-arg=\"{$6}\">{$7}<b>{$8}</b><span class=\"tbm\"><i>${$9}</i><small class=\"tba\" title=\"总资产：现金 − 欠款 + 服务买价 + 升级和容量的投入\">资产 ${$10}</small></span>{$11}</span>": "<span class=\"tb {$0} {$1} {$2}\" title=\"{$3}：現金 ${$4}、総資産 ${$5}\" data-act=\"jumpPl\" data-arg=\"{$6}\">{$7}<b>{$8}</b><span class=\"tbm\"><i>${$9}</i><small class=\"tba\" title=\"総資産：現金 − 借金 + サービスの購入額 + アップグレードとキャパシティへの投資\">資産 ${$10}</small></span>{$11}</span>",
- "<div class=\"sp-act\"><button type=\"button\" class=\"sm\" data-act=\"showSquareFull\" data-arg=\"{$0}\">看完整介绍</button>{$1}</div>": "<div class=\"sp-act\"><button type=\"button\" class=\"sm\" data-act=\"showSquareFull\" data-arg=\"{$0}\">詳細を見る</button>{$1}</div>"
+ "<div class=\"sp-act\"><button type=\"button\" class=\"sm\" data-act=\"showSquareFull\" data-arg=\"{$0}\">看完整介绍</button>{$1}</div>": "<div class=\"sp-act\"><button type=\"button\" class=\"sm\" data-act=\"showSquareFull\" data-arg=\"{$0}\">詳細を見る</button>{$1}</div>",
+ "第十七轮": "第 17 ラウンド",
+ "Vite 重构、修 17 处 bug、自建联机服务": "Vite で作り直し、バグ 17 件修正、マルチプレイサーバーの自前運用"
 }
