@@ -52,7 +52,7 @@ aws_game/
 │   ├── learn/        学习内容：arch/ 架构讲解（视频 + 图文）、svc/ 服务知识点；en/、ja/ 下是英文版、日文版
 │   └── i18n/         多语言对照表 en.json、ja.json，术语表 GLOSSARY.md（英文）、GLOSSARY.ja.md（日文），en/、ja/ 下是翻译的玩法手册和速览
 ├── docs/             规则书、玩法手册、玩法速览（md），更新说明（html / pdf），手册/、常用手册/（PDF）
-├── deploy/           部署：docker/（本机用 Docker 发网页）、chengdu/（成都服务器自动部署）
+├── deploy/           部署：docker/（本机用 Docker 发网页）、chengdu/（成都服务器自动部署）、peerjs/（自建联机信令 + TURN 中继）
 ├── tests/            开发检查：棋盘布局回归测试（Playwright）、代码检查（ESLint、Stylelint），package.json 和配置都在这里
 ├── .github/          工作流：发布 GitHub Pages、自动检查、成都部署
 ```
@@ -76,6 +76,7 @@ aws_game/
 | `docs/玩法速览.md` / `docs/玩法手册.md` / `docs/规则书.md` | 手册的源文件。网页里点「玩法」看到的是玩法速览（简版）和玩法手册（完整版） |
 | `deploy/docker/` | `Dockerfile`、`nginx.conf`：用 nginx 在本机发网页版（见「怎么玩」） |
 | `deploy/chengdu/` | 成都服务器自动部署：打包、服务器上的接收程序、配置说明（见文末） |
+| `deploy/peerjs/` | 自建联机服务：PeerJS 信令（PeerServer）+ TURN 中继（coturn），一份 docker compose，见 [deploy/peerjs/README.md](deploy/peerjs/README.md) |
 | `宣传片/` | 宣传片和玩法讲解视频（mp4，另有能直接播放的 html）：`玩法讲解_娱乐模式.mp4` … `玩法讲解_地狱模式.mp4` 是 6 个模式各自的讲解 |
 | `tools/` | 生成 PDF、卡牌和跑模拟的脚本；题库在 `tools/qbank/` |
 

@@ -1,0 +1,80 @@
+# 自建联机服务：PeerJS 信令（PeerServer）+ TURN 中继（coturn），前面 Caddy 自动申请 HTTPS 证书。
+# 用法和对外开放前要确认的事见同目录 README.md。
+#
+# 默认只监听本机（PUBLIC_BIND=127.0.0.1）：直接 up 起来不会对外开放任何端口。
+# 真要给玩家用时，在 .env 里写 PUBLIC_BIND=0.0.0.0 —— 这一步就是对公网开放，开之前看 README「对外开放前」。
+# 信令服务本身不发布端口，只在 compose 内部网络里，由 Caddy 转发；对外只有 Caddy 的 443/80 和 TURN 的端口。
+name: tycoon-peer
+
+services:
+  peerjs:
+    image: peerjs/peerjs-server:1.0.2   # 和游戏内置的 PeerJS 客户端、tests/ 里测试用的 peer 1.0.2 同一版
+    restart: unless-stopped
+    # --proxied：在 Caddy 后面，按 X-Forwarded-For 认真实地址；不开 allow_discovery（不然谁都能列出在线的房间）
+    command: ["--port", "9000", "--path", "/", "--key", "peerjs", "--proxied", "true", "--allow_discovery", "false",
+              "--concurrent_limit", "${PEER_CONCURRENT_LIMIT:-64}", "--alive_timeout", "60000"]
+    networks: [peer]
+    # 不写 ports：只有同一网络里的 caddy 能连到它
+
+  caddy:
+    image: caddy:2.8
+    restart: unless-stopped
+    depends_on: [peerjs]
+    environment:
+      PEER_DOMAIN: ${PEER_DOMAIN:?在 .env 里写 PEER_DOMAIN=你的信令域名}
+      ACME_EMAIL: ${ACME_EMAIL:?在 .env 里写 ACME_EMAIL=申请证书用的邮箱}
+    ports:
+      - "${PUBLIC_BIND:-127.0.0.1}:443:443"      # wss:// 信令
+      - "${PUBLIC_BIND:-127.0.0.1}:80:80"        # 只用来申请、续期证书（HTTP-01），其余请求跳 https
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks: [peer]
+
+  coturn:
+    image: coturn/coturn:4.6
+    restart: unless-stopped
+    # 账号密码只从 .env 读（这里是引用，不是明文）；玩家在游戏开局页「联机设置和测试」里填同一组
+    # denied-peer-ip：不许把流量中继到内网、本机和云厂商元数据地址，免得被人拿来当跳板摸你服务器所在的内网
+    command:
+      - -n
+      - --log-file=stdout
+      - --listening-port=3478
+      - --fingerprint
+      - --lt-cred-mech
+      - --realm=${TURN_REALM:?在 .env 里写 TURN_REALM，比如你的域名}
+      - --user=${TURN_USER:?在 .env 里写 TURN_USER}:${TURN_PASS:?在 .env 里写 TURN_PASS（随机长密码）}
+      - --external-ip=${TURN_PUBLIC_IP:?在 .env 里写 TURN_PUBLIC_IP=服务器公网 IP}
+      - --min-port=49160
+      - --max-port=49200
+      - --total-quota=${TURN_TOTAL_QUOTA:-60}
+      - --user-quota=${TURN_USER_QUOTA:-12}
+      - --max-bps=${TURN_MAX_BPS:-1000000}
+      - --no-cli
+      - --no-tls
+      - --no-dtls
+      - --no-multicast-peers
+      - --no-loopback-peers
+      - --denied-peer-ip=0.0.0.0-0.255.255.255
+      - --denied-peer-ip=10.0.0.0-10.255.255.255
+      - --denied-peer-ip=100.64.0.0-100.127.255.255
+      - --denied-peer-ip=127.0.0.0-127.255.255.255
+      - --denied-peer-ip=169.254.0.0-169.254.255.255
+      - --denied-peer-ip=172.16.0.0-172.31.255.255
+      - --denied-peer-ip=192.168.0.0-192.168.255.255
+      - --denied-peer-ip=::1
+      - --denied-peer-ip=fc00::-fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff
+      - --denied-peer-ip=fe80::-febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff
+    ports:
+      - "${PUBLIC_BIND:-127.0.0.1}:3478:3478/udp"
+      - "${PUBLIC_BIND:-127.0.0.1}:3478:3478/tcp"
+      - "${PUBLIC_BIND:-127.0.0.1}:49160-49200:49160-49200/udp"   # 中继端口段：每路中继占一个，41 个够二十来人同时用
+    networks: [peer]
+
+networks:
+  peer: {}
+
+volumes:
+  caddy-data: {}
+  caddy-config: {}
