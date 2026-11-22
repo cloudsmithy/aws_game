@@ -133,8 +133,8 @@ export function playerBrief(p) {
       btn(n >= 2 ? _t(4213, "指定一人") : _t(4214, "发给他"), 'incOne', p.cash >= one, tip(_tf(4216, "点了：{$0}花 ${$1} 让他抽一张 Health 卡。", n >= 2 ? _t(4215, "选一位对手，") : '', one)))
       + (n >= 2 ? btn(_t(4217, "随机一人"), 'incRand', p.cash >= one, tip(_tf(4218, "点了：花 ${$0}，随机挑一位对手抽一张。", one))) + btn(_tf(4219, "全场（${$0}）", one * 2), 'incAll', p.cash >= one * 2, tip(_tf(4220, "点了：花 ${$0}，从你的下一位开始，每位对手各抽一张。", one * 2))) : ''))); }
   if ((S.phase === 'roll' || S.phase === 'post') && buryOk(p)) { const one = incSendCost(p);
-    out.push(row(_tf(5652, "花 ${$0} 埋一张 Health 卡在自己停过的服务上，对手停上去就翻开（和发 Health 卡共用每圈一次；场上 {$1}/{$2} 张）", one, trapsOf(p).length, TRAP_MAX),
-      btn(_t(5653, "埋卡"), 'buryIncident', p.cash >= one, _tf(5654, "什么时候能点：自己的回合里，掷骰子前后都行；和发 Health 卡共用每圈一次（经过 Startup 扶持以后才能再来）。\n点了：花 ${$0} 从 Health 牌堆抽一张扣着，挑一块你这局停过的服务埋下去。对手停在那一格（经过不算）就翻开照常结算；你自己停上去没事。埋在哪、是哪张只有你知道；场上最多 {$1} 张。", one, TRAP_MAX)))); }
+    out.push(row(_tf(-1, "花 ${$0} 埋一张 Health 卡在自己停过的服务上，对手停上去就翻开（每回合一次；你埋了 {$1}/{$2} 张）", one, trapsOf(p).length, TRAP_MAX),
+      btn(_t(5653, "埋卡"), 'buryIncident', p.cash >= one, _tf(-1, "什么时候能点：自己的回合里，掷骰子前后都行，每回合一次。\n点了：花 ${$0} 从 Health 牌堆顶翻 3 张挑一张扣着，挑一块你这局停过的服务埋下去。对手停在那一格（经过不算）就翻开照常结算；你自己停上去没事。埋在哪、是哪张只有你知道；场上最多 {$1} 张。", one, TRAP_MAX)))); }
   if ((S.phase === 'roll' || S.phase === 'post') && p.chTurn !== turnKey() && chFoes(p).length && (!p.chUsed || chFoes(p).length >= 2)) { const n = chFoes(p).length, all = n >= 2, w = chaWait(p);
     const oneTip = _tf(4222, "什么时候能点：自己的回合里，掷骰子前后都行；每局只能用一次，同一回合和考全场只能发动一个；现金至少 ${$0}{$1}。\n怎么用：选一位对手，按他所在那一格的色组从题库出一题，他在自己的设备上答。答对他拿走你 ${$2}，答错他赔你 ${$3}。不受卡牌倍率影响。", CH_COST, p.cash < CH_COST ? _tf(4221, "，你现在只有 ${$0}", p.cash) : '', CH_COST, CH_WIN);
     const allTip = _tf(4224, "什么时候能点：自己的回合里，至少两位对手；每 3 圈能用一次（按你经过 Startup 扶持的次数算，开局就能用一次）{$0}；同一回合和考一个人只能发动一个；现金至少 ${$1}（每位对手 ${$2}）{$3}。\n怎么用：从你的下一位开始按座位顺序，每位对手各答一道题。答对的拿走你 ${$4}，答错的赔你 ${$5}。不受卡牌倍率影响。", w ? _tf(4223, "，你还要再经过 {$0} 次", w) : '', CHA_COST * n, CHA_COST, p.cash < CHA_COST * n ? _tf(4221, "，你现在只有 ${$0}", p.cash) : '', CHA_COST, CHA_WIN);
