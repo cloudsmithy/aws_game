@@ -239,8 +239,8 @@ export let REI = __rv(() => ([null,
 ]), v => { REI = v; }, () => REI);
 // 手牌：真人自己抽到、先不公开的 re:Invent 卡最多留几张（engine/18-reinvent.js）。满了就只能现在用、卖掉或丢掉
 export const REI_HAND_MAX = 3;
-export let CARDN = __rv(() => ({ BLAME: _t(869, "根因在上游"), ES: 'Enterprise Support', SP: 'Savings Plans', SPOT: _t(872, "Spot 实例"), CE: 'Cost Explorer', MAP: _t(873, "MAP 迁移加速"), WS: _t(874, "Workshop 动手实验") }), v => { CARDN = v; }, () => CARDN);
-export let CARDE = __rv(() => ({ BLAME: _t(875, "下次抽到 Health 事件时，可以把它甩给另一位玩家承受"), ES: _t(876, "免费离开维护窗口，或抵消一张任意 Health 事件卡"), SP: _t(877, "付过路费时用掉，这次减半（旧存档里的卡）"), SPOT: _t(878, "下次 Spot 购买时自动用掉，最低出价降到原价的 10%"), CE: _t(879, "踩到账单格时用掉免交一次，或抵消一次「月底账单爆了」"), MAP: _t(880, "下次买 IaaS、PaaS 或容器服务时用掉，打 7 折"), WS: _t(881, "下一次答题答错了，算你答对") }), v => { CARDE = v; }, () => CARDE);
+export let CARDN = __rv(() => ({ BLAME: _t(869, "根因在上游"), ES: 'Enterprise Support', SP: 'Savings Plans', SPOT: _t(872, "Spot 实例"), CE: 'Cost Explorer', MAP: _t(873, "MAP 迁移加速"), WS: _t(874, "Workshop 动手实验"), SPOTN: _t(5448, "Spot 中断通知") }), v => { CARDN = v; }, () => CARDN);
+export let CARDE = __rv(() => ({ BLAME: _t(875, "下次抽到 Health 事件时，可以把它甩给另一位玩家承受"), ES: _t(876, "免费离开维护窗口，或抵消一张任意 Health 事件卡"), SP: _t(877, "付过路费时用掉，这次减半（旧存档里的卡）"), SPOT: _t(878, "下次 Spot 购买时自动用掉，最低出价降到原价的 10%"), CE: _t(879, "踩到账单格时用掉免交一次，或抵消一次「月底账单爆了」"), MAP: _t(880, "下次买 IaaS、PaaS 或容器服务时用掉，打 7 折"), WS: _t(881, "下一次答题答错了，算你答对"), SPOTN: _t(5449, "下次你的 Spot 服务要被别人抢走时自动保住一次") }), v => { CARDE = v; }, () => CARDE);
 
 // 题卡：o[0] 是正确答案。干扰项要和正确项差不多长、说法确实是错的，不然玩家挑最长的那个就能蒙对
 export let QUIZ = __rv(() => ({

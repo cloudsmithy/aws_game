@@ -103,7 +103,10 @@ export function resetProp(i) { S.props[i] = { owner: null, level: 0, cap: 0, spo
 // （以下从 rules/03-services.js 挪来：用到 S、effActive）
 // ECS 服务默认就把任务尽量分散到多个 AZ（Fargate 也是），不算单 AZ；EBS 卷升了也只在一个 AZ。
 // 其他实例型看「多 AZ」那一级有没有升到，不能只看 level>0：EC2 第 1 级是自动 AMI，第 2 级跨 AZ Auto Scaling 才是多 AZ
-export const singleAZ = i => isInst(i) && SQ[i].k !== 'ecs' && (SQ[i].k === 'ebs' || !effActive(i, 'maz'));
+// 「这一圈」的效果（re:Invent 卡挂的）：p.lapFx = [{ k: 'rent' | 'az', ks: [服务 k], m: 倍数, lap: 挂上时的 p.laps, c: 卡号 }]，到下次经过 Startup 扶持（p.laps 变了）失效。
+// rent：主人这几块服务的过路费 ×m（engine/15-land.js payRent）；az：主人这几块服务算单 AZ（S3 Express One Zone）
+export const lapFx = (p, k) => p && p.lapFx ? p.lapFx.filter(x => x.k === k && x.lap === (p.laps || 0)) : [];
+export const singleAZ = i => (isInst(i) && SQ[i].k !== 'ecs' && (SQ[i].k === 'ebs' || !effActive(i, 'maz'))) || (S.props[i] && S.props[i].owner != null && S.players && lapFx(P(S.props[i].owner), 'az').some(x => x.ks.includes(SQ[i].k)));
 // 下线：拿回买价的一半先周转（Spot 按出价算），这笔钱不用还；重新上线不要钱
 export const offlineCash = i => Math.round((S.props[i].spot ? S.props[i].spotPaid : (S.props[i].paid ?? SQ[i].p)) / 2);
 // 别的文件要改这些变量（import 进来是只读的），走这里

@@ -70,10 +70,15 @@ export const coRightsize = i => !S.props[i].offline && !S.props[i].spot && coKin
 // h：'all' 整单减（降价）；'hour' 只减 Compute Optimizer 给降配建议的，公网 IPv4 地址费照付
 export function svcRunDue(p, i, h) {
   const ri = riActive(p, i), c = Math.max(0, runCost(i) - (ri ? ri.amt : 0));
-  if (h === 'all') return c / 2;
-  if (h === 'hour' && coRightsize(i)) { const ip = runCost(i) - runCost(i, true); return Math.max(0, c - ip) / 2 + Math.min(c, ip); }
-  return c;
+  if (h === 'all') return runCutDue(p, i, c / 2);
+  if (h === 'hour' && coRightsize(i)) { const ip = runCost(i) - runCost(i, true); return runCutDue(p, i, Math.max(0, c - ip) / 2 + Math.min(c, ip)); }
+  return runCutDue(p, i, c);
 }
+// 按服务打折的运行费（re:Invent「换上 Graviton4 实例」「Aurora Serverless v2 缩到 0」「Organizations 里共享 Savings Plans」）：
+// p.runCut = [{ ks: [服务 k]（不写 = 全部服务）, m: 倍数 | store: true（只交存储那部分，和下线时一样按 OFFLINE_FEE）, c: 卡号 }]。
+// 下次经过 Startup 扶持时一起用掉：passLaunch 把它放进 p.runCutNow 算这一次的账，和减半卡、RI 叠着算（先扣 RI、再减半、再打这个折）
+const runCutOf = (p, i) => (p.runCutNow || []).filter(x => !x.ks || x.ks.includes(SQ[i].k));
+const runCutDue = (p, i, c) => runCutOf(p, i).reduce((v, x) => x.store ? Math.min(v, OFFLINE_FEE[SQ[i].k] ?? v) : v * x.m, c);
 // 扣掉 RI 之后每块服务还要交多少：comp = 计算类（EC2、ECS、EKS、Lambda、SageMaker AI），db = 数据库类，other = 用不了 Savings Plans 的
 export function runAfterRI(p) {
   let other = 0, comp = 0, db = 0;
@@ -98,9 +103,9 @@ export const opCost = p => {
 // billAt：第 k 次（从 0 数）经过 Startup 扶持要交多少，和 passLaunch 同一套算法。h 是那次用的减半卡；
 // 到那时已经到期的 Savings Plans / RI 不算（1 年期的 SP 只管下一次），角色技能的减半/全免照乘
 export function billAt(p, k, h) {
-  const c0 = p.commits, h0 = p.halfRunNow;
-  p.commits = (c0 || []).filter(c => c.laps > k); p.halfRunNow = h;
-  const v = opCost(p); p.commits = c0; p.halfRunNow = h0;
+  const c0 = p.commits, h0 = p.halfRunNow, r0 = p.runCutNow;
+  p.commits = (c0 || []).filter(c => c.laps > k); p.halfRunNow = h; p.runCutNow = k === 0 ? p.runCut : null;   // 按服务打折的只管下一次
+  const v = opCost(p); p.commits = c0; p.halfRunNow = h0; p.runCutNow = r0;
   return Math.round(v * (p.runLaps > k ? p.runMul : 1));
 }
 // 手上的减半卡第 k 次经过时还管不管；老存档的 halfRun 是 true、没有 halfLaps，按整单减 1 圈
@@ -111,6 +116,12 @@ export function halfSave(p, h, laps = 1) {
   h = h === 'hour' ? 'hour' : 'all';
   let s = 0; for (let k = 0; k < laps; k++) s += billAt(p, k, '') - billAt(p, k, h);
   return s;
+}
+// 再挂一份按服务打折（x 的格式见 runCutOf），下次经过 Startup 扶持能多省多少：抽卡时写进日志
+export function runCutSave(p, x) {
+  const c0 = p.runCut, h = halfAt(p, 0), before = billAt(p, 0, h);
+  p.runCut = [...(c0 || []), x]; const after = billAt(p, 0, h); p.runCut = c0;
+  return before - after;
 }
 export const reqRate = i => SQ[i].bill === 'token' ? BAL.token : SQ[i].bill === 'req' ? (effActive(i, 'cost') ? BAL.req / 2 : BAL.req) : 0;
 

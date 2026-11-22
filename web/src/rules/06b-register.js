@@ -3,6 +3,7 @@ import { IX, SQ } from './03-services.js';
 import { INC, QUIZ, REI } from './04-roles-combos-cards.js';
 import { DLC, DLC_INC, DLC_QUIZ, DLC_REI, MOVE_INC, MOVE_REI, NEW_REI } from './05-dlc.js';
 import { INC26 } from './05c-inc26.js';
+import { REI26 } from './05d-rei26.js';
 import { QBANK_DLC } from './06-qbank.js';
 import { S, active, effActive, log, nm, owns, sqn } from '../engine/07-state.js';
 import { pay } from '../engine/08-money.js';
@@ -15,6 +16,7 @@ Object.assign(DLC, QBANK_DLC);   // 题库 DLC 并进 DLC（开局页的卡片�
 DLC_INC.forEach(c => INC.push(c));
 DLC_REI.forEach(c => REI.push(c));
 NEW_REI.forEach(c => REI.push(c));   // 新卡接在 DLC 卡后面，DLC 卡编号不变
+REI26.forEach(c => REI.push(c));   // 2026 年的 12 张基础 re:Invent 卡（rules/05d-rei26.js），接在最后，已有卡编号不变
 // 11-07 基础牌里成本类只有两张（月底账单、日志），补一张：存储没开分层或省钱存储。同样接在最后，已有卡编号不变
 const STORE_FIX = [IX.s3, IX.efs, IX.ebs, IX.opensearch];
 const storeHit = o => STORE_FIX.filter(i => active(o, i) && !effActive(i, 'cost'));

@@ -5,7 +5,7 @@ import { BAL, CAP_MAX, GRP, IX, N, SQ, TOKEN, capU, grpGap, grpN, isInst, lvName
 import { INC, REI, roleOf, rsBuyRate, rsRate } from '../rules/04-roles-combos-cards.js';
 import { dlcOn, fisCost, flyTo } from '../rules/05-dlc.js';
 import { qPoolS } from '../rules/06-qbank.js';
-import { F, P, S, active, availCard, cur, hasCombo, log, nm, ownedBy, owns, ownsGroup, singleAZ, sqn } from './07-state.js';
+import { F, P, S, active, availCard, cur, hasCombo, lapFx, log, nm, ownedBy, owns, ownsGroup, singleAZ, sqn } from './07-state.js';
 import { credit, pay, withGain } from './08-money.js';
 import { SPOT_OK, netWorth, reqRate } from './08c-costs.js';
 import { addCap, baseRent, bringOnline, buyPaid, capInfo, capPaidSum, doUpgrade, jointRent, roleDisc, tokUnit, turnKey, upPaidSum, upgradeInfo, zhe } from './09-rent.js';
@@ -242,6 +242,8 @@ async function spotTakeover(p, i) {
   if (r.v !== 'take') return false;
   const bid = Math.max(floor, Math.min(r.inp.bid || floor, s.p, p.cash));
   if (bid < need) { log(_tf(3060, "{$0} 出价想抢 {$1} 的 Spot 服务 {$2}，没压过他的出价，照常付过路费", nm(p), nm(o), sqn(i))); if (!isAI(p.id)) UI.toast(_t(3061, "猜低了，没抢到：照常付过路费")); return false; }
+  // 保留卡「收到 Spot 中断前 2 分钟通知」：主人提前把任务切到别的实例上，这次保住，卡用掉；落上来的人出价不扣钱，照常付过路费
+  { const sn = availCard(o, 'SPOTN'); if (sn) { sn.used = true; log(_tf(5446, "📨 {$0} 收到 Spot 中断前 2 分钟通知，及时把任务切走：{$1} 没抢到 {$2}，照常付过路费", nm(o), nm(p), sqn(i))); if (!isAI(p.id)) UI.toast(_tf(5447, "{$0} 用掉「Spot 中断通知」保住了 {$1}：照常付过路费", o.name, s.n)); return false; } }
   ST(p).spendBuy = (ST(p).spendBuy || 0) + pay(p, 'bank', bid);   // 复盘里算「买服务」
   const comp = Math.round((pr.spotPaid || 0) / 2); credit(o, comp, 'sell');
   pr.owner = p.id; pr.cap = 0; pr.impaired = false;
@@ -287,6 +289,7 @@ async function payRent(p, i, opts = {}) {
   if (opts.double) { r *= 2; notes.push(_t(3081, "双倍")); }
   if (o.rentBoost) { r *= o.rentBoost; notes.push(`${roleOf(o).sk.n} ×${o.rentBoost}`); }
   if (o.aiBoostTill >= S.round && s.g === 'ai') { r *= 2; notes.push(_t(3082, "生成式 AI 加速器 ×2")); }
+  lapFx(o, 'rent').filter(x => x.ks.includes(s.k)).forEach(x => { r = Math.round(r * x.m); notes.push(`${REI[x.c].n} ×${x.m}`); });   // re:Invent 卡挂的「这一圈过路费 ×m」
   if (o.rent3Left > 0 && r > 0) { r *= 3; o.rent3Left--; notes.push(_tf(3083, "爆款上线 ×3（还剩 {$0} 笔）", o.rent3Left)); }
   if (o.role === 'rs_msp' && pr.via == null) { r = Math.round(r * 0.9); notes.push(_t(3084, "托管服务商自己的服务 9 折")); }
   if (i === IX.s3 && p.role === 'ai') { r *= 2; notes.push(_t(3085, "AI 原生双倍")); }
