@@ -49,7 +49,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <h1>亚马逊云科技 User Group 云上大亨 · 这一轮改了什么</h1>
   <p>从「破产逻辑是不是有问题」开始，一路改到新角色、两个新开关、地狱模式和全套文档。每条改动后面写了为什么改；平衡数字都是用电脑玩家对打模拟出来的。</p>
   <nav>
-    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#r17">第十七轮</a><a href="#r18">第十八轮</a><a href="#r19">第十九轮</a><a href="#r20">第二十轮</a><a href="#r21">第二十一轮</a><a href="#todo">待定</a>
+    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#r17">第十七轮</a><a href="#r18">第十八轮</a><a href="#r19">第十九轮</a><a href="#r20">第二十轮</a><a href="#r21">第二十一轮</a><a href="#r22">第二十二轮</a><a href="#todo">待定</a>
   </nav>
 </header>
 
@@ -920,7 +920,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <h2><i>29</i>第二十一轮（11-22）：中途加入、埋 Health 卡、12 张新 re:Invent 卡、修 27 处问题</h2>
   <ul>
     <li><span class="tag new">新</span>联机中途加入：开局后来的新名字由房主确认；同意后排在最后一位、从下一轮开始走，起始资金是在场玩家的平均总资产，角色从没人用的里随机发。挑角色期间、限轮局的最后一轮、和局里的人重名时不收。原来的玩家用同样的名字回来照旧认回自己的座位。</li>
-    <li><span class="tag new">新</span>埋 Health 卡：和花钱让对手抽 Health 卡同价、每回合能埋一张（不占发卡的每圈一次），从 Health 牌堆顶 3 张里挑一张面朝下埋在本局停过的任意一块服务格上（路过的不算），场上埋几张不限（一格只埋一张）；日志只写「埋了一张」，谁停上去都翻开结算，埋的人自己落上去也一样；终局战报列出没人踩中的。联机时埋在哪、是哪张只发给本人。</li>
+    <li><span class="tag new">新</span>埋 Health 卡：和花钱让对手抽 Health 卡同价、每回合能埋一张（不占发卡的每圈一次），从 Health 牌堆顶 3 张里挑一张面朝下埋在这一回合棋子刚走过的一块服务格上（路过的、停下的都算；谁的都行、没人买的也行），场上埋几张不限，一格能叠好几张（谁埋的都行），有人停上去全部翻开，按埋下的先后结算；日志只写「埋了一张」，谁停上去就翻开结算（路过不触发），埋的人自己停上去也一样；终局战报列出没人踩中的。联机时埋在哪、是哪张只发给本人。</li>
     <li><span class="tag chg">改</span>维护窗口付钱提前出来从 $50 改成 $500；落在维护窗口格上停一轮或交 $50 照常走不变。</li>
     <li><span class="tag new">新</span>12 张新 re:Invent 卡进基础牌堆（#54–#65）：用 Kiro 做规格驱动重构、Lambda SnapStart、Graviton4、S3 Express One Zone、Aurora Serverless v2 缩到 0、Application Signals、Organizations 共享 Savings Plans、re:Post 回答被采纳、合办 User Group 分享、考过 Machine Learning Engineer – Associate、Activate 追加 Credits、Spot 中断通知（保留卡）。</li>
     <li><span class="tag bug">BUG</span>复查又修了 8 处：下线中的服务转手后新主人能按全价卖回；点玩家卡上的 ✎ 会顺带收起卡片；房主这台有本机座位时自己埋的卡看不到；牌堆抽空时买 re:Invent 卡照收钱；靠卡牌移动踩到埋的卡会带上那张卡的倍率；代理商局中途加入的起始资金偏高；中途加入、还没开始走的人会被发卡、出题、全场事件指到；埋卡说明写错。</li>
@@ -933,8 +933,18 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   </ul>
 </section>
 
+<section id="r22">
+  <h2><i>30</i>第二十二轮（11-22）：埋卡藏得住、金额统一成参数、修 7 处问题</h2>
+  <ul>
+    <li><span class="tag chg">改</span>埋 Health 卡只能埋在这一回合棋子刚走过的服务格上（路过的、停下的、飞过去的都算），不再是「这局停过的格」：开局停过的格少，日志又紧跟在「买下 X」后面，一看就知道埋在哪。</li>
+    <li><span class="tag chg">改</span>一格能叠好几张埋下的卡（谁埋的都行），有人停上去全部翻开，按埋下的先后结算；没翻开的卡（主人出局、结算到一半破产）扣着放回牌堆底，不进公开的弃牌堆。</li>
+    <li><span class="tag chg">改</span>写死的金额统一成参数（落在维护窗口格交的钱、卖 re:Invent 卡、牌堆抽空改领、技术债加价、重构费、大重构），提示文字都从参数取数；SaaS 创业公司的技术债说明写出它实际的 $30。</li>
+    <li><span class="tag bug">BUG</span>维护窗口付 $500 出来不查现金（远端、老页面点了会直接欠债）；技术债提示还写着已经删掉的「多交 $400 不停」；升级明细里的技术债加价是写死的；选对手、选并购目标这类列表的最后一项被显示成灰色的「放弃」；老板键 <code>:arch</code> 打不开架构讲解（改成 <code>:guides</code>）。</li>
+  </ul>
+</section>
+
 <section id="todo">
-  <h2><i>30</i>待定 / 已知问题</h2>
+  <h2><i>31</i>待定 / 已知问题</h2>
   <ul>
     <li>代理商在完整局（不限轮数约 16%）和地狱模式 15 轮（约 14%）偏弱，公平是 25%；各模式的数字见规则书第 32 节。</li>
     <li>模拟里的电脑不会刻意凑六大支柱，所以 Well-Architected 的达成率只能当下限看。</li>

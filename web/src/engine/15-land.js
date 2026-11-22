@@ -14,7 +14,7 @@ import { quiz } from './12-quiz.js';
 import { goReiCards, sendToJail } from './13-move.js';
 import { drawRei } from './16-deck.js';
 import { drawIncident, incident, skipOrPay } from './17-health.js';
-import { drawReinvent, noteStop, springTrap } from './18-reinvent.js';
+import { drawReinvent, springTrap } from './18-reinvent.js';
 import { raiseValue } from './20-bankrupt.js';
 import { manage } from './23-manage.js';
 import { ST, evt } from './26b-retro.js';
@@ -23,8 +23,8 @@ import { isAI } from './36-ai.js';
 import { MP } from '../net/40-host-sync.js';
 import { fxAll, fxCast, fxPot, sfxAll } from '../net/41-replay.js';
 // ================= 落点 =================
-// 停在服务格上记进 p.stops（埋 Health 卡只能埋在自己停过的格子上，经过不算）；这一格结算完（过路费、买地、升级都做完）再看有没有对手埋的 Health 卡
-export async function land(p, opts = {}) { const prev = S.histSq, at = S.histSq = p.pos; let r; try { noteStop(p, at); r = await withCardMul(0, () => land0(p, opts)); await withCardMul(0, () => springTrap(p, at)); } finally { S.histSq = prev; } await goReiCards(p); return r; }
+// 这一格结算完（过路费、买地、升级等）以后，看有没有踩中埋下的 Health 卡
+export async function land(p, opts = {}) { const prev = S.histSq, at = S.histSq = p.pos; let r; try { r = await withCardMul(0, () => land0(p, opts)); await withCardMul(0, () => springTrap(p, at)); } finally { S.histSq = prev; } await goReiCards(p); return r; }
 async function land0(p, opts = {}) {
   const i = p.pos, s = SQ[i];
   S.lastSq = i; if (!BOT && !SIM) fxAll({ sq: [i, 'fx-land', 900] });
@@ -39,7 +39,7 @@ async function land0(p, opts = {}) {
       else { const r = await offerLandingUpgrade(p, i, !opts.noJump), j = r === 'jump' && jumpInfo(p, i); if (j) await doJump(p, j.t); else if (r === 'did' && !opts.noJump) await colorJump(p, i); }
       break;
     }
-    case 'jail': if (p.jail === null) await skipOrPay(p, _t(2943, "赶上维护窗口"), 50, _t(2944, "换个时间窗口维护")); break;
+    case 'jail': if (p.jail === null) await skipOrPay(p, _t(2943, "赶上维护窗口"), BAL.jailLand, _t(2944, "换个时间窗口维护")); break;
     case 'tax': await tax(p, 200, true); break;
     case 'tax2': { let a = active(p, IX.vpc) && S.props[IX.vpc].level >= 1 ? 200 : 100; if (p.role === 'ecom') { a *= 2; log(_t(2945, "跨境电商：NAT 账单交双倍")); } await tax(p, a, false); break; }
     case 'inc': await drawIncident(p); break;
@@ -60,7 +60,7 @@ async function land0(p, opts = {}) {
       } else {
         // 牌堆和弃牌堆都空了（卡都在各家手牌里）抽不满 3 张：有几张选几张，一张都没有就按抽奖的保底领 $100
         const draws = []; for (let k = 0; k < 3; k++) { const x = await drawRei(); if (x != null) draws.push(x); }
-        if (!draws.length) { log(_tf(5554, "👥 {$0} 想在 User Group 活动抽 re:Invent 卡，可牌堆抽完了（卡都在各家手牌里），改领 ${$1}", nm(p), credit(p, 100, 'other'))); break; }
+        if (!draws.length) { log(_tf(5554, "👥 {$0} 想在 User Group 活动抽 re:Invent 卡，可牌堆抽完了（卡都在各家手牌里），改领 ${$1}", nm(p), credit(p, BAL.ugEmpty, 'other'))); break; }
         const pickId = await UI.ask({ who: p.id, title: _tf(2959, "{$0} 在 User Group 活动抽了 {$1} 张 re:Invent 卡，选一张", p.name, draws.length), html: _t(2960, "<p>选一张用，其余放回牌堆底。</p>"), cls: 'quiz', buttons: draws.map(x => ({ label: _tf(2961, "#{$0}「{$1}」：{$2}", x, REI[x].n, REI[x].e.replace(_tr(2747, "^保留：", ""), '')), value: x, disabled: x === 4 && p.role === 'fin' && draws.some(y => y !== 4) })) });
         draws.filter(x => x !== pickId).forEach(x => S.rei.push(x));
         log(_tf(2962, "👥 {$0} 在 User Group 活动抽 {$1} 张 re:Invent 卡，选了「{$2}」", nm(p), draws.length, REI[pickId].n));
@@ -118,7 +118,7 @@ export async function offerLandingUpgrade(p, i, canJump = false) {
   let html = _t(2985, "<p>落在自己的服务上，可以做一件事：</p>");
   if (u.ok) {
     const next = s.upg[u.next - 1];
-    const base = upCost(i, u.next), why = [...u.fees.map(f => `${f.why} +$${f.amt}`), u.sur ? _t(2986, "技术债攒到 2 个 +$50") : '', u.off].filter(Boolean);
+    const base = upCost(i, u.next), why = [...u.fees.map(f => `${f.why} +$${f.amt}`), u.sur ? _tf(5707, "技术债攒到 2 个 +${$0}", u.sur) : '', u.off].filter(Boolean);
     b.push({ label: _tf(2987, "升到第 {$0} 级「{$1}」${$2}", u.next, next[0], u.total), desc: `${next[3] ? next[3] + _t(2988, "。") : ''}${lvUpTxt(i, u.next)}${u.total !== base ? _tf(2991, "。基础价 ${$0}，这次{$1}", base, why.length ? _tf(2989, "：{$0}", why.join(_t(408, "；"))) : _t(2990, "价格不同")) : ''}`, value: 'up', cls: 'pri', disabled: p.cash < u.total });
   } else if (u.why) html += _tf(2992, "<p class=\"muted\">不能加功能：{$0}</p>", u.why);
   if (c.ok) {

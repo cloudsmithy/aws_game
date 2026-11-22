@@ -103,7 +103,7 @@ export function upgradeInfo(p, i, viaLanding = false) {
     if (s.g === 'ai' && !active(p, IX.s3)) fees.push({ to: 'bank', amt: 50, why: _t(2694, "训练数据存储费（你没有 S3）") });
   }
   // 技术债攒到 2 个每级 +$50（sur）：这是罚款，不是投入，upPaid 只记前面的升级费，卖回、去掉一级、估值都不算它
-  let sur = F.debt() && p.techDebt >= 2 ? 50 : 0;
+  let sur = F.debt() && p.techDebt >= 2 ? BAL.debtUpg : 0;
   // re:Invent「迁移到 Graviton」记下的一次免费：升 Graviton 这一级不花钱，技术债加价也免
   if (s.k === 'ec2' && eff === 'cost' && p.gravFree) { cost = 0; sur = 0; off = _t(2695, "用掉「迁移到 Graviton」记下的免费"); }
   cost += sur;

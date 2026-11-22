@@ -1,7 +1,7 @@
 import { _t, _tf, _tr } from '../core/01-i18n-runtime.js';
 import { SIM, SIM_AI, rnd } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
-import { GRP, IX, N, SQ, effIn, grpN, isInst } from '../rules/03-services.js';
+import { BAL, GRP, IX, N, SQ, effIn, grpN, isInst } from '../rules/03-services.js';
 import { CATS, COMBOS, INC } from '../rules/04-roles-combos-cards.js';
 import { dlcOn, flyTo } from '../rules/05-dlc.js';
 import { F, P, S, active, availCard, cur, effActive, hasCombo, inPlay, log, nm, ownedBy, owns, singleAZ, sqn } from './07-state.js';
@@ -67,7 +67,7 @@ export function debtCleared(p) {
   log(go ? _tf(5403, "🧱 {$0} 清完技术债，进维护窗口停一轮{$1}；出来不写复盘、不记技术债", nm(p), svc) : _tf(5558, "🧱 {$0} 清完技术债，本来就在维护窗口里，不再重进{$1}", nm(p), svc));
 }
 // 重构费按梯度：债越多越贵，越往后越贵（欠得越久，利息越高）——手上有 n 个技术债时清 1 个要 $50 × n，第 10 轮起再 +$30
-export const refactorCost = p => 50 * Math.max(1, p.techDebt) + (S.round >= 10 ? 30 : 0);
+export const refactorCost = p => BAL.refactorUnit * Math.max(1, p.techDebt) + (S.round >= BAL.refactorLateRound ? BAL.refactorLate : 0);
 export function payRefactor(p) { const c = refactorCost(p); if (!p.techDebt || p.cash < c) return false; pay(p, 'bank', c); p.techDebt--; p.refactored = true; sfxAll('buy'); log(_tf(3142, "🛠 {$0} 花 ${$1} 重构，清掉 1 个技术债（还剩 {$2} 个）", nm(p), c, p.techDebt)); debtCleared(p); return true; }
 export function refactorDebt() {
   const p = cur(); payRefactor(p);
@@ -113,12 +113,12 @@ async function penalize(p) {
   ST(p).hit++; speedLose(p, 2, _t(3157, "被事件打中"));
   if (!F.debt()) return;
   p.techDebt++;
-  log(_tf(3161, "🧱 {$0} 欠下 1 个技术债（共 {$1} 个）{$2}", nm(p), p.techDebt, p.techDebt === 1 && !S.debtExplained ? _tf(5405, "。技术债：每个让每圈运行费多 $20；攒到 2 个，升级每级贵 $50；攒到 3 个要大重构，交 ${$0}；重构清 1 个：手上有几个就是 $50 × 几个，第 10 轮起再加 $30。不管怎么清掉的，都要进维护窗口停一轮，名下服务一起下线一轮", cardAmt(300)) : ''));
+  log(_tf(3161, "🧱 {$0} 欠下 1 个技术债（共 {$1} 个）{$2}", nm(p), p.techDebt, p.techDebt === 1 && !S.debtExplained ? _tf(5702, "。技术债：每个让每圈运行费多 ${$1}；攒到 2 个，升级每级贵 ${$2}；攒到 3 个要大重构，交 ${$0}；重构清 1 个：手上有几个就是 ${$3} × 几个，第 {$4} 轮起再加 ${$5}。不管怎么清掉的，都要进维护窗口停一轮，名下服务一起下线一轮", cardAmt(BAL.bigRefactor), p.role === 'saas' ? BAL.debtLapSaas : BAL.debtLap, BAL.debtUpg, BAL.refactorUnit, BAL.refactorLateRound, BAL.refactorLate) : ''));
   S.debtExplained = true;
   if (p.techDebt >= 3) {
     // 技术债攒满 3 个必须大重构：交 $300、清掉 3 个，和别的清债一样马上进维护窗口停一轮（以前能多交 $100 不停，现在清债一律要停）
     p.techDebt -= 3; p.refactored = true;   // 大重构也是重构：成本优化支柱的「重构清过技术债」照样算
-    log(_tf(5406, "{$0} 技术债到 3 个：大重构，交 ${$1}，清掉 3 个", nm(p), pay(p, 'bank', 300)));
+    log(_tf(5406, "{$0} 技术债到 3 个：大重构，交 ${$1}，清掉 3 个", nm(p), pay(p, 'bank', BAL.bigRefactor)));
     debtCleared(p);
   }
 }

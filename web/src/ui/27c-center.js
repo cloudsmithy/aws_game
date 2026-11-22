@@ -78,7 +78,7 @@ export function renderCenter() {
     // 灰掉的按钮只显示标题：原因在悬停提示里，手机上点一下弹 toast
     // a 是 UI_ACTS 里的名字（data-act="uiAction"）；灰按钮的 data-fk 和能点时的 actKey 一样，重画后焦点认得回来
     const B = (why, a, title, label, short) => why ? `<button class="off" aria-disabled="true" data-fk="uiAction(${a})" data-why="${esc(why)}" data-act="toast" title="${esc(why)}${title ? '&#10;' + title : ''}">${label}</button>` : `<button data-act="uiAction" data-arg="${a}" title="${title}">${label}</button>`;
-    if (F.debt() && p.techDebt > 0) more += B(idleWhy || (p.cash < refactorCost(p) ? _tf(2981, "现金不够 ${$0}", refactorCost(p)) : ''), 'refactorDebt', _t(5433, "重构清掉 1 个技术债：手上有几个就是 $50 × 几个，第 10 轮起再加 $30；不占主动行动，但清完马上进维护窗口停一轮，名下服务一起下线一轮"), _tf(4049, "清技术债 ${$0}（{$1}）", refactorCost(p), p.techDebt));
+    if (F.debt() && p.techDebt > 0) more += B(idleWhy || (p.cash < refactorCost(p) ? _tf(2981, "现金不够 ${$0}", refactorCost(p)) : ''), 'refactorDebt', _tf(5706, "重构清掉 1 个技术债：手上有几个就是 ${$0} × 几个，第 {$1} 轮起再加 ${$2}；不占主动行动，但清完马上进维护窗口停一轮，名下服务一起下线一轮", BAL.refactorUnit, BAL.refactorLateRound, BAL.refactorLate), _tf(4049, "清技术债 ${$0}（{$1}）", refactorCost(p), p.techDebt));
     if (F.actions()) more += B(idleWhy || actionWhy(p), 'activeAction', _t(4050, "每回合可以做一件事：GameDay 演练、查看后面的 Health 事件卡、重构清技术债、迁移升级"), _t(4051, "主动行动"));
     more += B(idleWhy, 'manage', _tf(4053, "给自己的服务升级、加容量；{$0}彻底不要的可以按实付 {$1}卖回亚马逊云科技", isParty() ? '' : _t(4052, "缺钱时把服务下线拿回一半周转，"), sellZhe()), _t(4054, "资产管理"));
     more += B(idleWhy, 'trade', _t(4055, "和别的玩家换服务、换现金（完整局还能换保留卡和标记）"), _t(4056, "交易"));

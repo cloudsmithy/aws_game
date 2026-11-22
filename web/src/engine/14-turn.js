@@ -64,6 +64,7 @@ export async function jailAct(kind) {
   if (p.jailCat === RF_JAIL) kind = 'stay';   // 清技术债进来的只能停够一轮，不能付钱、用卡提前出来
   S.phase = 'busy'; UI.render();
   try {
+    if (kind === 'pay' && p.cash < BAL.jailFee) { UI.toast(_tf(2981, "现金不够 ${$0}", BAL.jailFee)); S.phase = 'roll'; UI.render(); return; }   // 按钮灰着只挡得住本机：远端、老页面发来的也要挡，不然欠一屁股债
     if (kind === 'pay') { pay(p, 'pot', BAL.jailFee); await leaveJail(p, _tf(5669, "付 ${$0} 开 Support Case", BAL.jailFee)); await resolveDebts(); if (checkOver()) return; if (!cur().alive) return nextTurn(); S.phase = 'roll'; UI.save(); UI.render(); return; }
     if (kind === 'es') { const c = availCard(p, 'ES'); if (c) { c.used = true; await leaveJail(p, _t(2918, "用掉 Enterprise Support")); } S.phase = 'roll'; UI.save(); UI.render(); return; }
     // 停一轮：这回合不走；停够了（传统企业上云要 2 轮）就出来，下回合照常掷骰子
@@ -120,7 +121,7 @@ export async function nextTurn() {
   await startTurn();
 }
 // 一位玩家开局时的全部字段：开局（ui/28-setup-save.js 的 newGame）和联机中途加入（joinPlayer）共用。name 是原文，这里转义
-export const makePlayer = (id, name, r, cash, reseller = false) => ({ id, name: esc(name), color: COLORS[id], role: r.id, cash, startCash: cash, pos: 0, jail: null, jailCat: 'sec', skip: 0, debt: [], techDebt: 0, coe: [], drill: [], cards: [], hand: [], stops: [], alive: true, speed: 0, reseller, rsRate: 0.9 });
+export const makePlayer = (id, name, r, cash, reseller = false) => ({ id, name: esc(name), color: COLORS[id], role: r.id, cash, startCash: cash, pos: 0, jail: null, jailCat: 'sec', skip: 0, debt: [], techDebt: 0, coe: [], drill: [], cards: [], hand: [], alive: true, speed: 0, reseller, rsRate: 0.9 });
 // 联机中途加入（房主同意后由 net/40d-host-msgs.js 的 admit 调）：排在座位最后，站在起点，没有服务和卡牌。
 // 角色从还没人用的客户角色里随机挑（都用过了就随便一个客户角色）；起始资金是还活着的各家总资产的平均数，取整到 $10；
 // 这一轮已经排好了，从下一轮开始走（nextTurn 按 joinRound 跳过）

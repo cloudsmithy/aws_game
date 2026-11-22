@@ -165,7 +165,7 @@ let VIM_CMDS = __rv(() => ([
   { n: 'grab', d: _t(4922, "作弊：随机抢一块地；抢到没人买的归你，抢到别人的照付过路费"), game: true, cheat: true, run: a => cheatCmd('grab', a) },
   { n: 'cheats', arg: 'on | off', d: _t(4923, "作弊码开关（联机时只有房主能改）"), game: true, run: a => { if (MP.role === 'client') return toast(_t(4924, "只有房主能开关作弊码")); const want = a[0] === 'on' ? true : a[0] === 'off' ? false : !cheatsOn(); S.cfg.cheats = want; log(want ? _t(4925, "🕹 作弊码打开了：用了会写进日志，可以被举报") : _t(4926, "🕹 作弊码关掉了")); save(); render(); } },
   { n: 'manuals', a: ['docs'], d: _t(5400, "手册网页版（新标签页）"), run: () => window.open(MANUAL_WEB, '_blank', 'noopener') },
-  { n: 'learn', a: ['arch'], d: _t(5694, "架构讲解目录（新标签页）"), run: () => window.open(LEARN_LINKS()[1][0], '_blank', 'noopener') },
+  { n: 'learn', a: ['guides'], d: _t(5694, "架构讲解目录（新标签页）"), run: () => window.open(LEARN_LINKS()[1][0], '_blank', 'noopener') },
   { n: 'changelog', a: ['log'], d: _t(4927, "更新说明（新标签页）"), run: () => window.open(DOCS + _t(4928, "更新说明.html"), '_blank', 'noopener') },
   { n: 'issue', d: _t(4929, "到 GitHub 提 issue（新标签页）"), run: () => window.open('https://github.com/cloudsmithy/aws_game/issues', '_blank', 'noopener') },
   { n: 'repo', d: _t(4930, "项目地址（新标签页）"), run: () => window.open('https://github.com/cloudsmithy/aws_game', '_blank', 'noopener') },

@@ -92,7 +92,7 @@ export const spScope = (r, n) => n === 3 ? r.comp : r.comp + r.db;
 // Savings Plans：每圈固定付承诺额，按折扣价抵扣符合条件的运行费；用不完不退，超出部分按原价
 // 每圈的技术债加价：每个技术债 $20（SaaS $30），开了技术债机制（F.debt()）才收。
 // opCost 把它加进总账；交运行费时 passLaunch 单独拿出这份，不分给代理商
-export const debtFee = p => p.techDebt * (p.role === 'saas' ? 30 : 20);
+export const debtFee = p => p.techDebt * (p.role === 'saas' ? BAL.debtLapSaas : BAL.debtLap);
 export const opCost = p => {
   const r = runAfterRI(p), sp = spActive(p);
   const base = sp ? (sp.scope === 'compute' ? r.comp : r.comp + r.db) : r.spBase;

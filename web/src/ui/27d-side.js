@@ -5,6 +5,7 @@ import { BAL, OFFLINE_MIN, SQ, capU, lvFull, lvName } from '../rules/03-services
 import { CARDE, CARDN, CATS, COMBOS, INC, REI, comboOpen, roleOf, rsRate, slotOpen, viaOf } from '../rules/04-roles-combos-cards.js';
 import { dlcOn } from '../rules/05-dlc.js';
 import { F, P, S, active, comboMiss, cur, debtOf, hasCombo, lapFx, logBody, logRow, ownedBy, ownsGroup, wildFits, wildFree, wildOf, wildTargets, winWA } from '../engine/07-state.js';
+import { cardAmt } from '../engine/08-money.js';
 import { commitsOf, netWorth, opCost, runCost, valBreak, valTip, valuation } from '../engine/08c-costs.js';
 import { canOnline, capInfo, chainTxt, downWhy, offRounds, spotMine, turnKey, upgradeInfo } from '../engine/09-rent.js';
 import { mainBtn, sameEl, viewOpen } from './10-modal.js';
@@ -133,8 +134,8 @@ export function playerBrief(p) {
       btn(n >= 2 ? _t(4213, "指定一人") : _t(4214, "发给他"), 'incOne', p.cash >= one, tip(_tf(4216, "点了：{$0}花 ${$1} 让他抽一张 Health 卡。", n >= 2 ? _t(4215, "选一位对手，") : '', one)))
       + (n >= 2 ? btn(_t(4217, "随机一人"), 'incRand', p.cash >= one, tip(_tf(4218, "点了：花 ${$0}，随机挑一位对手抽一张。", one))) + btn(_tf(4219, "全场（${$0}）", one * 2), 'incAll', p.cash >= one * 2, tip(_tf(4220, "点了：花 ${$0}，从你的下一位开始，每位对手各抽一张。", one * 2))) : ''))); }
   if ((S.phase === 'roll' || S.phase === 'post') && buryOk(p)) { const one = incSendCost(p);
-    out.push(row(_tf(5689, "花 ${$0} 埋一张 Health 卡在自己停过的服务上，谁停上去就翻开（自己也算；每回合一次{$1}）", one, trapsOf(p).length ? _tf(5683, "；你已经埋了 {$0} 张", trapsOf(p).length) : ''),
-      btn(_t(5653, "埋卡"), 'buryIncident', p.cash >= one, _tf(5690, "什么时候能点：自己的回合里，掷骰子前后都行，每回合一次。\n点了：花 ${$0} 从 Health 牌堆顶翻 {$1} 张挑一张扣着，挑一块你这局停过的服务埋下去。谁停在那一格（经过不算）就翻开照常结算，你自己停上去也一样。埋在哪、是哪张只有你知道；场上埋几张不限。", one, BURY_PICK)))); }
+    out.push(row(_tf(5697, "花 ${$0} 埋一张 Health 卡在这一回合刚走过的服务格上，谁停上去就翻开（自己也算；每回合一次{$1}）", one, trapsOf(p).length ? _tf(5683, "；你已经埋了 {$0} 张", trapsOf(p).length) : ''),
+      btn(_t(5653, "埋卡"), 'buryIncident', p.cash >= one, _tf(5698, "什么时候能点：自己的回合里走完以后（这一回合走过的服务格才能埋），每回合一次。\n点了：花 ${$0} 从 Health 牌堆顶翻 {$1} 张挑一张扣着，在这一回合走过的服务格（路过、停下都算）里挑一块埋下去。谁停在那一格（经过不算）就翻开照常结算，你自己停上去也一样。埋在哪、是哪张只有你知道；场上埋几张不限。", one, BURY_PICK)))); }
   if ((S.phase === 'roll' || S.phase === 'post') && p.chTurn !== turnKey() && chFoes(p).length && (!p.chUsed || chFoes(p).length >= 2)) { const n = chFoes(p).length, all = n >= 2, w = chaWait(p);
     const oneTip = _tf(4222, "什么时候能点：自己的回合里，掷骰子前后都行；每局只能用一次，同一回合和考全场只能发动一个；现金至少 ${$0}{$1}。\n怎么用：选一位对手，按他所在那一格的色组从题库出一题，他在自己的设备上答。答对他拿走你 ${$2}，答错他赔你 ${$3}。不受卡牌倍率影响。", CH_COST, p.cash < CH_COST ? _tf(4221, "，你现在只有 ${$0}", p.cash) : '', CH_COST, CH_WIN);
     const allTip = _tf(4224, "什么时候能点：自己的回合里，至少两位对手；每 3 圈能用一次（按你经过 Startup 扶持的次数算，开局就能用一次）{$0}；同一回合和考一个人只能发动一个；现金至少 ${$1}（每位对手 ${$2}）{$3}。\n怎么用：从你的下一位开始按座位顺序，每位对手各答一道题。答对的拿走你 ${$4}，答错的赔你 ${$5}。不受卡牌倍率影响。", w ? _tf(4223, "，你还要再经过 {$0} 次", w) : '', CHA_COST * n, CHA_COST, p.cash < CHA_COST * n ? _tf(4221, "，你现在只有 ${$0}", p.cash) : '', CHA_COST, CHA_WIN);
@@ -276,7 +277,7 @@ function plCard(p, mine, offSeats) {
       kv.push(`<span class="ri tipx" tabindex="0" title="${valTip(p)}" data-fk="nw${p.id}">${lb(_t(3714, "估值"))} <b>$${v.val}</b></span>`);
       kv.push(ri(_tf(4316, "运行费 <b>${$0}</b>{$1}{$2}{$3}", oc, oc ? _t(4313, "/圈") : '', mf ? ` + ${lb(_t(4314, "托管费"))} <b>$${mf}</b>` : '', cf ? ` + ${lb(_t(4315, "渠道维护费"))} <b>$${cf}</b>` : ''), why.join(_t(408, "；")), '', 'run'));
     } }
-  if (F.debt() && p.techDebt > 0) { const u = p.role === 'saas' ? 30 : 20; res.push(ri(`${lb(_t(3755, "技术债"))} ${p.techDebt}`, _tf(4318, "被 Health 事件罚到又没防护时欠 1 个：每个让每圈运行费多 ${$0}{$1}；2 个升级每级 +$50；3 个要大重构：停一轮交 $300，或者不停交 $400（抽 Health 卡时攒满的，这两个数跟着卡牌倍率涨）；重构清 1 个要 $50 × 手上的个数（第 10 轮起 +$30）", u, u === 30 ? _t(4317, "（SaaS 创业公司，别人是 $20）") : ''), '', 'debt')); }
+  if (F.debt() && p.techDebt > 0) { const u = p.role === 'saas' ? BAL.debtLapSaas : BAL.debtLap; res.push(ri(`${lb(_t(3755, "技术债"))} ${p.techDebt}`, _tf(5708, "被 Health 事件罚到又没防护时欠 1 个：每个让每圈运行费多 ${$0}{$1}；2 个升级每级 +${$2}；3 个要大重构，交 ${$3}（抽 Health 卡时攒满的跟着卡牌倍率涨）；重构清 1 个要 ${$4} × 手上的个数（第 {$5} 轮起 +${$6}）；不管怎么清掉的，都要进维护窗口停一轮、名下服务下线一轮", u, p.role === 'saas' ? _tf(5709, "（SaaS 创业公司，别人是 ${$0}）", BAL.debtLap) : '', BAL.debtUpg, cardAmt(BAL.bigRefactor), BAL.refactorUnit, BAL.refactorLateRound, BAL.refactorLate), '', 'debt')); }
   const mark = (list, name, extra, k) => {
     const u = list.filter(t => !t.used), cats = [...new Set(u.map(t => t.cat))], cn = c => CATS[c] || c;
     return ri(`${lb(name)} ${u.length}${cats.length === 1 && !mini ? _tf(2769, "（{$0}）", cn(cats[0])) : ''}`, _tf(4322, "{$0}{$1}。每个可以抵消一张同类 Health 事件卡{$2}", u.length ? _tf(4319, "没用的 {$0} 个：{$1}", u.length, cats.map(c => `${cn(c)} ×${u.filter(t => t.cat === c).length}`).join(_t(349, "、"))) : _t(4320, "都用掉了"), list.length > u.length ? _tf(4321, "；用掉 {$0} 个", list.length - u.length) : '', extra), '', k);

@@ -34,7 +34,7 @@ function harness() {
     SIM: false, aiTurn: () => false, animK: () => 1, render: () => {}, hopRender: () => {},
     passStart: async p => { p.cash += 200; ctx.S.log.push('start'); },
     passUG: async p => { p.cash += 50; ctx.S.log.push('ug'); },
-    reGoLog: () => ctx.S.log.push('back'), log: () => {}, nm: () => '', _tf: () => ''
+    reGoLog: () => ctx.S.log.push('back'), notePath: () => {}, log: () => {}, nm: () => '', _tf: () => ''
   });
   ctx.sleep = ms => new Promise(r => ctx.setTimeout(r, ms));
   vm.runInContext(`${segment}\n${fx}\n${replay}\n${movement}\n globalThis.R = MPFX; globalThis.segment = walkSegment; globalThis.cast = fxCast; globalThis.move = moveSteps;`, ctx);
