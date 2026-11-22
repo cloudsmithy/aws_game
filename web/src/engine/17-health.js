@@ -4,7 +4,7 @@ import { UI } from '../core/02b-ui-port.js';
 import { GRP, IX, N, SQ, effIn, grpN, isInst } from '../rules/03-services.js';
 import { CATS, COMBOS, INC } from '../rules/04-roles-combos-cards.js';
 import { dlcOn, flyTo } from '../rules/05-dlc.js';
-import { F, P, S, active, availCard, cur, effActive, hasCombo, log, nm, ownedBy, owns, singleAZ, sqn } from './07-state.js';
+import { F, P, S, active, availCard, cur, effActive, hasCombo, inPlay, log, nm, ownedBy, owns, singleAZ, sqn } from './07-state.js';
 import { cardAmt, credit, pay, withGain } from './08-money.js';
 import { baseRent, forceDown } from './09-rent.js';
 import { moveSteps, sendToJail } from './13-move.js';
@@ -133,7 +133,7 @@ function cancelOpts(p, id) {
   if (coe) b.push({ label: _tf(3170, "用复盘标记抵消（{$0}类）", CATS[c.c]), value: 'coe' });
   const dr = p.drill.find(t => !t.used && t.cat === c.c);
   if (dr) b.push({ label: _tf(3171, "用演练标记抵消（{$0}类）", CATS[c.c]), value: 'drill' });
-  const hosts = S.players.filter(o => o.alive && o.id !== p.id && immuneTo(o, id)), fine = cardAmt({ 3: 100, 10: 100, 20: p.role === 'media' ? 300 : 150 }[id] || 0);
+  const hosts = S.players.filter(o => inPlay(o) && o.id !== p.id && immuneTo(o, id)), fine = cardAmt({ 3: 100, 10: 100, 20: p.role === 'media' ? 300 : 150 }[id] || 0);
   hosts.forEach(o => b.push({ label: _tf(3172, "请 {$0} 托管", o.name), value: 'h' + o.id }));
   if (dlcOn('speed') && haIncident(id) && p.speed >= 4 && spdReady(p, 4)) b.push({ label: _t(3173, "花 4 点部署点数：故障转移扛住"), value: 'sp4' });
   if (dlcOn('speed') && p.speed >= 7 && spdReady(p, 7)) b.push({ label: _t(3174, "花 7 点部署点数：蓝绿部署抵消"), value: 'sp7' });
@@ -188,7 +188,7 @@ export async function incident(p, id) {
   // 全场事件（卡上写了 all，比如黑色星期五大促）：谁抽到都是全场结算。不能甩锅（甩给谁都一样），抽卡的人在监管沙盒里也不能让全场一起躲过去；
   // 在沙盒里的人由 run 自己跳过。不记技术债
   if (INC[id].all) { await INC[id].run(p, id); return; }
-  const bl = availCard(p, 'BLAME'), others0 = S.players.filter(o => o.alive && o.id !== p.id);
+  const bl = availCard(p, 'BLAME'), others0 = S.players.filter(o => inPlay(o) && o.id !== p.id);
   if (bl && others0.length) {
     const auto = isAI(p.id) || (SIM && SIM_AI), t = auto ? others0[rnd(others0.length)] : await UI.ask({ who: p.id, cls: 'pick', title: _tf(3193, "用「根因在上游」把「{$0}」甩给谁？", INC[id].n), buttons: [...others0.map(o => ({ label: o.name, value: o.id })), { label: _t(3194, "不甩，自己扛"), value: 'x' }] });
     const to = auto ? t : t === 'x' ? null : P(+t);
@@ -209,7 +209,7 @@ export async function incident(p, id) {
     case 1: case 9: if (await tryCancel(p, id)) return; await skipOrPay(p, INC[id].n, 80, id === 1 ? _t(3201, "加急提额") : _t(3202, "临时切到备用供应商")); break;
     case 15: {
       if (await tryCancel(p, id)) return;
-      const others = S.players.filter(o => o.alive && o.id !== p.id);
+      const others = S.players.filter(o => inPlay(o) && o.id !== p.id);
       if (others.length) { const y = await vote(others, _tf(3203, "{$0} 的安全审计过关吗？", p.name), _tf(3204, "<p>你是审计员：问 {$0} 一个安全问题（比如根用户开 MFA 了吗、S3 桶是公开的吗、密钥多久轮换一次），听完判断。</p>", nm(p)), _t(3205, "过关"), _t(3206, "不过关"), 0.5); if (y * 2 > others.length) { log(_tf(3207, "✅ {$0} 的安全审计通过了", nm(p))); return; } }
       await skipOrPay(p, _t(714, "安全审计没过"), 80, _t(3208, "加急整改")); break;
     }
@@ -242,7 +242,7 @@ export async function incident(p, id) {
       // GuardDuty 基础检测从 CloudTrail 管理事件就能发现桶被公开（不用开 S3 保护），但它只告警、不改桶权限：跟 #19 一样减损、不算免疫，发现得早也不记技术债。
       // 下线或被 DDoS 打下线的 GuardDuty 不算（active）。现实里能自动改回私有的是 Config 规则配自动修正，棋盘上没有这一格
       const gd = active(p, IX.guardduty), x = (p.role === 'health' ? 100 : 50) / (gd ? 2 : 1);
-      S.players.filter(o => o.alive && o.id !== p.id).forEach(o => pay(p, o, x));
+      S.players.filter(o => inPlay(o) && o.id !== p.id).forEach(o => pay(p, o, x));
       if (gd) { log(_tf(3219, "{$0} 的 GuardDuty 告警桶被改成了公开，及时改回私有：赔给每位其他玩家 ${$1}（少赔一半{$2}）", nm(p), cardAmt(x), p.role === 'health' ? _t(3218, "，医疗数据按双倍算") : '')); return; }
       log(_tf(3221, "{$0} 赔给每位其他玩家 ${$1}{$2}", nm(p), cardAmt(x), p.role === 'health' ? _t(3220, "（医疗数据泄露，赔双倍）") : '')); break;
     }

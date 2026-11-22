@@ -2,7 +2,7 @@ import { __rv, _t, _tf } from '../core/01-i18n-runtime.js';
 import { rnd } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { IX, SQ, isInst } from './03-services.js';
-import { F, S, active, effActive, log, nm, ownedBy, owns, sqn } from '../engine/07-state.js';
+import { F, S, active, effActive, inPlay, log, nm, ownedBy, owns, sqn } from '../engine/07-state.js';
 import { credit, pay } from '../engine/08-money.js';
 import { baseRent, forceDown } from '../engine/09-rent.js';
 import { impair, skipOrPay } from '../engine/17-health.js';
@@ -96,7 +96,7 @@ export let INC26 = __rv(() => ([
   // Impaired 和奖励按每个人名下的服务算，在监管沙盒里的人（immuneTill）这次不受影响，也不领奖励
   { dlc: 'inc26', n: _t(5383, "黑色星期五大促"), c: 'avail', e: _t(5384, "全场：流量一下子翻了几倍，Auto Scaling 来不及从零开始加机器。所有人名下没有弹性扩展功能的实例型服务变成 Impaired；有弹性扩展的每块从亚马逊云科技领 $50（每人最多领 $200）。全场事件，不能抵消"), im: _t(5385, "按块算：升了弹性扩展（EC2 跨 AZ Auto Scaling、ECS 服务自动扩缩、EKS Karpenter、RDS 只读副本、Aurora Auto Scaling……）的服务扛住了，还多赚一笔"), tip: _t(5386, "可以预期的大促别等指标涨了才扩容：用定时扩缩或预测性扩缩提前加机器，提前压测、确认服务配额够用；新机器起来要几分钟，突发流量先靠队列和限流挡一挡"), art: 'ec2',
     all: true, imm: o => '', hits: p => false, run: async p => {
-      const all = S.players.filter(o => o.alive);
+      const all = S.players.filter(inPlay);
       let any = false;
       for (const o of all) {
         if (o.immuneTill >= S.round) { log(_tf(3196, "🛡️ {$0} 在「监管沙盒」里，免疫「{$1}」", nm(o), _t(5383, "黑色星期五大促"))); continue; }

@@ -5,7 +5,7 @@ import { BAL, CAP_MAX, GRP, IX, N, SQ, TOKEN, capU, grpGap, grpN, isInst, lvName
 import { INC, REI, roleOf, rsBuyRate, rsRate, rsSold } from '../rules/04-roles-combos-cards.js';
 import { dlcOn, fisCost, flyTo } from '../rules/05-dlc.js';
 import { qPoolS } from '../rules/06-qbank.js';
-import { F, P, S, active, availCard, cur, hasCombo, lapFx, log, nm, ownedBy, owns, ownsGroup, singleAZ, sqn } from './07-state.js';
+import { F, P, S, active, availCard, cur, hasCombo, inPlay, lapFx, log, nm, ownedBy, owns, ownsGroup, singleAZ, sqn } from './07-state.js';
 import { credit, pay, withGain } from './08-money.js';
 import { SPOT_OK, netWorth, reqRate } from './08c-costs.js';
 import { addCap, baseRent, bringOnline, buyPaid, capInfo, capPaidSum, doUpgrade, downWhy, handOver, jointRent, roleDisc, svcLeaves, tokUnit, turnKey, upPaidSum, upgradeInfo, zhe } from './09-rent.js';
@@ -24,7 +24,7 @@ import { MP } from '../net/40-host-sync.js';
 import { fxAll, fxCast, fxPot, sfxAll } from '../net/41-replay.js';
 // ================= 落点 =================
 // 停在服务格上记进 p.stops（埋 Health 卡只能埋在自己停过的格子上，经过不算）；这一格结算完（过路费、买地、升级都做完）再看有没有对手埋的 Health 卡
-export async function land(p, opts = {}) { const prev = S.histSq, at = S.histSq = p.pos; let r; try { noteStop(p, at); r = await withCardMul(0, () => land0(p, opts)); await springTrap(p, at); } finally { S.histSq = prev; } await goReiCards(p); return r; }
+export async function land(p, opts = {}) { const prev = S.histSq, at = S.histSq = p.pos; let r; try { noteStop(p, at); r = await withCardMul(0, () => land0(p, opts)); await withCardMul(0, () => springTrap(p, at)); } finally { S.histSq = prev; } await goReiCards(p); return r; }
 async function land0(p, opts = {}) {
   const i = p.pos, s = SQ[i];
   S.lastSq = i; if (!BOT && !SIM) fxAll({ sq: [i, 'fx-land', 900] });
@@ -113,7 +113,7 @@ export function capHere() {
 export async function offerLandingUpgrade(p, i, canJump = false) {
   S.landAct = { k: turnKey(), i, p: p.id, used: false };
   const u = upgradeInfo(p, i, true), c = capInfo(p, i);
-  const foes = S.players.filter(q => q.alive && q.id !== p.id);
+  const foes = S.players.filter(q => inPlay(q) && q.id !== p.id);
   const s = SQ[i], b = [];
   let html = _t(2985, "<p>落在自己的服务上，可以做一件事：</p>");
   if (u.ok) {

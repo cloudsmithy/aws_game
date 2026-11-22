@@ -3229,7 +3229,7 @@ const LANG_KEY = 'aws-tycoon-lang';   // 记住上次选的语言：根目录 in
 // 有哪些语言：每种语言用它自己的写法（不翻译）。中文版在 code/index.html，别的语言在 code/<代码>/index.html（tools/i18n.mjs build <代码> 按 i18n/<代码>.json 生成）。
 // 以后加语言：这里加一行，再出一份 i18n/<代码>.json
 let LANGS = __rv(() => ([{ code: 'zh', name: _t(341, "简体中文") }, { code: 'en', name: 'English' }, { code: 'ja', name: _t(342, "日本語") }]), v => { LANGS = v; }, () => LANGS);
-let GAME_VERSION = __rv(() => ({ major: 1, round: 21, name: _t(5661, "第二十一轮"), title: _t(5662, "中途加入、埋 Health 卡、12 张新卡、修 27 处问题"), commits: 174, changes: 516, since: '2026-10-20', build: 'ce019c2', time: '2026-11-22 07:55' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
+let GAME_VERSION = __rv(() => ({ major: 1, round: 21, name: _t(5661, "第二十一轮"), title: _t(5662, "中途加入、埋 Health 卡、12 张新卡、修 27 处问题"), commits: 174, changes: 517, since: '2026-10-20', build: 'ce019c2', time: '2026-11-22 07:55' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
 let SQ = __rv(() => (LAYOUT.map(k => SVC[k] ? { t: 'prop', k, icon: k, ...SVC[k] } : UTIL[k] ? { t: 'util', k, icon: k, ...UTIL[k] } : { k, ...SPECIAL[k] })), v => { SQ = v; }, () => SQ);
 const IX = {}; SQ.forEach((s, i) => { if (!(s.k in IX)) IX[s.k] = i; });
 const GRP = g => SQ.map((s, i) => s.g === g ? i : -1).filter(i => i >= 0);
@@ -3467,7 +3467,7 @@ let INC = __rv(() => ([null,
   { n: _t(738, "高危 CVE 爆出"), c: 'sec', e: _t(739, "你名下每块没被漏洞扫描保护的 EC2、ECS、EKS、SageMaker AI：交 $30，并变成 Impaired"), im: _t(740, "持有「漏洞管理」架构；或者按块算：Inspector「EC2 扫描」保护 EC2，ECR「增强扫描」或 Inspector「ECR 镜像扫描」保护 ECS、EKS、SageMaker AI。RDS 这类托管数据库和 Serverless 由亚马逊云科技打补丁，不受影响"), tip: _t(741, "Amazon Inspector 会持续扫描 EC2、ECR 镜像和 Lambda 里的已知漏洞"), art: 'inspector' },
   { n: _t(742, "这次事故谁背锅"), c: 'ops', e: _t(743, "开复盘会找背锅的：指一位其他玩家，说出他的服务怎么连累了你；其他人（不算你们俩）投票，过半同意他就交 $100 进奖池，不然你自己交 $100。只有两个人玩时掷骰子，4–6 甩锅成功"), im: _t(708, "无"), tip: _t(744, "好的事故复盘对事不对人（Blameless Postmortem）：找的是流程和系统的漏洞，不是找人背锅"), art: 'cloudwatch',
     run: async p => {
-      const others = S.players.filter(o => o.alive && o.id !== p.id); if (!others.length) return 'nopen';
+      const others = S.players.filter(o => inPlay(o) && o.id !== p.id); if (!others.length) return 'nopen';
       const t = others.length === 1 ? others[0] : (isAI(p.id) || (SIM && SIM_AI)) ? others[rnd(others.length)] : P(+(await UI.ask({ who: p.id, cls: 'pick', title: _t(745, "这次事故甩给谁？"), html: _tf(746, "<p>指一位其他玩家，说清他的服务怎么连累了你。其他人投票，过半同意他就交 ${$0} 进奖池，不然你自己交。</p>", cardAmt(100)), buttons: others.map(o => ({ label: o.name, value: o.id })) })));
       const voters = others.filter(o => o.id !== t.id);
       let ok;
@@ -3736,7 +3736,7 @@ const idleInst = p => ownedBy(p).filter(i => isInst(i) && !S.props[i].level && !
 const topMr = p => ownedBy(p).filter(i => effActive(i, 'mr') && SQ[i].upg[S.props[i].level - 1] && SQ[i].upg[S.props[i].level - 1][2] === 'mr');
 // 「前进到某一格」：已经站在那一格上（技能抽卡、经过起点送的卡）就往前绕一整圈，经过起点、UG 照常结算；moveTo 走 0 步会原地再结算一次落点
 const advanceTo = (p, t) => moveSteps(p, ((t - p.pos + N) % N) || N);
-const hijackTo = p => S.players.filter(q => q.alive && q.id !== p.id && q.jail === null);
+const hijackTo = p => S.players.filter(q => inPlay(q) && q.id !== p.id && q.jail === null);
 // 只给 DLC 的卡挂 run：Health 卡 run 返回 'nopen' 表示这次不算罚；imm 返回免疫原因
 let DLC_INC = __rv(() => ([
   { dlc: 'reseller', n: _t(1508, "代理商涨价"), c: 'cost', e: _t(1509, "所有代理商的转售价上调一档（最多到原价）；你从代理商手里买的服务，每块补交 $20 差价给对应的代理商"), im: _t(1510, "你自己就是代理商"), tip: _t(1511, "经代理商采购的价格写在合同里，续约时可能调价；多比几家、签长期合同能锁住价格"), art: 'billing',
@@ -4065,7 +4065,7 @@ let INC26 = __rv(() => ([
   // Impaired 和奖励按每个人名下的服务算，在监管沙盒里的人（immuneTill）这次不受影响，也不领奖励
   { dlc: 'inc26', n: _t(5383, "黑色星期五大促"), c: 'avail', e: _t(5384, "全场：流量一下子翻了几倍，Auto Scaling 来不及从零开始加机器。所有人名下没有弹性扩展功能的实例型服务变成 Impaired；有弹性扩展的每块从亚马逊云科技领 $50（每人最多领 $200）。全场事件，不能抵消"), im: _t(5385, "按块算：升了弹性扩展（EC2 跨 AZ Auto Scaling、ECS 服务自动扩缩、EKS Karpenter、RDS 只读副本、Aurora Auto Scaling……）的服务扛住了，还多赚一笔"), tip: _t(5386, "可以预期的大促别等指标涨了才扩容：用定时扩缩或预测性扩缩提前加机器，提前压测、确认服务配额够用；新机器起来要几分钟，突发流量先靠队列和限流挡一挡"), art: 'ec2',
     all: true, imm: o => '', hits: p => false, run: async p => {
-      const all = S.players.filter(o => o.alive);
+      const all = S.players.filter(inPlay);
       let any = false;
       for (const o of all) {
         if (o.immuneTill >= S.round) { log(_tf(3196, "🛡️ {$0} 在「监管沙盒」里，免疫「{$1}」", nm(o), _t(5383, "黑色星期五大促"))); continue; }
@@ -4126,7 +4126,7 @@ let REI26 = __rv(() => ([
     } },
   { n: _t(5620, "在 Organizations 里共享 Savings Plans"), e: _t(5621, "你和下一位玩家下次经过 Startup 扶持时，运行费都打 75 折"), tip: _t(5622, "同一个组织里的账户默认共享 Savings Plans 和 RI 的折扣：一个账户用不完的承诺额，自动抵扣别的账户的用量"), art: 'savingsplans',
     run: async (p, others, card) => {
-      const n = S.players.length, nx = Array.from({ length: n - 1 }, (_, k) => S.players[(p.id + 1 + k) % n]).find(o => o.alive), c = r26Id(card);
+      const n = S.players.length, nx = Array.from({ length: n - 1 }, (_, k) => S.players[(p.id + 1 + k) % n]).find(inPlay), c = r26Id(card);
       const got = [p, nx].filter(Boolean).map(q => [q, r26Cut(q, { m: 0.75, c })]);
       log(_tf(5623, "🤝 {$0} 下次经过 Startup 扶持时运行费都打 75 折（按现在的用量大约少交：{$1}）", got.map(([q]) => nm(q)).join(_t(349, "、")), got.map(([q, s]) => _tf(3245, "{$0}（{$1}）", nm(q), '$' + s)).join(_t(349, "、"))));
     } },
@@ -4369,6 +4369,8 @@ const logRow = l => { const t = logTime(l), b = clean(logBody(l)); return `<div>
 // 旧存档、演示局里的日志名字还是棋子原色，显示时换成深一档的
 const logBody = l => String(l).replace(/<time data-t="\d+"><\/time>/, '').replace(/color:(#[0-9a-f]{6})/g, (m, c) => 'color:' + playerInk(c));
 const owns = (p, i) => S.props[i] && S.props[i].owner === p.id;
+// 在局里、能被别人的卡牌技能指到：中途加入的人（joinRound，engine/14-turn.js 的 joinPlayer）排到下一轮才开始走，这一轮里还不算，免得没走过一步就被发卡、出题、收订阅费
+const inPlay = q => !!q && q.alive && !(q.joinRound > S.round);
 const active = (p, i) => owns(p, i) && !S.props[i].offline && S.props[i].ddos == null;
 const ownedBy = p => OWNABLE.filter(i => owns(p, i));
 // 娱乐模式的盲盒格买不到，整组只看买得到的那几块（数据库组少 DMS、安全组少 GuardDuty/Inspector/KMS），不然这两组永远凑不齐；
@@ -4847,7 +4849,7 @@ const sellValue = i => Math.max(0, Math.round((buyPaid(i) + upPaidSum(i) + capPa
 function svcLeaves(from, i, to) {
   const pr = S.props[i];
   if (from && from.commits) from.commits = from.commits.filter(c => !(c.type === 'ri' && c.svc === i));
-  if (pr) { pr.ri = null; pr.offDrawn = 0; if (to != null && pr.ddos === to) { pr.ddos = null; pr.ddosLeft = 0; } }   // offDrawn 是原主人下线拿走的钱，新主人没拿过
+  if (pr) { pr.ri = null; pr.offDrawn = pr.offline ? (pr.offCash || 0) : 0; if (to != null && pr.ddos === to) { pr.ddos = null; pr.ddosLeft = 0; } }   // offDrawn：原主人下线拿走的钱新主人没拿过，清零；但还在下线的那一半跟着服务走（卖回、估值照扣，恢复前也不能再下线拿钱），不然转手一次就能把那一半再卖一遍
 }
 // 服务整块换主人（交易、破产分给债主、战略并购、抢 Spot、代理商清仓）：先 svcLeaves，再改主人、断开代理关系。
 // 代理商按进货价拿的库存（pr.paid 是 5 折）给了不是代理商的人，买价改按原价：客户的估值本来就按原价算服务（valBreak），卖回、下线不改的话按 5 折，两边对不上
@@ -5546,7 +5548,8 @@ const makePlayer = (id, name, r, cash, reseller = false) => ({ id, name: esc(nam
 function joinPlayer(name) {
   const id = S.players.length, alive = S.players.filter(q => q.alive), cust = ROLES.filter(r => !r.rs), used = new Set(S.players.map(q => q.role));
   const free = cust.filter(r => !used.has(r.id)), pool = free.length ? free : cust, r = pool[rnd(pool.length)];
-  const cash = Math.round(alive.reduce((a, q) => a + netWorth(q), 0) / Math.max(1, alive.length) / 10) * 10;
+  const base = alive.some(q => !q.reseller) ? alive.filter(q => !q.reseller) : alive;   // 代理商开局资金是客户的总和，算进来会把平均数抬得很高：只按客户算
+  const cash = Math.round(base.reduce((a, q) => a + netWorth(q), 0) / Math.max(1, base.length) / 10) * 10;
   const p = makePlayer(id, name, r, cash); p.joinRound = S.round + 1;
   S.players.push(p);
   Object.assign(ST(p), { gain: GAIN0(), dice: { n: 0, pips: 0, dbl: 0 }, low: { cash, r: p.joinRound } });
@@ -5560,7 +5563,7 @@ async function startTurn() {
   downTick(p);   // 强制下线到期恢复（DDoS、Health 卡），不管开没开高速部署
   if (dlcOn('speed')) speedTurnStart(p);
   if (p.rentBoost && --p.rentBoostTurns <= 0) { p.rentBoost = 0; log(_tf(2932, "{$0} 的「{$1}」结束了", nm(p), roleOf(p).sk.n)); }
-  if (p.subsTurns > 0) { p.subsTurns--; S.players.filter(o => o.alive && o.id !== p.id).forEach(o => pay(o, p, p.subsAmt, 'card')); log(_tf(2933, "{$0} 的「{$1}」：每位对手付订阅费 ${$2}（还剩 {$3} 次）", nm(p), roleOf(p).sk.n, p.subsAmt, p.subsTurns)); await resolveDebts(); if (checkOver()) return; }
+  if (p.subsTurns > 0) { p.subsTurns--; S.players.filter(o => inPlay(o) && o.id !== p.id).forEach(o => pay(o, p, p.subsAmt, 'card')); log(_tf(2933, "{$0} 的「{$1}」：每位对手付订阅费 ${$2}（还剩 {$3} 次）", nm(p), roleOf(p).sk.n, p.subsAmt, p.subsTurns)); await resolveDebts(); if (checkOver()) return; }
   ownedBy(p).forEach(i => { if (S.props[i].impaired) { S.props[i].impaired = false; log(_tf(2934, "{$0} 恢复正常", sqn(i))); } });
   for (const i of ownedBy(p)) {
     const pr = S.props[i]; if (!pr.offline || pr.offTurn === turnKey()) continue;
@@ -5588,7 +5591,7 @@ async function uiAction(fn) {
 
 // ================= 落点 =================
 // 停在服务格上记进 p.stops（埋 Health 卡只能埋在自己停过的格子上，经过不算）；这一格结算完（过路费、买地、升级都做完）再看有没有对手埋的 Health 卡
-async function land(p, opts = {}) { const prev = S.histSq, at = S.histSq = p.pos; let r; try { noteStop(p, at); r = await withCardMul(0, () => land0(p, opts)); await springTrap(p, at); } finally { S.histSq = prev; } await goReiCards(p); return r; }
+async function land(p, opts = {}) { const prev = S.histSq, at = S.histSq = p.pos; let r; try { noteStop(p, at); r = await withCardMul(0, () => land0(p, opts)); await withCardMul(0, () => springTrap(p, at)); } finally { S.histSq = prev; } await goReiCards(p); return r; }
 async function land0(p, opts = {}) {
   const i = p.pos, s = SQ[i];
   S.lastSq = i; if (!BOT && !SIM) fxAll({ sq: [i, 'fx-land', 900] });
@@ -5677,7 +5680,7 @@ function capHere() {
 async function offerLandingUpgrade(p, i, canJump = false) {
   S.landAct = { k: turnKey(), i, p: p.id, used: false };
   const u = upgradeInfo(p, i, true), c = capInfo(p, i);
-  const foes = S.players.filter(q => q.alive && q.id !== p.id);
+  const foes = S.players.filter(q => inPlay(q) && q.id !== p.id);
   const s = SQ[i], b = [];
   let html = _t(2985, "<p>落在自己的服务上，可以做一件事：</p>");
   if (u.ok) {
@@ -6044,7 +6047,7 @@ function cancelOpts(p, id) {
   if (coe) b.push({ label: _tf(3170, "用复盘标记抵消（{$0}类）", CATS[c.c]), value: 'coe' });
   const dr = p.drill.find(t => !t.used && t.cat === c.c);
   if (dr) b.push({ label: _tf(3171, "用演练标记抵消（{$0}类）", CATS[c.c]), value: 'drill' });
-  const hosts = S.players.filter(o => o.alive && o.id !== p.id && immuneTo(o, id)), fine = cardAmt({ 3: 100, 10: 100, 20: p.role === 'media' ? 300 : 150 }[id] || 0);
+  const hosts = S.players.filter(o => inPlay(o) && o.id !== p.id && immuneTo(o, id)), fine = cardAmt({ 3: 100, 10: 100, 20: p.role === 'media' ? 300 : 150 }[id] || 0);
   hosts.forEach(o => b.push({ label: _tf(3172, "请 {$0} 托管", o.name), value: 'h' + o.id }));
   if (dlcOn('speed') && haIncident(id) && p.speed >= 4 && spdReady(p, 4)) b.push({ label: _t(3173, "花 4 点部署点数：故障转移扛住"), value: 'sp4' });
   if (dlcOn('speed') && p.speed >= 7 && spdReady(p, 7)) b.push({ label: _t(3174, "花 7 点部署点数：蓝绿部署抵消"), value: 'sp7' });
@@ -6099,7 +6102,7 @@ async function incident(p, id) {
   // 全场事件（卡上写了 all，比如黑色星期五大促）：谁抽到都是全场结算。不能甩锅（甩给谁都一样），抽卡的人在监管沙盒里也不能让全场一起躲过去；
   // 在沙盒里的人由 run 自己跳过。不记技术债
   if (INC[id].all) { await INC[id].run(p, id); return; }
-  const bl = availCard(p, 'BLAME'), others0 = S.players.filter(o => o.alive && o.id !== p.id);
+  const bl = availCard(p, 'BLAME'), others0 = S.players.filter(o => inPlay(o) && o.id !== p.id);
   if (bl && others0.length) {
     const auto = isAI(p.id) || (SIM && SIM_AI), t = auto ? others0[rnd(others0.length)] : await UI.ask({ who: p.id, cls: 'pick', title: _tf(3193, "用「根因在上游」把「{$0}」甩给谁？", INC[id].n), buttons: [...others0.map(o => ({ label: o.name, value: o.id })), { label: _t(3194, "不甩，自己扛"), value: 'x' }] });
     const to = auto ? t : t === 'x' ? null : P(+t);
@@ -6120,7 +6123,7 @@ async function incident(p, id) {
     case 1: case 9: if (await tryCancel(p, id)) return; await skipOrPay(p, INC[id].n, 80, id === 1 ? _t(3201, "加急提额") : _t(3202, "临时切到备用供应商")); break;
     case 15: {
       if (await tryCancel(p, id)) return;
-      const others = S.players.filter(o => o.alive && o.id !== p.id);
+      const others = S.players.filter(o => inPlay(o) && o.id !== p.id);
       if (others.length) { const y = await vote(others, _tf(3203, "{$0} 的安全审计过关吗？", p.name), _tf(3204, "<p>你是审计员：问 {$0} 一个安全问题（比如根用户开 MFA 了吗、S3 桶是公开的吗、密钥多久轮换一次），听完判断。</p>", nm(p)), _t(3205, "过关"), _t(3206, "不过关"), 0.5); if (y * 2 > others.length) { log(_tf(3207, "✅ {$0} 的安全审计通过了", nm(p))); return; } }
       await skipOrPay(p, _t(714, "安全审计没过"), 80, _t(3208, "加急整改")); break;
     }
@@ -6153,7 +6156,7 @@ async function incident(p, id) {
       // GuardDuty 基础检测从 CloudTrail 管理事件就能发现桶被公开（不用开 S3 保护），但它只告警、不改桶权限：跟 #19 一样减损、不算免疫，发现得早也不记技术债。
       // 下线或被 DDoS 打下线的 GuardDuty 不算（active）。现实里能自动改回私有的是 Config 规则配自动修正，棋盘上没有这一格
       const gd = active(p, IX.guardduty), x = (p.role === 'health' ? 100 : 50) / (gd ? 2 : 1);
-      S.players.filter(o => o.alive && o.id !== p.id).forEach(o => pay(p, o, x));
+      S.players.filter(o => inPlay(o) && o.id !== p.id).forEach(o => pay(p, o, x));
       if (gd) { log(_tf(3219, "{$0} 的 GuardDuty 告警桶被改成了公开，及时改回私有：赔给每位其他玩家 ${$1}（少赔一半{$2}）", nm(p), cardAmt(x), p.role === 'health' ? _t(3218, "，医疗数据按双倍算") : '')); return; }
       log(_tf(3221, "{$0} 赔给每位其他玩家 ${$1}{$2}", nm(p), cardAmt(x), p.role === 'health' ? _t(3220, "（医疗数据泄露，赔双倍）") : '')); break;
     }
@@ -6240,10 +6243,12 @@ function saTarget(p) {
   const free = OWNABLE.filter(i => S.props[i].owner === null && !isHidden(i)).sort((a, b) => dist(a) - dist(b));
   return free.length ? free[0] : null;
 }
+const reiLeft = () => (S.rei || []).length + (S.reiDisc || []).length;
 // 花钱抽 re:Invent 卡：总资产的 4%（取整到 $10），最低 $50，越有钱越贵
 const reiBuyCost = p => Math.max(50, Math.round(netWorth(p) * 0.04 / 10) * 10);
 async function buyReinvent() {
   const p = cur(), cost = reiBuyCost(p); if (S.reiBought || p.cash < cost || p.jail !== null || S.phase !== 'busy') return;
+  if (!reiLeft()) return void UI.toast(_t(5664, "re:Invent 牌堆抽完了（卡都在各家手里），现在抽不了"));   // 先查再收钱：抽空了只给 $50 保底，比买卡的钱少
   S.reiBought = true; ST(p).spendMisc = (ST(p).spendMisc || 0) + pay(p, 'bank', cost);
   log(_tf(3259, "🎟 {$0} 花 ${$1} Credits 抽一张 re:Invent 卡（总资产的 4%）", nm(p), cost));
   await drawReinvent(p);
@@ -6258,7 +6263,7 @@ async function sendIncident(kind) {
   const foes = chFoes(p), one = incSendCost(p), cost = kind === 'all' ? one * 2 : one;
   if (p.cash < cost) return void UI.toast(_tf(2981, "现金不够 ${$0}", cost));
   let ts;
-  if (kind === 'all') { const n = S.players.length; ts = Array.from({ length: n - 1 }, (_, k) => S.players[(p.id + 1 + k) % n]).filter(o => o.alive); }   // 从下一位开始按座位顺序
+  if (kind === 'all') { const n = S.players.length; ts = Array.from({ length: n - 1 }, (_, k) => S.players[(p.id + 1 + k) % n]).filter(inPlay); }   // 从下一位开始按座位顺序
   else if (kind === 'rand') ts = [foes[rnd(foes.length)]];
   else { const t = foes.length === 1 ? foes[0] : await pickPartner(_tf(3262, "让谁抽一张 Health 卡？（花 ${$0}）", one)); if (!t) return; ts = [t]; }
   p.incLap = p.laps || 0;
@@ -6289,7 +6294,7 @@ async function buryIncident() {
   if (p.cash < cost) return void UI.toast(_tf(2981, "现金不够 ${$0}", cost));
   // 格子名写在按钮上：别的座位、观众那边的按钮换成「？」（priv.buttons），正文也换掉，看不出在挑哪几格
   const v = await UI.ask({ who: p.id, cls: 'pick', title: _tf(5563, "花 ${$0} 埋一张 Health 卡：埋在哪一格？（只有你看得到）", cost),
-    html: _tf(5564, "<p>从 Health 牌堆抽一张扣着埋下去，你自己也先不看。对手停在那一格（经过不算），结算完那一格以后翻开，由他照常结算。你自己停上去没事。</p><p class=\"muted\">只能埋在你这局停过的服务上，已经埋了卡的格子不能再埋；场上最多 {$0} 张，和发 Health 卡共用每圈一次。</p>", TRAP_MAX),
+    html: _tf(5564, "<p>从 Health 牌堆抽一张扣着埋下去，别人看不到埋在哪、是哪张（你自己在玩家卡上看得到）。对手停在那一格（经过不算），结算完那一格以后翻开，由他照常结算。你自己停上去没事。</p><p class=\"muted\">只能埋在你这局停过的服务上，已经埋了卡的格子不能再埋；每人同时最多 {$0} 张，和发 Health 卡共用每圈一次。</p>", TRAP_MAX),
     priv: { title: _tf(5565, "{$0} 在决定埋不埋 Health 卡", p.name), html: _t(5566, "<p>埋在哪一格只有他自己知道。</p>"), buttons: [...cands.map(() => '?'), _t(2465, "取消")] },
     buttons: [...cands.map(i => ({ label: SQ[i].n, value: i })), { label: _t(2465, "取消"), value: -1 }] });
   const i = +v; if (!cands.includes(i) || !buryOk(p) || !trapCands(p).includes(i) || p.cash < cost) return;
@@ -6406,7 +6411,7 @@ async function reiResolve(p, id) {
     p.cards.push({ id: c.keep, used: false }); log(_tf(3268, "{$0} 获得保留卡「{$1}」", nm(p), CARDN[c.keep])); return;
   }
   S.reiDisc.push(id);
-  const others = S.players.filter(o => o.alive && o.id !== p.id);
+  const others = S.players.filter(o => inPlay(o) && o.id !== p.id);
   if (c.run) { await c.run(p, others, c); return; }
   switch (id) {
     case 1: { const n = Math.min(4, COMBOS.filter(c => comboOpen(c) && hasCombo(p, c.id)).length); await moneyOrMove(p, c, 100 + 50 * n, got => log(_tf(3270, "{$0} {$1}领 ${$2} Credits", nm(p), n ? _tf(3269, "有 {$0} 个生效的架构，", n) : '', got))); break; }
@@ -6659,7 +6664,7 @@ async function useRoleSkill() { const p = cur(); if (!canSkill(p)) return; await
 async function roleSkill(p) { return withGain('card', () => roleSkill0(p)); }
 async function roleSkill0(p) {
   // 金额倍数见 skillMul()：跟着流量涨，完整局再 ×1.2，地狱模式不涨
-  const r = roleOf(p), m = skillMul(), $m = x => Math.round(x * m), others = S.players.filter(o => o.alive && o.id !== p.id);
+  const r = roleOf(p), m = skillMul(), $m = x => Math.round(x * m), others = S.players.filter(o => inPlay(o) && o.id !== p.id);
   const freeUp = i => { S.props[i].level++; (S.props[i].upPaid = S.props[i].upPaid || [])[S.props[i].level - 1] = 0; log(_tf(3374, "🔧 {$0} 免费给 {$1} 升到{$2}", nm(p), sqn(i), lvFull(i, S.props[i].level))); };
   const unowned = OWNABLE.filter(i => S.props[i].owner === null && SQ[i].t === 'prop' && !isHidden(i));
   const take = i => { S.props[i].owner = p.id; S.props[i].paid = 0; log(_tf(3375, "📈 {$0} 靠技能拿下 {$1}", nm(p), sqn(i))); };
@@ -6777,7 +6782,7 @@ async function speedRoll(p, d) {
 }
 // 能打的服务：对手已上线的服务，不能连着两次打同一个人；轻 DDoS 还要求现在没 Impaired
 const ddosShield = o => active(o, IX.shield) ? 'Shield Advanced' : active(o, IX.cloudfront) ? 'CloudFront' : '';
-const ddosTargets = (p, light) => S.players.filter((o, _, a) => o.alive && o.id !== p.id && (o.id !== p.lastDdos || a.filter(q => q.alive && q.id !== p.id).length === 1)).flatMap(o => ownedBy(o).filter(i => active(o, i) && ['prop', 'util'].includes(SQ[i].t) && !(light && S.props[i].impaired)).map(i => ({ o, i })));
+const ddosTargets = (p, light) => S.players.filter((o, _, a) => inPlay(o) && o.id !== p.id && (o.id !== p.lastDdos || a.filter(q => inPlay(q) && q.id !== p.id).length === 1)).flatMap(o => ownedBy(o).filter(i => active(o, i) && ['prop', 'util'].includes(SQ[i].t) && !(light && S.props[i].impaired)).map(i => ({ o, i })));
 const freeUps = p => ownedBy(p).filter(i => upgradeInfo(p, i, true).ok);
 const pickOpp = (p, title, list) => UI.ask({ who: p.id, cls: 'pick', title, buttons: [...list.map(o => ({ label: _tf(3420, "{$0}（${$1}）", o.name, o.cash), value: o.id })), { label: _t(3005, "算了"), value: 'x' }] });
 // 选目标列表上的数和格子上标的一样（shownRent）。12 点版打下线：这一环没有备用服务顶上，整套架构就失效；
@@ -6819,7 +6824,7 @@ let SPEED = __rv(() => ([
   { c: 3, n: _t(3457, "抽卡"), d: _t(3458, "免费抽一张 re:Invent 卡，掷骰子前后都能用（和花钱抽卡共用每回合一次，每局最多 2 次）"), ok: (p, ph) => (p.spd3n || 0) >= 2 ? _t(3459, "这局已经抽过 2 次了") : S.reiBought ? _t(3460, "这回合已经抽过卡") : p.jail !== null ? _t(3461, "在维护窗口里不能抽") : '', run: async p => { S.reiBought = true; p.spd3n = (p.spd3n || 0) + 1; speedSpend(p, 3, _tf(3462, "抽一张 re:Invent 卡（这局第 {$0} 次，最多 2 次）", p.spd3n)); await drawReinvent(p); } },
   { c: 4, n: _t(38, "故障转移"), d: _t(3463, "没做高可用、要被可用性事件打成 Impaired 时（AZ 断电、单点故障、Region 故障、流量暴增…），这次扛住"), react: _t(3464, "被可用性事件打中时自动问") },
   { c: 5, n: _t(3465, "混沌注入"), d: _t(3466, "逼一位对手抽一张 Health 事件卡（每回合最多发动一次攻击）"), ok: p => S.attackUsed ? _t(3467, "这回合已经攻击过了") : '', run: async p => {
-    const v = await pickOpp(p, _t(3468, "混沌注入：让谁抽一张 Health 事件卡？"), S.players.filter(o => o.alive && o.id !== p.id).sort((a, b) => netWorth(b) - netWorth(a)));
+    const v = await pickOpp(p, _t(3468, "混沌注入：让谁抽一张 Health 事件卡？"), S.players.filter(o => inPlay(o) && o.id !== p.id).sort((a, b) => netWorth(b) - netWorth(a)));
     if (v === 'x') return; const o = P(v);
     S.attackUsed = true; speedSpend(p, 5, _tf(3469, "对 {$0} 混沌注入，逼他抽一张 Health 事件卡", nm(o))); await drawIncident(o);
   } },
@@ -6985,11 +6990,11 @@ async function activeAction() {
 // ================= 交易 =================
 // 出题挑战：花 $100 从题库给一位对手出题，答对他拿走这 $100，答错他赔你 $200。11-08 起每局只能用一次（p.chUsed）
 const CH_COST = 100, CH_WIN = 200;
-const canChallenge = p => !!p && p.alive && p.chTurn !== turnKey() && !p.chUsed && p.cash >= CH_COST && S.players.some(o => o.alive && o.id !== p.id);
+const canChallenge = p => !!p && p.alive && p.chTurn !== turnKey() && !p.chUsed && p.cash >= CH_COST && S.players.some(o => inPlay(o) && o.id !== p.id);
 // 考全场：每 3 圈一次（CHA_LAPS，按这位玩家自己经过 Startup 扶持的次数 p.laps 算，开局就能用一次，用过记下 p.chaLap）；同一回合和考一个人只能发动一个（共用 p.chTurn）。每位对手各出一道（热座时后答的人看不到前一个人的题和答案），每人 $50：答对的拿走你 $50，答错的赔你 $100。至少两位对手才有
 const CHA_COST = 50, CHA_WIN = 100, CHA_LAPS = 3;
 const chaWait = p => Math.max(0, CHA_LAPS - ((p.laps || 0) - (p.chaLap ?? -CHA_LAPS)));   // 还要再经过几次 Startup 扶持才能考全场
-const chFoes = p => S.players.filter(o => o.alive && o.id !== p.id);
+const chFoes = p => S.players.filter(o => inPlay(o) && o.id !== p.id);
 const canChallengeAll = p => !!p && p.alive && p.chTurn !== turnKey() && !chaWait(p) && chFoes(p).length >= 2 && p.cash >= CHA_COST * chFoes(p).length;
 async function quizAll() {
   const p = cur(); if (!canChallengeAll(p)) return void UI.toast(!p ? '' : p.chTurn === turnKey() ? _t(3566, "这回合已经出过题了") : chaWait(p) ? _tf(3567, "考全场每 3 圈一次：还要再经过 {$0} 次 Startup 扶持", chaWait(p)) : _tf(2981, "现金不够 ${$0}", CHA_COST * chFoes(p).length));
@@ -7009,7 +7014,7 @@ async function quizAll() {
 }
 async function quizChallenge() {
   const p = cur(); if (!canChallenge(p)) return void UI.toast(!p ? '' : p.chTurn === turnKey() ? _t(3566, "这回合已经出过题了") : p.chUsed ? _t(3572, "考一个人每局只能用一次，已经用过了") : _tf(2981, "现金不够 ${$0}", CH_COST));
-  const others = S.players.filter(o => o.alive && o.id !== p.id);
+  const others = S.players.filter(o => inPlay(o) && o.id !== p.id);
   const t = others.length === 1 ? others[0] : await pickPartner(_tf(3573, "出题考谁？（花 ${$0}：答对他拿走这 ${$1}，答错他赔你 ${$2}）", CH_COST, CH_COST, CH_WIN));
   if (!t) return;
   p.chTurn = turnKey(); p.chUsed = true;
@@ -8331,7 +8336,7 @@ function playerBrief(p) {
   if (r.sk && !p.skillUsed) out.push(canSkill(p) ? row(_tf(4202, "专属技能「{$0}」可以发动了{$1}", r.sk.n, skillMulTxt(p)), btn(_t(4203, "发动"), 'useRoleSkill'), 'hot') : row(_tf(4204, "<span class=\"muted\">技能「{$0}」：总资产低于 ${$1} 时可用</span>", r.sk.n, skillLine(p))));
   if (dlcOn('speed')) { const n = SPEED.filter(x => !x.react && p.speed >= x.c && !x.ok(p, S.phase)).length; if (n) out.push(row(_tf(4205, "部署点数 {$0} 点，能发动 {$1} 个技能", p.speed, n), btn(_t(4206, "部署点数"), 'speedMenu'))); }
   if (F.debt() && p.techDebt > 0) out.push(row(_tf(4207, "技术债 {$0} 个，重构清 1 个要 ${$1}", p.techDebt, refactorCost(p)), btn(_t(4208, "清技术债"), 'refactorDebt', p.cash >= refactorCost(p))));
-  if ((S.phase === 'roll' || S.phase === 'post') && p.jail === null && !S.reiBought && p.cash >= reiBuyCost(p)) out.push(row(_tf(4209, "花 ${$0} 抽 re:Invent 卡", reiBuyCost(p)), btn(_t(3457, "抽卡"), 'buyReinvent')));
+  if ((S.phase === 'roll' || S.phase === 'post') && p.jail === null && !S.reiBought && reiLeft() && p.cash >= reiBuyCost(p)) out.push(row(_tf(4209, "花 ${$0} 抽 re:Invent 卡", reiBuyCost(p)), btn(_t(3457, "抽卡"), 'buyReinvent')));
   if ((S.phase === 'roll' || S.phase === 'post') && handOk(p)) out.push(row(_tf(5435, "手牌 {$0} 张：打出、卖掉，或者弃牌往前走 1–3 格{$1}", handOf(p).length, handWalked(p) ? _t(5436, "（弃牌走格子这回合已经用过）") : _t(5437, "（每回合一次）")), btn(_tf(5438, "手牌（{$0}）", handOf(p).length), 'reiHand')));
   if ((S.phase === 'roll' || S.phase === 'post') && incSendOk(p)) { const one = incSendCost(p), n = chFoes(p).length;
     const tip = w => _tf(4210, "什么时候能点：自己的回合里，掷骰子前后都行；每走一圈只能发一次（经过 Startup 扶持以后才能再发）。\n{$0}价钱是你抽 re:Invent 卡的 1.5 倍，跟着总资产涨；对方抽到的卡照常结算，能用 Enterprise Support 抵消。", w);
@@ -8498,7 +8503,7 @@ function plCard(p, mine, offSeats) {
   { const hand = handOf(p), seer = MP.role === 'client' ? p.id === mine : p.id === mine || (p.id === S.cur && !isAI(p.id) && !MP.isRemote(p.id));
     if (hand.length) res.push(ri(`${lb(_t(5439, "手牌"))} ${hand.length}`, seer && hand.every(id => REI[id]) ? _tf(5440, "没公开的 re:Invent 卡：{$0}。轮到自己时点「手牌」打出、卖掉或弃牌走 1–3 格", hand.map(id => REI[id].n).join(_t(349, "、"))) : _tf(5441, "没公开的 re:Invent 卡 {$0} 张：只有 {$1} 自己知道是什么", hand.length, p.name), '', 'hand')); }
   // 埋下的 Health 卡（engine/18-reinvent.js 的 S.traps）：大家都看得到埋了几张；埋在哪、是哪张只在主人自己的提示里写，看的人和手牌一样。联机时别人的那几条只有 by
-  { const tr = trapsOf(p), seer = MP.role ? p.id === mine : p.id === S.cur && !isAI(p.id);
+  { const tr = trapsOf(p), seer = MP.role === 'client' ? p.id === mine : p.id === mine || (p.id === S.cur && !isAI(p.id) && !MP.isRemote(p.id));
     if (tr.length) res.push(ri(`${lb(_t(5653, "埋卡"))} ${tr.length}`, seer && tr.every(t => SQ[t.sq] && INC[t.id]) ? tr.map(t => _tf(5656, "埋在 {$0}：{$1}", SQ[t.sq].n, INC[t.id].n)).join(_t(408, "；")) : _tf(5657, "埋了 {$0} 张 Health 卡：埋在哪、是哪张只有 {$1} 自己知道", tr.length, p.name), '', 'trap')); }
   const prog = archProg(p), done = prog.filter(x => x.done);
   // 收起的卡：保留卡、承诺折扣、生效的架构、支柱只写个数，说明在提示里
@@ -12041,7 +12046,7 @@ Object.assign(ACTS, {
   uiAction: (el, e, a) => { const f = UI_ACTS[a]; if (f) uiAction(f); else console.error('unknown uiAction', a); },
   backToSetup: () => backToSetup(), toHome: () => { location.href = homeUrl(); }, showReport: () => showReport(), endNow: () => endNow(),
   gallery: () => gallery(), maybeTour: (el, e, a) => maybeTour(a === 'true'), keysHelp: () => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' })),
-  toggleSfx: () => toggleSfx(), renameDialog: (el, e, a) => renameDialog(a), toggleBoss: () => toggleBoss(), toggleArchTip: () => toggleArchTip(), toggleAnim: () => toggleAnim(),
+  toggleSfx: () => toggleSfx(), renameDialog: (el, e, a) => { e.stopPropagation(); renameDialog(a); },   // 玩家卡上的 ✎ 在可折叠的那一行里：不顺带收起 / 展开 toggleBoss: () => toggleBoss(), toggleArchTip: () => toggleArchTip(), toggleAnim: () => toggleAnim(),
   quitGame: () => quitGame(), confirmNew: () => confirmNew(), langMenu: el => langMenu(el),
   // 灰按钮：有 data-arg 念它，没有就念 data-why
   toast: (el, e, a) => toast(a ?? el.dataset.why), dlcToast: (el, e, a) => toast((a ?? '') + el.title, 5000),   // data-arg 是前缀（「这局开了：」，跟着翻译串走）

@@ -4,7 +4,7 @@ import { UI } from '../core/02b-ui-port.js';
 import { IX, N, SQ, lvName } from '../rules/03-services.js';
 import { INC } from '../rules/04-roles-combos-cards.js';
 import { dlcOn } from '../rules/05-dlc.js';
-import { P, S, active, combosBrokenBy, cur, log, nm, ownedBy, sqn } from './07-state.js';
+import { P, S, active, combosBrokenBy, cur, inPlay, log, nm, ownedBy, sqn } from './07-state.js';
 import { netWorth } from './08c-costs.js';
 import { baseRent, forceDown, shownRent, upgradeInfo } from './09-rent.js';
 import { moveSteps } from './13-move.js';
@@ -53,7 +53,7 @@ export async function speedRoll(p, d) {
 }
 // 能打的服务：对手已上线的服务，不能连着两次打同一个人；轻 DDoS 还要求现在没 Impaired
 const ddosShield = o => active(o, IX.shield) ? 'Shield Advanced' : active(o, IX.cloudfront) ? 'CloudFront' : '';
-const ddosTargets = (p, light) => S.players.filter((o, _, a) => o.alive && o.id !== p.id && (o.id !== p.lastDdos || a.filter(q => q.alive && q.id !== p.id).length === 1)).flatMap(o => ownedBy(o).filter(i => active(o, i) && ['prop', 'util'].includes(SQ[i].t) && !(light && S.props[i].impaired)).map(i => ({ o, i })));
+const ddosTargets = (p, light) => S.players.filter((o, _, a) => inPlay(o) && o.id !== p.id && (o.id !== p.lastDdos || a.filter(q => inPlay(q) && q.id !== p.id).length === 1)).flatMap(o => ownedBy(o).filter(i => active(o, i) && ['prop', 'util'].includes(SQ[i].t) && !(light && S.props[i].impaired)).map(i => ({ o, i })));
 const freeUps = p => ownedBy(p).filter(i => upgradeInfo(p, i, true).ok);
 const pickOpp = (p, title, list) => UI.ask({ who: p.id, cls: 'pick', title, buttons: [...list.map(o => ({ label: _tf(3420, "{$0}（${$1}）", o.name, o.cash), value: o.id })), { label: _t(3005, "算了"), value: 'x' }] });
 // 选目标列表上的数和格子上标的一样（shownRent）。12 点版打下线：这一环没有备用服务顶上，整套架构就失效；
@@ -95,7 +95,7 @@ export let SPEED = __rv(() => ([
   { c: 3, n: _t(3457, "抽卡"), d: _t(3458, "免费抽一张 re:Invent 卡，掷骰子前后都能用（和花钱抽卡共用每回合一次，每局最多 2 次）"), ok: (p, ph) => (p.spd3n || 0) >= 2 ? _t(3459, "这局已经抽过 2 次了") : S.reiBought ? _t(3460, "这回合已经抽过卡") : p.jail !== null ? _t(3461, "在维护窗口里不能抽") : '', run: async p => { S.reiBought = true; p.spd3n = (p.spd3n || 0) + 1; speedSpend(p, 3, _tf(3462, "抽一张 re:Invent 卡（这局第 {$0} 次，最多 2 次）", p.spd3n)); await drawReinvent(p); } },
   { c: 4, n: _t(38, "故障转移"), d: _t(3463, "没做高可用、要被可用性事件打成 Impaired 时（AZ 断电、单点故障、Region 故障、流量暴增…），这次扛住"), react: _t(3464, "被可用性事件打中时自动问") },
   { c: 5, n: _t(3465, "混沌注入"), d: _t(3466, "逼一位对手抽一张 Health 事件卡（每回合最多发动一次攻击）"), ok: p => S.attackUsed ? _t(3467, "这回合已经攻击过了") : '', run: async p => {
-    const v = await pickOpp(p, _t(3468, "混沌注入：让谁抽一张 Health 事件卡？"), S.players.filter(o => o.alive && o.id !== p.id).sort((a, b) => netWorth(b) - netWorth(a)));
+    const v = await pickOpp(p, _t(3468, "混沌注入：让谁抽一张 Health 事件卡？"), S.players.filter(o => inPlay(o) && o.id !== p.id).sort((a, b) => netWorth(b) - netWorth(a)));
     if (v === 'x') return; const o = P(v);
     S.attackUsed = true; speedSpend(p, 5, _tf(3469, "对 {$0} 混沌注入，逼他抽一张 Health 事件卡", nm(o))); await drawIncident(o);
   } },

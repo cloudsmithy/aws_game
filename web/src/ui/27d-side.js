@@ -12,7 +12,7 @@ import { capUpTxt, lvUpTxt } from '../engine/11b-rent-info.js';
 import { jailMax, mspFee } from '../engine/13-move.js';
 import { landHere } from '../engine/15-land.js';
 import { refactorCost, rfJailTxt, rfJailed } from '../engine/17-health.js';
-import { TRAP_MAX, buryOk, handOf, handOk, handWalked, incSendCost, incSendOk, reiBuyCost, trapsOf } from '../engine/18-reinvent.js';
+import { TRAP_MAX, buryOk, handOf, handOk, handWalked, incSendCost, incSendOk, reiBuyCost, reiLeft, trapsOf } from '../engine/18-reinvent.js';
 import { canSkill, skillLine, skillMulTxt } from '../engine/21-skills.js';
 import { SPEED, SPEED_MAX } from '../engine/22-speed.js';
 import { CHA_COST, CHA_WIN, CH_COST, CH_WIN, canChallenge, canChallengeAll, chFoes, chaWait } from '../engine/25-trade.js';
@@ -125,7 +125,7 @@ export function playerBrief(p) {
   if (r.sk && !p.skillUsed) out.push(canSkill(p) ? row(_tf(4202, "专属技能「{$0}」可以发动了{$1}", r.sk.n, skillMulTxt(p)), btn(_t(4203, "发动"), 'useRoleSkill'), 'hot') : row(_tf(4204, "<span class=\"muted\">技能「{$0}」：总资产低于 ${$1} 时可用</span>", r.sk.n, skillLine(p))));
   if (dlcOn('speed')) { const n = SPEED.filter(x => !x.react && p.speed >= x.c && !x.ok(p, S.phase)).length; if (n) out.push(row(_tf(4205, "部署点数 {$0} 点，能发动 {$1} 个技能", p.speed, n), btn(_t(4206, "部署点数"), 'speedMenu'))); }
   if (F.debt() && p.techDebt > 0) out.push(row(_tf(4207, "技术债 {$0} 个，重构清 1 个要 ${$1}", p.techDebt, refactorCost(p)), btn(_t(4208, "清技术债"), 'refactorDebt', p.cash >= refactorCost(p))));
-  if ((S.phase === 'roll' || S.phase === 'post') && p.jail === null && !S.reiBought && p.cash >= reiBuyCost(p)) out.push(row(_tf(4209, "花 ${$0} 抽 re:Invent 卡", reiBuyCost(p)), btn(_t(3457, "抽卡"), 'buyReinvent')));
+  if ((S.phase === 'roll' || S.phase === 'post') && p.jail === null && !S.reiBought && reiLeft() && p.cash >= reiBuyCost(p)) out.push(row(_tf(4209, "花 ${$0} 抽 re:Invent 卡", reiBuyCost(p)), btn(_t(3457, "抽卡"), 'buyReinvent')));
   if ((S.phase === 'roll' || S.phase === 'post') && handOk(p)) out.push(row(_tf(5435, "手牌 {$0} 张：打出、卖掉，或者弃牌往前走 1–3 格{$1}", handOf(p).length, handWalked(p) ? _t(5436, "（弃牌走格子这回合已经用过）") : _t(5437, "（每回合一次）")), btn(_tf(5438, "手牌（{$0}）", handOf(p).length), 'reiHand')));
   if ((S.phase === 'roll' || S.phase === 'post') && incSendOk(p)) { const one = incSendCost(p), n = chFoes(p).length;
     const tip = w => _tf(4210, "什么时候能点：自己的回合里，掷骰子前后都行；每走一圈只能发一次（经过 Startup 扶持以后才能再发）。\n{$0}价钱是你抽 re:Invent 卡的 1.5 倍，跟着总资产涨；对方抽到的卡照常结算，能用 Enterprise Support 抵消。", w);
@@ -292,7 +292,7 @@ function plCard(p, mine, offSeats) {
   { const hand = handOf(p), seer = MP.role === 'client' ? p.id === mine : p.id === mine || (p.id === S.cur && !isAI(p.id) && !MP.isRemote(p.id));
     if (hand.length) res.push(ri(`${lb(_t(5439, "手牌"))} ${hand.length}`, seer && hand.every(id => REI[id]) ? _tf(5440, "没公开的 re:Invent 卡：{$0}。轮到自己时点「手牌」打出、卖掉或弃牌走 1–3 格", hand.map(id => REI[id].n).join(_t(349, "、"))) : _tf(5441, "没公开的 re:Invent 卡 {$0} 张：只有 {$1} 自己知道是什么", hand.length, p.name), '', 'hand')); }
   // 埋下的 Health 卡（engine/18-reinvent.js 的 S.traps）：大家都看得到埋了几张；埋在哪、是哪张只在主人自己的提示里写，看的人和手牌一样。联机时别人的那几条只有 by
-  { const tr = trapsOf(p), seer = MP.role ? p.id === mine : p.id === S.cur && !isAI(p.id);
+  { const tr = trapsOf(p), seer = MP.role === 'client' ? p.id === mine : p.id === mine || (p.id === S.cur && !isAI(p.id) && !MP.isRemote(p.id));
     if (tr.length) res.push(ri(`${lb(_t(5653, "埋卡"))} ${tr.length}`, seer && tr.every(t => SQ[t.sq] && INC[t.id]) ? tr.map(t => _tf(5656, "埋在 {$0}：{$1}", SQ[t.sq].n, INC[t.id].n)).join(_t(408, "；")) : _tf(5657, "埋了 {$0} 张 Health 卡：埋在哪、是哪张只有 {$1} 自己知道", tr.length, p.name), '', 'trap')); }
   const prog = archProg(p), done = prog.filter(x => x.done);
   // 收起的卡：保留卡、承诺折扣、生效的架构、支柱只写个数，说明在提示里

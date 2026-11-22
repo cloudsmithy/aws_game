@@ -62,6 +62,8 @@ export const logRow = l => { const t = logTime(l), b = clean(logBody(l)); return
 // 旧存档、演示局里的日志名字还是棋子原色，显示时换成深一档的
 export const logBody = l => String(l).replace(/<time data-t="\d+"><\/time>/, '').replace(/color:(#[0-9a-f]{6})/g, (m, c) => 'color:' + playerInk(c));
 export const owns = (p, i) => S.props[i] && S.props[i].owner === p.id;
+// 在局里、能被别人的卡牌技能指到：中途加入的人（joinRound，engine/14-turn.js 的 joinPlayer）排到下一轮才开始走，这一轮里还不算，免得没走过一步就被发卡、出题、收订阅费
+export const inPlay = q => !!q && q.alive && !(q.joinRound > S.round);
 export const active = (p, i) => owns(p, i) && !S.props[i].offline && S.props[i].ddos == null;
 export const ownedBy = p => OWNABLE.filter(i => owns(p, i));
 // 娱乐模式的盲盒格买不到，整组只看买得到的那几块（数据库组少 DMS、安全组少 GuardDuty/Inspector/KMS），不然这两组永远凑不齐；

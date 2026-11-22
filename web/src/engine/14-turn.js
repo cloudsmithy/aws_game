@@ -5,7 +5,7 @@ import { BAL, OFFLINE_MIN, SQ } from '../rules/03-services.js';
 import { CATS, ROLES, roleOf } from '../rules/04-roles-combos-cards.js';
 import { dlcOn } from '../rules/05-dlc.js';
 import { askQuestion, pickQuestion, qPoolS } from '../rules/06-qbank.js';
-import { P, S, availCard, cur, log, nm, ownedBy, sqn, winTimed } from './07-state.js';
+import { P, S, availCard, cur, inPlay, log, nm, ownedBy, sqn, winTimed } from './07-state.js';
 import { GAIN0, credit, pay } from './08-money.js';
 import { netWorth } from './08c-costs.js';
 import { bringOnline, canOnline, downTick, offRounds, turnKey } from './09-rent.js';
@@ -127,7 +127,8 @@ export const makePlayer = (id, name, r, cash, reseller = false) => ({ id, name: 
 export function joinPlayer(name) {
   const id = S.players.length, alive = S.players.filter(q => q.alive), cust = ROLES.filter(r => !r.rs), used = new Set(S.players.map(q => q.role));
   const free = cust.filter(r => !used.has(r.id)), pool = free.length ? free : cust, r = pool[rnd(pool.length)];
-  const cash = Math.round(alive.reduce((a, q) => a + netWorth(q), 0) / Math.max(1, alive.length) / 10) * 10;
+  const base = alive.some(q => !q.reseller) ? alive.filter(q => !q.reseller) : alive;   // 代理商开局资金是客户的总和，算进来会把平均数抬得很高：只按客户算
+  const cash = Math.round(base.reduce((a, q) => a + netWorth(q), 0) / Math.max(1, base.length) / 10) * 10;
   const p = makePlayer(id, name, r, cash); p.joinRound = S.round + 1;
   S.players.push(p);
   Object.assign(ST(p), { gain: GAIN0(), dice: { n: 0, pips: 0, dbl: 0 }, low: { cash, r: p.joinRound } });
@@ -141,7 +142,7 @@ async function startTurn() {
   downTick(p);   // 强制下线到期恢复（DDoS、Health 卡），不管开没开高速部署
   if (dlcOn('speed')) speedTurnStart(p);
   if (p.rentBoost && --p.rentBoostTurns <= 0) { p.rentBoost = 0; log(_tf(2932, "{$0} 的「{$1}」结束了", nm(p), roleOf(p).sk.n)); }
-  if (p.subsTurns > 0) { p.subsTurns--; S.players.filter(o => o.alive && o.id !== p.id).forEach(o => pay(o, p, p.subsAmt, 'card')); log(_tf(2933, "{$0} 的「{$1}」：每位对手付订阅费 ${$2}（还剩 {$3} 次）", nm(p), roleOf(p).sk.n, p.subsAmt, p.subsTurns)); await resolveDebts(); if (checkOver()) return; }
+  if (p.subsTurns > 0) { p.subsTurns--; S.players.filter(o => inPlay(o) && o.id !== p.id).forEach(o => pay(o, p, p.subsAmt, 'card')); log(_tf(2933, "{$0} 的「{$1}」：每位对手付订阅费 ${$2}（还剩 {$3} 次）", nm(p), roleOf(p).sk.n, p.subsAmt, p.subsTurns)); await resolveDebts(); if (checkOver()) return; }
   ownedBy(p).forEach(i => { if (S.props[i].impaired) { S.props[i].impaired = false; log(_tf(2934, "{$0} 恢复正常", sqn(i))); } });
   for (const i of ownedBy(p)) {
     const pr = S.props[i]; if (!pr.offline || pr.offTurn === turnKey()) continue;

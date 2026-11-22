@@ -5,7 +5,7 @@ import { GRP, SQ } from '../rules/03-services.js';
 import { CARDN, CATS } from '../rules/04-roles-combos-cards.js';
 import { dlcOn } from '../rules/05-dlc.js';
 import { askQuestion, pickQuestion, qPoolS } from '../rules/06-qbank.js';
-import { F, P, S, cur, log, nm, ownedBy, ownsGroup, sqn } from './07-state.js';
+import { F, P, S, cur, inPlay, log, nm, ownedBy, ownsGroup, sqn } from './07-state.js';
 import { pay } from './08-money.js';
 import { RI_OK, RI_PLANS, SP_PLANS, commitsOf, riActive, runAfterRI, runCost, spActive, spScope } from './08c-costs.js';
 import { buyPaid, handOver, turnKey } from './09-rent.js';
@@ -18,11 +18,11 @@ import { MP } from '../net/40-host-sync.js';
 // ================= 交易 =================
 // 出题挑战：花 $100 从题库给一位对手出题，答对他拿走这 $100，答错他赔你 $200。11-08 起每局只能用一次（p.chUsed）
 export const CH_COST = 100, CH_WIN = 200;
-export const canChallenge = p => !!p && p.alive && p.chTurn !== turnKey() && !p.chUsed && p.cash >= CH_COST && S.players.some(o => o.alive && o.id !== p.id);
+export const canChallenge = p => !!p && p.alive && p.chTurn !== turnKey() && !p.chUsed && p.cash >= CH_COST && S.players.some(o => inPlay(o) && o.id !== p.id);
 // 考全场：每 3 圈一次（CHA_LAPS，按这位玩家自己经过 Startup 扶持的次数 p.laps 算，开局就能用一次，用过记下 p.chaLap）；同一回合和考一个人只能发动一个（共用 p.chTurn）。每位对手各出一道（热座时后答的人看不到前一个人的题和答案），每人 $50：答对的拿走你 $50，答错的赔你 $100。至少两位对手才有
 export const CHA_COST = 50, CHA_WIN = 100, CHA_LAPS = 3;
 export const chaWait = p => Math.max(0, CHA_LAPS - ((p.laps || 0) - (p.chaLap ?? -CHA_LAPS)));   // 还要再经过几次 Startup 扶持才能考全场
-export const chFoes = p => S.players.filter(o => o.alive && o.id !== p.id);
+export const chFoes = p => S.players.filter(o => inPlay(o) && o.id !== p.id);
 export const canChallengeAll = p => !!p && p.alive && p.chTurn !== turnKey() && !chaWait(p) && chFoes(p).length >= 2 && p.cash >= CHA_COST * chFoes(p).length;
 export async function quizAll() {
   const p = cur(); if (!canChallengeAll(p)) return void UI.toast(!p ? '' : p.chTurn === turnKey() ? _t(3566, "这回合已经出过题了") : chaWait(p) ? _tf(3567, "考全场每 3 圈一次：还要再经过 {$0} 次 Startup 扶持", chaWait(p)) : _tf(2981, "现金不够 ${$0}", CHA_COST * chFoes(p).length));
@@ -42,7 +42,7 @@ export async function quizAll() {
 }
 export async function quizChallenge() {
   const p = cur(); if (!canChallenge(p)) return void UI.toast(!p ? '' : p.chTurn === turnKey() ? _t(3566, "这回合已经出过题了") : p.chUsed ? _t(3572, "考一个人每局只能用一次，已经用过了") : _tf(2981, "现金不够 ${$0}", CH_COST));
-  const others = S.players.filter(o => o.alive && o.id !== p.id);
+  const others = S.players.filter(o => inPlay(o) && o.id !== p.id);
   const t = others.length === 1 ? others[0] : await pickPartner(_tf(3573, "出题考谁？（花 ${$0}：答对他拿走这 ${$1}，答错他赔你 ${$2}）", CH_COST, CH_COST, CH_WIN));
   if (!t) return;
   p.chTurn = turnKey(); p.chUsed = true;
