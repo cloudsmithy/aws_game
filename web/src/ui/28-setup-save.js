@@ -1,9 +1,9 @@
-import { __rv, _t, _tf } from '../core/01-i18n-runtime.js';
-import { $, BOT, COLORS, DEMO, KEY, MY_REV, PAWN, REV_KEY, SAVE_FAIL, SIM, STALE, __set_MY_REV, __set_SAVE_FAIL, __set_STALE, awsImg, esc, revNow, rnd, shuffle, unesc } from '../core/02-util.js';
+import { LANG, __rv, _t, _tf } from '../core/01-i18n-runtime.js';
+import { $, BOT, COLORS, DEMO, KEY, MY_REV, PAWN, REV_KEY, SAVE_FAIL, SIM, STALE, __set_MY_REV, __set_SAVE_FAIL, __set_STALE, awsImg, esc, homeUrl, revNow, rnd, shuffle, unesc } from '../core/02-util.js';
 import { BAL, IX, MAX_ROUNDS, OWNABLE } from '../rules/03-services.js';
 import { INC, REI, ROLES, roleOf, rsShort } from '../rules/04-roles-combos-cards.js';
 import { DLC, dlcOn } from '../rules/05-dlc.js';
-import { F, S, __set_S, cur, debtOf, isWild, log, nm, resetProp, winParts, winTimed, winWA } from '../engine/07-state.js';
+import { F, MAX_PLAYERS, S, __set_S, cur, debtOf, isWild, log, nm, resetProp, winParts, winTimed, winWA } from '../engine/07-state.js';
 import { GAIN0 } from '../engine/08-money.js';
 import { PHONE_MQ, TABP_MQ, ask, bgInert, focusBack, info, kbdFocus, modal, modalBlocks, viewOpen } from './10-modal.js';
 import { endTurn } from '../engine/14-turn.js';
@@ -20,8 +20,8 @@ import { BOTOUT } from '../dev/29-bot.js';
 import { sfx } from './32-sfx.js';
 import { FX } from './33-fx3d.js';
 import { dealCast } from './34-cast.js';
-import { applyBal, hellCfg, isHell, isParty } from '../rules/35-modes.js';
-import { __set_aiTimer, aiTimer, isAI } from '../engine/36-ai.js';
+import { applyBal, hellCfg, isHell, isParty, rollRoundMul } from '../rules/35-modes.js';
+import { __set_AI_PAUSE, __set_aiTimer, aiTimer, isAI } from '../engine/36-ai.js';
 import { MP } from '../net/40-host-sync.js';
 import { mpUI } from '../net/42-setup.js';
 export async function renameDialog() {
@@ -63,12 +63,32 @@ export function save() {
 export function staleTab() {
   __set_STALE(true); clearTimeout(aiTimer); __set_aiTimer(0);
   if (!$('#modal').hidden && $('#modal .box.stale')) return;
-  ask({ local: true, cls: 'stale', title: _t(4632, "这局在别处接着打了"), html: _t(4633, "<p>另一个标签页（或者另一份 index.html）接着打了这一局，或者开了新局。这里不再自动保存，免得把那边的进度盖掉。</p><p>回开局页后点「继续上一局」，接着打的是存档里最新的那一局。</p>"), buttons: [{ label: _t(3903, "回开局页"), value: true, cls: 'pri' }] }).then(() => { location.href = location.pathname; });
+  ask({ local: true, cls: 'stale', title: _t(4632, "这局在别处接着打了"), html: _t(4633, "<p>另一个标签页（或者另一份 index.html）接着打了这一局，或者开了新局。这里不再自动保存，免得把那边的进度盖掉。</p><p>回开局页后点「继续上一局」，接着打的是存档里最新的那一局。</p>"), buttons: [{ label: _t(3903, "回开局页"), value: true, cls: 'pri' }] }).then(() => { location.href = homeUrl(); });
 }
 export const npVal = () => +(document.querySelector('input[name=np]:checked') || { value: 3 }).value;
 // 开局时实际用的轮数上限和限时分钟（输入框里的数夹到允许范围）：开局页摘要也按这个写，和进了游戏看到的一致
-const setupRL = () => Math.min(MAX_ROUNDS, Math.max(5, Math.round(+$('#rounds').value) || 15)), setupMin = () => Math.max(5, +$('#minutes').value || 90);
+const setupRL = () => Math.min(MAX_ROUNDS, Math.max(5, Math.round(+$('#rounds').value) || 15)), setupMin = () => Math.min(600, Math.max(5, +$('#minutes').value || 90));   // 600 和输入框的 max 一致
+// 多人（超过 4 人）：人数默认只有 2–4 人三格；打开开关才多出 5…MAX_PLAYERS 人（engine/07-state.js）。平衡和界面都按 2–4 人调的，开关旁边一直写着不推荐。
+// 开关和多出来的格子由这里画（文字要跟语言走）：开关所在的 #npMore 换了语言才重画，不然点开关时焦点会被重画丢掉。
+// 关掉时选着 5 人以上的退回 4 人；房主大厅里已经坐了 4 位以上远端玩家时关不掉（关了就有人没座位）
+const npManyOn = () => !!($('#npMany') || {}).checked;
+// 联机房间最多收几位（含房主）：没开「多人」还是 4 人，开了到 MAX_PLAYERS
+const npMax = () => npManyOn() ? MAX_PLAYERS : 4;
+const npMoreTile = k => `<label class="tile more"><input type="radio" name="np" value="${k}" data-act-change="renderNames"><b>${_tf(5395, "{$0} 人", k)}</b></label>`;
+function renderNpMore() {
+  const box = $('#npMore'), tiles = document.querySelector('.tiles.np'); if (!box || !tiles) return;
+  const lang = box.dataset.lang !== LANG;
+  if (lang) { const on = npManyOn(); box.dataset.lang = LANG; box.innerHTML = `<label class="switch" title="${_tf(5396, "人数可以选到 {$0} 人。规则、平衡和界面都是按 2–4 人设计的，人多了每人等得久、棋盘挤、侧栏要滚动", MAX_PLAYERS)}"><input type="checkbox" id="npMany" data-act-change="renderNames"${on ? ' checked' : ''}><span class="tg"></span><b>${_t(5397, "多人（超过 4 人）")}</b></label><span class="npwarn">${_t(5398, "不推荐：平衡和界面都按 2–4 人设计，尽量不开")}</span>`; }
+  const mpNeed = MP.role === 'host' && !(S && S.players) && Object.keys(MP.seats).some(k => +k >= 4);
+  if (mpNeed && !npManyOn()) $('#npMany').checked = true;
+  const on = npManyOn(), more = tiles.querySelectorAll('.tile.more');
+  if (on && (!more.length || lang)) { const c = (tiles.querySelector('input[name=np]:checked') || {}).value; more.forEach(x => x.remove()); tiles.insertAdjacentHTML('beforeend', Array.from({ length: MAX_PLAYERS - 4 }, (_, k) => npMoreTile(k + 5)).join('')); const el = c && tiles.querySelector(`input[name=np][value="${c}"]`); if (el) el.checked = true; }
+  else if (!on && more.length) { const c = tiles.querySelector('input[name=np]:checked'); more.forEach(x => x.remove()); if (!c || +c.value > 4) tiles.querySelector('input[name=np][value="4"]').checked = true; }
+  tiles.classList.toggle('more', on); box.classList.toggle('on', on);
+  MP.seatMax = npMax();   // 房主收几位远端玩家跟着开关走（net/40d-host-msgs.js 的 admit）
+}
 export function renderNames() {
+  renderNpMore();
   const n = npVal(), old = [...document.querySelectorAll('#names input[id^=nm]')].map(x => x.value), oldAi = [...document.querySelectorAll('#names input[id^=ai]')].map(x => x.checked), oldRs = [...document.querySelectorAll('#names input[id^=rs]')].map(x => x.checked);
   $('#names').innerHTML = Array.from({ length: n }, (_, k) => `<div class="nrow">${PAWN(COLORS[k])}<input id="nm${k}" placeholder="${_tf(4634, "玩家 {$0}", k + 1)}" value="${esc(old[k] || '')}" maxlength="12" aria-label="${_tf(4635, "玩家 {$0} 名字", k + 1)}"><label class="aiopt" title="${_t(4636, "这个座位交给电脑玩")}"><input type="checkbox" id="ai${k}" ${oldAi[k] ? 'checked' : ''}>${_t(4278, "电脑")}</label><label class="aiopt rsopt" title="${_t(4637, "这个座位当代理商（代理商模式，最多一半）")}" hidden><input type="checkbox" id="rs${k}" ${oldRs[k] ? 'checked' : ''}>${_t(4638, "代理商")}</label></div>`).join('');
   setupSum();
@@ -79,6 +99,9 @@ export function newGame(cfg) {
   if ((cfg.dlc || []).includes('reseller') && !(cfg.rs || []).some(Boolean)) cfg.dlc = cfg.dlc.filter(k => k !== 'reseller');
   const rsOn = (cfg.dlc || []).includes('reseller'), isRsSeat = k => rsOn && !!(cfg.rs || [])[k];
   const custRoles = shuffle(ROLES.filter(r => !r.rs)), rsRoles = shuffle(ROLES.filter(r => r.rs));
+  // 多人局角色牌不够分（客户角色 12 张、代理商 3 张）：一副发完再洗一副接着发，先把每种都发一遍才会重复。
+  // 4 人以内用不到这一步，洗牌次数和以前一样，同一个种子开出来的局不变
+  const deal = (pool, rs) => pool.shift() || (pool.push(...shuffle(ROLES.filter(r => !r.rs === !rs))), pool.shift());
   if (cfg.anim == null) { try { cfg.anim = localStorage.getItem('amono-anim') || ''; } catch (e) { cfg.anim = ''; } }   // 动画速度沿用上一局的选择
   __set_S({
     cfg, layoutVer: 2, players: [], props: {}, pot: 0, cur: 0, round: 1, phase: 'roll', doubles: 0, again: false,
@@ -87,12 +110,13 @@ export function newGame(cfg) {
     rei: shuffle(Array.from({ length: REI.length - 1 }, (_, k) => k + 1).filter(k => !REI[k].dlc || (cfg.dlc || []).includes(REI[k].dlc))), reiDisc: [],
     endAt: (cfg.timed || cfg.win === 'timed') ? Date.now() + cfg.minutes * 60000 : null,
   });
+  __set_AI_PAUSE(false);   // 联机「再来一局」不刷新页面：上一局点的「暂停电脑」不带进新局
   applyBal();
   OWNABLE.forEach(resetProp);
   cfg.names.forEach((name, k) => {
-    const r = isRsSeat(k) ? rsRoles.shift() : custRoles.shift();
+    const r = isRsSeat(k) ? deal(rsRoles, true) : deal(custRoles, false);
     S.players.push({ id: k, name: esc(name), color: COLORS[k], role: r.id, cash: roleCash(r, cfg), startCash: roleCash(r, cfg), pos: 0, jail: null, jailCat: 'sec', skip: 0, debt: [], techDebt: 0, coe: [], drill: [], cards: [], alive: true, speed: 0, reseller: isRsSeat(k), rsRate: 0.9 });
-    if (r.id === 'unicorn' && cfg.mode !== 'hell') S.props[IX.route53].owner = k;
+    if (r.id === 'unicorn' && cfg.mode !== 'hell' && S.props[IX.route53].owner == null) { S.props[IX.route53].owner = k; S.props[IX.route53].paid = 0; }   // 送的，没花钱：卖回、下线、Trusted Advisor 退款都按 $0 算，不按标价
   });
   // 代理商的起始资金 = 所有客户起始资金的总和（代理商只靠架构收过路费、地还会被客户买走，要本钱囤货）；娱乐模式只打 10 轮按估值排名，不加。
   // 有轮数上限（开局页默认 15 轮）时打满就按估值排名，囤货的本钱本身算进估值：给足总和（4 人局约 $4800）代理商 15 轮局里 86% 拿第一，
@@ -104,6 +128,7 @@ export function newGame(cfg) {
   if (dlcOn('speed')) speedTurnStart(S.players[0]);   // 开局直接是 1 号位的回合，没走 startTurn：部署点数在这里补上 +1
   log(_tf(4639, "🎬 游戏开始：{$0}", S.players.map(p => _tf(3245, "{$0}（{$1}）", nm(p), roleOf(p).n)).join(_t(349, "、"))));
   if (S.players.some(q => q.seatBonus)) log(_tf(4640, "后走补贴：{$0}（1 号位先走，后面的人开局多领一点）", S.players.filter(q => q.seatBonus).map(q => `${nm(q)} +$${q.seatBonus}`).join(_t(349, "、"))));
+  rollRoundMul();   // 「每轮随机」的卡牌倍率：第 1 轮也要掷（之后每轮在 nextTurn 里掷）；不是随机倍率时什么都不做
   // 战报新指标：开局时间、第 1 轮开始时的估值；最低现金从开局资金（含后走补贴）算起
   S.t0 = Date.now(); S.valHist = []; valSnap();
   S.cast = dealCast(S.players.length);   // 动画里的人物：这一局谁是韩叔、虫虫、Damo、Yuki，开局随机分，整局不变
@@ -241,7 +266,9 @@ export function playerGallery() {
 async function roleDraft() {
   const used = new Set(), pools = { c: shuffle(ROLES.filter(r => !r.rs)), r: shuffle(ROLES.filter(r => r.rs)) };
   for (const p of S.players) {
-    const opts = (p.reseller ? pools.r : pools.c).filter(r => !used.has(r.id)).slice(0, 3);
+    const pool = p.reseller ? pools.r : pools.c;
+    let opts = pool.filter(r => !used.has(r.id)).slice(0, 3);
+    if (!opts.length) opts = shuffle([...pool]).slice(0, 3);   // 多人局这一类角色都被挑走了：和随机分一样允许重复，从全部里看 3 张
     let pick = opts[0];
     if (opts.length > 1 && !isAI(p.id) && !BOT && !SIM) {
       const v = await ask({ who: p.id, noAI: true, cls: 'wide', title: _tf(4699, "{$0} 挑一个角色", p.name), html: _tf(4700, "<p class=\"muted\">三张里挑一张，挑走的别人就拿不到了。</p><div class=\"rcards\">{$0}</div>", opts.map(r => roleCardMini(p, r)).join('')), buttons: opts.map((r, k) => ({ label: _tf(4701, "选「{$0}」", r.n), value: k, cls: k === 0 ? 'pri' : '' })) });
@@ -257,7 +284,7 @@ async function roleDraft() {
 function rolesRecalc() {
   const cfg = S.cfg;
   S.players.forEach(q => { q.cash = q.startCash = roleCash(roleOf(q), cfg); });
-  if (S.round === 1) { if (S.props[IX.route53].owner != null && !S.props[IX.route53].level) S.props[IX.route53].owner = null; const u = S.players.find(q => q.role === 'unicorn'); if (u && cfg.mode !== 'hell') S.props[IX.route53].owner = u.id; }
+  if (S.round === 1) { if (S.props[IX.route53].owner != null && !S.props[IX.route53].level) { S.props[IX.route53].owner = null; delete S.props[IX.route53].paid; } const u = S.players.find(q => q.role === 'unicorn'); if (u && cfg.mode !== 'hell') { S.props[IX.route53].owner = u.id; S.props[IX.route53].paid = 0; } }
   if (BAL.rsCashSum && cfg.mode !== 'party') { const cs = S.players.filter(q => !q.reseller), tot = cs.reduce((a, q) => a + q.startCash, 0); S.players.filter(q => q.reseller).forEach(q => { q.cash = q.startCash = rsShort(cfg) ? q.startCash + (BAL.rsLimitPer || 0) * cs.length : tot; }); }
   S.players.forEach(q => { q.cash += q.seatBonus || 0; Object.assign(ST(q), { low: { cash: q.cash, r: 1 } }); });
   S.valHist = []; valSnap();
@@ -292,6 +319,7 @@ export async function resumeGame() {
   S.players.forEach(q => { const t = ST(q); t.gain = t.gain || GAIN0(); t.dice = t.dice || { n: 0, pips: 0, dbl: 0 }; t.low = t.low || { cash: q.cash - debtOf(q), r: S.round }; });
   if (S.t0 && S.tSave) S.tOff = (S.tOff || 0) + Math.max(0, Date.now() - S.tSave);   // 上次存档到现在页面是关着的，不算对局用时
   delete S.edp; S.moving = null;
+  S.turnStartAt = Date.now();   // 存档里是当初轮到这一位的时刻：不重置的话，联机玩家刚坐回来房主就看到「半天没动，我来替他操作」
   // 只在结算中途才有的状态：卡牌倍率、正在记录的格子。读到了说明是老版本在结算中途存的档，清掉，不然之后卖服务、去掉升级也按卡牌倍率给钱
   delete S.cardMul; S.histSq = null;
   try { const a = localStorage.getItem('amono-anim'); if (a != null) S.cfg.anim = a; } catch (e) { }   // 动画速度跟这台设备最后一次的选择
@@ -324,13 +352,14 @@ export async function endNow() {
 }
 export async function quitGame() {
   if (!$('#modal').hidden && !$('#modal').classList.contains('min')) return;
+  if (MP.role === 'client') return void MP.leave();   // 远端不存档（save 对远端什么都不做），不能说「已经自动保存」；走「离开房间」，房主那边也知道他走了
   if (S && S.over) return void backToSetup();   // 结束时存档已经删了（gameOver），不能再说「已经自动保存」：和「再来一局」一样直接回开局页
   if (S && !['roll', 'post', 'over'].includes(S.phase) && !S.over) return void toast(_t(4723, "结算中，等这一步做完再退出"));
   if (modalBlocks()) return;   // 收起的查资料窗替玩家关掉再问；先看结算中，收起的是流程窗时提示「结算中」更准
   // 存档写不进去（SAVE_FAIL）时不能再说「已经自动保存」：整段换掉，限时那句（暗示回来还能接着计）也不显示；主按钮换成「取消」
   const ok = await ask({ local: true, cancelable: true, title: _t(4724, "退出这局？"), html: SAVE_FAIL ? _t(4725, "<p>浏览器存储写不进去（存满了或被禁用），这局最近的进度没存上。退出以后回不到现在这一步。</p>") : _tf(4727, "<p>对局已经自动保存。回到开局页后，点「继续上一局」就能接着玩。</p>{$0}", S && S.endAt && !S.over ? _tf(4726, "<p>限时停在 {$0}，回来接着计。</p>", fmtTime(S.endAt - Date.now())) : ''), buttons: SAVE_FAIL ? [{ label: _t(4728, "退出"), value: true, cls: 'danger' }, { label: _t(2465, "取消"), value: false, cls: 'pri' }] : [{ label: _t(4728, "退出"), value: true, cls: 'pri' }, { label: _t(2465, "取消"), value: false }] });
   // 主动退出算暂停：记下还剩多少时间，「继续上一局」时从这里接着计。意外刷新、直接关页面没走这里，照旧按真实时间算
-  if (ok) { if (S && S.endAt && !S.over) S.leftMs = Math.max(0, S.endAt - Date.now()); save(); location.href = location.pathname; }
+  if (ok) { if (S && S.endAt && !S.over) S.leftMs = Math.max(0, S.endAt - Date.now()); save(); location.href = homeUrl(); }
 }
 export function backToSetup() { if (!STALE && revNow() === MY_REV) { try { localStorage.removeItem(KEY); } catch (e) { } } againGo(); }   // 存档被别的页面接手了就不删，那是别人还在打的局
 // 「再来一局」「新游戏」沿用这一局的开局设置：开局时记下开局页表单的原始值（setupSave），回开局页时填回去（setupRestore）。
@@ -351,6 +380,7 @@ export function setupRestore() {
   if (!v || typeof v !== 'object') return;
   const fire = el => el.dispatchEvent(new Event('change', { bubbles: true }));
   const radio = (name, x) => { const el = [...document.querySelectorAll(`input[name=${name}]`)].find(r => r.value === String(x)); if (el && !el.checked) { el.checked = true; fire(el); } return !!el; };
+  if (+v.np > 4 && $('#npMany') && !npManyOn()) { $('#npMany').checked = true; renderNames(); }   // 上一局是多人局：先打开「多人」，5 人以上的格子才有
   radio('np', v.np); radio('diff', v.diff);
   if (v.diff !== 'hell' && v.cmul && $('#cmul') && [...$('#cmul').options].some(o => o.value === String(v.cmul))) { $('#cmul').value = String(v.cmul); fire($('#cmul')); }   // 地狱模式固定 2 倍、这一项藏着
   const dlc = Array.isArray(v.dlc) ? v.dlc : [];
@@ -370,9 +400,7 @@ export function setupRestore() {
 export function againGo() {
   if (MP.role === 'host' && MP.peer && !MP.peer.destroyed) return void MP.again();
   try { sessionStorage.setItem('amono-again', '1'); } catch (e) { }
-  const q = new URLSearchParams(location.search), keep = new URLSearchParams();
-  ['peerhost', 'peerport', 'peerpath'].forEach(k => { if (q.get(k)) keep.set(k, q.get(k)); });
-  location.href = location.pathname + (String(keep) ? '?' + keep : '');
+  location.href = homeUrl();
 }
 // 动画速度：「快」把骰子、走棋、飞行、User Group 的过场按同一比例缩短，画面不变。记在 S.cfg 里，联机时只有房主能改、随状态同步，
 // 远端重播骰子也按同一档，两边不会一边还在转、一边棋子已经走了。下一局沿用这次的选择
@@ -426,7 +454,7 @@ export function setupSum() {
   // 学习模式开局时才自动补云从业者题库、勾了题库 DLC 开局时才自动打开答题（startFromSetup），摘要提前照实写出来
   const study = !!diff && diff.value === 'study', qOn = [...document.querySelectorAll('#dlcTiles input:checked')].some(x => DLC[x.value] && DLC[x.value].quiz);
   const win = [$('#winWA').checked && 'Well-Architected', study ? _t(5149, "不限轮数") : $('#winRounds').checked ? _tf(5150, "{$0} 轮", setupRL()) : _tf(5151, "最多 {$0} 轮", MAX_ROUNDS), $('#winTimed').checked && _tf(3773, "{$0} 分钟", setupMin())].filter(Boolean);
-  $('#setupSum').innerHTML = `${_tf(5157, "<b>{$0} 人 · {$1}</b>", npVal(), diff ? diff.parentElement.querySelector('b').textContent : '')}<br>${win.length ? win.join(' / ') : _t(5152, "只看谁没破产")}${nDlc ? _tf(5153, " · {$0} 个 DLC", nDlc) : ''}${rsOn && !rsSeat ? _t(5154, " · 代理商模式没选座位，不生效") : ''}${study && !qOn ? _t(5155, " · 云从业者题库") : ''}${study || qOn || $('#learn').checked ? _t(5156, " · 答题") : ''}`;
+  $('#setupSum').innerHTML = `${_tf(5157, "<b>{$0} 人 · {$1}</b>", npVal(), diff ? diff.parentElement.querySelector('b').textContent : '')}${npVal() > 4 ? _t(5399, "<span class=\"warn\">（超过 4 人，不推荐）</span>") : ''}<br>${win.length ? win.join(' / ') : _t(5152, "只看谁没破产")}${nDlc ? _tf(5153, " · {$0} 个 DLC", nDlc) : ''}${rsOn && !rsSeat ? _t(5154, " · 代理商模式没选座位，不生效") : ''}${study && !qOn ? _t(5155, " · 云从业者题库") : ''}${study || qOn || $('#learn').checked ? _t(5156, " · 答题") : ''}`;
 }
 // （从 core/43-boot.js 挪来：setupSum 要用；分页的按钮和事件仍在启动代码里画、绑）
 // 11-08 DLC 分四页：玩法拓展、题库、代理商模式、技能包。没显示的那页照样在表单里，勾了的数写在标签上

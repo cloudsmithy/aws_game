@@ -312,11 +312,11 @@ Object.assign(FX, {
       const Hs = Math.max(80, Math.min(150, cell0 * 1.5)), k1 = Hs * u / 1.9, R = Hs * 0.95 * u;
       // User Group 在角上：一圈人往棋盘里面挪，别被屏幕边切掉
       const c = this.world(Math.max(Hs * 1.9, Math.min(innerWidth - Hs * 1.9, cr.x)), Math.max(Hs * 1.75, Math.min(innerHeight - Hs * 0.5, cr.y + cr.h * 0.15)));
-      const seat = Math.max(0, COLORS.indexOf(p.color)), others = [0, 1, 2, 3].filter(k => k !== seat), crew = [seat, ...others];
+      const seat = Math.max(0, COLORS.indexOf(p.color)), others = [0, 1, 2, 3].filter(k => k !== seat).slice(0, 3), crew = [seat, ...others];
       // 四个人站成一道弧：主角在中间偏前、个子大一点，三个伙伴在两边（x、y 是法阵半径的倍数，最后是大小）
       // 立牌比原来的几何体小人宽，往两边拉开一点
       const spots = [[-0.32, -0.1, 1], [-1.16, 0.12, 0.82], [0.47, 0.02, 0.86], [1.24, 0.14, 0.82]];
-      const mc = this.magic(c.x, c.y, R, 0x9fd0ff), fx = [mc.g], conf = [...COLORS.map(x => new THREE.Color(x).getHex()), 0xffd27a, 0xffffff];
+      const mc = this.magic(c.x, c.y, R, 0x9fd0ff), fx = [mc.g], conf = [...S.players.map(q => new THREE.Color(q.color).getHex()), 0xffd27a, 0xffffff];
       const cs = crew.map((k, n) => { const ch = this.chibi(k), H = ch.holder; this.scene.add(H); H.position.set(c.x + spots[n][0] * R, c.y + spots[n][1] * R, 0.3 - n * 0.02); H.rotation.set(0, 0, 0); ch.shuffle(); ch.frame(n ? 'pal' : 'ug', spots[n][0] < 0 ? 1 : -1); H.scale.setScalar(0.0001); return { ch, H, s: spots[n][2], d: n * 0.07 }; });
       sfx('magic'); this.dim(true); let popped = false; const untitle = this.title('User Group ', _t(4794, "活动"), _tf(4795, "{$0} 来参加线下分享", p.name), cr.y);
       await this.run(1500 * animK(), k => {

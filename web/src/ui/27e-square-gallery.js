@@ -113,7 +113,7 @@ function sqPanelHtml(i) {
   let rent = '', rentN = '';
   if (o) {
     if (pr.offline) { rent = '$0'; rentN = _t(4469, "已下线，不收"); }
-    else if (pr.ddos != null) { rent = '$0'; rentN = _t(4470, "被 DDoS，不收"); }
+    else if (pr.ddos != null) { rent = '$0'; rentN = pr.ddosWhy ? _t(4469, "已下线，不收") : _t(4470, "被 DDoS，不收"); }
     else if (pr.impaired) { rent = '$0'; rentN = _t(4471, "Impaired，暂停"); }
     else { let sr = null; try { sr = shownRent(i); } catch (e) { } if (!sr || !sr.r) { rent = '$0'; rentN = _t(4472, "代理商库存，没成架构不收"); } else { rent = sr.txt.replace(_t(2763, "点数×"), _t(2764, "骰子点数 × ")); rentN = sr.cap ? _tf(4473, "保护期封顶，之后 {$0}", sr.fullTxt.replace(_t(2763, "点数×"), _t(2764, "骰子点数 × "))) : sr.jr ? _t(4474, "整套架构联合收费") : (s.bill === 'req' || s.bill === 'token' || util) ? _t(4475, "随骰子点数浮动") : ''; } }
   } else { const x = rentAt(i, 0); rent = x.pt != null ? _tf(2800, "骰子点数 × {$0}", +x.pt.toFixed(1)) : `$${Math.round(x.v)}`; rentN = x.pt != null ? _tf(4476, "买下后，掷 7 点 ${$0}", Math.round(x.pt * 7)) : _t(2772, "买下后"); }

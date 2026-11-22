@@ -3,7 +3,7 @@ import { UI } from '../core/02b-ui-port.js';
 import { BAL, OFFLINE_OK, OWNABLE, SQ } from '../rules/03-services.js';
 import { P, S, comboOn, cur, debtOf, log, nm, ownedBy, resetProp, sqn } from './07-state.js';
 import { giveTo } from './08-money.js';
-import { buyPaid, capCost, sellCap, sellProp, sellUpgrade, sellValue, sellZhe, stripValue, takeOffline, upPaidSum } from './09-rent.js';
+import { buyPaid, capPaidSum, sellCap, sellProp, sellUpgrade, sellValue, sellZhe, stripValue, svcLeaves, takeOffline, upPaidSum } from './09-rent.js';
 import { manage } from './23-manage.js';
 import { evt } from './26b-retro.js';
 import { isParty } from '../rules/35-modes.js';
@@ -106,12 +106,13 @@ async function bankrupt(p) {
     UI.render(); return;
   }
   const keys = [...ids, ...(bankOwed > 0 ? ['bank'] : [])], share = k => (k === 'bank' ? bankOwed : owed[k]) / total;
-  const val = i => buyPaid(i) + upPaidSum(i) + (S.props[i].cap || 0) * capCost(i);
+  // 和 sellValue、valBreak 一样：Hackathon 免费加的容量不算钱，下线的扣掉下线时已经拿走的那一半
+  const val = i => { const pr = S.props[i]; return Math.max(0, buyPaid(i) + upPaidSum(i) + capPaidSum(i) - (pr.offline ? pr.offCash || 0 : 0)); };
   const assets = props.reduce((a, i) => a + val(i), 0) + Math.max(0, p.cash), got = Object.fromEntries(keys.map(k => [k, 0])), gotProps = Object.fromEntries(keys.map(k => [k, []]));
   // 现金也按比例分（破产时现金一般已经扣光）
   if (p.cash > 0) { let left = p.cash; keys.forEach((k, n) => { const x = n === keys.length - 1 ? left : Math.floor(p.cash * share(k)); left -= x; got[k] += x; if (k !== 'bank') giveTo(k, x, 'other'); }); p.cash = 0; }
   [...props].sort((a, b) => val(b) - val(a)).forEach(i => { const k = keys.reduce((best, x) => (share(x) * assets - got[x]) > (share(best) * assets - got[best]) ? x : best, keys[0]); got[k] += val(i); gotProps[k].push(i); });
-  keys.forEach(k => gotProps[k].forEach(i => { if (k === 'bank') resetProp(i); else { const pr = S.props[i]; pr.owner = k; pr.impaired = false; pr.via = null; } }));
+  keys.forEach(k => gotProps[k].forEach(i => { svcLeaves(p, i, k === 'bank' ? null : k); if (k === 'bank') resetProp(i); else { const pr = S.props[i]; pr.owner = k; pr.impaired = false; pr.via = null; } }));
   const top = P(ids[0]); top.cards.push(...p.cards); top.coe.push(...p.coe); top.drill.push(...p.drill); p.cards = []; p.coe = []; p.drill = [];
   log(_tf(3366, "💀 {$0} 账户被暂停，资产按欠款比例分：{$1}", nm(p), keys.map(k => _tf(3365, "{$0} {$1}（欠款占 {$2}%）", k === 'bank' ? _t(3362, "亚马逊云科技收回") : nm(P(k)) + _t(3363, " 拿到"), gotProps[k].length ? gotProps[k].map(sqn).join(_t(349, "、")) : _t(3364, "（没分到服务）"), Math.round(share(k) * 100))).join(_t(408, "；"))));
   UI.render();

@@ -80,6 +80,8 @@ export function aiDecide(view, inputs, buttons, who) {
   if (_tr(4827, "抽了(两|三|\\d+) ?张", "").test(title)) return go(en[rnd(en.length)]);
   if ((b = pick(l => _tr(4828, "^交 \\$\\d+ .*继续走$", "").test(l)))) return go(p.cash - money(b.l) >= RES + 150 ? b : pick(l => l.startsWith(_t(4829, "停一轮"))) || b);
   if ((b = pick(l => l.startsWith(_t(4830, "让 ")) && l.endsWith('Impaired')))) { const pb = pick(l => _tr(4831, "^交 \\$\\d+$", "").test(l)); return go(pb && p.cash - money(pb.l) >= RES + 100 ? pb : b); }
+  // 交钱还是让服务强制下线（Health 卡）：按钮 value 是 'down'，和 Impaired 那条一样，钱够留底就交
+  if ((b = en.find(x => x.value === 'down'))) { const pb = en.find(x => x.value === 'pay'); return go(pb && p.cash - money(pb.l) >= RES + 100 ? pb : b); }
   for (const key of [_t(2754, "执行"), _t(2478, "知道了"), _t(2461, "继续"), _t(4652, "开始"), _t(3233, "讲出来了"), _t(2610, "关闭"), _t(2926, "跳过")]) { const x = pick(l => l.startsWith(key)); if (x) return go(x); }
   go(en.find(x => (x.cls || '').includes('pri')) || en[0] || { value: buttons[0].value });
   return { v: out, set };
@@ -103,6 +105,7 @@ export function aiBuild(p, res = 250) {
 export let aiTimer = 0;
 // 电脑在玩的时候可以暂停（电脑在房主那台跑，只有房主那边有这个按钮：电脑的回合和电脑答弹窗都会停在原地，点「继续」接着跑）
 export let AI_PAUSE = false;
+export const __set_AI_PAUSE = v => (AI_PAUSE = v);   // 开新局时清掉（联机「再来一局」不刷新页面，上一局的暂停会带过去）
 // 现在是不是暂停着：房主和单机看本机的开关，远端看房主推过来的 S.aiPause（pushState 每次按 AI_PAUSE 重写）
 export function aiPaused() { return MP.role === 'client' ? !!(S && S.aiPause) : AI_PAUSE; }
 // 收起弹窗看棋盘时底栏、中间的「暂停」也点得到：点哪个都刷新弹窗里的提示和「暂停 / 继续」，不然两边对不上

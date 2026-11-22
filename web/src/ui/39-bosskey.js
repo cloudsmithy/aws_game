@@ -6,7 +6,7 @@ import { COMBOS, INC, QUIZ, REI, comboOpen } from '../rules/04-roles-combos-card
 import { QBANK } from '../rules/06-qbank.js';
 import { S, hasCombo, log, owns } from '../engine/07-state.js';
 import { MODAL_CUR, ask, greyWhy, mainBtn, viewOpen } from './10-modal.js';
-import { showManual } from './26e-manual.js';
+import { MANUAL_WEB, showManual } from './26e-manual.js';
 import { archTipOff, toggleArchTip } from './27b-arch-notes.js';
 import { render } from './27d-side.js';
 import { SVC_INTRO, gallery } from './27e-square-gallery.js';
@@ -164,6 +164,7 @@ let VIM_CMDS = __rv(() => ([
   { n: 'free', d: _t(4921, "作弊：自己马上出维护窗口"), game: true, cheat: true, run: a => cheatCmd('free', a) },
   { n: 'grab', d: _t(4922, "作弊：随机抢一块地；抢到没人买的归你，抢到别人的照付过路费"), game: true, cheat: true, run: a => cheatCmd('grab', a) },
   { n: 'cheats', arg: 'on | off', d: _t(4923, "作弊码开关（联机时只有房主能改）"), game: true, run: a => { if (MP.role === 'client') return toast(_t(4924, "只有房主能开关作弊码")); const want = a[0] === 'on' ? true : a[0] === 'off' ? false : !cheatsOn(); S.cfg.cheats = want; log(want ? _t(4925, "🕹 作弊码打开了：用了会写进日志，可以被举报") : _t(4926, "🕹 作弊码关掉了")); save(); render(); } },
+  { n: 'manuals', a: ['docs'], d: _t(5400, "手册网页版（新标签页）"), run: () => window.open(MANUAL_WEB, '_blank', 'noopener') },
   { n: 'changelog', a: ['log'], d: _t(4927, "更新说明（新标签页）"), run: () => window.open(DOCS + _t(4928, "更新说明.html"), '_blank', 'noopener') },
   { n: 'issue', d: _t(4929, "到 GitHub 提 issue（新标签页）"), run: () => window.open('https://github.com/cloudsmithy/aws_game/issues', '_blank', 'noopener') },
   { n: 'repo', d: _t(4930, "项目地址（新标签页）"), run: () => window.open('https://github.com/cloudsmithy/aws_game', '_blank', 'noopener') },
@@ -207,7 +208,7 @@ function showVersion() {
     <div class="ver-term"><div class="ver-cmd"><span>$</span>:version</div>
       <dl><dt>${_t(4950, "这一版")}</dt><dd>${esc(V.name)} · ${esc(V.title)}</dd>${V.changes ? _tf(4946, "<dt>累计</dt><dd>{$0} 轮更新、{$1} 项改动{$2}{$3}</dd>", V.round, V.changes, V.commits ? _tf(4944, "、{$0} 次提交", V.commits) : '', V.since ? _tf(4945, "（{$0} 起）", V.since) : '') : ''}<dt>${_t(4951, "构建号")}</dt><dd><code>${esc(V.build)}</code></dd>${V.time ? _tf(4947, "<dt>生成时间</dt><dd>{$0}</dd>", esc(V.time)) : ''}<dt class="vdep" hidden>${_t(4952, "线上部署")}</dt><dd class="vdep" hidden><code></code></dd></dl></div>
     <ul class="ver-stats">${stats.map(([n, t]) => `<li><b>${n}</b><span>${t}</span></li>`).join('')}</ul>
-    <div class="ver-links">${_tf(4953, "<a href=\"{$0}更新说明.html\" target=\"_blank\" rel=\"noopener\">更新说明{$1}</a><a href=\"https://github.com/cloudsmithy/aws_game\" target=\"_blank\" rel=\"noopener noreferrer\">项目地址{$2}</a><a href=\"https://github.com/cloudsmithy/aws_game/issues\" target=\"_blank\" rel=\"noopener noreferrer\">提 issue{$3}</a>", DOCS, ext, ext, ext)}</div>
+    <div class="ver-links">${_tf(4953, "<a href=\"{$0}更新说明.html\" target=\"_blank\" rel=\"noopener\">更新说明{$1}</a><a href=\"https://github.com/cloudsmithy/aws_game\" target=\"_blank\" rel=\"noopener noreferrer\">项目地址{$2}</a><a href=\"https://github.com/cloudsmithy/aws_game/issues\" target=\"_blank\" rel=\"noopener noreferrer\">提 issue{$3}</a>", DOCS, ext, ext, ext)}<a href="${MANUAL_WEB}" target="_blank" rel="noopener">${_t(5390, "手册（网页版）")}${ext}</a></div>
   </div>`;
   ask({ local: true, cancelable: true, view: true, cls: 'verbox', title: _t(364, "版本"), html, buttons: [{ label: _t(4954, "复制版本信息"), value: 'copy', title: _t(4955, "提 issue 时贴上，方便对上是哪一版") }, { label: _t(2478, "知道了"), value: true, cls: 'pri' }] })
     .then(v => { if (v !== 'copy') return; const done = () => toast(_t(4956, "版本信息已复制")); try { navigator.clipboard.writeText(info).then(done, () => toast(info, 6000)); } catch (e) { toast(info, 6000); } });

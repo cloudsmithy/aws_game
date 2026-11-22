@@ -1,5 +1,5 @@
 import { LANG, __setLangHook, _t, _tf, _tr } from './01-i18n-runtime.js';
-import { $, ACTS, BOT, DEMO, KEY, MY_REV, REV_KEY, SIM, awsImg, esc } from './02-util.js';
+import { $, ACTS, BOT, DEMO, KEY, MY_REV, REV_KEY, SIM, awsImg, esc, homeUrl } from './02-util.js';
 import { DISC_GENAI, DISC_PLAY, DISC_PRICE, GROUPS, IX, N, SQ } from '../rules/03-services.js';
 import { langBtn, langMenu } from '../ui/03b-lang-menu.js';
 import { COMBOS, INC, QUIZ, REI } from '../rules/04-roles-combos-cards.js';
@@ -33,8 +33,9 @@ import { toggleSfx } from '../ui/32-sfx.js';
 import { hellDlc } from '../rules/35-modes.js';
 import { toggleAiPause } from '../engine/36-ai.js';
 import { BOSS, toggleBoss } from '../ui/39-bosskey.js';
+import { sigInit } from '../net/40a-signal.js';
 import { MP } from '../net/40-host-sync.js';
-import { mpHostName, mpNetDialog, mpNetTest, mpTurnSave, mpUI } from '../net/42-setup.js';
+import { mpHostName, mpNetDialog, mpNetTest, mpSigSave, mpTurnSave, mpUI } from '../net/42-setup.js';
 // ================= data-act 动作表（机制见 core/02-util.js 的 ACTS / actRun）=================
 // 动作名就用原来行内 onclick 调的函数名，actKey 能拼回原文；函数在各个文件里，点的时候才查，所以表放在最后一个文件、开头先填好（启动代码和机器人要点按钮）
 // data-act="uiAction" 的 data-arg：回合里的操作，交给 uiAction 包一层（锁住按钮、结算欠款、存档）
@@ -55,7 +56,7 @@ Object.assign(ACTS, {
   // 对局：主按钮、更多操作、菜单
   doRoll: () => doRoll(), endTurn: () => endTurn(), jailAct: (el, e, a) => jailAct(a), toggleAiPause: () => toggleAiPause(), 'MP.aipause': () => MP.send(MP.hostConn, { t: 'aipause' }),
   uiAction: (el, e, a) => { const f = UI_ACTS[a]; if (f) uiAction(f); else console.error('unknown uiAction', a); },
-  backToSetup: () => backToSetup(), toHome: () => { location.href = location.pathname; }, showReport: () => showReport(), endNow: () => endNow(),
+  backToSetup: () => backToSetup(), toHome: () => { location.href = homeUrl(); }, showReport: () => showReport(), endNow: () => endNow(),
   gallery: () => gallery(), maybeTour: (el, e, a) => maybeTour(a === 'true'), keysHelp: () => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' })),
   toggleSfx: () => toggleSfx(), renameDialog: () => renameDialog(), toggleBoss: () => toggleBoss(), toggleArchTip: () => toggleArchTip(), toggleAnim: () => toggleAnim(),
   quitGame: () => quitGame(), confirmNew: () => confirmNew(), langMenu: el => langMenu(el),
@@ -72,7 +73,7 @@ Object.assign(ACTS, {
   // 联机
   'MP.leave': () => MP.leave(), 'MP.proposeEnd': () => MP.proposeEnd(), 'MP.kickDialog': () => MP.kickDialog(), 'MP.kick': (el, e, a) => MP.kick(+a),
   'MP.idleTake': () => MP.idleTake(), 'MP.watchDialog': () => MP.watchDialog(), 'MP.reviewJoin': (el, e, a) => MP.reviewJoin(a), 'MP.copyWatchInvite': () => MP.copyWatchInvite(),
-  'MP.rejoin': () => { MP.reN = 0; MP.rejoin(); }, mpNetTest: () => mpNetTest(), mpTurnSave: (el, e, a) => mpTurnSave(a === 'true' || undefined),
+  'MP.rejoin': () => { MP.reN = 0; MP.rejoin(); }, mpNetTest: () => mpNetTest(), mpSigSave: () => mpSigSave(), mpTurnSave: (el, e, a) => mpTurnSave(a === 'true' || undefined),
   mpHostGo: el => { if ($('#mppwd').value.length < 4) { $('#mpstat').innerHTML = '<span class=warn>密码至少 4 位</span>'; } else { mpHostName(); MP.host($('#mppwd').value, $('#mpallowwatch').checked); el.disabled = true; } },
   mpJoinGo: el => { MP.join($('#mproom').value, $('#mppwd').value, $('#mpname').value, undefined, $('#mpmode').value === 'spectator'); el.disabled = true; },
 });
@@ -101,6 +102,7 @@ function renderHero() {
 }
 renderHero();
 renderNames();
+sigInit();   // 读网站给的默认信令服务器（docker compose 自建部署有 peer-config.json；GitHub Pages 没有，走公共）
 // UG 活动局：线下活动一键开——娱乐模式 + 边玩边答题，12 轮或 30 分钟先到为准，4 人一桌，不开 DLC；网址加 ?ug=1 打开就直接开局
 function ugPreset(start = true) {
   const pick = sel => { const el = document.querySelector(sel); if (el) { el.checked = true; el.dispatchEvent(new Event('change', { bubbles: true })); } };
@@ -146,10 +148,10 @@ function studyTiles(on) {
   learn.disabled = $('#winRounds').disabled = $('#rounds').disabled = on;
 }
 function renderDlcTiles() {
-  const box = $('#dlcTiles'), keep = new Map([...box.querySelectorAll('input')].map(x => [x.value, [x.checked, x.disabled]])), cat = box.dataset.cat;
+  const box = $('#dlcTiles'), keep = new Map([...box.querySelectorAll('input')].map(x => [x.value, [x.checked, x.disabled, x.parentElement.classList.contains('lock')]])), cat = box.dataset.cat;
   $('#dlcTiles').innerHTML = Object.entries(DLC).map(([k, d]) => `<label class="tile ck ${d.quiz ? 'qdlc' : ''}" data-cat="${dlcCat(k, d)}"><input type="checkbox" value="${k}"><b>${awsImg(d.icon)}${d.n}</b><span>${d.d}</span></label>`).join('');
 $('#dlcTabs').innerHTML = DLC_TABS.map(([c, t], k) => `<button type="button" role="tab" id="dlct-${c}" data-cat="${c}" aria-controls="dlcTiles" aria-selected="${!k}" tabindex="${k ? -1 : 0}">${t}<span class="dlcn" hidden></span></button>`).join('');
-  box.querySelectorAll('input').forEach(x => { const k = keep.get(x.value); if (k) { x.checked = k[0]; x.disabled = k[1]; } });
+  box.querySelectorAll('input').forEach(x => { const k = keep.get(x.value); if (k) { x.checked = k[0]; x.disabled = k[1]; x.parentElement.classList.toggle('lock', k[2]); } });   // 地狱模式锁住的格子（hellTiles 加的 lock）切换语言重画后照样显示锁
   if (cat) dlcTab(cat); if (typeof dlcCounts === 'function') dlcCounts();
 }
 function dlcTab(c, focus) {

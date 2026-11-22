@@ -1,13 +1,14 @@
 import { _t, _tf } from '../core/01-i18n-runtime.js';
 import { $, KEY, esc, unesc } from '../core/02-util.js';
 import { wbApply, wbValid } from '../rules/06-qbank.js';
-import { S, cur, log, nm } from '../engine/07-state.js';
+import { MAX_PLAYERS, S, cur, log, nm } from '../engine/07-state.js';
 import { MODAL_CUR, ask, info } from '../ui/10-modal.js';
 import { timedOver } from '../ui/26e-manual.js';
 import { render } from '../ui/27d-side.js';
 import { applyRename, npVal, renderNames, toast } from '../ui/28-setup-save.js';
 import { AI_PAUSE, isAI, toggleAiPause } from '../engine/36-ai.js';
 import { applyCheat, reportCheat } from '../engine/38-cheats.js';
+import { sigLabel } from './40a-signal.js';
 import { MP } from './40-host-sync.js';
 Object.assign(MP, {
   onHostMsg(conn, m) {
@@ -46,18 +47,18 @@ Object.assign(MP, {
   },
   async admit(conn, m, approval) {
     if (this.role !== 'host' || !conn.open || conn._closed || conn._admitted || conn._pending) return;
-    if (m.name != null && typeof m.name !== 'string') return this.reject(conn, '名字必须是文字');
+    if (m.name != null && typeof m.name !== 'string') return this.reject(conn, _t(5253, "名字必须是文字"));
     const name = (m.name || '').replace(/\s+/g, ' ').trim().slice(0, 12) || _t(3861, "玩家");
     if (m.mode === 'spectator') {
-      if (!this.watchToken || m.invite !== this.watchToken) return this.reject(conn, '观战邀请无效或已关闭');
-      if (Object.keys(this.viewers).length >= this.watchLimit) return this.reject(conn, '观战人数已满');
+      if (!this.watchToken || m.invite !== this.watchToken) return this.reject(conn, _t(5254, "观战邀请无效或已关闭"));
+      if (Object.keys(this.viewers).length >= this.watchLimit) return this.reject(conn, _t(5255, "观战人数已满"));
       const id = this.newKey(); conn._viewer = id; conn._admitted = true;
       this.viewers[id] = { name, conn, online: true, delta: m.delta === 1, walk: m.walk === 1 };
       this.send(conn, { t: 'welcome', mode: 'spectator', seat: null, room: this.room });
       this.pushState(true, this.viewers[id]); if (this.cur) this.send(conn, this.cur.msg);
       this.refreshMembers(); return;
     }
-    if (m.mode != null && m.mode !== 'player') return this.reject(conn, '不支持的入房身份');
+    if (m.mode != null && m.mode !== 'player') return this.reject(conn, _t(5256, "不支持的入房身份"));
     if (m.auth !== this.auth) { this.reject(conn, _t(4986, "密码不对")); return; }
     if (this.banned && this.banned.has(name.replace(/\s+/g, ' ').trim())) { this.reject(conn, _t(4987, "房主把你移出了这个房间")); return; }
     // 名字定位座位，钥匙或房主确认鉴权后再认回。
@@ -67,7 +68,7 @@ Object.assign(MP, {
     if (seat != null) {
       const x = this.seats[seat], proven = x.key && Array.isArray(m.keys) && m.keys.slice(0, 8).includes(x.key);
       if (!proven && !(approval && approval.seat === seat && approval.previous === x)) {
-        if (x.online) return this.reject(conn, '该玩家仍在线；请使用原浏览器，或等其离线后由房主确认身份');
+        if (x.online) return this.reject(conn, _t(5257, "该玩家仍在线；请使用原浏览器，或等其离线后由房主确认身份"));
         return this.requestSeat(conn, { ...m, name }, seat, x);
       }
       const old = x.conn; if (old) { old._seat = null; old._closed = true; this.send(old, { t: 'kicked' }); try { old.close({ flush: true }); } catch (e) { } setTimeout(() => { try { old.close(); } catch (e) { } }, 5000); }
@@ -82,8 +83,10 @@ Object.assign(MP, {
       // 房主刷新后还没点「继续上一局」：存档里的联机玩家按名字先坐回原座位，大厅和 welcome 里的座位号就和局里一致；对不上的照旧按先后排
       const saved = this.savedSeat(name, used);
       if (saved != null && !(approval && approval.seat === saved && approval.previous === null)) return this.requestSeat(conn, { ...m, name }, saved, null);
-      seat = saved ?? [1, 2, 3].find(k => !used.has(k));
-      if (seat == null) { this.reject(conn, _t(4992, "房间满了（最多 4 人）")); return; }
+      // 远端座位 1…(上限 - 1)：开局页没开「多人（超过 4 人）」时最多 4 人（3 位远端），开了到 MAX_PLAYERS；观众另算，不占座位
+      const mx = this.seatMax || 4;
+      seat = saved ?? Array.from({ length: mx - 1 }, (_, k) => k + 1).find(k => !used.has(k));
+      if (seat == null) { this.reject(conn, mx > 4 ? _tf(5303, "房间满了（最多 {$0} 人）", mx) : _t(4992, "房间满了（最多 4 人）")); return; }
     }
     // key：座位钥匙，每次 welcome 换一把新的（换了设备进来以后旧设备那把就作废）。只放在房主的 MP.seats 和他本人的浏览器里，不能写进 S：S 会推给所有人
     const skey = this.newKey(); conn._admitted = true; conn._seat = seat; this.seats[seat] = { name, conn, online: true, wb: this.wbIn(m.wb), delta: m.delta === 1, walk: m.walk === 1, key: skey };   // delta：新版页面，收得了增量状态
@@ -101,7 +104,7 @@ Object.assign(MP, {
     let sv = null; try { sv = JSON.parse(localStorage.getItem(KEY)); } catch (e) { }
     if (!sv || sv.over || !Array.isArray(sv.mpSeats) || !Array.isArray(sv.players)) return;
     const key = esc(name.replace(/\s+/g, ' ').trim());
-    return sv.mpSeats.find(k => k > 0 && k < 4 && !used.has(k) && sv.players[k] && sv.players[k].name === key);
+    return sv.mpSeats.find(k => k > 0 && k < MAX_PLAYERS && !used.has(k) && sv.players[k] && sv.players[k].name === key);
   },
   // 还在等人回来的座位（局里的名字），拒绝时告诉对方该用哪个名字
   waiting() { return Object.keys(this.seats).filter(k => !this.seats[k].online && S.players[k]).map(k => unesc(S.players[k].name)); },
@@ -125,12 +128,14 @@ Object.assign(MP, {
   renderLobby() {
     const watch = $('#mpallowwatch'); if (watch) { watch.checked = !!this.watchToken; watch.disabled = true; }
     const n = 1 + Math.max(0, ...Object.keys(this.seats).map(Number));   // 按最大的座位号算：按存档排座时可能只有 3 号位有人，按人数算会把玩家 4 截掉
-    if (npVal() < n) { const r = document.querySelector(`input[name=np][value="${Math.min(4, n)}"]`); if (r) { r.checked = true; renderNames(); } }
+    // 4 号以后的座位有人（开了「多人」，或者按存档排座）：renderNames 会把「多人」打开、补上 5 人以上的格子，再选人数
+    if (npVal() < n) { const q = () => document.querySelector(`input[name=np][value="${Math.min(MAX_PLAYERS, n)}"]`); let r = q(); if (!r) { renderNames(); r = q(); } if (r && !r.checked) { r.checked = true; renderNames(); } }
     Object.entries(this.seats).forEach(([k, x]) => { const el = $('#nm' + k), ai = $('#ai' + k); if (el) { el.value = x.name; el.readOnly = true; el.title = x.online ? _t(4996, "联机玩家") : _t(4997, "联机玩家（已断开）"); } if (ai) { ai.checked = false; ai.disabled = true; ai.title = _t(4998, "联机玩家，不能交给电脑"); } });   // 「电脑」灰掉只是给房主看的，开局时 startFromSetup 照样把联机座位算成真人
-    const list = [_tf(5000, "<li><b>玩家 1</b>：{$0}（你，房主，本机）</li>", esc((($('#nm0') || {}).value || '').trim() || _t(4999, "玩家 1")))].concat([1, 2, 3].map(k => this.seats[k] ? _tf(5001, "<li><b>玩家 {$0}</b>：{$1}{$2} <button type=\"button\" class=\"sm\" data-act=\"MP.kick\" data-arg=\"{$3}\" title=\"把他移出房间，这个名字不能再进\">移出</button></li>", k + 1, esc(this.seats[k].name), this.seats[k].online ? '' : _t(4962, "（已断开）"), k) : _tf(5002, "<li class=\"muted\">玩家 {$0}：空位（不来人就在本机轮流玩）</li>", k + 1)));
+    const list = [_tf(5000, "<li><b>玩家 1</b>：{$0}（你，房主，本机）</li>", esc((($('#nm0') || {}).value || '').trim() || _t(4999, "玩家 1")))].concat(Array.from({ length: Math.max(npVal(), n) - 1 }, (_, k) => k + 1).map(k => this.seats[k] ? _tf(5001, "<li><b>玩家 {$0}</b>：{$1}{$2} <button type=\"button\" class=\"sm\" data-act=\"MP.kick\" data-arg=\"{$3}\" title=\"把他移出房间，这个名字不能再进\">移出</button></li>", k + 1, esc(this.seats[k].name), this.seats[k].online ? '' : _t(4962, "（已断开）"), k) : _tf(5002, "<li class=\"muted\">玩家 {$0}：空位（不来人就在本机轮流玩）</li>", k + 1)));
     const watchers = Object.values(this.viewers);
-    const invitation = this.watchToken ? `<div class="mpwatch"><p><b>受邀观战已开启</b> · 最多 ${this.watchLimit} 位观众，不占玩家座位</p><p>观战邀请码：<code data-watch-code style="overflow-wrap:anywhere;user-select:all">${esc(this.watchToken)}</code> <button type="button" class="sm" data-act="MP.copyWatchInvite">复制观战邀请</button></p><p class="muted">将房间号和观战邀请码发给解说，选择「加入房间 → 受邀观战」，现在就能进来等待开赛。</p><p>已到场观众（${watchers.length}/${this.watchLimit}）：${watchers.length ? watchers.map(x => esc(x.name)).join('、') : '暂无'}</p></div>` : '';
+    const invitation = this.watchToken ? _tf(5258, "<div class=\"mpwatch\"><p><b>受邀观战已开启</b> · 最多 {$0} 位观众，不占玩家座位</p><p>观战邀请码：<code data-watch-code style=\"overflow-wrap:anywhere;user-select:all\">{$1}</code> <button type=\"button\" class=\"sm\" data-act=\"MP.copyWatchInvite\">复制观战邀请</button></p><p class=\"muted\">将房间号和观战邀请码发给解说，选择「加入房间 → 受邀观战」，现在就能进来等待开赛。</p><p>已到场观众（{$2}/{$0}）：{$3}</p></div>", this.watchLimit, esc(this.watchToken), watchers.length, watchers.length ? watchers.map(x => esc(x.name)).join(_t(349, "、")) : _t(5259, "暂无")) : '';
     $('#mpstat').innerHTML = _tf(5003, "<div class=\"mproom\">房间号 <b>{$0}</b><span class=\"muted\">把房间号和密码发给朋友，他们在自己的设备上打开这个页面，点「加入房间」</span></div><ul class=\"mpseats\">{$1}</ul>", this.room, list.slice(0, Math.max(npVal(), n)).join('')) + `<div data-mp-members>${this.viewerUI()}</div>${invitation}`;
+    $('#mpstat').insertAdjacentHTML('beforeend', `<p class="muted mpsig">${esc(sigLabel())}</p>`);   // 大家要连同一个信令服务器：写出房主这边用的是哪个
   },
   // 对方没正常关页面就没了（锁屏、断网、浏览器被系统杀掉）：数据通道不会自己关，PeerJS 只认 ICE 的 failed，Chrome 上 ICE 一直停在 disconnected。
   // 整条连接 failed（浏览器十几秒收不到对方的连通性确认）就回不来了，主动关掉，走正常的断线流程。不支持 connectionState 的浏览器照旧

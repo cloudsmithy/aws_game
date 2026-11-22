@@ -8,7 +8,7 @@ import { qPoolS } from '../rules/06-qbank.js';
 import { F, P, S, active, availCard, cur, hasCombo, log, nm, ownedBy, owns, ownsGroup, singleAZ, sqn } from './07-state.js';
 import { credit, pay, withGain } from './08-money.js';
 import { SPOT_OK, netWorth, reqRate } from './08c-costs.js';
-import { addCap, baseRent, bringOnline, buyPaid, capCost, capInfo, doUpgrade, jointRent, roleDisc, tokUnit, turnKey, upPaidSum, upgradeInfo, zhe } from './09-rent.js';
+import { addCap, baseRent, bringOnline, buyPaid, capInfo, capPaidSum, doUpgrade, jointRent, roleDisc, tokUnit, turnKey, upPaidSum, upgradeInfo, zhe } from './09-rent.js';
 import { capUpTxt, lvUpTxt } from './11b-rent-info.js';
 import { quiz } from './12-quiz.js';
 import { goReiCards, sendToJail } from './13-move.js';
@@ -31,7 +31,7 @@ async function land0(p, opts = {}) {
     case 'prop': case 'util': {
       if (isHidden(i)) { await blindBox(p); break; }
       const pr = S.props[i];
-      if (pr.owner === null) { if (opts.noBuy) log(_tf(2942, "{$0} 同色跳到 {$1}，跳过去不能买", nm(p), sqn(i))); else await offerBuy(p, i, opts); }
+      if (pr.owner === null) { if (opts.noBuy) log(opts.noBuy === 'card' ? _tf(5274, "{$0} 落在 {$1}：这次是卡上再掷的一步，落地不能买", nm(p), sqn(i)) : _tf(2942, "{$0} 同色跳到 {$1}，跳过去不能买", nm(p), sqn(i))); else await offerBuy(p, i, opts); }
       else if (pr.owner !== p.id) { if (pr.offline) await offlineTakeover(p, i); else if (!(await spotTakeover(p, i)) && !(await buyFromReseller(p, i))) await payRent(p, i); }
       // 自己落到自己下线的那一格：免费拉起来（不用等满 3 轮），这一格这回合就不再升级、不同色跳
       else if (pr.offline) { bringOnline(p, i); UI.render(); }
@@ -207,7 +207,8 @@ async function buyFromReseller(p, i) {
   if (!dlcOn('reseller') || !r.reseller || p.reseller || pr.via != null || pr.offline || pr.ddos != null || !['prop', 'util'].includes(s.t)) return false;
   if (BAL.rsKeepCombo && jointRent(i, 7)) return false;
   if (BAL.rsKeepGroup && (ownsGroup(r, s.g) || pr.level > 0)) return false;   // 整组和升过级的也是代理商在用的，不卖
-  const extra = upPaidSum(i) + (pr.cap || 0) * capCost(i), base = Math.round(s.p * rsRate(r) * (p.rsCoupon || 1)), x = base + extra, cost = buyPaid(i);
+  const extra = upPaidSum(i) + capPaidSum(i),   // 升级、容量都按代理商实付的算（Hackathon 免费送的容量和卡牌免费升的级一样不算钱）
+    base = Math.round(s.p * rsRate(r) * (p.rsCoupon || 1)), x = base + extra, cost = buyPaid(i);
   // 答题照样折上折：答对在转售价上再打 8 折（独立开发者开了边玩边答题 7 折、没开 9 折），少收的是代理商让的利
   const qd = p.role === 'indie' ? (S.cfg.learn ? 0.7 : 0.9) : 0.8, canQ = S.cfg.learn || p.role === 'indie';
   let tried = false, ok = false, v, qres = '';
@@ -273,7 +274,7 @@ async function payRent(p, i, opts = {}) {
   const pr = S.props[i], o = P(pr.owner), s = SQ[i];
   if (pr.impaired) { log(_tf(3072, "{$0} 是 Impaired 状态，这次不收过路费", sqn(i))); return 0; }
   if (pr.offline) { log(_tf(3073, "{$0} 已下线，这次不收过路费", sqn(i))); return 0; }
-  if (pr.ddos != null) { log(_tf(3074, "{$0} 正被 DDoS 打到下线，这次不收过路费", sqn(i))); return 0; }
+  if (pr.ddos != null) { log(pr.ddosWhy ? _tf(5295, "{$0} 因「{$1}」下线，这次不收过路费", sqn(i), pr.ddosWhy) : _tf(3074, "{$0} 正被 DDoS 打到下线，这次不收过路费", sqn(i))); return 0; }
   const dice = S.lastDice[0] + S.lastDice[1];
   const jr = jointRent(i, dice);
   if (o.reseller && !jr && !BAL.rsSolo) { log(_tf(3075, "{$0} 是代理商 {$1} 自己的服务，没组成有效架构，这次不收过路费", sqn(i), nm(o))); return 0; }

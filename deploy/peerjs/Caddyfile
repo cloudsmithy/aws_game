@@ -1,20 +1,33 @@
-# 信令域名：自动申请、续期 Let's Encrypt 证书；WebSocket（wss://）Caddy 自动转发
+# 游戏页面和信令服务器放在同一个域名下：自动申请、续期 Let's Encrypt 证书；WebSocket（wss://）Caddy 自动转发
+#   /peerjs、/peerjs/*   → PeerServer（信令）
+#   /peer-config.json    → 告诉游戏「信令就在本站」，页面默认走自建（GitHub Pages 上没有这个文件，走公共 PeerJS）
+#   其余                 → 游戏网站（仓库的 code/，和 GitHub Pages 发布的内容一样；code/i18n/ 是翻译原表，不对外）
 {
 	email {$ACME_EMAIL}
 }
 
 {$PEER_DOMAIN} {
 	encode gzip
-	# 只转发 PeerJS 用到的路径：/peerjs（WebSocket 信令）和 /peerjs/id 等 HTTP 接口；其余一律 404
 	@peer path /peerjs /peerjs/*
 	handle @peer {
 		reverse_proxy peerjs:9000
 	}
-	handle {
+	handle /peer-config.json {
+		header Content-Type application/json
+		header Cache-Control no-store
+		respond `{"host":"{$PEER_DOMAIN}","path":"/"}` 200   # 不写端口：游戏按网站自己的端口连
+	}
+	@internal path /i18n /i18n/*
+	handle @internal {
 		respond "Not Found" 404
+	}
+	handle {
+		root * /srv/site
+		file_server
 	}
 	header {
 		-Server
 		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
 	}
 }

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查卡 · 亚马逊云科技 User Group 云上大亨</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="k">MANUAL · 玩家</div>
+<h1>速查卡</h1>
+<nav class="links"><a href="index.html">← 全部手册</a><a href="https://github.com/cloudsmithy/aws_game/blob/master/docs/%E6%89%8B%E5%86%8C/1-%E7%8E%A9%E5%AE%B6/%E9%80%9F%E6%9F%A5%E5%8D%A1.pdf">原版 PDF（GitHub）</a></nav>
+</header>
+<section>
+<h3 id="s1">一回合</h3>
+<ol>
+<li>1 号位先走，第 2、3、4 位开局多领 $50 / $100 / $150（不算进开局资金）。</li>
+<li>掷两颗骰子往前走；对子再掷一次，同一回合第 3 次对子进维护窗口。</li>
+<li>结算落点：买服务 / 付过路费 / 抽卡 / 交账单；落在自己的服务上：加功能、加容量、FIS 攻击对手，</li>
+</ol>
+<ul>
+<li>三选一，之后可以「同色跳」。</li>
+</ul>
+<ol>
+<li>掷骰子前后都能：花总资产 4% 抽 re:Invent 卡；每圈花 1.5 倍让对手抽 Health 卡；出题考一人（每局一次）或全场（每 3 圈）；资产管理、交易。</li>
+</ol>
+<h3 id="s2">买服务</h3>
+<ul>
+<li>按需：原价，稳。</li>
+<li>Spot（只有 EC2、ECS、EKS、SageMaker AI）：出价保密，最低 20%；别人猜的价多出原价 10% 才抢得走。</li>
+<li>不买就留在亚马逊云科技，别人不能竞价抢。</li>
+</ul>
+<h3 id="s3">缺钱怎么办</h3>
+<ul>
+<li>去掉升级、减容量：退实付的一半。下线（EC2、RDS、Aurora、Redshift、ECS）：拿回买价一半，不收过路费；至少 3 轮后还一半 + 10% 上线，期间别人能付原价拉走。卖回亚马逊云科技：买价 + 升级 + 容量的实付按 8 折拿回，服务回亚马逊云科技。</li>
+<li>全卖了也不够：破产出局，服务按欠款比例分给债主。</li>
+</ul>
+<h3 id="s4">专属技能（每个角色一个，一局一次）</h3>
+<ul>
+<li>总资产低于自己开局资金的一半时，自己回合里发动。</li>
+<li>先结算角色自己的技能，再「战略并购」：按卖回价</li>
+<li>买下总资产最高的对手的一块服务（钱付给他，不够就欠着）。</li>
+<li>在维护窗口里也能发动；用过放一张「技能已用」标记。每个角色的技能写在角色卡上。</li>
+</ul>
+<h3 id="s5">每圈运行费（经过 Startup 扶持时交）</h3>
+<div class="tw"><table>
+<thead><tr><th>按小时</th><th>EC2、RDS、ECS、EKS…空着也要交</th></tr></thead>
+<tbody>
+<tr><td>按用量</td><td>Lambda、DynamoDB…收过路费时交 15%</td></tr>
+<tr><td>固定月费</td><td>S3、EFS、ECR、Route 53、WAF 每圈 $5；KMS 升到客户托管密钥后才收</td></tr>
+<tr><td>按 token</td><td>Bedrock：过路费 = 点数 × 单价，交 25%</td></tr>
+<tr><td>公网 IPv4</td><td>EC2 每圈 +$5（开私有子网就免）</td></tr>
+</tbody></table></div>
+<h3 id="s6">高可用：AZ 断电打不打得到</h3>
+<div class="tw"><table>
+<thead><tr><th>绿字</th><th>自带跨 AZ：Serverless、托管服务、ECS</th></tr></thead>
+<tbody>
+<tr><td>橙字</td><td>要自己升多 AZ：EC2、RDS、Aurora、EKS…</td></tr>
+<tr><td>红字</td><td>永远单 AZ：EBS</td></tr>
+<tr><td>蓝字</td><td>全局：Route 53、CloudFront、Shield</td></tr>
+</tbody></table></div>
+<p>扛 Region 故障，不管哪类都要升「多区域」。</p>
+<h3 id="s7">怎么赢</h3>
+<ul>
+<li>经典：别人都破产（最多 50 轮）。</li>
+<li>默认 15 轮：按估值排名（现金 + 服务 + 升级×2 + 架构 $200 − 技术债 $100…）。</li>
+<li>Well-Architected：六大支柱达到本难度要求（入门每条 1 分 / 标准每条 1 分且共 12 分 / 完整每条 2 分 / 地狱每条 2 分且共 18 分）。</li>
+</ul>
+<p>高速部署（开关）：部署点数 0–12</p>
+<p>每回合 +1；被 Health 卡罚到 −2；进维护窗口 −4。攻击每回合 1 次；有 Shield Advanced 或 CloudFront 的打不动。</p>
+<div class="tw"><table>
+<thead><tr><th>1 灰度发布</th><th>2 回滚重发</th></tr></thead>
+<tbody>
+<tr><td>3 抽卡</td><td>4 故障转移</td></tr>
+<tr><td>5 混沌注入</td><td>6 DDoS（轻）</td></tr>
+<tr><td>7 蓝绿部署</td><td>8 流水线自动化</td></tr>
+<tr><td>9 自动修复</td><td>10 Global Accelerator</td></tr>
+<tr><td>11 加开一班</td><td>12 DDoS（重）</td></tr>
+</tbody></table></div>
+<ul>
+<li>背面：奖池、维护窗口、角落格、支柱、架构、代理商和地狱模式 · 游戏内价格为虚构，不代表实际定价</li>
+</ul>
+<h3 id="s8">奖池和亚马逊云科技</h3>
+<ul>
+<li>进奖池：两个账单格、Health 罚款、维护窗口 $50、合规审查费。</li>
+<li>出奖池：停在 User Group 抽奖拿 $100～全部（不够亚马逊云科技补）；抽到 Free Tier 卡拿走全部。其他花销都付给亚马逊云科技，亚马逊云科技的钱用不完。</li>
+</ul>
+<h3 id="s9">角落和特殊格</h3>
+<div class="tw"><table>
+<thead><tr><th>Startup 扶持</th><th>经过领 $200，交运行费</th></tr></thead>
+<tbody>
+<tr><td>User Group</td><td>经过领 $50；停下抽奖或抽 3 张 re:Invent 选一张</td></tr>
+<tr><td>Root 密钥泄露</td><td>直接进维护窗口</td></tr>
+<tr><td>忘关的 EC2</td><td>交 $200 或总资产 10%</td></tr>
+<tr><td>NAT Gateway 账单</td><td>交 $100；开了私有子网交 $200</td></tr>
+</tbody></table></div>
+<h3 id="s10">技术债</h3>
+<ul>
+<li>被罚又没抵消就领 1 个：每个让运行费每圈 +$20。2 个：升级每级贵 $50（平时每级 $100 / $150，按用量三格 $50，印在服务卡上）。3 个：停一轮交 $300，或不停交 $400（抽卡攒满的乘卡牌倍率），清空。</li>
+<li>重构清 1 个（掷骰子前后随时能做）：$50 × 手上个数，第 10 轮起 +$30。</li>
+</ul>
+<h3 id="s11">代理商模式（开关）</h3>
+<ul>
+<li>代理商不超过一半。开局资金：勾了轮数上限（默认 15 轮）= 角色卡 + 每位客户 $300；不限轮数 = 客户总和；娱乐、地狱只按角色卡。</li>
+<li>落在空地上按进货价 5 折占地（地狱 7 折）；自己的地只在组成架构时收过路费，架构 ×2（地狱正常收）。</li>
+<li>客户落在代理商的地上可以按转售价买走；架构、整组、升过级的不卖。买走后运行费交给代理商。</li>
+</ul>
+<h3 id="s12">维护窗口</h3>
+<ul>
+<li>走到这格：停一轮，或交 $50 照常走。被送进来：下回合停一轮，或付 $50 / 用 Enterprise Support 出来照常走。</li>
+<li>出来时写一句根因，领复盘标记。</li>
+</ul>
+<h3 id="s13">六大支柱（每处算 1 分，门槛见正面「怎么赢」）</h3>
+<div class="tw"><table>
+<thead><tr><th>卓越运营</th><th>每块 CloudWatch / CloudTrail / Step Functions / EventBridge；写过复盘 +1</th></tr></thead>
+<tbody>
+<tr><td>安全性</td><td>每块安全组服务或 CloudFront；演练标记</td></tr>
+<tr><td>可靠性</td><td>每块托管服务；实例多 AZ；多区域 2 分</td></tr>
+<tr><td>性能效率</td><td>每处弹性扩展；每个生效架构</td></tr>
+<tr><td>成本优化</td><td>重构过技术债 / 签过 SP、RI 或用过 Cost Explorer / 每处降成本功能</td></tr>
+<tr><td>可持续性</td><td>每块 Serverless / Graviton / 每处数据分层 / Fargate、Auto Mode</td></tr>
+</tbody></table></div>
+<h3 id="s14">有效架构（凑齐联合收费，节选）</h3>
+<ul>
+<li>Serverless API：API Gateway + Lambda + DynamoDB/Aurora</li>
+<li>经典三层 Web：ELB + EC2/ECS + RDS/Aurora 容器平台：ECR + ECS/EKS + ELB 事件驱动：EventBridge + Step Functions + Lambda</li>
+<li>订单削峰：EC2/ECS + SQS + Lambda</li>
+<li>图片缩略图：S3 + Lambda + CloudFront</li>
+</ul>
+<p>全部 48 种见主持人规则书第 23 节；一块服务在几个生效架构里时串联收费，共用的只算一次。</p>
+<h3 id="s15">地狱模式</h3>
+<ul>
+<li>完整局 + 全部玩法 DLC + 高速部署，必须答题，卡牌 ×2。</li>
+<li>掷完骰子 1/3 概率随机掉题，不能跳过：答对 +$50，答错 −$50 进奖池。</li>
+<li>过路费每 5 轮 +1.5 倍，起点 $150，卖回 6 折，答对只减 30%；每个角色多一条地狱限制。</li>
+</ul>
+</section>
+<footer>本页由 <code>web/tools/build-manuals.mjs</code> 从 PDF 抽取文字自动排版，版式和图片以<a href="https://github.com/cloudsmithy/aws_game/blob/master/docs/%E6%89%8B%E5%86%8C/1-%E7%8E%A9%E5%AE%B6/%E9%80%9F%E6%9F%A5%E5%8D%A1.pdf">原版 PDF</a> 为准。</footer>
+</div>
+</body>
+</html>

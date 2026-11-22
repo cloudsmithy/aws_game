@@ -1,4 +1,5 @@
-# 自建联机服务：PeerJS 信令（PeerServer）+ TURN 中继（coturn），前面 Caddy 自动申请 HTTPS 证书。
+# 自建部署：游戏网站 + PeerJS 信令（PeerServer）+ TURN 中继（coturn），前面 Caddy 自动申请 HTTPS 证书。
+# 游戏页面从本站读 peer-config.json，默认就连这里的信令服务器（GitHub Pages 上没有这个文件，走公共 PeerJS）。
 # 用法和对外开放前要确认的事见同目录 README.md。
 #
 # 默认只监听本机（PUBLIC_BIND=127.0.0.1）：直接 up 起来不会对外开放任何端口。
@@ -24,10 +25,12 @@ services:
       PEER_DOMAIN: ${PEER_DOMAIN:?在 .env 里写 PEER_DOMAIN=你的信令域名}
       ACME_EMAIL: ${ACME_EMAIL:?在 .env 里写 ACME_EMAIL=申请证书用的邮箱}
     ports:
-      - "${PUBLIC_BIND:-127.0.0.1}:443:443"      # wss:// 信令
+      - "${PUBLIC_BIND:-127.0.0.1}:443:443"      # 游戏网站 + wss:// 信令
       - "${PUBLIC_BIND:-127.0.0.1}:80:80"        # 只用来申请、续期证书（HTTP-01），其余请求跳 https
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../../code:/srv/site:ro                  # 游戏网站（仓库的 code/，先 cd web && npm run build 打包好）
+      - ../../docs/更新说明.html:/srv/site/docs/更新说明.html:ro   # 游戏里「更新说明」的链接
       - caddy-data:/data
       - caddy-config:/config
     networks: [peer]

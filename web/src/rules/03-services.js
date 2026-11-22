@@ -177,7 +177,7 @@ export const LANG_KEY = 'aws-tycoon-lang';   // 记住上次选的语言：根�
 // 有哪些语言：每种语言用它自己的写法（不翻译）。中文版在 code/index.html，别的语言在 code/<代码>/index.html（tools/i18n.mjs build <代码> 按 i18n/<代码>.json 生成）。
 // 以后加语言：这里加一行，再出一份 i18n/<代码>.json
 export let LANGS = __rv(() => ([{ code: 'zh', name: _t(341, "简体中文") }, { code: 'en', name: 'English' }, { code: 'ja', name: _t(342, "日本語") }]), v => { LANGS = v; }, () => LANGS);
-export let GAME_VERSION = __rv(() => ({ major: 1, round: 16, name: _t(344, "第十六轮"), title: _t(345, "受邀观战、联机鉴权、棋盘对齐、下线改规则"), commits: 150, changes: 459, since: '2026-10-20', build: '6b3f2bb', time: '2026-11-21 08:27' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
+export let GAME_VERSION = __rv(() => ({ major: 1, round: 19, name: _t(5401, "第十九轮"), title: _t(5402, "Health 扩展包、多人局、信令可选"), commits: 158, changes: 503, since: '2026-10-20', build: 'd244e21', time: '2026-11-22 04:50' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
 export let SQ = __rv(() => (LAYOUT.map(k => SVC[k] ? { t: 'prop', k, icon: k, ...SVC[k] } : UTIL[k] ? { t: 'util', k, icon: k, ...UTIL[k] } : { k, ...SPECIAL[k] })), v => { SQ = v; }, () => SQ);
 export const IX = {}; SQ.forEach((s, i) => { if (!(s.k in IX)) IX[s.k] = i; });
 export const GRP = g => SQ.map((s, i) => s.g === g ? i : -1).filter(i => i >= 0);

@@ -7,7 +7,7 @@ import { dlcOn } from '../rules/05-dlc.js';
 import { askQuestion, pickQuestion, qPoolS } from '../rules/06-qbank.js';
 import { P, S, availCard, cur, log, nm, ownedBy, sqn, winTimed } from './07-state.js';
 import { credit, pay } from './08-money.js';
-import { bringOnline, canOnline, offRounds, turnKey } from './09-rent.js';
+import { bringOnline, canOnline, downTick, offRounds, turnKey } from './09-rent.js';
 import { goReiCards, jailMax, moveSteps, sendToJail } from './13-move.js';
 import { land } from './15-land.js';
 import { drawReinvent } from './18-reinvent.js';
@@ -118,6 +118,7 @@ async function startTurn() {
   const p = cur();
   S.diceQ = null;   // 上一位没走到 afterAction 就结束（三连对子进维护窗口等）时剩下的点数不留给下一位
   S.actionUsed = false; S.doubles = 0; S.again = false; S.lastCard = null; S.reiBought = false; S.aucFx = null;
+  downTick(p);   // 强制下线到期恢复（DDoS、Health 卡），不管开没开高速部署
   if (dlcOn('speed')) speedTurnStart(p);
   if (p.rentBoost && --p.rentBoostTurns <= 0) { p.rentBoost = 0; log(_tf(2932, "{$0} 的「{$1}」结束了", nm(p), roleOf(p).sk.n)); }
   if (p.subsTurns > 0) { p.subsTurns--; S.players.filter(o => o.alive && o.id !== p.id).forEach(o => pay(o, p, p.subsAmt, 'card')); log(_tf(2933, "{$0} 的「{$1}」：每位对手付订阅费 ${$2}（还剩 {$3} 次）", nm(p), roleOf(p).sk.n, p.subsAmt, p.subsTurns)); await resolveDebts(); if (checkOver()) return; }

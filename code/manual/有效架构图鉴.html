@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>有效架构图鉴 · 亚马逊云科技 User Group 云上大亨</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="k">MANUAL · 图鉴</div>
+<h1>有效架构图鉴</h1>
+<p>48 个有效架构：组成、怎么搭、至少要花多少、额外加成，以及串联收费</p>
+<nav class="links"><a href="index.html">← 全部手册</a><a href="https://github.com/cloudsmithy/aws_game/blob/master/docs/%E6%89%8B%E5%86%8C/5-%E5%9B%BE%E9%89%B4/%E6%9C%89%E6%95%88%E6%9E%B6%E6%9E%84%E5%9B%BE%E9%89%B4.pdf">原版 PDF（GitHub）</a></nav>
+<nav class="toc"><a href="#s1">一 有效架构是什么</a><a href="#s2">二 全部 48 个架构一览</a><a href="#s3">三 每个架构的组成</a><a href="#s52">四 怎么凑比较快</a></nav>
+</header>
+<section>
+<p class="muted"><b>免责声明</b>：游戏里特定亚马逊云科技生成式人工智能相关的服务仅在亚马逊云科技海外区域可用，亚马逊云科技 User Group 仅为帮助您了解行业前沿技术和发展海外业务选择推介该服务。亚马逊云科技中国区域相关云服务由西云数据和光环新网运营，具体信息以中国区域官网为准。游戏内价格为虚构，不代表实际定价；$ 是游戏币单位。</p>
+</section>
+<section>
+<h2 id="s1">一 有效架构是什么</h2>
+<p>把几块服务组成一套真实能跑的架构（比如 ELB → EC2 → RDS），就是「有效架构」。凑齐以后：</p>
+<ul>
+<li>联合收费：别人落在其中任意一块上，按整套架构所有服务的过路费加起来收；被打成 Impaired 的那块这次不算。</li>
+<li>串联收费：一块服务同时在几个生效架构里时，几个架构串在一起收，共用的服务只算一次。</li>
+<li>估值：每个生效的架构 +$200（打满轮数时排名用）。</li>
+<li>六大支柱：每个生效的架构给「性能效率」支柱加 1 分。</li>
+<li>有些架构还有额外加成（下表最后一列），比如容器组升级费减半、免疫某张 Health 卡。</li>
+<li>架构里的服务要都在手上、而且在运行：下线的、被 DDoS 打下线的服务不算持有，架构会暂时失效。</li>
+<li>写着「A 或 B」的格子，有其中一个就能凑成；几块都在手上，联合收费时都算进去。标着「可选」的那块不用也能凑成，有的话一起收。</li>
+<li>万能服务：CloudWatch、CloudTrail、Config 什么架构都能绑；KMS 只能绑有存储或数据库的架构；VPC 只要架构里有一块能接进 VPC 的服务就能绑。每块万能服务绑一个架构：缺一块就顶上，已经凑齐的就并进去一起收；绑了不能换。</li>
+</ul>
+</section>
+<section>
+<h2 id="s2">二 全部 48 个架构一览</h2>
+<div class="tw"><table>
+<thead><tr><th>架构</th><th>组成</th><th>至少要花</th><th>额外加成</th></tr></thead>
+<tbody>
+<tr><td>Serverless API</td><td>（可选：CloudFront） + （可选：S3） +（可选：Cognito） + API Gateway + Lambda + DynamoDB 或 Aurora</td><td>$680</td><td></td></tr>
+<tr><td>经典三层 Web</td><td>（可选：Route 53） + （可选：CloudFront） + ELB + （可选：Cognito） + EC2 或 ECS + RDS 或 Aurora + （可选：OpenSearch）</td><td>$520</td><td></td></tr>
+<tr><td>容器平台</td><td>ECR + ECS 或 EKS + ELB</td><td>$500</td><td>容器组升级费减半</td></tr>
+<tr><td>事件驱动</td><td>EventBridge + Step Functions + Lambda</td><td>$720</td><td></td></tr>
+<tr><td>订单削峰</td><td>EC2 或 ECS + SQS + Lambda + （可选：DynamoDB 或 RDS 或 Aurora）</td><td>$560</td><td>免疫「流量暴增」，扛住了还能领钱</td></tr>
+<tr><td>图片缩略图</td><td>S3 + （可选：EventBridge） + Lambda + CloudFront</td><td>$680</td><td></td></tr>
+<tr><td>GenAI 聊天机器人</td><td>（可选：Cognito） + API Gateway + Lambda + （可选：AgentCore） + Bedrock 或 SageMaker AI</td><td>$900</td><td></td></tr>
+<tr><td>数仓 ETL</td><td>S3 + Glue + Redshift</td><td>$700</td><td></td></tr>
+<tr><td>访问日志分析</td><td>ELB + S3 + （可选：Glue） + Athena</td><td>$520</td><td></td></tr>
+<tr><td>文件排队处理</td><td>S3 + （可选：EventBridge） + SQS + Lambda + （可选：DynamoDB）</td><td>$520</td><td></td></tr>
+<tr><td>威胁自动响应</td><td>GuardDuty + EventBridge + Step Functions + （可选：Lambda）</td><td>$880</td><td>免疫「暴露在公网的实例被 SSH 暴力破解」和「Root 密钥被推到了 GitHub」</td></tr>
+<tr><td>实时日志分析</td><td>Kinesis + Lambda + OpenSearch 或 Redshift</td><td>$860</td><td></td></tr>
+<tr><td>Serverless 数据湖</td><td>（可选：Kinesis） + S3 + Glue + Athena</td><td>$680</td><td>每次经过或停在 Startup 扶持多领 $50</td></tr>
+<tr><td>静态网站</td><td>Route 53 + CloudFront + （可选：WAF） + S3</td><td>$620</td><td></td></tr>
+<tr><td>GenAI 知识库（RAG）</td><td>S3 + （可选：Lambda） + OpenSearch 或 Aurora + Bedrock</td><td>$840</td><td>别人落在你的 Bedrock 上，额外付你 $50</td></tr>
+<tr><td>ML 训练与部署</td><td>S3 或 EFS + ECR + SageMaker AI</td><td>$700</td><td></td></tr>
+<tr><td>高可用入口</td><td>Route 53 + （可选：CloudFront） +（可选：WAF） + ELB + EC2 + （可选：VPC）</td><td>$400</td><td>EC2 升「跨 AZ Auto Scaling」（多 AZ 那一级）半价：ELB 本来就跨多个 AZ，在另一个 AZ 再起一台实例挂进目标组就行</td></tr>
+<tr><td>缓存加速</td><td>（可选：Cognito） + ELB + EC2 或 ECS + ElastiCache + RDS 或 Aurora 或 DynamoDB</td><td>$780</td><td></td></tr>
+<tr><td>防勒索备份</td><td>EBS + S3 + GuardDuty + （可选：KMS）</td><td>$560</td><td>免疫「勒索软件加密了数据」（安全攻防 DLC）：快照和对象都锁着，攻击者删不掉，直接从干净的快照恢复</td></tr>
+<tr><td>托管智能体</td><td>Bedrock + AgentCore + Lambda</td><td>$820</td><td></td></tr>
+<tr><td>智能客服</td><td>（可选：Cognito） + API Gateway + AgentCore + Lambda + DynamoDB</td><td>$780</td><td></td></tr>
+<tr><td>运维助手智能体</td><td>EventBridge + AgentCore + Lambda</td><td>$560</td><td></td></tr>
+<tr><td>数据分析智能体</td><td>AgentCore + Athena + S3</td><td>$480</td><td></td></tr>
+<tr><td>API 查询服务</td><td>API Gateway + Lambda + RDS 或 Aurora + DMS + OpenSearch</td><td>$1420</td><td></td></tr>
+<tr><td>定时启停 EC2</td><td>EventBridge + Lambda + EC2</td><td>$560</td><td></td></tr>
+<tr><td>ELB 日志检索</td><td>ELB + S3 + （可选：EventBridge） + Lambda + OpenSearch</td><td>$780</td><td></td></tr>
+<tr><td>Zero-ETL 实时数仓</td><td>Aurora 或 RDS 或 DynamoDB + Redshift + SageMaker AI</td><td>$1040</td><td></td></tr>
+<tr><td>Zero-ETL 商品搜索</td><td>DynamoDB + OpenSearch + Lambda +（可选：API Gateway）</td><td>$820</td><td></td></tr>
+<tr><td>带登录的 API</td><td>Cognito + API Gateway + Lambda +（可选：DynamoDB 或 Aurora）</td><td>$520</td><td></td></tr>
+<tr><td>ALB 登录认证</td><td>Cognito + ELB + EC2 或 ECS</td><td>$320</td><td></td></tr>
+<tr><td>App 直传 S3</td><td>Cognito + S3 + CloudFront</td><td>$540</td><td></td></tr>
+<tr><td>带登录的智能体</td><td>Cognito + AgentCore + Lambda</td><td>$400</td><td></td></tr>
+<tr><td>边缘登录校验</td><td>Cognito + CloudFront + Lambda + （可选：S3）</td><td>$700</td><td></td></tr>
+<tr><td>S3 公开自动关闭</td><td>S3 + Config + EventBridge</td><td>$450</td><td></td></tr>
+<tr><td>安全组自动收紧</td><td>EC2 + Config + EventBridge</td><td>$490</td><td>免疫「暴露在公网的实例被 SSH 暴力破解」：对整个互联网开着的 22 端口几分钟内就被关掉</td></tr>
+<tr><td>电商下单流程</td><td>API Gateway + Step Functions + Lambda + DynamoDB + （可选：SQS）</td><td>$940</td><td></td></tr>
+<tr><td>安全防护基线</td><td>（可选：WAF） + GuardDuty + Inspector + Config + （可选：KMS）</td><td>$910</td><td>免疫「安全审计没过」：检测、扫描、合规检查都有记录</td></tr>
+<tr><td>DynamoDB 变更事件</td><td>DynamoDB + Lambda + EventBridge</td><td>$700</td><td></td></tr>
+<tr><td>数据库变更入湖</td><td>RDS 或 Aurora + DMS + Kinesis + S3 或 Redshift 或 OpenSearch + （可选：EventBridge）</td><td>$980</td><td></td></tr>
+<tr><td>缓存自动刷新</td><td>DynamoDB + （可选：EventBridge） + Lambda + ElastiCache</td><td>$760</td><td></td></tr>
+<tr><td>数据库迁上云</td><td>DMS + RDS 或 Aurora + EC2</td><td>$720</td><td></td></tr>
+<tr><td>死信队列兜底</td><td>EventBridge + Lambda + SQS</td><td>$700</td><td></td></tr>
+<tr><td>漏洞管理</td><td>ECR + Inspector + ECS 或 EKS 或 EC2 + （可选：EventBridge）</td><td>$660</td><td>免疫「高危 CVE 爆出」</td></tr>
+<tr><td>多机共享文件</td><td>ELB + EC2 或 ECS 或 EKS + EFS + （可选：VPC）</td><td>$340</td><td></td></tr>
+<tr><td>AI Agent 工作流</td><td>Step Functions + Lambda + Bedrock</td><td>$980</td><td></td></tr>
+<tr><td>实时推荐</td><td>Kinesis + Lambda + SageMaker AI + DynamoDB 或 ElastiCache</td><td>$1220</td><td></td></tr>
+<tr><td>全球 API 加速</td><td>CloudFront + WAF + API Gateway +（可选：Lambda）</td><td>$1020</td><td></td></tr>
+<tr><td>DDoS 防护</td><td>CloudFront 或 ELB + Shield Advanced + WAF</td><td>$960</td><td>WAF 不交每圈的固定费用，升「托管规则」「限速规则」半价：Shield Advanced 订阅包了受保护资源上 WAF 的标准费用（Bot Control 不在里面，照原价）</td></tr>
+</tbody></table></div>
+</section>
+<section>
+<h2 id="s3">三 每个架构的组成</h2>
+<h3 id="s4">Serverless API</h3>
+<p class="flow">可选 CloudFront → 可选 S3 + 可选 Cognito ⇄ API Gateway → Lambda → DynamoDB 或 Aurora</p>
+<ul>
+<li>怎么搭：（可选）CloudFront 分发前端页面 +（可选）页面放在 S3 里 +（可选）用户用 Cognito 登录，API Gateway 先验令牌（⇄）→ API Gateway 接请求 → Lambda 处理 → DynamoDB 或 Aurora（Serverless v2）存数据；前后端都配上就是一个没有服务器要管的完整网站</li>
+<li>至少要花：$680（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s5">经典三层 Web</h3>
+<p class="flow">可选 Route 53 → 可选 CloudFront → ELB ⇄ 可选 Cognito → EC2 或 ECS → RDS 或 Aurora + 可选 OpenSearch</p>
+<ul>
+<li>怎么搭：（可选）Route 53 解析域名 →（可选）CloudFront 就近缓存静态内容、在边缘挡掉一部分攻击 → ELB 把请求分到多个 AZ →（可选）ALB 先让没登录的用户去 Cognito 登录（⇄）→ EC2 或 ECS 跑应用 → RDS 或 Aurora 存数据 +（可选）应用写库的同时把要搜的内容也写进 OpenSearch，站内搜索走它，不压数据库</li>
+<li>至少要花：$520（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s6">容器平台</h3>
+<p class="flow">ECR → ECS 或 EKS ← ELB</p>
+<ul>
+<li>怎么搭：镜像放 ECR，ECS 或 EKS 拉镜像跑起来 ← ELB 把外面的请求分给这些容器</li>
+<li>至少要花：$500（每一格取最便宜的那个）</li>
+<li>额外加成：容器组升级费减半</li>
+</ul>
+<h3 id="s7">事件驱动</h3>
+<p class="flow">EventBridge → Step Functions → Lambda</p>
+<ul>
+<li>怎么搭：EventBridge 收事件 → Step Functions 编排 → Lambda 执行每一步</li>
+<li>至少要花：$720（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s8">订单削峰</h3>
+<p class="flow">EC2 或 ECS → SQS → Lambda → 可选 或</p>
+<ul>
+<li>怎么搭：EC2 或 ECS 上的网站收订单 → SQS 排队削峰 → Lambda 按自己的节奏处理 →（可选）订单写进 DynamoDB、RDS 或 Aurora；大促时网站不被压垮</li>
+<li>至少要花：$560（每一格取最便宜的那个）</li>
+<li>额外加成：免疫「流量暴增」，扛住了还能领钱</li>
+</ul>
+<h3 id="s9">图片缩略图</h3>
+<p class="flow">S3 → 可选 EventBridge → Lambda → CloudFront</p>
+<ul>
+<li>怎么搭：图片上传到 S3 →（可选）EventBridge 先收到 S3 事件并按规则过滤（只要图片、只要某个目录）再分发 → Lambda 生成缩略图，写回 S3 → CloudFront 从 S3 取图就近分发</li>
+<li>至少要花：$680（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s10">GenAI 聊天机器人</h3>
+<p class="flow">可选 Cognito ⇄ API Gateway → Lambda → 可选 AgentCore → Bedrock 或 SageMaker AI</p>
+<ul>
+<li>怎么搭：（可选）用户先用 Cognito 登录（⇄）→ API Gateway 收消息 → Lambda 组装提示词和上下文 →（可选）交给 AgentCore 上跑的智能体，记住对话、按需调工具 → Bedrock 或 SageMaker AI 上部署的模型生成回答</li>
+<li>至少要花：$900（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s11">数仓 ETL</h3>
+<p class="flow">S3 → Glue → Redshift</p>
+<ul>
+<li>怎么搭：原始数据落 S3 → Glue 作业清洗转换 → 加载进 Redshift 做报表和 BI 分析</li>
+<li>至少要花：$700（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s12">访问日志分析</h3>
+<p class="flow">ELB → S3 → 可选 Glue → Athena</p>
+<ul>
+<li>怎么搭：ALB 把每个请求的访问日志投递到 S3 →（可选）Glue 爬虫建好表结构和分区 → Athena 直接用 SQL 查慢请求、5xx 和来源 IP，按扫描量计费</li>
+<li>至少要花：$520（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s13">文件排队处理</h3>
+<p class="flow">S3 → 可选 EventBridge → SQS → Lambda → 可选 DynamoDB</p>
+<ul>
+<li>怎么搭：文件上传到 S3 →（可选）事件先进 EventBridge，按规则过滤、转发 → SQS 排队 → Lambda 一批批取出来处理，失败的会重试 →（可选）处理结果记进 DynamoDB</li>
+<li>至少要花：$520（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s14">威胁自动响应</h3>
+<p class="flow">GuardDuty → EventBridge → Step Functions → 可选 Lambda</p>
+<ul>
+<li>怎么搭：GuardDuty 发现异常 → EventBridge 路由 → Step Functions 按剧本自动处置 →（可选）Lambda 执行隔离实例、吊销密钥这些动作</li>
+<li>至少要花：$880（每一格取最便宜的那个）</li>
+<li>额外加成：免疫「暴露在公网的实例被 SSH 暴力破解」和「Root 密钥被推到了 GitHub」</li>
+</ul>
+<h3 id="s15">实时日志分析</h3>
+<p class="flow">Kinesis → Lambda → OpenSearch 或 Redshift</p>
+<ul>
+<li>怎么搭：Kinesis 收数据流 → Lambda 处理后写进 OpenSearch 检索；Redshift 也能直接从 Kinesis 流式摄取，用 SQL 分析</li>
+<li>至少要花：$860（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s16">Serverless 数据湖</h3>
+<p class="flow">可选 Kinesis → S3 → Glue → Athena</p>
+<ul>
+<li>怎么搭：（可选）Kinesis 把网站和 App 的点击流实时写进来，Data Firehose 按分钟落盘 → S3 按小时分区存原始数据 → Glue 爬虫识别表结构、建好数据目录 → Athena 直接用 SQL 查，按扫描量计费</li>
+<li>至少要花：$680（每一格取最便宜的那个）</li>
+<li>额外加成：每次经过或停在 Startup 扶持多领 $50</li>
+</ul>
+<h3 id="s17">静态网站</h3>
+<p class="flow">Route 53 → CloudFront + 可选 WAF → S3</p>
+<ul>
+<li>怎么搭：Route 53 解析域名 → CloudFront 全球缓存 +（可选）WAF 挡掉恶意请求 → S3 存网页文件</li>
+<li>至少要花：$620（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s18">GenAI 知识库（RAG）</h3>
+<p class="flow">S3 → 可选 Lambda → OpenSearch 或 Aurora → Bedrock</p>
+<ul>
+<li>怎么搭：资料放 S3 →（可选）Lambda 自定义怎么切分、清洗文档 → Bedrock 知识库把文档切块、算向量，存进 OpenSearch 或 Aurora PostgreSQL（pgvector）→ Bedrock 检索相关片段后生成回答，回答里带着出处；前面接 API Gateway、Lambda 就是企业知识问答（见 GenAI 聊天机器人）</li>
+<li>至少要花：$840（每一格取最便宜的那个）</li>
+<li>额外加成：别人落在你的 Bedrock 上，额外付你 $50</li>
+</ul>
+<h3 id="s19">ML 训练与部署</h3>
+<p class="flow">S3 或 EFS + ECR → SageMaker AI</p>
+<ul>
+<li>怎么搭：训练数据放 S3 或 EFS → 自己的训练镜像放 ECR → SageMaker AI 拉镜像、读数据，训练并部署</li>
+<li>至少要花：$700（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s20">高可用入口</h3>
+<p class="flow">Route 53 → 可选 CloudFront + 可选 WAF → ELB → EC2 +</p>
+<ul>
+<li>怎么搭：Route 53 健康检查 →（可选）CloudFront 在边缘接住请求 +（可选）WAF 过滤恶意流量 → ELB 跨 AZ 分发 → EC2 跑应用，一台坏了 ELB 自动不再往它上面转 +（可选）自己的 VPC 划好跨 AZ 的公有、私有子网，EC2 放私有子网</li>
+<li>至少要花：$400（每一格取最便宜的那个）</li>
+<li>额外加成：EC2 升「跨 AZ Auto Scaling」（多 AZ 那一级）半价：ELB 本来就跨多个 AZ，在另一个 AZ 再起一台实例挂进目标组就行</li>
+</ul>
+<h3 id="s21">缓存加速</h3>
+<p class="flow">可选 Cognito ⇄ ELB → EC2 或 ECS → ElastiCache → RDS 或 Aurora 或 DynamoDB 怎么搭：（可选）ALB 先让没登录的用户去 Cognito 登录（⇄）→ ELB 分发流量 → EC2 或 ECS 跑应用 → 先查 ElastiCache 里的热点数据，没命中再去查 RDS、Aurora 或 DynamoDB，查到的写回缓存 → 数据库压 力小、响应快 至少要花：$780（每一格取最便宜的那个） 额外加成：没有，只有联合收费</p>
+<h3 id="s22">防勒索备份</h3>
+<p class="flow">EBS + S3 + GuardDuty + 可选 KMS</p>
+<ul>
+<li>怎么搭：EBS 快照开快照锁定（合规模式下到期前谁都删不掉，root 用户也不行） + 重要文件放进开了对象锁定的 S3 桶 + GuardDuty 恶意软件防护扫描 EBS 卷和新传进 S3 的文件 +（可选）KMS 客户托管密钥加密快照和对象，密钥权限单独管；中了勒索，从扫过、没发现威胁的快照恢复</li>
+<li>至少要花：$560（每一格取最便宜的那个）</li>
+<li>额外加成：免疫「勒索软件加密了数据」（安全攻防 DLC）：快照和对象都锁着，攻击者删不掉，直接从干净的快照恢复</li>
+</ul>
+<h3 id="s23">托管智能体</h3>
+<p class="flow">Bedrock ⇄ AgentCore → Lambda</p>
+<ul>
+<li>怎么搭：AgentCore Runtime 托管运行智能体，一轮轮调 Bedrock 上的模型推理、决定下一步（⇄ 是来回调用）→ 通过 AgentCore Gateway 把 Lambda 函数接成 MCP 工具，去调业务接口</li>
+<li>至少要花：$820（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s24">智能客服</h3>
+<p class="flow">可选 Cognito ⇄ API Gateway → AgentCore → Lambda → DynamoDB</p>
+<ul>
+<li>怎么搭：（可选）用户先用 Cognito 登录（⇄）→ API Gateway 收用户消息 → AgentCore Runtime 跑客服智能体，Memory 记住这位用户聊过什么 → 通过 AgentCore Gateway 调 Lambda 工具 → Lambda 查</li>
+<li>DynamoDB 里的订单、工单，智能体给出回答或直接办好</li>
+<li>至少要花：$780（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s25">运维助手智能体</h3>
+<p class="flow">EventBridge → AgentCore → Lambda</p>
+<ul>
+<li>怎么搭：EventBridge 收到告警和 Health 事件 → AgentCore 智能体读日志、查指标找根因 → 通过 Gateway 调 Lambda 执行修复（重启、扩容、回滚）</li>
+<li>至少要花：$560（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s26">数据分析智能体</h3>
+<p class="flow">AgentCore → Athena → S3</p>
+<ul>
+<li>怎么搭：用户用大白话提问 → AgentCore 智能体写 SQL，用 Code Interpreter 跑分析、画图 → Athena 直接查 S3 里的数据</li>
+<li>至少要花：$480（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s27">API 查询服务</h3>
+<p class="flow">API Gateway → Lambda → RDS 或 Aurora → DMS → OpenSearch</p>
+<ul>
+<li>怎么搭：API Gateway 接请求 → Lambda 处理：写操作进 RDS 或 Aurora（SQL Server、MySQL 这类关系库，经 RDS Proxy 复用连接）→ DMS 持续把库里的改动同步进 OpenSearch（CDC，RDS 自己没法把数据推给 OpenSearch，同步就靠它）→ OpenSearch 负责查询和全文检索（不压主库）</li>
+<li>至少要花：$1420（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s28">定时启停 EC2</h3>
+<p class="flow">EventBridge → Lambda → EC2</p>
+<ul>
+<li>怎么搭：EventBridge Scheduler 按时间表触发（比如工作日 9 点开、20 点关）→ Lambda 调 StartInstances、StopInstances（也可以用 Scheduler 的通用目标直接调 EC2 API，不写 Lambda）→ 开发测试用的 EC2 只在上班时间开着；停着的实例不收实例小时费，EBS 卷照收</li>
+<li>至少要花：$560（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s29">ELB 日志检索</h3>
+<p class="flow">ELB → S3 → 可选 EventBridge → Lambda → OpenSearch</p>
+<ul>
+<li>怎么搭：ELB 每 5 分钟把访问日志写进 S3 →（可选）新文件事件先进 EventBridge 再分发 → Lambda 逐行解析 → 写进 OpenSearch，在 Dashboards 上实时搜 5xx、慢请求和可疑 IP</li>
+<li>至少要花：$780（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s30">Zero-ETL 实时数仓</h3>
+<p class="flow">Aurora 或 RDS 或 DynamoDB → Redshift → SageMaker AI</p>
+<ul>
+<li>怎么搭：Aurora、RDS for MySQL 或 DynamoDB 里的业务数据，通过 Zero-ETL 集成几秒内自动同步进 Redshift，不用自己写 ETL 管道 → Redshift 里直接跑报表 → 用 Redshift ML 写一句 SQL，后台交给 SageMaker AI 训练预测模型（比如预测哪些用户要流失）</li>
+<li>至少要花：$1040（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s31">Zero-ETL 商品搜索</h3>
+<p class="flow">DynamoDB → OpenSearch ⇄ Lambda ← 可选 API Gateway</p>
+<ul>
+<li>怎么搭：DynamoDB 存商品和订单 → 通过 Zero-ETL 集成（OpenSearch Ingestion 管道）自动把改动同步进 OpenSearch，不用自己写同步代码；Lambda 接搜索请求，去 OpenSearch 里做全文、模糊和按距离搜索（⇄）←（可选）请求从 API Gateway 进来</li>
+<li>至少要花：$820（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s32">带登录的 API</h3>
+<p class="flow">Cognito ⇄ API Gateway → Lambda → 可选 DynamoDB 或 Aurora</p>
+<ul>
+<li>怎么搭：用户先在 Cognito 用户池登录，拿到 JWT 令牌 → 请求带着令牌打到 API Gateway，Cognito 授权方先验令牌（⇄），没登录的直接挡回去 → 验过的请求才转给 Lambda，从令牌里就知道是谁 →（可选）读写 DynamoDB 或 Aurora</li>
+<li>至少要花：$520（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s33">ALB 登录认证</h3>
+<p class="flow">Cognito ⇄ ELB → EC2 或 ECS</p>
+<ul>
+<li>怎么搭：用户访问 ALB，监听器规则里有一步认证：没登录的先跳到 Cognito 托管登录页，登录完回到 ALB（⇄）→ ALB 把用户信息放进请求头转给 EC2 或 ECS，老应用不用自己写登录</li>
+<li>至少要花：$320（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s34">App 直传 S3</h3>
+<p class="flow">Cognito + S3 → CloudFront</p>
+<ul>
+<li>怎么搭：App 先找 Cognito 身份池换一份临时凭证（权限只够写这位用户自己的目录），拿着凭证直接把照片、视频传进 S3，不经过自己的服务器 → CloudFront 把这些文件就近分发出去</li>
+<li>至少要花：$540（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s35">带登录的智能体</h3>
+<p class="flow">Cognito ⇄ AgentCore → Lambda</p>
+<ul>
+<li>怎么搭：用户先用 Cognito 登录拿到令牌 → AgentCore Runtime 只接带有效令牌的请求（入站认证，⇄），AgentCore Identity 知道这一次是谁在用 → 智能体通过 Gateway 调 Lambda 办事，按这位用户自己的权限来</li>
+<li>至少要花：$400（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s36">边缘登录校验</h3>
+<p class="flow">Cognito ⇄ CloudFront + Lambda → 可选 S3</p>
+<ul>
+<li>怎么搭：用户先在 Cognito 登录拿到令牌 → 每个请求到了 CloudFront 边缘节点，Lambda@Edge 先验令牌，没登录的直接跳去登录页（⇄）→ 验过的才回源取内容（可选：源站是 S3）；私有文档、付费视频不会被人拿着链接直接下载</li>
+<li>至少要花：$700（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s37">S3 公开自动关闭</h3>
+<p class="flow">S3 ⇄ Config → EventBridge</p>
+<ul>
+<li>怎么搭：S3 桶被人设成公开 → Config 托管规则（s3-bucket-public-read-prohibited 这类）马上发现，自动修正调 Systems Manager 自动化文档，把这个桶的「阻止公共访问」打开（⇄）→ 合规状态变化的事件发到 EventBridge，转给安全团队（邮件、聊天群）</li>
+<li>至少要花：$450（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s38">安全组自动收紧</h3>
+<p class="flow">EC2 ⇄ Config → EventBridge</p>
+<ul>
+<li>怎么搭：EC2 的安全组被人改成对 0.0.0.0/0 开 22 端口 → Config 规则 restricted-ssh 发现了，自动修正调 Systems Manager 自动化文档 AWS-DisablePublicAccessForSecurityGroup 删掉这条规则（⇄）→ EventBridge 把这件事通知到安全团队</li>
+<li>至少要花：$490（每一格取最便宜的那个）</li>
+<li>额外加成：免疫「暴露在公网的实例被 SSH 暴力破解」：对整个互联网开着的 22 端口几分钟内就被关掉</li>
+</ul>
+<h3 id="s39">电商下单流程</h3>
+<p class="flow">API Gateway → Step Functions → Lambda → DynamoDB + 可选 SQS</p>
+<ul>
+<li>怎么搭：API Gateway 接下单请求 → Step Functions 按步骤编排：扣库存、扣款、建发货单，哪一步失败就把前面做过的撤回 → 每一步由 Lambda 执行 → 订单状态记在 DynamoDB +（可选）发货任务放进 SQS，仓库系统按自己的节奏取</li>
+<li>至少要花：$940（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s40">安全防护基线</h3>
+<p class="flow">可选 WAF + GuardDuty + Inspector + Config + 可选 KMS 怎么搭：（可选）WAF 挡在入口过滤恶意请求 + GuardDuty 盯着账户和网络里的异常行为 + Inspector 持续扫 EC2、容器镜像和 Lambda 的漏洞 + Config 检查配置合不合规，不合规的自动改回来 +（可选）KMS 统一管 加密密钥、自动轮换 至少要花：$910（每一格取最便宜的那个） 额外加成：免疫「安全审计没过」：检测、扫描、合规检查都有记录</p>
+<h3 id="s41">DynamoDB 变更事件</h3>
+<p class="flow">DynamoDB → Lambda → EventBridge</p>
+<ul>
+<li>怎么搭：订单表一有新增、修改，DynamoDB Streams 按顺序记下每条变更（CDC）→ Lambda 读变更流（也可以用 EventBridge Pipes 直接接，不写代码）→ EventBridge 收到 Lambda 转好的业务事件，积分、通知、风控这些下游系统各自订阅</li>
+<li>至少要花：$700（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s42">数据库变更入湖</h3>
+<p class="flow">RDS 或 Aurora → DMS → Kinesis → S3 或 或 OpenSearch + 可选</p>
+<ul>
+<li>怎么搭：DMS 持续抓 RDS 或 Aurora 的变更日志（CDC：MySQL 的 binlog、PostgreSQL 的 WAL）→ 写进 Kinesis Data Streams → Data Firehose 落进 S3 数据湖或写进 OpenSearch 做实时检索，或者 Redshift 流式摄取直接从 Kinesis 读，几秒内就能查到 +（可选）DMS 任务的状态变化发到 EventBridge，同步断了马上告警</li>
+<li>至少要花：$980（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s43">缓存自动刷新</h3>
+<p class="flow">DynamoDB → 可选 EventBridge → Lambda → ElastiCache</p>
+<ul>
+<li>怎么搭：DynamoDB 里的数据一改，Streams 按顺序记下变更 →（可选）用 EventBridge Pipes 过滤、转发，不用自己写轮询 → Lambda 去 ElastiCache 删掉或刷新对应的缓存 → 读到的总是新数据，不用等缓存过期</li>
+<li>至少要花：$760（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s44">数据库迁上云</h3>
+<p class="flow">DMS → RDS 或 Aurora ← EC2</p>
+<ul>
+<li>怎么搭：DMS 把机房的数据库全量搬到 RDS 或 Aurora（换引擎的先用 Schema Conversion 转表结构和存储过程），之后持续同步变更，新旧库一直对得上 ← 割接那一刻应用切到云上的 EC2 连新库，停机只要几分钟</li>
+<li>至少要花：$720（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s45">死信队列兜底</h3>
+<p class="flow">EventBridge → Lambda → SQS</p>
+<ul>
+<li>怎么搭：EventBridge 把事件投给 Lambda → Lambda 处理失败、重试次数用完的事件，转进 SQS 死信队列（DLQ）存着，不会丢 → CloudWatch 告警盯着死信队列里的消息数；修好 bug 以后用 DLQ 重驱把消息送回去重新处理</li>
+<li>至少要花：$700（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s46">漏洞管理</h3>
+<p class="flow">ECR ⇄ Inspector → ECS 或 EKS 或 EC2 + 可选 EventBridge 怎么搭：镜像推进 ECR，Inspector 马上扫一遍漏洞（⇄）→ 没有高危漏洞的镜像才部署到 ECS、EKS 或 EC2；跑起来以后 Inspector 继续盯着，新爆出的 CVE 也能发现 +（可选）Inspector 的发现发到 EventBridge，自动通知负责人、开工单 至少要花：$660（每一格取最便宜的那个） 额外加成：免疫「高危 CVE 爆出」</p>
+<h3 id="s47">多机共享文件</h3>
+<p class="flow">ELB → EC2 或 ECS 或 EKS → EFS + 可选 VPC</p>
+<ul>
+<li>怎么搭：ELB 把请求分到多台机器 → EC2、ECS 或 EKS 上的应用都挂同一个 EFS 文件系统 → 用户上传的文件写一次，哪台接请求都读得到，加机器不用同步文件 +（可选）VPC 每个 AZ 的子网里都有 EFS 挂载点</li>
+<li>至少要花：$340（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s48">AI Agent 工作流</h3>
+<p class="flow">Step Functions → Lambda → Bedrock</p>
+<ul>
+<li>怎么搭：Step Functions 编排多步任务 → Lambda 调用工具和接口 → Bedrock 推理决定下一步</li>
+<li>至少要花：$980（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s49">实时推荐</h3>
+<p class="flow">Kinesis → Lambda ⇄ SageMaker AI → DynamoDB 或 ElastiCache</p>
+<ul>
+<li>怎么搭：Kinesis 收用户的点击、浏览行为 → Lambda 读流，调 SageMaker AI 的推理端点算推荐（⇄）→ 推荐结果写进 DynamoDB 或 ElastiCache，前端打开页面直接读</li>
+<li>至少要花：$1220（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s50">全球 API 加速</h3>
+<p class="flow">CloudFront + WAF → API Gateway → 可选 Lambda</p>
+<ul>
+<li>怎么搭：CloudFront 在边缘接住请求 + WAF 过滤恶意流量 → API Gateway 处理 →（可选）Lambda 跑后端逻辑</li>
+<li>至少要花：$1020（每一格取最便宜的那个）</li>
+<li>额外加成：没有，只有联合收费</li>
+</ul>
+<h3 id="s51">DDoS 防护</h3>
+<p class="flow">CloudFront 或 ELB + Shield Advanced + WAF</p>
+<ul>
+<li>怎么搭：CloudFront 分发或 ALB 加进 Shield Advanced 保护 → 防应用层攻击要给这个入口关联 WAF Web ACL，至少放一条限速规则；订阅里含 Anti-DDoS 托管规则组，HTTP 洪水几秒内就认出来、拦掉或质询 → 网络层的攻击由 Shield Advanced 直接挡</li>
+<li>至少要花：$960（每一格取最便宜的那个）</li>
+<li>额外加成：WAF 不交每圈的固定费用，升「托管规则」「限速规则」半价：Shield Advanced 订阅包了受保护资源上 WAF 的标准费用（Bot Control 不在里面，照原价）</li>
+</ul>
+</section>
+<section>
+<h2 id="s52">四 怎么凑比较快</h2>
+<ul>
+<li>先看自己手上已经有的服务能凑哪几个：网页里玩家卡会列出「还缺 xx」，鼠标停在架构名上（手机上点一下）能看组成。</li>
+<li>同一块服务可以同时算进好几个架构，比如 Lambda、S3、CloudFront 都很「百搭」，优先买。</li>
+<li>re:Invent 卡「解决方案架构师的建议」会让你飞到某个架构里还缺的、没人买的那块。</li>
+<li>交易的时候，对方差一块就能凑齐的服务，价钱可以要高一点。</li>
+</ul>
+</section>
+<footer>本页由 <code>web/tools/build-manuals.mjs</code> 从 PDF 抽取文字自动排版，版式和图片以<a href="https://github.com/cloudsmithy/aws_game/blob/master/docs/%E6%89%8B%E5%86%8C/5-%E5%9B%BE%E9%89%B4/%E6%9C%89%E6%95%88%E6%9E%B6%E6%9E%84%E5%9B%BE%E9%89%B4.pdf">原版 PDF</a> 为准。</footer>
+</div>
+</body>
+</html>

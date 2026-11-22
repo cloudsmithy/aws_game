@@ -5,7 +5,7 @@ import { COMBOS, comboOpen, slotOpen } from '../rules/04-roles-combos-cards.js';
 import { dlcOn } from '../rules/05-dlc.js';
 import { F, INK, S, active, comboMiss, hasCombo, logRow, nm, ownedBy, owns, wildFree, wildOf, winWA } from '../engine/07-state.js';
 import { runCost, valBreak, valTip } from '../engine/08c-costs.js';
-import { capCost, chainTxt, shownRent, spotMine, upPaidSum } from '../engine/09-rent.js';
+import { capPaidSum, chainTxt, shownRent, spotMine, upPaidSum } from '../engine/09-rent.js';
 import { ask } from './10-modal.js';
 import { refactorCost } from '../engine/17-health.js';
 import { PILLARS, SEC_PILLAR, pillarNeed, pillarParts, pillarTotal, pillars, waRuleText, waTotalNeed } from '../engine/26a-pillars-win.js';
@@ -20,7 +20,7 @@ import { MP } from '../net/40-host-sync.js';
 export function showLedger(id) {
   const p = S.players[id]; if (!p) return;   // 明细、玩法、图鉴、格子介绍、快捷键是查资料窗（view），开在流程弹窗上面一层，不用先等下面的弹窗关掉
   const t = ST(p), v = valBreak(p);
-  const rows = ownedBy(p).map(i => { const pr = S.props[i], s = SQ[i]; return `<tr><td>${awsImg(s.icon)}${s.n}</td><td>${pr.spot ? (spotMine(i) ? `Spot $${pr.spotPaid}` : _t(2587, "Spot（出价看不到）")) : `$${pr.paid ?? s.p}`}</td><td>${s.upg ? lvFull(i, pr.level) : '—'}${pr.cap ? _tf(2588, " · {$0} 个{$1}", pr.cap, capU(s.k)) : ''}${pr.offline ? _t(2589, " · 已下线") : ''}${pr.impaired ? ' · Impaired' : ''}</td><td>\$${upPaidSum(i) + (pr.cap || 0) * capCost(i)}</td><td><b>\$${t.earnBy[i] || 0}</b>${t.hitsBy[i] ? _tf(2590, "<small>（{$0} 次）</small>", t.hitsBy[i]) : ''}</td><td>${_tf(2593, "${$0}/圈 · 累计 ${$1}", runCost(i), t.runBy[i] || 0)}</td><td>${(sr => sr.txt + (sr.cap ? _tf(2591, "（保护期封顶，之后 {$0}）", sr.fullTxt) : '') + (sr.jr ? _t(2592, "（架构联合）") : ''))(shownRent(i))}</td></tr>`; }).join('');
+  const rows = ownedBy(p).map(i => { const pr = S.props[i], s = SQ[i]; return `<tr><td>${awsImg(s.icon)}${s.n}</td><td>${pr.spot ? (spotMine(i) ? `Spot $${pr.spotPaid}` : _t(2587, "Spot（出价看不到）")) : `$${pr.paid ?? s.p}`}</td><td>${s.upg ? lvFull(i, pr.level) : '—'}${pr.cap ? _tf(2588, " · {$0} 个{$1}", pr.cap, capU(s.k)) : ''}${pr.offline ? _t(2589, " · 已下线") : ''}${pr.impaired ? ' · Impaired' : ''}</td><td>\$${upPaidSum(i) + capPaidSum(i)}</td><td><b>\$${t.earnBy[i] || 0}</b>${t.hitsBy[i] ? _tf(2590, "<small>（{$0} 次）</small>", t.hitsBy[i]) : ''}</td><td>${_tf(2593, "${$0}/圈 · 累计 ${$1}", runCost(i), t.runBy[i] || 0)}</td><td>${(sr => sr.txt + (sr.cap ? _tf(2591, "（保护期封顶，之后 {$0}）", sr.fullTxt) : '') + (sr.jr ? _t(2592, "（架构联合）") : ''))(shownRent(i))}</td></tr>`; }).join('');
   const sold = Object.keys(t.earnBy).map(Number).filter(i => !owns(p, i) && t.earnBy[i]);
   const logs = S.log.filter(l => l.includes(nm(p)) || l.includes(`<b style="color:${p.color}">${p.name}</b>`) || l.includes(`<b style="color:${INK[p.color]}">${p.name}</b>`)).slice(0, 120).map(logRow).join('');
   ask({ local: true, cancelable: true, view: true, cls: 'wide', title: _tf(2594, "{$0} 的明细", p.name), html: `<div class="ledger">

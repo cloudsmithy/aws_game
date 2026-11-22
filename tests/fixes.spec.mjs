@@ -60,7 +60,8 @@ test('娱乐模式：re:Invent「上了 Startup Showcase」前进到最近一块
   await start(page, { mode: 'party' });
   await page.evaluate(() => {
     S.players[0].pos = IX.vpc;   // 往前第一格是 ECR（盲盒）
-    window.__to = null; moveTo = async (q, t) => { window.__to = t; q.pos = t; }; land = async () => {};
+    // 旧版走 moveTo，现在「前进到某一格」走 moveSteps（站在目标上时绕一整圈）：两条都记下落点
+    window.__to = null; moveTo = async (q, t) => { window.__to = t; q.pos = t; }; moveSteps = async (q, n) => { q.pos = (q.pos + n) % N; window.__to = q.pos; }; land = async () => {};
   });
   await run(page, () => drawReinvent(S.players[0], 20));
   // 亮卡窗（发牌动画期间不收点击）：一直点到函数返回

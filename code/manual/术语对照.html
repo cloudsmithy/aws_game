@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>术语对照 · 亚马逊云科技 User Group 云上大亨</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="k">MANUAL · 玩家</div>
+<h1>术语对照</h1>
+<nav class="links"><a href="index.html">← 全部手册</a><a href="https://github.com/cloudsmithy/aws_game/blob/master/docs/%E6%89%8B%E5%86%8C/1-%E7%8E%A9%E5%AE%B6/%E6%9C%AF%E8%AF%AD%E5%AF%B9%E7%85%A7.pdf">原版 PDF（GitHub）</a></nav>
+<nav class="toc"><a href="#s1">一 棋盘上的格子</a><a href="#s2">二 钱和资产</a><a href="#s3">三 状态和标记</a><a href="#s4">四 这个游戏独有的</a></nav>
+</header>
+<section>
+<p class="muted"><b>免责声明</b>：游戏里特定亚马逊云科技生成式人工智能相关的服务仅在亚马逊云科技海外区域可用，亚马逊云科技 User Group 仅为帮助您了解行业前沿技术和发展海外业务选择推介该服务。亚马逊云科技中国区域相关云服务由西云数据和光环新网运营，具体信息以中国区域官网为准。游戏内价格为虚构，不代表实际定价；$ 是游戏币单位。</p>
+<p>玩过传统地产类桌游的，对照这张表就能马上上手。左边是那类游戏的叫法，中间是这个游戏里的叫法，右边说明有什么不一样。</p>
+</section>
+<section>
+<h2 id="s1">一 棋盘上的格子</h2>
+<div class="tw"><table>
+<thead><tr><th>传统地产类桌游</th><th>这个游戏</th><th>有什么不一样</th></tr></thead>
+<tbody>
+<tr><td>起点 GO</td><td>Startup 扶持</td><td>经过领 $200 Credits（地狱模式 $150），同时交这一圈所有服务的运行费</td></tr>
+<tr><td>地产</td><td>服务（35 个）</td><td>每个服务按真实特性计费：实例空着也收钱，Serverless 没人用不花钱，Bedrock 按 token 收</td></tr>
+<tr><td>同色地产</td><td>色组（存储、计算、网络……）</td><td>集齐整组：没升级的服务过路费翻倍，而且随时可以加容量（升级还是要落在自己那块上）</td></tr>
+<tr><td>公用事业（电力、水厂）</td><td>按用量收费的格子</td><td>过路费 = 对方点数 × 倍数</td></tr>
+<tr><td>机会卡</td><td>Health 事件卡</td><td>坏事为主：AZ 断电、DDoS、证书过期……做了对应防护就免疫</td></tr>
+<tr><td>命运卡</td><td>re:Invent 卡</td><td>好事为主：Credits、免费升级、保留卡、飞行移动</td></tr>
+<tr><td>监狱</td><td>维护窗口</td><td>走到这格：停一轮，或者交 $50 照常走；被送进来：下回合付 $50 出来照常掷骰子，或者停一轮；不能靠掷对子出来</td></tr>
+<tr><td>去坐牢</td><td>Root 密钥泄露</td><td>直接进维护窗口</td></tr>
+<tr><td>免费停车</td><td>User Group 活动</td><td>经过领 $50；停下抽奖拿 $100～奖池全部，或者抽 3 张 re:Invent 卡选一张</td></tr>
+<tr><td>所得税 / 奢侈税</td><td>账单格（忘关的 EC2、NAT Gateway 账单）</td><td>忘关的 EC2：交 $200 或总资产 10%（自选）；NAT Gateway 账单：交 $100，你的 VPC 开了私有子网要交 $200；都进奖池，手上有 Cost Explorer 卡能免一次</td></tr>
+</tbody></table></div>
+</section>
+<section>
+<h2 id="s2">二 钱和资产</h2>
+<div class="tw"><table>
+<thead><tr><th>传统地产类桌游</th><th>这个游戏</th><th>有什么不一样</th></tr></thead>
+<tbody>
+<tr><td>银行</td><td>亚马逊云科技</td><td>卖服务、收运行费的那一方，钱付给它就离开了游戏</td></tr>
+<tr><td>房子 / 酒店</td><td>升级（功能） / 容量</td><td>升级是真实功能：多 AZ、Auto Scaling、多区域……每级有防护效果；容量是节点、并发、分片</td></tr>
+<tr><td>抵押</td><td>下线</td><td>EC2、RDS、Aurora、Redshift、ECS 能下线：拿回买价一半，不收过路费；至少 3 轮后还一半加原价 10% 才能上线；下线期间别人落上来可以付原价拉走</td></tr>
+<tr><td>拍卖（不买就拍卖）</td><td>不买就是不买</td><td>落地的人不买，这块留在亚马逊云科技，没有竞价，等下一个落上来的人再决定</td></tr>
+<tr><td>卖地给银行</td><td>卖回亚马逊云科技</td><td>买价 + 升级 + 容量的实付按 8 折拿回（地狱模式 6 折）</td></tr>
+<tr><td>拆房子卖给银行</td><td>去掉升级 / 减容量</td><td>退这一级实付的一半</td></tr>
+<tr><td>破产</td><td>账户被暂停</td><td>全卖了也不够还才破产，服务按欠款比例分给各个债主</td></tr>
+<tr><td>免费停车奖池</td><td>奖池</td><td>罚款先进奖池，User Group 抽奖或 Free Tier 卡拿走</td></tr>
+<tr><td>—</td><td>运行费</td><td>传统地产类桌游没有：每圈经过起点时交，按服务计费方式算</td></tr>
+<tr><td>—</td><td>请求费 / token 成本</td><td>按用量的服务收过路费时交 15%，Bedrock 交 25%</td></tr>
+<tr><td>—</td><td>Spot 购买</td><td>自己出价买，出了多少只有自己知道（格子上只写 Spot）；别人落上来猜一个价，比你的出价多出原价的 10% 才能抢走，猜低了照常付过路费</td></tr>
+<tr><td>—</td><td>Savings Plans / RI</td><td>承诺用量换运行费折扣，1 圈算 1 年（完整局）</td></tr>
+</tbody></table></div>
+</section>
+<section>
+<h2 id="s3">三 状态和标记</h2>
+<div class="tw"><table>
+<thead><tr><th>传统地产类桌</th><th>这个游戏</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>游</td><td></td><td></td></tr>
+<tr><td>—</td><td>Impaired</td><td>服务被事件打挂，暂停收过路费，到主人下回合恢复</td></tr>
+<tr><td>出狱卡</td><td>Enterprise Support（保留卡）</td><td>出维护窗口，或者抵消一张 Health 卡</td></tr>
+<tr><td>—</td><td>复盘标记</td><td>出维护窗口时写根因领，抵消一张同类 Health 卡</td></tr>
+<tr><td>—</td><td>演练标记</td><td>GameDay 演练领（完整局），抵消一张同类 Health 卡</td></tr>
+<tr><td>—</td><td>技术债</td><td>被罚又没防护时欠下，让运行费变贵，攒到 3 个要大重构（停一轮，或者多交一笔钱不停；标准局起）</td></tr>
+</tbody></table></div>
+</section>
+<section>
+<h2 id="s4">四 这个游戏独有的</h2>
+<div class="tw"><table>
+<thead><tr><th>叫法</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>有效架构</td><td>凑齐一套真实架构（比如 ELB → EC2 → RDS），别人落在其中任意一块，按整套服务的过路费加起来收</td></tr>
+<tr><td>六大支柱</td><td>Well-Architected 胜利条件：卓越运营、安全性、可靠性、性能效率、成本优化、可持续性；难度越高要的分越多</td></tr>
+<tr><td>角色专属技能（战略并购）</td><td>落后时每个角色能发动一次的技能</td></tr>
+<tr><td>部署点数</td><td>高速部署开关里的计数，0–12，花掉发动技能，12 点能 DDoS 对手</td></tr>
+<tr><td>客户 / 代理商</td><td>代理商模式里的两种身份：代理商打折进货占地，客户落在代理商的地上可以从他手里买，运行费交给代理商</td></tr>
+<tr><td>地狱限制</td><td>地狱模式里每个角色多一条的限制</td></tr>
+<tr><td>估值</td><td>打满轮数时排名用：总资产 + 升级和容量再算一倍 + 每个架构 $200 + 复盘标记 − 技术债</td></tr>
+</tbody></table></div>
+</section>
+<footer>本页由 <code>web/tools/build-manuals.mjs</code> 从 PDF 抽取文字自动排版，版式和图片以<a href="https://github.com/cloudsmithy/aws_game/blob/master/docs/%E6%89%8B%E5%86%8C/1-%E7%8E%A9%E5%AE%B6/%E6%9C%AF%E8%AF%AD%E5%AF%B9%E7%85%A7.pdf">原版 PDF</a> 为准。</footer>
+</div>
+</body>
+</html>

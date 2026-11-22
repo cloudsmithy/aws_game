@@ -2,6 +2,7 @@ import { __rv, _t, _tf } from '../core/01-i18n-runtime.js';
 import { IX, SQ } from './03-services.js';
 import { INC, QUIZ, REI } from './04-roles-combos-cards.js';
 import { DLC, DLC_INC, DLC_QUIZ, DLC_REI, MOVE_INC, MOVE_REI, NEW_REI } from './05-dlc.js';
+import { INC26 } from './05c-inc26.js';
 import { QBANK_DLC } from './06-qbank.js';
 import { S, active, effActive, log, nm, owns, sqn } from '../engine/07-state.js';
 import { pay } from '../engine/08-money.js';
@@ -36,6 +37,7 @@ let INC_ADD4 = __rv(() => ({ n: _t(2497, "用户账号被撞库"), c: 'sec', e: 
   imm: o => active(o, IX.cognito) && S.props[IX.cognito].level >= 1 ? _t(2501, "Cognito 开了 MFA") : '',
   run: async p => { const h = credHalf(p); log(_tf(2503, "{$0} 的登录页被撞库，交 ${$1} 进奖池{$2}", nm(p), pay(p, 'pot', h ? 60 : 120), h ? _t(2502, "（WAF 限速规则挡掉了大部分请求，只交一半）") : '')); } }), v => { INC_ADD4 = v; }, () => INC_ADD4);
 INC.push(INC_ADD4);
+INC26.forEach(c => INC.push(c));   // DLC「Health 事件扩展包（2026）」的 10 张卡（rules/05c-inc26.js），接在最后，已有卡编号不变
 Object.entries(DLC_QUIZ).forEach(([k, list]) => list.forEach(q => { const g = k === 'genai' ? 'ai' : k === 'sec' ? 'sec' : 'general'; QUIZ[g].push(Object.assign(q, { dlc: k })); }));   // 推进去的是同一个对象：切换语言时跟着 DLC_QUIZ 一起换字
 // 11-09 DMS 进了数据库组：补两道 DMS 的题（接在最后，已有的题编号不变）
 let QUIZ_DB_ADD = __rv(() => ([

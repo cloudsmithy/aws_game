@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>玩法手册 · 亚马逊云科技 User Group 云上大亨</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="k">MANUAL · 玩家</div>
+<h1>玩法手册</h1>
+<nav class="links"><a href="index.html">← 全部手册</a><a href="https://github.com/cloudsmithy/aws_game/blob/master/docs/%E6%89%8B%E5%86%8C/1-%E7%8E%A9%E5%AE%B6/%E7%8E%A9%E6%B3%95%E6%89%8B%E5%86%8C.pdf">原版 PDF（GitHub）</a></nav>
+<nav class="toc"><a href="#s1">一、一句话玩法</a><a href="#s2">二、开局</a><a href="#s3">三、一回合怎么走</a><a href="#s4">四、怎么赚钱</a><a href="#s8">五、怎么花钱：不同服务的账单不一样</a><a href="#s9">六、怎么变强：升级和扩容</a><a href="#s12">七、怎么不被坑：Health 事件和防护</a><a href="#s13">八、角落格</a><a href="#s14">九、怎么赢</a><a href="#s15">十、DLC 扩展包和开关（开局页第 05 步，可多选，默认都不开）</a><a href="#s16">十一、新手建议</a><a href="#s17">十二、一局开头示例</a><a href="#s18">十三、常见问题</a><a href="#s19">附录：有效架构</a><a href="#s20">去哪查细节</a></nav>
+</header>
+<section>
+<blockquote>
+<p>这本手册讲怎么上手玩，十分钟读完。每条规则的细节和数字查「主持人规则书.pdf」；网页版里点「玩法」也能随时打开这本手册。</p>
+</blockquote>
+<blockquote>
+<p><strong>免责声明</strong>：游戏里特定亚马逊云科技生成式人工智能相关的服务仅在亚马逊云科技海外区域可用，亚马逊云科技 User Group 仅为帮助您了解行业前沿技术和发展海外业务选择推介该服务。亚马逊云科技中国区域相关云服务由西云数据和光环新网运营，具体信息以中国区域官网为准。游戏内价格为虚构，不代表实际定价；$ 是游戏币单位。</p>
+</blockquote>
+<hr>
+</section>
+<section>
+<h2 id="s1">一、一句话玩法</h2>
+<p>你是一家在亚马逊云科技上创业的公司：绕着棋盘走，<strong>买亚马逊云科技服务</strong>，别人走到你的服务上就<strong>付你过路费</strong>；把服务<strong>升级、扩容、组成完整架构</strong>，收得更多；同时要<strong>扛住各种线上事故</strong>，<strong>控制好账单</strong>。最后没破产的人赢，或者先做到 Well-Architected 六大支柱的人赢（难度越高，每条支柱要求越高）。玩法灵感来自经典的地产类桌游。</p>
+<hr>
+</section>
+<section>
+<h2 id="s2">二、开局</h2>
+<ol>
+<li>打开游戏网页，选人数（2–4 人）、难度、胜利条件，点「开始游戏」。1 号位先走；后走的人开局多领一点现金（第 2、3、4 位分别 +$50、+$100、+$150），补回先走先挑地的便宜。</li>
+<li>每人随机抽到一个角色（开局页勾了「三选一挑角色」的话，每人从 3 张里挑一张），起始资金、特殊能力和专属技能都不一样，一共 12 个（开了代理商模式还有 3 个代理商角色，见第十节）：</li>
+</ol>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>角色</th>
+<th>起始资金</th>
+<th>能力</th>
+<th>弱点</th>
+<th>专属技能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>车库创业公司</td>
+<td>$1500</td>
+<td>每次经过或停在 Startup 扶持多领 $50</td>
+<td>钱比较少</td>
+<td>「Activate 加码」领 $1200，接下来 3 圈经过 Startup 扶持时运行费全免</td>
+</tr>
+<tr>
+<td>传统企业上云</td>
+<td>$1600</td>
+<td>买 EC2、RDS 打 85 折</td>
+<td>被送进维护窗口，不交钱要停 2 轮</td>
+<td>「MAP 迁移补贴」名下所有实例型服务各免费升一级，再领 $300（一块都升不了就领 $800）；接下来 3 圈运行费减半</td>
+</tr>
+<tr>
+<td>独角兽</td>
+<td>$1500</td>
+<td>开局免费拿到 Route 53</td>
+<td>账单格交双倍</td>
+<td>「新一轮融资」领一笔融资：开局资金减现在的总资产再加 $500（最少 $1000，最多 $2000）</td>
+</tr>
+<tr>
+<td>金融合规公司</td>
+<td>$1600</td>
+<td>买安全组服务打 8 折；免疫「安全审计没过」</td>
+<td>Spot 最低出价要原价的 40%（别人 20%）；抽到「抢到便宜的 Spot 容量」放回牌堆底</td>
+<td>「监管沙盒」技术债清零，这一轮和接下来 2 轮免疫所有 Health 事件，领 $800</td>
+</tr>
+<tr>
+<td>AI 原生公司</td>
+<td>$1600</td>
+<td>买 AI 组服务打 9 折</td>
+<td>付 S3 过路费时交双倍（训练数据读写量大）</td>
+<td>「生成式 AI 加速器」AI 组所有服务各免费升一级，再领 $400（一块都升不了就领 $1000）；这一轮和接下来 2 轮 AI 组过路费 ×2</td>
+</tr>
+<tr>
+<td>跨境电商</td>
+<td>$1600</td>
+<td>买网络组服务打 8 折</td>
+<td>踩到 NAT Gateway 账单格交双倍</td>
+<td>「黑五网一」领 $500；接下来 3 个回合，你所有服务的过路费 ×2</td>
+</tr>
+<tr>
+<td>SaaS 创业公司</td>
+<td>$1600</td>
+<td>买 Lambda、API Gateway、DynamoDB 和应用集成组服务打 8 折</td>
+<td>每个技术债让运行费多 $30（别人是 $20）</td>
+<td>「上架 Marketplace」接下来 4 个自己的回合开始时，每位对手付你 $150 订阅费</td>
+</tr>
+<tr>
+<td>游戏工作室</td>
+<td>$1600</td>
+<td>Spot 最低出价只要原价的 10%</td>
+<td>「流量暴增」没扛住时，每块 Impaired 的服务再交 $30</td>
+<td>「爆款上线」领 $400；接下来 4 笔别人付你的过路费 ×3</td>
+</tr>
+<tr>
+<td>独立开发者</td>
+<td>$1500</td>
+<td>不开「边玩边答题」也能答：买服务答对打 9 折，付过路费答对付八成；开了边玩边答题，买服务答对打 7 折（别人 8 折），付过路费答对只付 35%（别人一半）</td>
+<td>钱比较少；不能签 Savings Plans / RI</td>
+<td>「开源走红」领 $400，再从没人买的服务里自己挑 2 块白拿（没有可拿的再领 $600）</td>
+</tr>
+<tr>
+<td>数据智能公司</td>
+<td>$1600</td>
+<td>买分析组服务打 8 折</td>
+<td>「月底账单爆了」每份容量交 $20（别人 $10）</td>
+<td>「数据变现」每持有一块服务领 $200（不到 4 块按 4 块算）</td>
+</tr>
+<tr>
+<td>短视频平台</td>
+<td>$1600</td>
+<td>买存储组服务打 8 折</td>
+<td>「DDoS 打满了入口」交双倍</td>
+<td>「现象级爆款」每位对手付你 $300</td>
+</tr>
+<tr>
+<td>互联网医疗</td>
+<td>$1600</td>
+<td>买数据库组服务打 8 折；免疫「实习生误删了生产数据」</td>
+<td>「S3 桶被设成了公开」赔双倍</td>
+<td>「紧急救治」所有 Impaired 和被 DDoS 打下线的服务马上恢复，技术债清零，领 $1000</td>
+</tr>
+</tbody></table></div>
+<p>   <strong>专属技能</strong>：起死回生用的：总资产（现金 + 服务 + 升级）低于自己开局资金的一半时（开局 $1600 的就是低于 $800），自己回合里点「专属技能」发动一次，一局只能用一次。发动时先结算角色自己的技能，再「战略并购」：按卖回价把全场总资产最高的对手的一块服务买下来（连同升级和容量），钱付给他；现金不够就先欠着，按欠款规则处理。技能里写的是基础金额：之后跟着流量涨一半（最多 2.5 倍），完整局再 ×1.2，地狱模式不涨（独角兽「新一轮融资」、总代理「年度返点」按公式算，不跟着涨）；网页里技能按钮的提示和玩家卡上会写现在的倍数。
+3. <strong>选模式</strong>：想图热闹选<strong>娱乐模式</strong>（只有常用服务，到处是盲盒格，抽卡抽到爽，10 轮约 15 分钟）；想认真算账选<strong>入门 / 标准 / 完整局</strong>；想学东西、备考认证选<strong>学习模式</strong>（必答题、错题本，不限轮数）。另外可以选<strong>卡牌倍率</strong>：1 倍、1.5 倍、2 倍，或者每轮随机。
+4. 开局页默认选的是标准局，第一次玩建议改选<strong>入门局</strong>，胜利条件保持默认（经典 + 15 轮上限，一局约 20 分钟）；熟悉了再试标准局和完整局。想顺便学亚马逊云科技，就打开开局页第 02 步「难度」下面的<strong>边玩边答题</strong>开关（选了学习模式难度会自动打开）。
+5. 人不够？名字后面勾「电脑」，那个座位就交给电脑玩，一个人也能开局。
+6. 想每人用自己的电脑或手机玩：开局页第 04 步，房主点「创建房间」设密码，把 6 位房间号和密码发给大家，其他人打开同一个 <code>index.html</code> 点「加入房间」。轮到谁谁在自己的设备上操作，画面实时同步。有人掉线，用局里的名字重新加入就回到原来的座位；房主那台刷新了，房主重新创建房间、点「继续上一局」，大家拿新房间号、用局里的名字加入。</p>
+<hr>
+</section>
+<section>
+<h2 id="s3">三、一回合怎么走</h2>
+<ol>
+<li><strong>掷骰子</strong>，按点数往前走。</li>
+<li><strong>看落在哪</strong>：<ul>
+<li>没人买的服务 → 可以按需买（全价，稳），EC2、ECS、EKS、SageMaker AI 还可以 Spot 买（自己出价，最低原价的 20%；出了多少别人看不到，别人猜的价够高就能抢走）。买的时候答题拿到的折扣，和角色、卡牌给的折扣都相乘（折上折）。</li>
+<li>别人的服务 → 付过路费。</li>
+<li>自己的服务 → 可以给它<strong>加一个功能</strong>、<strong>加一份容量</strong>，或者用 <strong>FIS 抽一张故障牌攻击对手</strong>（$40～$100，抽到哪张付哪张；三选一）。</li>
+<li>Health 事件 / re:Invent → 抽一张卡照做。</li>
+<li>账单格、角落格 → 按格子上写的办。</li>
+</ul>
+</li>
+<li><strong>做点别的</strong>（可选）：资产管理、和别人交易，或者出题考对手（同一回合两种只能发动一个）：花 $100 考一个人（每局一次；按他所在那一格的色组出题，答对他拿走这 $100，答错他赔你 $200），或者考全场（每 3 圈一次，按你经过 Startup 扶持的次数算；至少两位对手，每人各一道，每人 $50，答对的拿走、答错的赔你 $100）；还可以花钱让对手抽一张 Health 卡（每圈一次，价钱是抽 re:Invent 卡的 1.5 倍，可以指定、随机，或者付两倍让全场各抽一张）；完整局还能签 Savings Plans / RI、做主动行动。</li>
+<li>结算完点「<strong>轮到下一位</strong>」结束回合（电脑玩家自动结束）。掷出对子可以再掷一次，但同一回合连掷 3 次对子会「被限流」，直接进维护窗口。</li>
+</ol>
+<hr>
+</section>
+<section>
+<h2 id="s4">四、怎么赚钱</h2>
+<h3 id="s5">1. 收过路费</h3>
+<p>服务越贵、升级越多、容量越大，过路费越高。按用量计费的服务（Serverless，还有 S3、Route 53、CloudFront、KMS、WAF、Bedrock 这类按请求或 token 收费的）过路费还会随对方掷出的点数浮动：点数大说明流量大，收得多。主人集齐一整组（同色的几块）时，没升级的服务过路费也翻倍。标准局、完整局和学习模式开局前 2 轮是<strong>新账户保护期</strong>：每笔过路费最多 $50，格子上也按 $50 标，第 3 轮起按原价收。</p>
+<h3 id="s6">2. 组成有效架构，联合收费</h3>
+<p>把几块能真正配合工作的服务凑齐，就组成一个架构。<strong>别人落在架构里任意一块上，要把整套架构里所有服务的过路费加起来付给你。</strong> 这是游戏里最赚钱的玩法。一块服务同时在几个生效架构里时，几个架构<strong>串联收费</strong>，共用的服务只算一次。一共 48 个架构，写着「A 或 B」的有其中一个就行。棋盘上已经生效的架构，格子上的过路费是橙底，写的就是整套加起来的数，鼠标停在上面能看到每块各多少。</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>架构</th>
+<th>要哪些服务</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Serverless API</td>
+<td>（可选：CloudFront） + （可选：S3） + （可选：Cognito） + API Gateway + Lambda + DynamoDB 或 Aurora</td>
+</tr>
+<tr>
+<td>经典三层 Web</td>
+<td>（可选：Route 53） + （可选：CloudFront） + ELB + （可选：Cognito） + EC2 或 ECS + RDS 或 Aurora + （可选：OpenSearch）</td>
+</tr>
+<tr>
+<td>容器平台</td>
+<td>ECR + ECS 或 EKS + ELB</td>
+</tr>
+<tr>
+<td>事件驱动</td>
+<td>EventBridge + Step Functions + Lambda</td>
+</tr>
+<tr>
+<td>订单削峰</td>
+<td>EC2 或 ECS + SQS + Lambda + （可选：DynamoDB 或 RDS 或 Aurora）</td>
+</tr>
+<tr>
+<td>图片缩略图</td>
+<td>S3 + （可选：EventBridge） + Lambda + CloudFront</td>
+</tr>
+<tr>
+<td>GenAI 聊天机器人</td>
+<td>（可选：Cognito） + API Gateway + Lambda + （可选：AgentCore） + Bedrock 或 SageMaker AI</td>
+</tr>
+<tr>
+<td>数仓 ETL</td>
+<td>S3 + Glue + Redshift</td>
+</tr>
+<tr>
+<td>访问日志分析</td>
+<td>ELB + S3 + （可选：Glue） + Athena</td>
+</tr>
+<tr>
+<td>文件排队处理</td>
+<td>S3 + （可选：EventBridge） + SQS + Lambda + （可选：DynamoDB）</td>
+</tr>
+<tr>
+<td>威胁自动响应</td>
+<td>GuardDuty + EventBridge + Step Functions + （可选：Lambda）</td>
+</tr>
+<tr>
+<td>实时日志分析</td>
+<td>Kinesis + Lambda + OpenSearch 或 Redshift</td>
+</tr>
+<tr>
+<td>Serverless 数据湖</td>
+<td>（可选：Kinesis） + S3 + Glue + Athena</td>
+</tr>
+<tr>
+<td>静态网站</td>
+<td>Route 53 + CloudFront + （可选：WAF） + S3</td>
+</tr>
+<tr>
+<td>GenAI 知识库（RAG）</td>
+<td>S3 + （可选：Lambda） + OpenSearch 或 Aurora + Bedrock</td>
+</tr>
+<tr>
+<td>ML 训练与部署</td>
+<td>S3 或 EFS + ECR + SageMaker AI</td>
+</tr>
+<tr>
+<td>高可用入口</td>
+<td>Route 53 + （可选：CloudFront） + （可选：WAF） + ELB + EC2 + （可选：VPC）</td>
+</tr>
+<tr>
+<td>缓存加速</td>
+<td>（可选：Cognito） + ELB + EC2 或 ECS + ElastiCache + RDS 或 Aurora 或 DynamoDB</td>
+</tr>
+<tr>
+<td>防勒索备份</td>
+<td>EBS + S3 + GuardDuty + （可选：KMS）</td>
+</tr>
+<tr>
+<td>托管智能体</td>
+<td>Bedrock + AgentCore + Lambda</td>
+</tr>
+<tr>
+<td>智能客服</td>
+<td>（可选：Cognito） + API Gateway + AgentCore + Lambda + DynamoDB</td>
+</tr>
+<tr>
+<td>运维助手智能体</td>
+<td>EventBridge + AgentCore + Lambda</td>
+</tr>
+<tr>
+<td>数据分析智能体</td>
+<td>AgentCore + Athena + S3</td>
+</tr>
+<tr>
+<td>API 查询服务</td>
+<td>API Gateway + Lambda + RDS 或 Aurora + DMS + OpenSearch</td>
+</tr>
+<tr>
+<td>定时启停 EC2</td>
+<td>EventBridge + Lambda + EC2</td>
+</tr>
+<tr>
+<td>ELB 日志检索</td>
+<td>ELB + S3 + （可选：EventBridge） + Lambda + OpenSearch</td>
+</tr>
+<tr>
+<td>Zero-ETL 实时数仓</td>
+<td>Aurora 或 RDS 或 DynamoDB + Redshift + SageMaker AI</td>
+</tr>
+<tr>
+<td>Zero-ETL 商品搜索</td>
+<td>DynamoDB + OpenSearch + Lambda + （可选：API Gateway）</td>
+</tr>
+<tr>
+<td>带登录的 API</td>
+<td>Cognito + API Gateway + Lambda + （可选：DynamoDB 或 Aurora）</td>
+</tr>
+<tr>
+<td>ALB 登录认证</td>
+<td>Cognito + ELB + EC2 或 ECS</td>
+</tr>
+<tr>
+<td>App 直传 S3</td>
+<td>Cognito + S3 + CloudFront</td>
+</tr>
+<tr>
+<td>带登录的智能体</td>
+<td>Cognito + AgentCore + Lambda</td>
+</tr>
+<tr>
+<td>边缘登录校验</td>
+<td>Cognito + CloudFront + Lambda + （可选：S3）</td>
+</tr>
+<tr>
+<td>S3 公开自动关闭</td>
+<td>S3 + Config + EventBridge</td>
+</tr>
+<tr>
+<td>安全组自动收紧</td>
+<td>EC2 + Config + EventBridge</td>
+</tr>
+<tr>
+<td>电商下单流程</td>
+<td>API Gateway + Step Functions + Lambda + DynamoDB + （可选：SQS）</td>
+</tr>
+<tr>
+<td>安全防护基线</td>
+<td>（可选：WAF） + GuardDuty + Inspector + Config + （可选：KMS）</td>
+</tr>
+<tr>
+<td>DynamoDB 变更事件</td>
+<td>DynamoDB + Lambda + EventBridge</td>
+</tr>
+<tr>
+<td>数据库变更入湖</td>
+<td>RDS 或 Aurora + DMS + Kinesis + S3 或 Redshift 或 OpenSearch + （可选：EventBridge）</td>
+</tr>
+<tr>
+<td>缓存自动刷新</td>
+<td>DynamoDB + （可选：EventBridge） + Lambda + ElastiCache</td>
+</tr>
+<tr>
+<td>数据库迁上云</td>
+<td>DMS + RDS 或 Aurora + EC2</td>
+</tr>
+<tr>
+<td>死信队列兜底</td>
+<td>EventBridge + Lambda + SQS</td>
+</tr>
+<tr>
+<td>漏洞管理</td>
+<td>ECR + Inspector + ECS 或 EKS 或 EC2 + （可选：EventBridge）</td>
+</tr>
+<tr>
+<td>多机共享文件</td>
+<td>ELB + EC2 或 ECS 或 EKS + EFS + （可选：VPC）</td>
+</tr>
+<tr>
+<td>AI Agent 工作流</td>
+<td>Step Functions + Lambda + Bedrock</td>
+</tr>
+<tr>
+<td>实时推荐</td>
+<td>Kinesis + Lambda + SageMaker AI + DynamoDB 或 ElastiCache</td>
+</tr>
+<tr>
+<td>全球 API 加速</td>
+<td>CloudFront + WAF + API Gateway + （可选：Lambda）</td>
+</tr>
+<tr>
+<td>DDoS 防护</td>
+<td>CloudFront 或 ELB + Shield Advanced + WAF</td>
+</tr>
+</tbody></table></div>
+<p>一个架构 3 到 7 块不等（必须的 3 到 5 块，其余是可选块）。「A 或 B」有一块就算，都有就都一起收；标「可选」的那块没有也算凑成，有的话一起收。架构图里 → 是往下走，⇄ 是去问一下再回来（验令牌、调模型），+ 是一起配合，← 是数据从后面流进来。</p>
+<p>有些架构还有额外好处，比如「高可用入口」让 EC2 升「跨 AZ Auto Scaling」（多 AZ 那一级）半价，「DDoS 防护」让 WAF 不交固定费用、前两级升级半价。</p>
+<p><strong>万能服务</strong>（5 个）：CloudWatch、CloudTrail、Config（监控组）什么架构都能绑；KMS 只能绑到有存储或数据库的架构（S3、EBS、EFS、RDS、Aurora、DynamoDB、ElastiCache、Redshift、OpenSearch）；VPC 只要架构里有一块能接进 VPC 的服务就能绑：计算、容器、数据库、存储、分析、AI 组的任意一块，或者 ELB、API Gateway（Lambda 能接入 VPC，API Gateway 能做私有 API，S3、DynamoDB 走 VPC 终端节点），可选的、几选一的块都算；只由安全、监控、Route 53、CloudFront 和应用集成组（SQS、EventBridge、Step Functions）组成的架构，VPC 绑不了。每块能绑一次到你的一个架构上：缺一块就顶上，凑齐了就并进去、过路费一起收；一个架构只能并进一块，它本来就在这个架构里的不能再绑。绑了不能换（抽到 re:Invent「请合作伙伴梳理了一遍架构」能免费改绑一次）；卖掉、交易给别人或者被 DDoS 打下线，靠它顶上的架构就散了。CloudWatch 绑在有你自己在线的 Lambda 或 EC2 的架构上，「凌晨 3 点被告警叫醒」不算罚。抽到 re:Invent 卡「解决方案架构师的建议」，能直接飞到你架构里缺的那块服务。</p>
+<h3 id="s7">3. 其他进账</h3>
+<ul>
+<li>每次经过起点「Startup 扶持」，领 $200 Credits。</li>
+<li>经过「User Group 活动」领取 $50；停在上面二选一：<strong>抽奖</strong>，随机拿 $100～奖池全部（账单格和罚款都进奖池，不够 $100 亚马逊云科技补上）；或者<strong>抽 3 张 re:Invent 卡选一张</strong>。抽到 re:Invent「领到 Free Tier 额度」能把奖池全部拿走。</li>
+<li>re:Invent 卡大多是好事：拿 Credits、考认证、Hackathon 拿奖……</li>
+</ul>
+<hr>
+</section>
+<section>
+<h2 id="s8">五、怎么花钱：不同服务的账单不一样</h2>
+<p>普通的地产类桌游买下地皮就只管收租；这里<strong>买下服务之后，它还会按自己的计费方式持续花你的钱。</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>服务类型</th>
+<th>例子</th>
+<th>每圈经过起点时</th>
+<th>收到过路费时</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>IaaS / 容器</td>
+<td>EC2、EBS、ECS、EKS</td>
+<td>交运行费（空着也要交）</td>
+<td>全归你</td>
+</tr>
+<tr>
+<td>PaaS</td>
+<td>RDS、Aurora、Redshift、SageMaker AI</td>
+<td>交运行费，比 IaaS 贵</td>
+<td>全归你</td>
+</tr>
+<tr>
+<td>Serverless</td>
+<td>Lambda、DynamoDB、SQS</td>
+<td>不交钱</td>
+<td>交 15% 请求费</td>
+</tr>
+<tr>
+<td>按存储 / 按个收月费</td>
+<td>S3、EFS、ECR、KMS、Route 53、WAF</td>
+<td>固定月费 $5（KMS 只用亚马逊云科技托管密钥时不收）</td>
+<td>交 15% 请求费</td>
+</tr>
+<tr>
+<td>按 token</td>
+<td>Bedrock</td>
+<td>不交钱（加了模型单元要交）</td>
+<td>交 25% token 成本</td>
+</tr>
+<tr>
+<td>订阅</td>
+<td>Shield Advanced</td>
+<td>固定 $20</td>
+<td>全归你</td>
+</tr>
+</tbody></table></div>
+<p>所以：</p>
+<ul>
+<li>Serverless 前期没负担，没人来就不花钱，适合起步。</li>
+<li>实例型服务空着也烧钱，但有人来时收入全归你，适合放在大家常走的位置。</li>
+<li>想省钱可以 Spot 购买（只有 EC2、ECS、EKS、SageMaker AI 能用，现实里也只有这几类有 Spot 容量）：自己出价，最低原价的 20%（游戏工作室 10%，地狱模式除外）。出得越低越省，出了多少只有你自己知道：别人落上来只能猜，猜的价比你多出原价的 10% 就能抢走（你拿回出价的一半作补偿），猜低了照付你过路费；以后补上差价再加原价的 10% 就能转成按需，出到全价就没人能抢。金融合规公司 Spot 购买和抢 Spot 都至少要出原价的 40%。</li>
+<li>完整局可以跟亚马逊云科技签 <strong>Savings Plans</strong> 或买<strong>预留实例（RI）</strong>，<strong>1 圈算 1 年</strong>：<ul>
+<li>Savings Plans 1 年：不预付，承诺每圈花一笔固定的钱，EC2、ECS、EKS、Lambda、SageMaker AI 和 RDS、Aurora、ElastiCache、OpenSearch 的运行费都打 75 折。</li>
+<li>Savings Plans 3 年：只覆盖 EC2、ECS、EKS、Lambda、SageMaker AI，打 55 折；数据库（含 OpenSearch）照原价，因为现实里 Database Savings Plans 只有 1 年期。</li>
+<li>RI：挑一块 EC2、RDS、Aurora、ElastiCache、Redshift、OpenSearch 或 DMS，全额预付，1 年省 35%、3 年省 55%，期内它的运行费全免。</li>
+<li>服务卖回亚马逊云科技了，承诺也照付。ELB、EBS、Kinesis 都用不了，和现实一样。</li>
+</ul>
+</li>
+<li>缺钱时，EC2、RDS、Aurora、Redshift、ECS 可以<strong>下线</strong>，相当于地产类桌游里的抵押：先拿回买价的一半周转，下线期间不收过路费，运行费只剩每圈 $5 的存储费（ECS 不收）；下线固定 3 轮，满 3 轮在你回合开始时自动恢复，拿回的钱不用还；没满 3 轮时你自己落到这一格就能提前免费拉起来。这期间别人落上来，可以付原价把它买走。OpenSearch、ElastiCache 这类现实里不能停机的不能下线。娱乐模式没有下线。</li>
+<li>EC2 每圈多交 $5 公网 IPv4 地址费（2024 年起真实收费），你的 VPC 开了私有子网就免。</li>
+<li>彻底不要的服务可以<strong>卖回亚马逊云科技</strong>：买价、升级、容量实际花的钱加起来<strong>按 8 折</strong>拿回，升级越多卖得越多；以后不用再交它的运行费，这块重新变成谁都能买的状态。只去掉升级或容量、服务留着，是退一半。</li>
+<li><strong>不买就是不买</strong>：落地的人不买，这块留在亚马逊云科技，别人不能竞价抢。EC2、ECS、EKS、SageMaker AI 落地时可以用 Spot 自己出价买；已经是 Spot 的，别人落上来可以猜一个价来抢：猜得够高就抢走、不付这次过路费，猜低了照常付过路费。</li>
+<li>自己回合里，掷骰子之前或之后，可以花总资产的 4%（最低 $50）<strong>抽一张 re:Invent 卡</strong>，每回合一次（在维护窗口里不能抽）。</li>
+</ul>
+<hr>
+</section>
+<section>
+<h2 id="s9">六、怎么变强：升级和扩容</h2>
+<p>落在<strong>自己的服务</strong>上时，可以加功能、加容量（下面细说），或者用 FIS 攻击一位对手：随机抽一张故障牌，抽到哪张付哪张（注入 API 限流错误 $40、断开依赖服务的网络 $40、停止 EC2 实例 $60、终止实例 $60、模拟 AZ 断电 $100），对手当场承受，三选一：</p>
+<h3 id="s10">加功能（最多 3 级）</h3>
+<ul>
+<li><strong>实例型服务</strong>（EC2、RDS、EKS 等）买下时是<strong>单 AZ</strong>，要升到带<strong>多 AZ</strong> 的那一级：RDS、Aurora、EKS 这些是第 1 级「多 AZ」，EC2 是第 2 级「跨 AZ Auto Scaling」（第 1 级是自动 AMI）。EBS 卷永远单 AZ；ECS 服务默认就跨 AZ 分散任务。</li>
+<li>其他服务天生跨多个 AZ，三级都是功能，比如：<ul>
+<li>ECR：基础扫描 → 增强扫描 → 跨区域复制</li>
+<li>Lambda：提高并发配额 → 预置并发 → 容器镜像 + Web Adapter</li>
+<li>Bedrock：Nova Lite → Nova Pro → 跨区域推理（档位越高，每个 token 越贵，过路费越高；跨区域推理只算一处弹性扩展，不算多区域容灾）</li>
+<li>VPC：私有子网 + NAT（要多交 NAT 的钱）→ Session Manager → Transit Gateway</li>
+</ul>
+</li>
+<li>很多功能自带防护：多 AZ 扛 AZ 断电，Auto Scaling 扛流量暴增，增强扫描扛 CVE，备份扛误删……服务详情里都写着。</li>
+</ul>
+<h3 id="s11">加容量（最多 4 份）</h3>
+<p>给服务加节点、加并发：EC2 加实例、EKS 加节点、Lambda 加并发、Kinesis 加分片、SageMaker AI 加实例、Bedrock 加模型单元……每份让过路费 <strong>+25%</strong>。实例型服务每多一份，每圈运行费也会多一些；Serverless 加并发不增加运行费。</p>
+<blockquote>
+<p>升级只能在落到自己那块服务上时做；集齐一整组之后，不用等落地，在「资产管理」里随时可以加容量。</p>
+</blockquote>
+<hr>
+</section>
+<section>
+<h2 id="s12">七、怎么不被坑：Health 事件和防护</h2>
+<p>Health 事件卡大多是坏事，但几乎每张都有对应的防护。提前做好架构，就能躲过去：</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>遇到</th>
+<th>怎么防</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>一个 AZ 断电 / 单点故障</td>
+<td>实例型服务升多 AZ；托管和全局服务大多本来就跨 AZ；凑齐「高可用入口」的话，EC2 升「跨 AZ Auto Scaling」半价（只挂 ELB 不算多 AZ）</td>
+</tr>
+<tr>
+<td>某个服务在 Region 里宕机</td>
+<td>升到多区域那一级</td>
+</tr>
+<tr>
+<td>us-east-1 大面积故障</td>
+<td>每块服务各自升到多区域那一级（没升的变 Impaired）；Route 53、CloudFront 这类全局服务不受影响</td>
+</tr>
+<tr>
+<td>EC2 实例硬件退役</td>
+<td>EC2 升到「跨 AZ Auto Scaling」自动换实例；或者 ELB 升到第 3 级「负载均衡 + Auto Scaling」、EventBridge 升到第 2 级「Health 事件通知」</td>
+</tr>
+<tr>
+<td>流量暴增</td>
+<td>实例型服务升到「扛住流量暴增」那一级（EC2 Auto Scaling、ECS 服务自动扩缩、EKS Karpenter 自动扩缩、RDS 只读副本这类；EBS、SageMaker AI、DMS、OpenSearch 没有这一级），或者凑「订单削峰」架构；其他服务不受影响。全都扛住了就领 $100</td>
+</tr>
+<tr>
+<td>服务配额用完</td>
+<td>Lambda 提高并发配额，或 CloudWatch 告警提前发现</td>
+</tr>
+<tr>
+<td>DDoS</td>
+<td>Shield Advanced、WAF、CloudFront（Shield Standard 默认免费开着）</td>
+</tr>
+<tr>
+<td>SSH 暴力破解</td>
+<td>持有「威胁自动响应」或「安全组自动收紧」架构；VPC 升到 Session Manager，或付 $50 借别人的；ECS 用 Fargate、EKS 用 Auto Mode 也不怕；只有 GuardDuty 也能及时发现，改为交 $50、实例不变 Impaired</td>
+</tr>
+<tr>
+<td>高危 CVE</td>
+<td>持有「漏洞管理」架构；Inspector 扫描 EC2；ECR 增强扫描或 Inspector 镜像扫描保护容器；托管数据库和 Serverless 的运行时由亚马逊云科技打补丁</td>
+</tr>
+<tr>
+<td>误删数据</td>
+<td>有备份类功能（S3 版本控制、DynamoDB 时间点恢复、EBS 自动快照、EC2 自动 AMI、EFS 自动备份）</td>
+</tr>
+<tr>
+<td>S3 桶被设成公开</td>
+<td>KMS 客户托管密钥、CloudFront 源访问控制，或者 Config 升到「自动修正」（自动把桶改回私有）；只有 GuardDuty 也能及时发现，改为每人赔一半</td>
+</tr>
+<tr>
+<td>Root 密钥被推到了 GitHub（Health 卡）</td>
+<td>「威胁自动响应」架构（GuardDuty 发现后自动吊销密钥）；角落格「Root 密钥泄露」没有防护，踩到就进维护窗口</td>
+</tr>
+<tr>
+<td>证书过期</td>
+<td>ELB 或 CloudFront 升到 HTTPS（ACM 自动续期）</td>
+</tr>
+<tr>
+<td>凌晨 3 点被告警叫醒</td>
+<td>CloudWatch 万能服务绑在有你自己在线的 Lambda 或 EC2 的架构上</td>
+</tr>
+<tr>
+<td>安全审计没过</td>
+<td>持有「安全防护基线」架构，或者 2 个以上安全组服务，或者有一处合规类升级（Config 托管规则、CloudTrail 日志文件完整性验证或组织级跟踪、KMS 自动轮换、WAF 托管规则、GuardDuty 所有区域开启、Inspector Lambda 扫描、Cognito MFA、API Gateway 接入认证、AgentCore Identity）；金融合规公司本来就免疫</td>
+</tr>
+<tr>
+<td>有人手动改了生产配置</td>
+<td>Config 升到「自动修正」，配置漂移自动改回来</td>
+</tr>
+</tbody></table></div>
+<p>被事件打挂的服务会变成 <strong>Impaired</strong>，到它主人的下一个回合前收不到过路费。</p>
+<p>实在躲不过，还能用 Enterprise Support 卡、复盘标记、演练标记来抵消，或者付一笔托管费给一位对这张卡免疫的玩家，请他托管（至少 $20，他同意才行）。要你「停一轮」的卡都能改成交钱立刻处理、照常走。被罚到又没抵消的，标准局起会欠 1 个<strong>技术债</strong>：每个让每圈运行费多 $20；攒到 2 个升级每级贵 $50；攒到 3 个要「大重构」：停一轮交 $300，或者不停交 $400（抽 Health 卡时攒满的，跟着卡牌倍率涨）。重构清掉 1 个：手上有 1 个 $50、2 个 $100，第 10 轮起再加 $30，越拖越贵。</p>
+<hr>
+<p><strong>同色跳</strong>：同色服务打散在棋盘四边。落在自己的服务上（升不升级都行），可以选择飞到前面下一块同色服务（像飞行棋），只跳一次；跳过去的格子没人买的话不能买，别人的要付过路费。</p>
+<p><strong>不只靠骰子走</strong>：抽到卫星链路、DataSync、跨 Region 扩张、Global Accelerator 快线这类卡会直接飞过去，往前飞和同色跳路过起点、UG 活动照常领钱；抽到 DNS 配错、发布回滚、流量被劫持会被退回去或者跟别人换位置，这些不算经过。往回退时绕过了起点的（比如从 Health 格抽到 DNS 配错），算退回上一圈：下次往前经过起点不领钱、也不交运行费。</p>
+<hr>
+</section>
+<section>
+<h2 id="s13">八、角落格</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>格子</th>
+<th>发生什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Startup 扶持（起点）</td>
+<td>经过领 $200 Credits，同时交这一圈的运行费</td>
+</tr>
+<tr>
+<td>维护窗口</td>
+<td>自己走到这里：停一轮，或者交 $50 照常走。被送进来的：下一回合二选一，付 $50 马上出来、照常掷骰子，或者停一轮再出来（传统企业上云要停 2 轮；Enterprise Support 卡也能免费出来）；出来时讲一句根因，可以领复盘标记</td>
+</tr>
+<tr>
+<td>User Group 活动</td>
+<td>经过 UG 活动领取 $50；停在上面二选一：抽奖 $100～奖池全部（不够亚马逊云科技补）/ 抽 3 张 re:Invent 卡选一张</td>
+</tr>
+<tr>
+<td>Root 密钥泄露</td>
+<td>直接进维护窗口</td>
+</tr>
+</tbody></table></div>
+<hr>
+</section>
+<section>
+<h2 id="s14">九、怎么赢</h2>
+<ul>
+<li><strong>经典模式</strong>：别人都破产了，你就赢了。</li>
+<li><strong>越往后过路费越高</strong>：从第 5 轮起所有过路费 × 1.75，第 10 轮起 × 2.5，第 15 轮起 × 3.25……业务做大了，流量越来越多，后期一块好地就能把人收破产。</li>
+<li><strong>季度财报、旧版本停止支持</strong>（标准局起）：每 3 圈出一次财报，总资产最低的人领 $150 融资，最高的人交 $100 合规审查费进奖池。re:Invent 牌堆每洗一次牌，所有人各掷一颗骰子，点数最小的人退掉一块没升级、没加容量的带版本服务（RDS、Aurora、ElastiCache、OpenSearch、EKS、Lambda、Glue、DMS、Bedrock，挑最便宜的那块），拿回买价的一半。</li>
+<li><strong>破产</strong>：钱不够付时，可以先在资产管理里去掉升级和容量、把能停机的服务下线，或者把服务按实付 8 折卖回亚马逊云科技凑钱，也可以直接宣告破产；全卖了也不够还的会直接破产，服务按欠款比例分给各个债主（欠亚马逊云科技的那份退回亚马逊云科技）；平时自己回合里点「宣告破产」也能主动认输，资产交回亚马逊云科技，不能指定送人。</li>
+<li>胜利条件可以多选，谁先达成谁赢。</li>
+<li><strong>Well-Architected 模式</strong>：先同时满足卓越运营、安全性、可靠性、性能效率、成本优化、可持续性六个支柱的人赢。网页版会实时显示每个人的支柱进度。每条支柱按「有几处」计分，比如每持有一块 CloudWatch、CloudTrail 各算 1 分卓越运营，每块安全服务算 1 分安全性，S3、DynamoDB、Lambda 这类天生跨 AZ 的服务每块算 1 分可靠性（EC2、RDS 这类实例要自己升多 AZ 才算）。入门局每条 1 分就够；标准局每条 1 分、六条加起来 12 分；完整局每条 2 分；地狱模式每条 2 分、六条加起来 18 分。网页上鼠标停在支柱上（手机上点一下）能看到得分和还差什么。</li>
+<li><strong>地狱模式</strong>：完整局 + 全部玩法 DLC、高速部署和题库，必须答题，掷完骰子还会随机掉题（答对 +$50、答错 −$50）；卡牌 ×2，过路费每 5 轮 +1.5 倍，答对过路费只减 30%；起点只领 $150，卖回亚马逊云科技只有 6 折；没有新账户保护期，每个角色多一条地狱限制。想挑战再选。</li>
+<li><strong>轮数上限</strong>（默认开，15 轮，一局约 20 分钟）：打满轮数按资产估值排名，保证一局能打完。不勾也最多打 50 轮（学习模式不限轮数）。</li>
+<li><strong>现在结算</strong>：时间到了、不想打了，点「对局」菜单里的「现在结算」，按估值排名结束。</li>
+<li><strong>限时模式</strong>：时间到了按资产估值排名。中途点「对局」菜单的「退出到开局页」，计时会停住，回来「继续上一局」接着计。</li>
+</ul>
+<hr>
+</section>
+<section>
+<h2 id="s15">十、DLC 扩展包和开关（开局页第 05 步，可多选，默认都不开）</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>扩展包</th>
+<th>加了什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GenAI 浪潮</td>
+<td>AI 组过路费 ×1.5；多 2 张 Health 卡、3 张 re:Invent 卡、6 道 AI 题</td>
+</tr>
+<tr>
+<td>安全攻防</td>
+<td>FIS 攻击打 8 折；安全组过路费 ×1.3；多 3 张 Health 卡、2 张 re:Invent 卡、4 道安全题</td>
+</tr>
+<tr>
+<td>FinOps 账单大战</td>
+<td>所有运行费 ×1.5；任何难度都能签 Savings Plans / RI；多 2 张 Health 卡、2 张 re:Invent 卡、4 道成本题</td>
+</tr>
+<tr>
+<td>全球出海</td>
+<td>有多区域功能的服务过路费再 +30%；多 2 张 Health 卡、2 张 re:Invent 卡、4 道全球化题</td>
+</tr>
+<tr>
+<td>高速部署（开关）</td>
+<td>每人一个部署点数 0–12：每回合 +1，被事件打中 −2、进维护窗口 −4；花 1–12 点各发动一个技能，比如 1 点多走或少走一步、4 点故障转移扛住没做高可用的故障、5 点逼对手抽 Health 卡、6 点 DDoS 让对手一块服务 Impaired、12 点 DDoS 让对手一块服务下线 2 回合</td>
+</tr>
+<tr>
+<td>代理商模式（开关）</td>
+<td>座位可以当代理商（不超过一半）：代理商落在没人买的服务上按进货价 5 折（地狱 7 折）占地囤货，自己的地只在组成有效架构时收过路费、架构 ×2（地狱模式正常收）；客户落在代理商的地上可以按转售价从他手里买，在用的（架构、整组、升过级）不卖；之后这块的运行费交给代理商，代理商赚差价。开局资金 = 所有客户开局资金的总和；勾了轮数上限时是角色卡加每位客户 $300（娱乐、地狱模式只按角色卡）。代理商有 3 张自己的角色卡，角色卡上的开局资金是娱乐、地狱模式和有轮数上限时用的：总代理（$1500，技能「年度返点」领「客户从你手里买的服务总价」的一半（最少 $800））；托管服务商（MSP）（$1400，技能「托管续约」每位客户付你 $400，你再领 $300（没有客户就领 $800））；咨询合作伙伴（$1300，技能「解决方案打包」领 $400，再从没人买、原价不超过 $400 的服务里挑 2 块白拿（没有可拿的再领 $600））</td>
+</tr>
+</tbody></table></div>
+<hr>
+<p><strong>键盘快捷键</strong>：空格掷骰子（单机时骰子还在转，再按一下直接出点数）、回车选主按钮、1–9 按顺序选弹窗里的按钮（从左往右、从上往下，灰的也算一个；Spot 出价、改名字的窗一打开光标就在输入框里，数字直接输进框，回车提交）、B 资产管理、M 玩法、? 看全部快捷键。弹窗开着时 Tab 只在弹窗里转，关掉后焦点回到原来的按钮；电脑的弹窗只能看，按键不会替它选。嫌动画慢，可以在「对局」菜单里把「动画速度」切到「快」。</p>
+<hr>
+<p><strong>想顺便备考认证？</strong> 勾「题库：云从业者 / 解决方案架构师助理 / AI 从业者」任一个 DLC，游戏里就会出对应考纲的原创练习题，答错进错题本，下次再考。不想玩棋盘，开局页点「刷题模式」直接刷题，刷完按考点给正确率。</p>
+<hr>
+</section>
+<section>
+<h2 id="s16">十一、新手建议</h2>
+<ol>
+<li>前几圈先买运行费低的服务：Lambda、SQS、DynamoDB 这类 Serverless 没人用就不花钱（Lambda 升到第 2 级预置并发后每圈交 $10）；S3 买价只要 $60、EFS $100，每圈也只交 $5 固定月费。</li>
+<li>盯住一个架构去凑：联合收费比单块服务强得多。</li>
+<li>买了实例型服务，尽早升多 AZ：AZ 断电、单点故障这几张卡专门坑单 AZ 的实例。</li>
+<li>VPC 很关键：没有 VPC 的人给实例升多 AZ 要付钱给 VPC 主人；VPC 升到 Session Manager 还能防 SSH 暴力破解，别人也可以付钱借用。</li>
+<li>别一口气把钱花光：每圈都要交运行费，账单格和事件卡也会扣钱。现金太少一次没付上，就可能被迫变卖。</li>
+<li>注意 Bedrock：它按 token 收费，对方掷的点数越大，你收得越多；但要交 25% token 成本。它不交运行费，未升级时单次过路费和同价位的服务差不多，升级后涨得慢一些；另一个用处是凑 GenAI 知识库（RAG）、托管智能体、AI Agent 工作流这三个非它不可的架构，还有凑齐 AI 组。</li>
+</ol>
+<hr>
+</section>
+<section>
+<h2 id="s17">十二、一局开头示例</h2>
+<blockquote>
+<p>韩叔是车库创业公司，起始 $1500。</p>
+<p>第 1 轮掷出 3，落在 <strong>re:Invent</strong>，抽到「拿到 Activate 创业扶持 Credits」，领 $100（还没有架构，拿不到每套 $50 的加码）。
+第 2 轮落在 <strong>Lambda</strong>，花 $220 买下。Serverless 不交运行费，没人来也不花钱。
+第 4 轮落在另一格 <strong>re:Invent</strong>，抽到「走 Global Accelerator 快线」，一路飞回自己的 Lambda，路过起点领了 $250（车库创业公司每次多领 $50）；落地后选「加 1 个并发」，过路费 +25%。
+后来虫虫落在韩叔的 Lambda 上，付了过路费，韩叔把其中 15% 作为请求费付给亚马逊云科技。
+韩叔又买到 API Gateway 和 DynamoDB，凑齐「Serverless API」。从此别人落在这三块里任意一块，都要按三块加起来的过路费付给韩叔。
+有一轮韩叔抽到 Health 事件「一个 AZ 断电了」：他的服务全是 Serverless，天生跨多个 AZ，一点事都没有。要是换成虫虫抽到，他的 EC2 还是单 AZ，就会变成 Impaired。</p>
+</blockquote>
+<hr>
+</section>
+<section>
+<h2 id="s18">十三、常见问题</h2>
+<p><strong>Q：哪些服务不用自己做多 AZ？</strong>
+看格子底部类型字的颜色：绿字（Serverless 和大部分托管服务，比如 S3、Lambda、DynamoDB、SQS，还有 ECS）自带跨 AZ 高可用，AZ 断电卡打不到；橙字（EC2、RDS、Aurora、EKS 这类实例型）买下时是单 AZ，要升到带多 AZ 的那一级（多数是第 1 级，EC2 是第 2 级「跨 AZ Auto Scaling」）；红字（EBS）永远单 AZ；蓝字（Route 53、CloudFront、Shield Advanced）是全局服务。想扛整个 Region 出问题，不管哪类都要升多区域。</p>
+<p><strong>Q：卖回亚马逊云科技和下线有什么区别？</strong>
+下线是暂时停机、拿回一半周转（不用还），服务还是你的，固定 3 轮后自动恢复、自己落到这一格可以提前免费拉起来，期间别人可以付原价买走；卖回亚马逊云科技是彻底不要，买价、升级、容量的实付按 8 折拿回，服务回到亚马逊云科技，谁先落上去谁就能买，包括你自己。所以缺钱又还想留着的先下线，确定不要了就卖。</p>
+<p><strong>Q：为什么 Route 53 没有「多 AZ」？</strong>
+Route 53 是全局服务，本来就不在某个 AZ 里，它的升级是健康检查、故障转移路由这些功能。</p>
+<p><strong>Q：CloudWatch、CloudTrail、Config 怎么收钱？</strong>
+这三格算一组按用量收费：过路费 = 对方掷出的点数 × 倍数，三格都有时倍数最高，升级后倍数还会增加。</p>
+<p><strong>Q：架构联合收费和单块过路费能叠加吗？</strong>
+不叠加。落在架构里的服务上，就按整套架构的总额收一次，单块的过路费不另算。一块服务同时在几个生效架构里时，这几个架构串联收费：用到的服务过路费都加起来，共用的服务只算一次。比如你有 ELB、EC2、RDS、Route 53，别人落在 EC2 上，「经典三层 Web」和「高可用入口」一起生效，四块的过路费加起来收。</p>
+<p><strong>Q：保留卡都干啥的？</strong>
+抽到后放在面前，需要时用掉：Enterprise Support 免费离开维护窗口或抵消一张 Health 事件卡；Spot 容量让下次 Spot 最低出价降到 10%；Cost Explorer 免一次账单格或抵消「月底账单爆了」；MAP 让下次买 IaaS、PaaS 或容器服务打 7 折；Workshop 让下一次答错的题算你答对（落地答题、被对手出题考、抽查都算）；根因在上游让你把下一张 Health 事件甩给另一位玩家承受（他对这张卡免疫就作废）。网页里鼠标停在玩家面板的卡名上（手机上点一下卡名）能看到说明。</p>
+<p><strong>Q：Spot 出多少合适？</strong>
+出价越低越省钱，但越容易被抢。别人看不到你出了多少，只能猜：猜的价比你多出原价的 10% 就抢走，被抢你拿回出价的一半；他猜低了就照付你过路费。想长期留着、要升级的服务，要么直接按需买，要么之后补差价（再加原价的 10%）转成按需。</p>
+<p><strong>Q：奖池的钱从哪来、到哪去？</strong>
+两个账单格、Health 事件罚款、维护窗口的 $50 都进奖池。停在 User Group 活动选「抽奖」至少拿 $100，最多把奖池整个拿走；抽到「领到 Free Tier 额度」也拿走全部。经过 UG 活动（没停在上面）领取 $50。</p>
+<p><strong>Q：网页版能存档吗？</strong>
+能。浏览器会自动保存，关掉再打开，点「继续上一局」就行。同一个浏览器只存一局：还有没打完的局时开新局会先问一句；别在两个标签页里同时打，后接着打的那边算数。</p>
+<hr>
+</section>
+<section>
+<h2 id="s19">附录：有效架构</h2>
+<p>凑齐后，别人落在其中任意一块上，按整套架构所有服务的过路费加起来收。</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>架构</th>
+<th>组成</th>
+<th>加成</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Serverless API</td>
+<td>（可选）CloudFront 分发前端页面 +（可选）页面放在 S3 里 +（可选）用户用 Cognito 登录，API Gateway 先验令牌（⇄）→ API Gateway 接请求 → Lambda 处理 → DynamoDB 或 Aurora（Serverless v2）存数据；前后端都配上就是一个没有服务器要管的完整网站</td>
+<td>—</td>
+</tr>
+<tr>
+<td>经典三层 Web</td>
+<td>（可选）Route 53 解析域名 →（可选）CloudFront 就近缓存静态内容、在边缘挡掉一部分攻击 → ELB 把请求分到多个 AZ →（可选）ALB 先让没登录的用户去 Cognito 登录（⇄）→ EC2 或 ECS 跑应用 → RDS 或 Aurora 存数据 +（可选）应用写库的同时把要搜的内容也写进 OpenSearch，站内搜索走它，不压数据库</td>
+<td>—</td>
+</tr>
+<tr>
+<td>容器平台</td>
+<td>镜像放 ECR，ECS 或 EKS 拉镜像跑起来 ← ELB 把外面的请求分给这些容器</td>
+<td>容器组升级费减半</td>
+</tr>
+<tr>
+<td>事件驱动</td>
+<td>EventBridge 收事件 → Step Functions 编排 → Lambda 执行每一步</td>
+<td>—</td>
+</tr>
+<tr>
+<td>订单削峰</td>
+<td>EC2 或 ECS 上的网站收订单 → SQS 排队削峰 → Lambda 按自己的节奏处理 →（可选）订单写进 DynamoDB、RDS 或 Aurora；大促时网站不被压垮</td>
+<td>免疫「流量暴增」，扛住了还能领钱</td>
+</tr>
+<tr>
+<td>图片缩略图</td>
+<td>图片上传到 S3 →（可选）EventBridge 先收到 S3 事件并按规则过滤（只要图片、只要某个目录）再分发 → Lambda 生成缩略图，写回 S3 → CloudFront 从 S3 取图就近分发</td>
+<td>—</td>
+</tr>
+<tr>
+<td>GenAI 聊天机器人</td>
+<td>（可选）用户先用 Cognito 登录（⇄）→ API Gateway 收消息 → Lambda 组装提示词和上下文 →（可选）交给 AgentCore 上跑的智能体，记住对话、按需调工具 → Bedrock 或 SageMaker AI 上部署的模型生成回答</td>
+<td>—</td>
+</tr>
+<tr>
+<td>数仓 ETL</td>
+<td>原始数据落 S3 → Glue 作业清洗转换 → 加载进 Redshift 做报表和 BI 分析</td>
+<td>—</td>
+</tr>
+<tr>
+<td>访问日志分析</td>
+<td>ALB 把每个请求的访问日志投递到 S3 →（可选）Glue 爬虫建好表结构和分区 → Athena 直接用 SQL 查慢请求、5xx 和来源 IP，按扫描量计费</td>
+<td>—</td>
+</tr>
+<tr>
+<td>文件排队处理</td>
+<td>文件上传到 S3 →（可选）事件先进 EventBridge，按规则过滤、转发 → SQS 排队 → Lambda 一批批取出来处理，失败的会重试 →（可选）处理结果记进 DynamoDB</td>
+<td>—</td>
+</tr>
+<tr>
+<td>威胁自动响应</td>
+<td>GuardDuty 发现异常 → EventBridge 路由 → Step Functions 按剧本自动处置 →（可选）Lambda 执行隔离实例、吊销密钥这些动作</td>
+<td>免疫「暴露在公网的实例被 SSH 暴力破解」和「Root 密钥被推到了 GitHub」</td>
+</tr>
+<tr>
+<td>实时日志分析</td>
+<td>Kinesis 收数据流 → Lambda 处理后写进 OpenSearch 检索；Redshift 也能直接从 Kinesis 流式摄取，用 SQL 分析</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Serverless 数据湖</td>
+<td>（可选）Kinesis 把网站和 App 的点击流实时写进来，Data Firehose 按分钟落盘 → S3 按小时分区存原始数据 → Glue 爬虫识别表结构、建好数据目录 → Athena 直接用 SQL 查，按扫描量计费</td>
+<td>每次经过或停在 Startup 扶持多领 $50</td>
+</tr>
+<tr>
+<td>静态网站</td>
+<td>Route 53 解析域名 → CloudFront 全球缓存 +（可选）WAF 挡掉恶意请求 → S3 存网页文件</td>
+<td>—</td>
+</tr>
+<tr>
+<td>GenAI 知识库（RAG）</td>
+<td>资料放 S3 →（可选）Lambda 自定义怎么切分、清洗文档 → Bedrock 知识库把文档切块、算向量，存进 OpenSearch 或 Aurora PostgreSQL（pgvector）→ Bedrock 检索相关片段后生成回答，回答里带着出处；前面接 API Gateway、Lambda 就是企业知识问答（见 GenAI 聊天机器人）</td>
+<td>别人落在你的 Bedrock 上，额外付你 $50</td>
+</tr>
+<tr>
+<td>ML 训练与部署</td>
+<td>训练数据放 S3 或 EFS → 自己的训练镜像放 ECR → SageMaker AI 拉镜像、读数据，训练并部署</td>
+<td>—</td>
+</tr>
+<tr>
+<td>高可用入口</td>
+<td>Route 53 健康检查 →（可选）CloudFront 在边缘接住请求 +（可选）WAF 过滤恶意流量 → ELB 跨 AZ 分发 → EC2 跑应用，一台坏了 ELB 自动不再往它上面转 +（可选）自己的 VPC 划好跨 AZ 的公有、私有子网，EC2 放私有子网</td>
+<td>EC2 升「跨 AZ Auto Scaling」（多 AZ 那一级）半价：ELB 本来就跨多个 AZ，在另一个 AZ 再起一台实例挂进目标组就行</td>
+</tr>
+<tr>
+<td>缓存加速</td>
+<td>（可选）ALB 先让没登录的用户去 Cognito 登录（⇄）→ ELB 分发流量 → EC2 或 ECS 跑应用 → 先查 ElastiCache 里的热点数据，没命中再去查 RDS、Aurora 或 DynamoDB，查到的写回缓存 → 数据库压力小、响应快</td>
+<td>—</td>
+</tr>
+<tr>
+<td>防勒索备份</td>
+<td>EBS 快照开快照锁定（合规模式下到期前谁都删不掉，root 用户也不行） + 重要文件放进开了对象锁定的 S3 桶 + GuardDuty 恶意软件防护扫描 EBS 卷和新传进 S3 的文件 +（可选）KMS 客户托管密钥加密快照和对象，密钥权限单独管；中了勒索，从扫过、没发现威胁的快照恢复</td>
+<td>免疫「勒索软件加密了数据」（安全攻防 DLC）：快照和对象都锁着，攻击者删不掉，直接从干净的快照恢复</td>
+</tr>
+<tr>
+<td>托管智能体</td>
+<td>AgentCore Runtime 托管运行智能体，一轮轮调 Bedrock 上的模型推理、决定下一步（⇄ 是来回调用）→ 通过 AgentCore Gateway 把 Lambda 函数接成 MCP 工具，去调业务接口</td>
+<td>—</td>
+</tr>
+<tr>
+<td>智能客服</td>
+<td>（可选）用户先用 Cognito 登录（⇄）→ API Gateway 收用户消息 → AgentCore Runtime 跑客服智能体，Memory 记住这位用户聊过什么 → 通过 AgentCore Gateway 调 Lambda 工具 → Lambda 查 DynamoDB 里的订单、工单，智能体给出回答或直接办好</td>
+<td>—</td>
+</tr>
+<tr>
+<td>运维助手智能体</td>
+<td>EventBridge 收到告警和 Health 事件 → AgentCore 智能体读日志、查指标找根因 → 通过 Gateway 调 Lambda 执行修复（重启、扩容、回滚）</td>
+<td>—</td>
+</tr>
+<tr>
+<td>数据分析智能体</td>
+<td>用户用大白话提问 → AgentCore 智能体写 SQL，用 Code Interpreter 跑分析、画图 → Athena 直接查 S3 里的数据</td>
+<td>—</td>
+</tr>
+<tr>
+<td>API 查询服务</td>
+<td>API Gateway 接请求 → Lambda 处理：写操作进 RDS 或 Aurora（SQL Server、MySQL 这类关系库，经 RDS Proxy 复用连接）→ DMS 持续把库里的改动同步进 OpenSearch（CDC，RDS 自己没法把数据推给 OpenSearch，同步就靠它）→ OpenSearch 负责查询和全文检索（不压主库）</td>
+<td>—</td>
+</tr>
+<tr>
+<td>定时启停 EC2</td>
+<td>EventBridge Scheduler 按时间表触发（比如工作日 9 点开、20 点关）→ Lambda 调 StartInstances、StopInstances（也可以用 Scheduler 的通用目标直接调 EC2 API，不写 Lambda）→ 开发测试用的 EC2 只在上班时间开着；停着的实例不收实例小时费，EBS 卷照收</td>
+<td>—</td>
+</tr>
+<tr>
+<td>ELB 日志检索</td>
+<td>ELB 每 5 分钟把访问日志写进 S3 →（可选）新文件事件先进 EventBridge 再分发 → Lambda 逐行解析 → 写进 OpenSearch，在 Dashboards 上实时搜 5xx、慢请求和可疑 IP</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Zero-ETL 实时数仓</td>
+<td>Aurora、RDS for MySQL 或 DynamoDB 里的业务数据，通过 Zero-ETL 集成几秒内自动同步进 Redshift，不用自己写 ETL 管道 → Redshift 里直接跑报表 → 用 Redshift ML 写一句 SQL，后台交给 SageMaker AI 训练预测模型（比如预测哪些用户要流失）</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Zero-ETL 商品搜索</td>
+<td>DynamoDB 存商品和订单 → 通过 Zero-ETL 集成（OpenSearch Ingestion 管道）自动把改动同步进 OpenSearch，不用自己写同步代码；Lambda 接搜索请求，去 OpenSearch 里做全文、模糊和按距离搜索（⇄）←（可选）请求从 API Gateway 进来</td>
+<td>—</td>
+</tr>
+<tr>
+<td>带登录的 API</td>
+<td>用户先在 Cognito 用户池登录，拿到 JWT 令牌 → 请求带着令牌打到 API Gateway，Cognito 授权方先验令牌（⇄），没登录的直接挡回去 → 验过的请求才转给 Lambda，从令牌里就知道是谁 →（可选）读写 DynamoDB 或 Aurora</td>
+<td>—</td>
+</tr>
+<tr>
+<td>ALB 登录认证</td>
+<td>用户访问 ALB，监听器规则里有一步认证：没登录的先跳到 Cognito 托管登录页，登录完回到 ALB（⇄）→ ALB 把用户信息放进请求头转给 EC2 或 ECS，老应用不用自己写登录</td>
+<td>—</td>
+</tr>
+<tr>
+<td>App 直传 S3</td>
+<td>App 先找 Cognito 身份池换一份临时凭证（权限只够写这位用户自己的目录），拿着凭证直接把照片、视频传进 S3，不经过自己的服务器 → CloudFront 把这些文件就近分发出去</td>
+<td>—</td>
+</tr>
+<tr>
+<td>带登录的智能体</td>
+<td>用户先用 Cognito 登录拿到令牌 → AgentCore Runtime 只接带有效令牌的请求（入站认证，⇄），AgentCore Identity 知道这一次是谁在用 → 智能体通过 Gateway 调 Lambda 办事，按这位用户自己的权限来</td>
+<td>—</td>
+</tr>
+<tr>
+<td>边缘登录校验</td>
+<td>用户先在 Cognito 登录拿到令牌 → 每个请求到了 CloudFront 边缘节点，Lambda@Edge 先验令牌，没登录的直接跳去登录页（⇄）→ 验过的才回源取内容（可选：源站是 S3）；私有文档、付费视频不会被人拿着链接直接下载</td>
+<td>—</td>
+</tr>
+<tr>
+<td>S3 公开自动关闭</td>
+<td>S3 桶被人设成公开 → Config 托管规则（s3-bucket-public-read-prohibited 这类）马上发现，自动修正调 Systems Manager 自动化文档，把这个桶的「阻止公共访问」打开（⇄）→ 合规状态变化的事件发到 EventBridge，转给安全团队（邮件、聊天群）</td>
+<td>—</td>
+</tr>
+<tr>
+<td>安全组自动收紧</td>
+<td>EC2 的安全组被人改成对 0.0.0.0/0 开 22 端口 → Config 规则 restricted-ssh 发现了，自动修正调 Systems Manager 自动化文档 AWS-DisablePublicAccessForSecurityGroup 删掉这条规则（⇄）→ EventBridge 把这件事通知到安全团队</td>
+<td>免疫「暴露在公网的实例被 SSH 暴力破解」：对整个互联网开着的 22 端口几分钟内就被关掉</td>
+</tr>
+<tr>
+<td>电商下单流程</td>
+<td>API Gateway 接下单请求 → Step Functions 按步骤编排：扣库存、扣款、建发货单，哪一步失败就把前面做过的撤回 → 每一步由 Lambda 执行 → 订单状态记在 DynamoDB +（可选）发货任务放进 SQS，仓库系统按自己的节奏取</td>
+<td>—</td>
+</tr>
+<tr>
+<td>安全防护基线</td>
+<td>（可选）WAF 挡在入口过滤恶意请求 + GuardDuty 盯着账户和网络里的异常行为 + Inspector 持续扫 EC2、容器镜像和 Lambda 的漏洞 + Config 检查配置合不合规，不合规的自动改回来 +（可选）KMS 统一管加密密钥、自动轮换</td>
+<td>免疫「安全审计没过」：检测、扫描、合规检查都有记录</td>
+</tr>
+<tr>
+<td>DynamoDB 变更事件</td>
+<td>订单表一有新增、修改，DynamoDB Streams 按顺序记下每条变更（CDC）→ Lambda 读变更流（也可以用 EventBridge Pipes 直接接，不写代码）→ EventBridge 收到 Lambda 转好的业务事件，积分、通知、风控这些下游系统各自订阅</td>
+<td>—</td>
+</tr>
+<tr>
+<td>数据库变更入湖</td>
+<td>DMS 持续抓 RDS 或 Aurora 的变更日志（CDC：MySQL 的 binlog、PostgreSQL 的 WAL）→ 写进 Kinesis Data Streams → Data Firehose 落进 S3 数据湖或写进 OpenSearch 做实时检索，或者 Redshift 流式摄取直接从 Kinesis 读，几秒内就能查到 +（可选）DMS 任务的状态变化发到 EventBridge，同步断了马上告警</td>
+<td>—</td>
+</tr>
+<tr>
+<td>缓存自动刷新</td>
+<td>DynamoDB 里的数据一改，Streams 按顺序记下变更 →（可选）用 EventBridge Pipes 过滤、转发，不用自己写轮询 → Lambda 去 ElastiCache 删掉或刷新对应的缓存 → 读到的总是新数据，不用等缓存过期</td>
+<td>—</td>
+</tr>
+<tr>
+<td>数据库迁上云</td>
+<td>DMS 把机房的数据库全量搬到 RDS 或 Aurora（换引擎的先用 Schema Conversion 转表结构和存储过程），之后持续同步变更，新旧库一直对得上 ← 割接那一刻应用切到云上的 EC2 连新库，停机只要几分钟</td>
+<td>—</td>
+</tr>
+<tr>
+<td>死信队列兜底</td>
+<td>EventBridge 把事件投给 Lambda → Lambda 处理失败、重试次数用完的事件，转进 SQS 死信队列（DLQ）存着，不会丢 → CloudWatch 告警盯着死信队列里的消息数；修好 bug 以后用 DLQ 重驱把消息送回去重新处理</td>
+<td>—</td>
+</tr>
+<tr>
+<td>漏洞管理</td>
+<td>镜像推进 ECR，Inspector 马上扫一遍漏洞（⇄）→ 没有高危漏洞的镜像才部署到 ECS、EKS 或 EC2；跑起来以后 Inspector 继续盯着，新爆出的 CVE 也能发现 +（可选）Inspector 的发现发到 EventBridge，自动通知负责人、开工单</td>
+<td>免疫「高危 CVE 爆出」</td>
+</tr>
+<tr>
+<td>多机共享文件</td>
+<td>ELB 把请求分到多台机器 → EC2、ECS 或 EKS 上的应用都挂同一个 EFS 文件系统 → 用户上传的文件写一次，哪台接请求都读得到，加机器不用同步文件 +（可选）VPC 每个 AZ 的子网里都有 EFS 挂载点</td>
+<td>—</td>
+</tr>
+<tr>
+<td>AI Agent 工作流</td>
+<td>Step Functions 编排多步任务 → Lambda 调用工具和接口 → Bedrock 推理决定下一步</td>
+<td>—</td>
+</tr>
+<tr>
+<td>实时推荐</td>
+<td>Kinesis 收用户的点击、浏览行为 → Lambda 读流，调 SageMaker AI 的推理端点算推荐（⇄）→ 推荐结果写进 DynamoDB 或 ElastiCache，前端打开页面直接读</td>
+<td>—</td>
+</tr>
+<tr>
+<td>全球 API 加速</td>
+<td>CloudFront 在边缘接住请求 + WAF 过滤恶意流量 → API Gateway 处理 →（可选）Lambda 跑后端逻辑</td>
+<td>—</td>
+</tr>
+<tr>
+<td>DDoS 防护</td>
+<td>CloudFront 分发或 ALB 加进 Shield Advanced 保护 → 防应用层攻击要给这个入口关联 WAF Web ACL，至少放一条限速规则；订阅里含 Anti-DDoS 托管规则组，HTTP 洪水几秒内就认出来、拦掉或质询 → 网络层的攻击由 Shield Advanced 直接挡</td>
+<td>WAF 不交每圈的固定费用，升「托管规则」「限速规则」半价：Shield Advanced 订阅包了受保护资源上 WAF 的标准费用（Bot Control 不在里面，照原价）</td>
+</tr>
+</tbody></table></div>
+<hr>
+</section>
+<section>
+<h2 id="s20">去哪查细节</h2>
+<ul>
+<li><strong>每个服务的特性、三级升级、计费方式</strong>：网页里点「图鉴」，或者看「主持人规则书.pdf」第 8 节。</li>
+<li><strong>全部 Health 事件卡和 re:Invent 卡</strong>：「卡牌.pdf」可以直接打印裁开；每张卡的完整效果和免疫条件见「主持人规则书.pdf」第 20、21 节。</li>
+<li><strong>题库和答案</strong>：题卡在「卡牌.pdf」里，答案倒印在卡底；完整题库见「主持人规则书.pdf」附录。</li>
+<li><strong>所有数字</strong>（升级费、运行费、Savings Plans / RI、估值公式）：「主持人规则书.pdf」。</li>
+</ul>
+</section>
+<footer>本页由 <code>web/tools/build-manuals.mjs</code> 从 <code>docs/玩法手册.md</code> 生成：改内容请改源文件再重新生成。</footer>
+</div>
+</body>
+</html>
