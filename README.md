@@ -2,6 +2,8 @@
 
 [![Cloudflare Pages](https://img.shields.io/github/check-runs/cloudsmithy/aws_game/master?nameFilter=Cloudflare%20Pages&label=Cloudflare%20Pages&logo=cloudflare&logoColor=white)](https://github.com/cloudsmithy/aws_game/commits/master)
 
+**官网（直接开玩）：<https://aws-game.usergroup.cn/>** · 备用：[GitHub Pages](https://cloudsmithy.github.io/aws_game/) · [English](https://aws-game.usergroup.cn/en/) · [日本語](https://aws-game.usergroup.cn/ja/) · [手册网页版](https://aws-game.usergroup.cn/manual/)
+
 作者：亚马逊云科技 User Group · 云上大亨开发小组。规则有疑问、游戏有 bug，都可以在这里反馈给我们：https://github.com/cloudsmithy/aws_game/issues
 
 > **免责声明**：游戏里特定亚马逊云科技生成式人工智能相关的服务仅在亚马逊云科技海外区域可用，亚马逊云科技 User Group 仅为帮助您了解行业前沿技术和发展海外业务选择推介该服务。亚马逊云科技中国区域相关云服务由西云数据和光环新网运营，具体信息以中国区域官网为准。
@@ -58,7 +60,7 @@ aws_game/
 ├── .github/          工作流：发布 GitHub Pages、自动检查、成都部署
 ```
 
-网站地址：GitHub Pages 上是 https://cloudsmithy.github.io/aws_game/ （游戏就在根上），英文 https://cloudsmithy.github.io/aws_game/en/ ，日文 https://cloudsmithy.github.io/aws_game/ja/ 。以前的 `…/code/index.html` 地址会自动跳过来。手册有网页版：https://cloudsmithy.github.io/aws_game/manual/ （手机上也好读；游戏里「玩法」弹窗最上面、`:manuals` 命令和「版本」窗口都能点过去）。手册 PDF 本身不放到网站上，网页版每页都链到 GitHub 上的原版 PDF，卡牌和棋盘这种打印用的只有 PDF（旧的 PDF 链接会转到 GitHub 上的文件）。
+网站地址：官网 https://aws-game.usergroup.cn/ （成都服务器，`master` 更新后自动部署，国内打开快；英文 `/en/`、日文 `/ja/`、手册 `/manual/`）；GitHub Pages 上是 https://cloudsmithy.github.io/aws_game/ （游戏就在根上），英文 https://cloudsmithy.github.io/aws_game/en/ ，日文 https://cloudsmithy.github.io/aws_game/ja/ 。以前的 `…/code/index.html` 地址会自动跳过来。手册有网页版：https://cloudsmithy.github.io/aws_game/manual/ （手机上也好读；游戏里「玩法」弹窗最上面、`:manuals` 命令和「版本」窗口都能点过去）。手册 PDF 本身不放到网站上，网页版每页都链到 GitHub 上的原版 PDF，卡牌和棋盘这种打印用的只有 PDF（旧的 PDF 链接会转到 GitHub 上的文件）。
 
 ## 文件
 
