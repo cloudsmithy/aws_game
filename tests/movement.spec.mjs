@@ -43,7 +43,7 @@ test('房主和两个客户端：真实 WebRTC、3D 回放、UG 结算与状态�
     });
     for (const client of clients) await expect.poll(() => client.evaluate(() => received.some(m => m.t === 'state'))).toBe(true);
     // re:Invent 牌堆的顺序房主不发（远端收到同样张数的 0）：两边都只比张数
-    const canonical = page => page.evaluate(() => JSON.parse(JSON.stringify({ ...S, diceQ: undefined, rei: S.rei && S.rei.map(() => 0) })));
+    const canonical = page => page.evaluate(() => JSON.parse(JSON.stringify({ ...S, diceQ: undefined, rei: S.rei && S.rei.map(() => 0), inc: S.inc && S.inc.map(() => 0) })));
     const before = await Promise.all(clients.map(canonical));
     // 仅发路径，不发状态，确认本地动画不会替房主改变任何状态。
     await host.evaluate(() => fxCast('walk', { p: 0, seq: 1, from: 1, path: [2, 3, 4, 5, 6, 7], ms: 90, last: true }));

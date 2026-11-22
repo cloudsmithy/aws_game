@@ -2,16 +2,16 @@ import { _t, _tf } from '../core/01-i18n-runtime.js';
 import { BOT, SIM, rnd, waitAnim } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { IX, N, OWNABLE, SQ, capU, lvFull, lvName } from '../rules/03-services.js';
-import { CARDN, CATS, COMBOS, REI, REI_HAND_MAX, comboOpen } from '../rules/04-roles-combos-cards.js';
+import { CARDN, CATS, COMBOS, INC, REI, REI_HAND_MAX, comboOpen } from '../rules/04-roles-combos-cards.js';
 import { advanceTo } from '../rules/05-dlc.js';
-import { S, cur, hasCombo, log, nm, ownedBy, owns, resetProp, sqn } from './07-state.js';
+import { P, S, cur, hasCombo, log, nm, ownedBy, owns, resetProp, sqn } from './07-state.js';
 import { cardAmt, credit, giveTo, pay, withGain } from './08-money.js';
 import { SP_PLANS, billAt, commitsOf, halfAt, halfSave, netWorth, runAfterRI, spActive } from './08c-costs.js';
 import { capInfo, fullBack, svcLeaves, turnKey, upgradeInfo } from './09-rent.js';
 import { moveSteps } from './13-move.js';
 import { rollDice } from './14-turn.js';
 import { land } from './15-land.js';
-import { drawRei } from './16-deck.js';
+import { drawRei, ensureInc } from './16-deck.js';
 import { aiName, debtCleared, drawIncident, tableOK, voteWho } from './17-health.js';
 import { chFoes, pickPartner } from './25-trade.js';
 import { ST } from './26b-retro.js';
@@ -60,6 +60,50 @@ async function sendIncident(kind) {
 export function incOne() { return sendIncident('one'); }
 export function incRand() { return sendIncident('rand'); }
 export function incAll() { return sendIncident('all'); }
+// ---- 埋 Health 卡 ----
+// 和「花钱让对手抽 Health 卡」同价（incSendCost）、共用每圈一次（p.incLap）：从 Health 牌堆抽一张扣着，埋在自己这局停过的一块服务上（p.stops，经过不算；谁的都行、没人买的也行，
+// 已经埋了卡的格子不能再埋）。每人场上最多 TRAP_MAX 张。对手停在那一格、结算完那一格以后翻开，照抽到 Health 卡结算（免疫、抵消、甩锅都照旧）；自己停上去什么都不发生，卡还埋着。
+// 埋在哪、是哪张只有自己知道：S.traps 只在房主这台是全的，联机推状态时别人的只留 by（net/40c-sync.js 的 stateFor），日志只写花了多少钱。主人出局，他埋的卡收回弃牌堆。
+// 电脑不会埋（全电脑的模拟和以前一模一样）
+export const TRAP_MAX = 2;
+const isSvc = i => SQ[i].t === 'prop' || SQ[i].t === 'util';
+export const trapsOf = p => (S.traps || []).filter(t => t.by === p.id);
+const trapCands = p => (p.stops || []).filter(i => isSvc(i) && !(S.traps || []).some(t => t.sq === i));
+export const buryOk = p => incSendOk(p) && trapsOf(p).length < TRAP_MAX && trapCands(p).length > 0 && (S.inc.length + S.incDisc.length) > 0;
+export function noteStop(p, i) { if (!isSvc(i)) return; const a = p.stops || (p.stops = []); if (!a.includes(i)) a.push(i); }
+export async function buryIncident() {
+  const p = cur(); if (!p || isAI(p.id) || SIM || BOT || S.phase !== 'busy') return;
+  if (!incSendOk(p)) return void UI.toast(p && !incSendReady(p) ? _t(5511, "这一圈已经发过或埋过 Health 卡了：经过 Startup 扶持以后才能再来") : _t(5512, "现在不能埋 Health 卡"));
+  if (trapsOf(p).length >= TRAP_MAX) return void UI.toast(_tf(5513, "场上已经有你埋的 {$0} 张 Health 卡了，最多 {$1} 张", trapsOf(p).length, TRAP_MAX));
+  const cost = incSendCost(p), cands = trapCands(p).sort((a, b) => a - b);
+  if (!cands.length) return void UI.toast(_t(5514, "没有能埋的格子：只能埋在自己这局停过、还没埋卡的服务上"));
+  if (p.cash < cost) return void UI.toast(_tf(2981, "现金不够 ${$0}", cost));
+  // 格子名写在按钮上：别的座位、观众那边的按钮换成「？」（priv.buttons），正文也换掉，看不出在挑哪几格
+  const v = await UI.ask({ who: p.id, cls: 'pick', title: _tf(5515, "花 ${$0} 埋一张 Health 卡：埋在哪一格？（只有你看得到）", cost),
+    html: _tf(5516, "<p>从 Health 牌堆抽一张扣着埋下去，你自己也先不看。对手停在那一格（经过不算），结算完那一格以后翻开，由他照常结算。你自己停上去没事。</p><p class=\"muted\">只能埋在你这局停过的服务上，已经埋了卡的格子不能再埋；场上最多 {$0} 张，和发 Health 卡共用每圈一次。</p>", TRAP_MAX),
+    priv: { title: _tf(5517, "{$0} 在决定埋不埋 Health 卡", p.name), html: _t(5518, "<p>埋在哪一格只有他自己知道。</p>"), buttons: [...cands.map(() => '?'), _t(2465, "取消")] },
+    buttons: [...cands.map(i => ({ label: SQ[i].n, value: i })), { label: _t(2465, "取消"), value: -1 }] });
+  const i = +v; if (!cands.includes(i) || !buryOk(p) || !trapCands(p).includes(i) || p.cash < cost) return;
+  p.incLap = p.laps || 0;
+  await withCardMul(0, async () => { ST(p).spendMisc = (ST(p).spendMisc || 0) + pay(p, 'bank', cost); });
+  ensureInc(1); const id = S.inc.shift();
+  (S.traps = S.traps || []).push({ by: p.id, sq: i, id, round: S.round });
+  const hs = S.histSq; S.histSq = null;   // 不记进哪一格的历史：记进去就知道埋在哪了
+  try { log(_tf(5519, "💣 {$0} 花 ${$1} 埋了一张 Health 卡", nm(p), cost)); } finally { S.histSq = hs; }
+  UI.render();
+}
+// 停在 i 上的 p 踩没踩中对手埋的卡（land 结算完这一格以后调）
+export async function springTrap(p, i) {
+  if (!S.traps || !S.traps.length || !p.alive || S.over) return;
+  const k = S.traps.findIndex(t => t.sq === i && t.by !== p.id); if (k < 0) return;
+  const t = S.traps.splice(k, 1)[0];
+  log(_tf(5520, "💣 {$0} 踩中了 {$1} 埋在 {$2} 的 Health 卡「{$3}」", nm(p), nm(P(t.by)), sqn(i), INC[t.id].n));
+  await drawIncident(p, t.id); UI.render();
+}
+// 主人出局：他埋的卡收回弃牌堆
+export function dropTraps(p) { if (!S.traps || !S.traps.length) return; S.traps.filter(t => t.by === p.id).forEach(t => S.incDisc.push(t.id)); S.traps = S.traps.filter(t => t.by !== p.id); }
+// 结束时没人踩中的：亮出来写进日志（战报里也列）
+export function trapsLeft() { (S.traps || []).forEach(t => log(_tf(5521, "💣 {$0} 在 {$1} 埋的「{$2}」没人踩中", nm(P(t.by)), sqn(t.sq), INC[t.id].n))); }
 // 卡牌效果都在这层里结算：卡牌倍率（盲盒翻倍时外面已经设好）、收支记在「卡牌」名下、联机弹窗归抽卡的人选。抽卡和打出手牌共用
 function asCard(p, fn) { const a0 = MP.actor; MP.actor = p.id; return withCardMul(S.cardMul || cardMulBase(), () => withGain('card', fn)).finally(() => { MP.actor = a0; }); }
 // forced：已经定好是哪一张（User Group 活动三选一选中的）；fixed：效果是外面定的、不能挑（盲盒翻倍）。这两种照旧直接亮卡结算

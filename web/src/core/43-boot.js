@@ -11,7 +11,7 @@ import { canFocus, mainBtn, viewOpen } from '../ui/10-modal.js';
 import { doRoll, endTurn, jailAct, uiAction } from '../engine/14-turn.js';
 import { capHere, upHere } from '../engine/15-land.js';
 import { refactorDebt } from '../engine/17-health.js';
-import { buyReinvent, incAll, incOne, incRand, reiHand } from '../engine/18-reinvent.js';
+import { buryIncident, buyReinvent, incAll, incOne, incRand, reiHand } from '../engine/18-reinvent.js';
 import { declareBankrupt } from '../engine/20-bankrupt.js';
 import { setRsRate, useRoleSkill, wildDialog } from '../engine/21-skills.js';
 import { speedMenu } from '../engine/22-speed.js';
@@ -42,7 +42,7 @@ import { mpHostName, mpNetDialog, mpNetTest, mpSigSave, mpTurnSave, mpUI } from 
 const UI_ACTS = Object.assign(Object.create(null), {
   manage: () => manage(cur()), trade: () => trade(), edpDialog: () => edpDialog(), activeAction: () => activeAction(), declareBankrupt: () => declareBankrupt(),
   buyReinvent: () => buyReinvent(), reiHand: () => reiHand(), refactorDebt: () => refactorDebt(), useRoleSkill: () => useRoleSkill(), wildDialog: () => wildDialog(), quizChallenge: () => quizChallenge(),
-  quizAll: () => quizAll(), incOne: () => incOne(), incRand: () => incRand(), incAll: () => incAll(), upHere: () => upHere(), capHere: () => capHere(), speedMenu: () => speedMenu(), setRsRate: () => setRsRate(),
+  quizAll: () => quizAll(), incOne: () => incOne(), incRand: () => incRand(), incAll: () => incAll(), buryIncident: () => buryIncident(), upHere: () => upHere(), capHere: () => capHere(), speedMenu: () => speedMenu(), setRsRate: () => setRsRate(),
 });
 Object.assign(ACTS, {
   // 开局页

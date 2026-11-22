@@ -157,10 +157,11 @@ async function tryCancel(p, id) {
   log(_tf(3191, "{$0} 拒绝托管", nm(o)));
   return tryCancel(p, id);
 }
-export async function drawIncident(p) { const a0 = MP.actor; MP.actor = p.id; try { return await withCardMul(S.cardMul || cardMulBase(), () => drawIncident0(p)); } finally { MP.actor = a0; } }
-async function drawIncident0(p) {
-  ensureInc(1);
-  const id = S.inc.shift(); S.incDisc.push(id);
+// fixed：已经从牌堆里拿出来的那一张（埋下的 Health 卡被踩中，engine/18-reinvent.js 的 springTrap），不再从牌堆抽
+export async function drawIncident(p, fixed) { const a0 = MP.actor; MP.actor = p.id; try { return await withCardMul(S.cardMul || cardMulBase(), () => drawIncident0(p, fixed)); } finally { MP.actor = a0; } }
+async function drawIncident0(p, fixed) {
+  if (fixed == null) ensureInc(1);
+  const id = fixed ?? S.inc.shift(); S.incDisc.push(id);
   // 有抵消、托管可选的卡先不亮，留给「要抵消吗」那个窗一起亮，少点一次。会甩锅、在沙盒里、免疫的照旧先亮卡
   const defer = !availCard(p, 'BLAME') && !(p.immuneTill >= S.round) && !immuneTo(p, id) && !noHit(p, id) && cancelOpts(p, id).b.length > 0;
   if (defer) { S.lastCard = { kind: 'inc', id, who: p.id }; UI.render(); UI.__set_CARD_DEAL({ id, who: p.id }); }

@@ -117,7 +117,9 @@ export function modal({ title, html = '', inputs = [], buttons = [{ label: _t(27
         return `<label>${inp.label} <input type="number" inputmode="numeric" id="in_${inp.id}"${inp.af ? ' data-af enterkeyhint="done"' : ''} min="${inp.min ?? 0}" ${inp.max != null ? `max="${inp.max}"` : ''} step="${inp.step ?? 1}" value="${inp.value ?? 0}"></label>`;
       }).join('') + '</div>';
     }
-    h += `<div class="btns">${buttons.map((b, k) => `<button data-k="${k}" class="${b.cls || ''}${b.desc ? ' opt' : ''}" ${b.disabled ? 'disabled' : ''}>${b.desc ? `<b>${clean(b.label)}</b><small class="bd">${clean(b.desc)}</small>` : clean(b.label)}</button>`).join('')}</div>`;
+    // priv.buttons：遮着的时候按钮上的字也换掉（埋 Health 卡的格子名），替掉线的人选时换回真的
+    const bIn = b => b.desc ? `<b>${clean(b.label)}</b><small class="bd">${clean(b.desc)}</small>` : clean(b.label), pb = veil && priv.buttons;
+    h += `<div class="btns">${buttons.map((b, k) => `<button data-k="${k}" class="${b.cls || ''}${b.desc ? ' opt' : ''}" ${b.disabled ? 'disabled' : ''}>${pb ? clean(pb[k] ?? '') : bIn(b)}</button>`).join('')}</div>`;
     box.innerHTML = h; m.hidden = false; box.scrollTop = 0; box.dataset.who = mpWho ?? ''; bgInert();
     box.onscroll = null; if (box.classList.contains('doc')) docToc(box);
     requestAnimationFrame(() => fitArch(box));   // 架构图一行放不下就整体缩小，一眼看全
@@ -155,7 +157,7 @@ export function modal({ title, html = '', inputs = [], buttons = [{ label: _t(27
       if (ap) { const upd = () => { ap.previousElementSibling.innerHTML = AI_PAUSE ? _tf(2731, "{$0} 已暂停，点「继续」它再选", nmAI) : _tf(2732, "{$0} 在选…", nmAI); ap.textContent = AI_PAUSE ? _t(2461, "继续") : _t(2733, "暂停"); }; upd(); ap._upd = upd; ap.onclick = toggleAiPause; }
       box.querySelectorAll('.btns button,[data-v],.inps input,.inps textarea,.inps select').forEach(el => { el._d0 = el.disabled; el.disabled = true; });
       const tk = box.querySelector('[data-mptake]');
-      if (tk) tk.onclick = () => { if (veil) { box.querySelector('h3 span').innerHTML = clean(title); box.querySelector('.mb').innerHTML = html; } box.classList.remove('mpwait'); tk.parentNode.remove(); box.querySelectorAll('.btns button,[data-v],.inps input,.inps textarea,.inps select').forEach(el => { el.disabled = !!el._d0; }); buttons.forEach((b, k) => { if (b.disabled) box.querySelector(`button[data-k="${k}"]`).disabled = true; }); };
+      if (tk) tk.onclick = () => { if (veil) { box.querySelector('h3 span').innerHTML = clean(title); box.querySelector('.mb').innerHTML = html; if (pb) buttons.forEach((b, k) => { box.querySelector(`button[data-k="${k}"]`).innerHTML = bIn(b); }); } box.classList.remove('mpwait'); tk.parentNode.remove(); box.querySelectorAll('.btns button,[data-v],.inps input,.inps textarea,.inps select').forEach(el => { el.disabled = !!el._d0; }); buttons.forEach((b, k) => { if (b.disabled) box.querySelector(`button[data-k="${k}"]`).disabled = true; }); };
       // 人走了不回来：点一次「他回来之前都由我来选」，之后他的买地、抽卡、竞价、投票、交易确认都直接在房主这台选，不用每个窗再点。
       // 只认真掉线的座位（hostPlays 还要求 !online，30 秒没动的计时只露出上面那个按钮）；他用同一个名字连回来，admit 换掉整个座位对象，标记跟着没了
       const ta = box.querySelector('[data-mpall]');
