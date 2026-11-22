@@ -57,14 +57,14 @@ function immuneByProp(o, id) {
 export const RF_JAIL = 'rf';   // 维护窗口的原因（p.jailCat）：清技术债；事件进来的是 CATS 里的类别
 // 清技术债进来的维护窗口：界面上不写「付 $50 出来」「Enterprise Support」，这次只能停够一轮（中间状态行、右栏待办、玩家卡共用这一句）
 export const rfJailed = p => p.jail !== null && p.jailCat === RF_JAIL;
-export const rfJailTxt = () => _t(5470, "在维护窗口里（清技术债）：只能停这一轮，不能付 $50 或用 Enterprise Support 提前出来");
+export const rfJailTxt = () => _t(5557, "在维护窗口里（清技术债）：只能停这一轮，不能付 $50 或用 Enterprise Support 提前出来");
 export function debtCleared(p) {
   const down = ownedBy(p).filter(i => !S.props[i].offline && S.props[i].ddos == null), go = p.jail === null;
   down.forEach(i => forceDown(i, p.id, 1, RF_JAIL));   // 原因存键，显示时 downWhy 翻成「清技术债」
   if (go) void sendToJail(p, RF_JAIL);   // 不带说明文字：sendToJail 不弹窗、不等待，这里照常同步往下走
   const svc = down.length ? _tf(5404, "，名下 {$0} 块服务一起下线一轮", down.length) : '';
   // 已经在维护窗口里（被事件送进来的）不重进：日志不说「进维护窗口」
-  log(go ? _tf(5403, "🧱 {$0} 清完技术债，进维护窗口停一轮{$1}；出来不写复盘、不记技术债", nm(p), svc) : _tf(5471, "🧱 {$0} 清完技术债，本来就在维护窗口里，不再重进{$1}", nm(p), svc));
+  log(go ? _tf(5403, "🧱 {$0} 清完技术债，进维护窗口停一轮{$1}；出来不写复盘、不记技术债", nm(p), svc) : _tf(5558, "🧱 {$0} 清完技术债，本来就在维护窗口里，不再重进{$1}", nm(p), svc));
 }
 // 重构费按梯度：债越多越贵，越往后越贵（欠得越久，利息越高）——手上有 n 个技术债时清 1 个要 $50 × n，第 10 轮起再 +$30
 export const refactorCost = p => 50 * Math.max(1, p.techDebt) + (S.round >= 10 ? 30 : 0);
@@ -162,10 +162,11 @@ async function tryCancel(p, id) {
   log(_tf(3191, "{$0} 拒绝托管", nm(o)));
   return tryCancel(p, id);
 }
-export async function drawIncident(p) { const a0 = MP.actor; MP.actor = p.id; try { return await withCardMul(S.cardMul || cardMulBase(), () => drawIncident0(p)); } finally { MP.actor = a0; } }
-async function drawIncident0(p) {
-  ensureInc(1);
-  const id = S.inc.shift(); S.incDisc.push(id);
+// fixed：已经从牌堆里拿出来的那一张（埋下的 Health 卡被踩中，engine/18-reinvent.js 的 springTrap），不再从牌堆抽
+export async function drawIncident(p, fixed) { const a0 = MP.actor; MP.actor = p.id; try { return await withCardMul(S.cardMul || cardMulBase(), () => drawIncident0(p, fixed)); } finally { MP.actor = a0; } }
+async function drawIncident0(p, fixed) {
+  if (fixed == null) ensureInc(1);
+  const id = fixed ?? S.inc.shift(); S.incDisc.push(id);
   // 有抵消、托管可选的卡先不亮，留给「要抵消吗」那个窗一起亮，少点一次。会甩锅、在沙盒里、免疫的照旧先亮卡
   const defer = !availCard(p, 'BLAME') && !(p.immuneTill >= S.round) && !immuneTo(p, id) && !noHit(p, id) && cancelOpts(p, id).b.length > 0;
   if (defer) { S.lastCard = { kind: 'inc', id, who: p.id }; UI.render(); UI.__set_CARD_DEAL({ id, who: p.id }); }

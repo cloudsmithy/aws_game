@@ -115,7 +115,7 @@ async function passLaunch(p) {
   if (hasCombo(p, 'lake')) g += 50;
   credit(p, g, 'salary'); p.laps = (p.laps || 0) + 1;   // 真正走完的圈数（往回绕过起点的不算，见 passStart）：考全场按它算
   // 「这一圈」的效果（re:Invent 卡挂的 p.lapFx，见 engine/07-state.js）到这里结束
-  if (p.lapFx && p.lapFx.length) { const end = p.lapFx.filter(x => x.lap < p.laps); p.lapFx = p.lapFx.filter(x => x.lap >= p.laps); [...new Set(end.map(x => x.c))].forEach(c => log(_tf(5464, "{$0} 的「{$1}」这一圈结束了", nm(p), REI[c].n))); }
+  if (p.lapFx && p.lapFx.length) { const end = p.lapFx.filter(x => x.lap < p.laps); p.lapFx = p.lapFx.filter(x => x.lap >= p.laps); [...new Set(end.map(x => x.c))].forEach(c => log(_tf(5551, "{$0} 的「{$1}」这一圈结束了", nm(p), REI[c].n))); }
   // 老存档里的 halfRun 是 true，按整单减半算
   const half = p.halfRun === 'hour' ? 'hour' : p.halfRun ? 'all' : '', cut = p.runCut && p.runCut.length ? p.runCut : null, full = half || cut ? opCost(p) : 0;
   // 降价卡管 2 圈，halfLaps 记还剩几圈；老存档没有这个字段，按 1 圈算
@@ -124,7 +124,7 @@ async function passLaunch(p) {
   // 按服务打折的运行费（p.runCut，见 engine/08c-costs.js runCutOf）只管这一次：算完就清掉，和减半卡叠着算
   p.runCutNow = cut; if (cut) p.runCut = [];
   let oc = opCost(p); p.halfRunNow = false; p.runCutNow = null;
-  if (cut) log(_tf(5465, "{$0} 用上「{$1}」：这次运行费少交 ${$2}", nm(p), [...new Set(cut.map(x => REI[x.c].n))].join(_t(349, "、")), (half ? halfOc : full) - oc));
+  if (cut) log(_tf(5552, "{$0} 用上「{$1}」：这次运行费少交 ${$2}", nm(p), [...new Set(cut.map(x => REI[x.c].n))].join(_t(349, "、")), (half ? halfOc : full) - oc));
   if (half) {
     // 把没减的几笔写出来，免得玩家以为名单里的服务全减了
     const keep = [];

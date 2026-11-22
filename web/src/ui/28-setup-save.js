@@ -108,7 +108,7 @@ export function newGame(cfg) {
   __set_S({
     cfg, layoutVer: 2, tk: 100, players: [], props: {}, pot: 0, cur: 0, round: 1, phase: 'roll', doubles: 0, again: false,   // tk：回合编号 turnKey 的进位（座位号占两位），读档时按它换算老存档
     lastDice: [0, 0], lastSq: null, quarterCount: 0, actionUsed: false, log: [], over: false, winner: null, qSeen: {},   // qSeen：这一局出过的题号，保证一局不出重复题
-    inc: shuffle(Array.from({ length: INC.length - 1 }, (_, k) => k + 1).filter(k => !INC[k].dlc || (cfg.dlc || []).includes(INC[k].dlc))), incDisc: [],
+    inc: shuffle(Array.from({ length: INC.length - 1 }, (_, k) => k + 1).filter(k => !INC[k].dlc || (cfg.dlc || []).includes(INC[k].dlc))), incDisc: [], traps: [],
     rei: shuffle(Array.from({ length: REI.length - 1 }, (_, k) => k + 1).filter(k => !REI[k].dlc || (cfg.dlc || []).includes(REI[k].dlc))), reiDisc: [],
     endAt: (cfg.timed || cfg.win === 'timed') ? Date.now() + cfg.minutes * 60000 : null,
   });
@@ -317,7 +317,8 @@ export async function resumeGame() {
     if (pr.wild && !isWild(+i)) pr.wild = null;   // 老存档：Config 以前是万能服务，绑过的解开
     delete pr.forced;
   });
-  S.players.forEach(q => { q.cards = q.cards || []; q.hand = q.hand || []; q.coe = q.coe || []; q.drill = q.drill || []; q.debt = q.debt || []; q.speed = q.speed || 0; q.rsRate = q.rsRate || 0.9; if (q.rentBoost && !q.rentBoostTurns) q.rentBoostTurns = 1; q.startCash = q.startCash || startCashOf(q); q.rsCoupon = q.rsCoupon || 0; q.buyCoupon = q.buyCoupon || 0; q.commits = (q.commits || []).filter(c => c.laps > 0); });
+  if (!Array.isArray(S.traps)) S.traps = [];   // 老存档没有埋下的 Health 卡
+  S.players.forEach(q => { q.cards = q.cards || []; q.hand = q.hand || []; q.stops = q.stops || []; q.coe = q.coe || []; q.drill = q.drill || []; q.debt = q.debt || []; q.speed = q.speed || 0; q.rsRate = q.rsRate || 0.9; if (q.rentBoost && !q.rentBoostTurns) q.rentBoostTurns = 1; q.startCash = q.startCash || startCashOf(q); q.rsCoupon = q.rsCoupon || 0; q.buyCoupon = q.buyCoupon || 0; q.commits = (q.commits || []).filter(c => c.laps > 0); });
   // 咨询合作伙伴的估值按「买过的客户」算（rsSold）：老存档没记，先按现在还经他付费的客户补上
   S.players.forEach(q => { if (q.reseller && !q.rsEver) q.rsEver = rsCustomers(q).map(c => c.id); });
   // 回合编号改成 round × 100 + 座位（engine/09-rent.js 的 turnKey）：老存档里记着的按 round × 10 + 座位换算，不然「这回合已经做过」全都对不上

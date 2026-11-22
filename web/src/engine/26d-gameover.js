@@ -4,6 +4,7 @@ import { UI } from '../core/02b-ui-port.js';
 import { SQ } from '../rules/03-services.js';
 import { P, S, log, nm } from './07-state.js';
 import { valuation } from './08c-costs.js';
+import { trapsLeft } from './18-reinvent.js';
 import { reportOutRound } from './26b-retro.js';
 // 估值走势：每轮开始记一次 [轮次, 0 号玩家估值, 1 号, …]（按玩家 id，出局的人记 null），结束时 gameOver 再记一次终局值
 export function valSnap() { if (!S || !S.players) return; (S.valHist = S.valHist || []).push([S.round, ...S.players.map(q => q.alive ? valuation(q) : null)]); }
@@ -53,6 +54,7 @@ export function statTxt(w) {
 export function gameOver(w, why, kind) {
   S.over = true; S.phase = 'over'; S.winner = w ? w.id : null; S.overWhy = why; if (kind) S.overKind = kind;   // 结束原因跟着状态同步，远端拿它出战报
   if (!S.t1) { S.t1 = Date.now(); valSnap(); }   // 战报：对局用时、估值走势的终局值
+  if (!S.trapsShown) { S.trapsShown = true; trapsLeft(); }   // 埋下没人踩中的 Health 卡这时候亮出来（只写一次）
   if (w) log(_tf(3899, "🏆 {$0} 获胜：{$1}", nm(w), why));
   // 只删自己存的那份：演示局、机器人局、被别的标签页接手了的旧页面，删掉的是别人还在打的局
   if (!BOT && !DEMO && !STALE && revNow() === MY_REV) { try { localStorage.removeItem(KEY); } catch (e) { } }

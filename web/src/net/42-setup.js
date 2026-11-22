@@ -127,7 +127,7 @@ function sigFormHtml() {
   const v = sigSaved(), opt = (val, name) => `<option value="${val}"${(v.mode || 'auto') === val ? ' selected' : ''}>${name}</option>`;
   return `<h4>${_t(5304, "信令服务器")}</h4>
     <p class="muted">${_t(5305, "房间号登记在信令服务器上：房主、玩家、观众要用同一个才找得到房间。默认跟着网站走：GitHub Pages 上是 PeerJS 公共服务器，自己用 docker compose 部署的是自建的。只存在这台设备上。")}</p>
-    <p class="muted">${_t(5484, "互联网上的信令服务器必须用 HTTPS（wss），只有局域网地址（localhost、192.168.x.x、10.x.x.x、.local 这类）可以用 HTTP")}</p>
+    <p class="muted">${_t(5586, "互联网上的信令服务器必须用 HTTPS（wss），只有局域网地址（localhost、192.168.x.x、10.x.x.x、.local 这类）可以用 HTTP")}</p>
     <p id="sigcur"><b>${esc(sigLabel())}</b></p>
     <div class="mpturn"><label><select id="sigmode">${opt('auto', _t(5306, "跟着网站默认"))}${opt('public', _tf(5297, "公共 PeerJS（{$0}）", SIG_PUBLIC))}${opt('custom', _t(5307, "自建"))}</select></label>
     <label>${_t(5308, "域名")}<input id="sighost" autocomplete="off" spellcheck="false" placeholder="peer.example.com" value="${esc(v.host || '')}"></label>
@@ -142,7 +142,7 @@ export function mpSigSave() {
   sigSave(own ? { mode, ...own } : { mode });
   $('#sigcur').innerHTML = `<b>${esc(sigLabel())}</b>`;
   // 互联网上的地址填了 80、8080 这类 http 端口：照样按 wss 连（sigSecure），先说清楚，免得以为能走 http
-  const tls = own && !isLanHost(own.host) && own.port !== 443 ? `<br><span class="warn">${_t(5485, "互联网上的信令服务器必须用 HTTPS（wss），只有局域网地址可以用 HTTP")}</span>` : '';
+  const tls = own && !isLanHost(own.host) && own.port !== 443 ? `<br><span class="warn">${_t(5587, "互联网上的信令服务器必须用 HTTPS（wss），只有局域网地址可以用 HTTP")}</span>` : '';
   $('#sigmsg').innerHTML = `<span class="muted">${MP.role ? _t(5101, "下次创建或加入房间时生效") : _t(5102, "创建或加入房间时就会用上")}</span>${tls}`;
   document.querySelectorAll('.mpsig').forEach(el => { el.textContent = sigLabel(); });   // 表单下面、大厅里那一行跟着改
 }

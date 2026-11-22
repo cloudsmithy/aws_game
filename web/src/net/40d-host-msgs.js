@@ -83,11 +83,11 @@ Object.assign(MP, {
       if (S && S.players) {
         // 开局后来的新名字：中途加入，房主同意了才排到座位最后（engine/14-turn.js 的 joinPlayer）。座位满了照旧拒绝，提示掉线的人用局里的名字回来
         const left = this.waiting(), mx = Math.min(this.seatMax || 4, MAX_PLAYERS);
-        if (S.over) return this.reject(conn, _t(5480, "这局已经结束了，等房主开下一局再加入"));
-        if (S.drafting) return this.reject(conn, _t(5481, "大家正在挑角色，挑完再加入"));
+        if (S.over) return this.reject(conn, _t(5578, "这局已经结束了，等房主开下一局再加入"));
+        if (S.drafting) return this.reject(conn, _t(5579, "大家正在挑角色，挑完再加入"));
         if (S.players.length >= mx) return this.reject(conn, left.length ? _tf(4989, "游戏已经开始。原来的玩家用局里的名字重新加入：{$0}", left.join(_t(349, "、"))) : mx > 4 ? _tf(5303, "房间满了（最多 {$0} 人）", mx) : _t(4992, "房间满了（最多 4 人）"));
-        if (S.cfg.roundLimit && S.round >= S.cfg.roundLimit) return this.reject(conn, _t(5482, "已经是最后一轮了，不能中途加入"));
-        if (S.players.some(q => q.name === esc(name))) return this.reject(conn, _tf(5483, "局里已经有人叫 {$0} 了，换个名字再加入", name));
+        if (S.cfg.roundLimit && S.round >= S.cfg.roundLimit) return this.reject(conn, _t(5580, "已经是最后一轮了，不能中途加入"));
+        if (S.players.some(q => q.name === esc(name))) return this.reject(conn, _tf(5581, "局里已经有人叫 {$0} 了，换个名字再加入", name));
         if (!(approval && approval.join && approval.game === S)) return this.requestSeat(conn, { ...m, name }, S.players.length, null, true);
         seat = joinPlayer(name).id; joined = true;
         (S.mpSeats = S.mpSeats || []).push(seat);   // 记成联机座位：房主刷新后读档，他照样能按名字坐回来
@@ -145,11 +145,11 @@ Object.assign(MP, {
   wbMark(seat, id, ok) { const x = this.seats[seat]; this.send(x.conn, { t: 'wb', id, ok: !!ok }); return wbApply(x.wb || (x.wb = {}), id, ok); },
   // 大厅里（还没开局）远端玩家改自己的名字：和入房时一样整理、查重（大厅不收重名，见 admit），被移出过的名字不能用；房主这边的座位表跟着刷新
   lobbyRename(seat, raw) {
-    const x = this.seats[seat]; if (!x) return _t(5551, "你不在这个房间的座位上");
+    const x = this.seats[seat]; if (!x) return _t(5582, "你不在这个房间的座位上");
     const name = raw.replace(/\s+/g, ' ').trim().slice(0, 12); if (!name) return _t(4628, "名字不能是空的");
     if (this.banned && this.banned.has(name)) return _t(4987, "房主把你移出了这个房间");
     const host = (($('#nm0') || {}).value || '').replace(/\s+/g, ' ').trim();
-    if (name === host || Object.entries(this.seats).some(([k, y]) => +k !== seat && y.name.replace(/\s+/g, ' ') === name)) return _tf(5552, "已经有人叫 {$0} 了，换一个", name);
+    if (name === host || Object.entries(this.seats).some(([k, y]) => +k !== seat && y.name.replace(/\s+/g, ' ') === name)) return _tf(5583, "已经有人叫 {$0} 了，换一个", name);
     x.name = name; this.renderLobby(); return '';
   },
   renderLobby() {

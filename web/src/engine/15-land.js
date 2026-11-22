@@ -14,7 +14,7 @@ import { quiz } from './12-quiz.js';
 import { goReiCards, sendToJail } from './13-move.js';
 import { drawRei } from './16-deck.js';
 import { drawIncident, incident, skipOrPay } from './17-health.js';
-import { drawReinvent } from './18-reinvent.js';
+import { drawReinvent, noteStop, springTrap } from './18-reinvent.js';
 import { raiseValue } from './20-bankrupt.js';
 import { manage } from './23-manage.js';
 import { ST, evt } from './26b-retro.js';
@@ -23,7 +23,8 @@ import { isAI } from './36-ai.js';
 import { MP } from '../net/40-host-sync.js';
 import { fxAll, fxCast, fxPot, sfxAll } from '../net/41-replay.js';
 // ================= 落点 =================
-export async function land(p, opts = {}) { const prev = S.histSq; S.histSq = p.pos; let r; try { r = await withCardMul(0, () => land0(p, opts)); } finally { S.histSq = prev; } await goReiCards(p); return r; }
+// 停在服务格上记进 p.stops（埋 Health 卡只能埋在自己停过的格子上，经过不算）；这一格结算完（过路费、买地、升级都做完）再看有没有对手埋的 Health 卡
+export async function land(p, opts = {}) { const prev = S.histSq, at = S.histSq = p.pos; let r; try { noteStop(p, at); r = await withCardMul(0, () => land0(p, opts)); await springTrap(p, at); } finally { S.histSq = prev; } await goReiCards(p); return r; }
 async function land0(p, opts = {}) {
   const i = p.pos, s = SQ[i];
   S.lastSq = i; if (!BOT && !SIM) fxAll({ sq: [i, 'fx-land', 900] });
@@ -59,7 +60,7 @@ async function land0(p, opts = {}) {
       } else {
         // 牌堆和弃牌堆都空了（卡都在各家手牌里）抽不满 3 张：有几张选几张，一张都没有就按抽奖的保底领 $100
         const draws = []; for (let k = 0; k < 3; k++) { const x = await drawRei(); if (x != null) draws.push(x); }
-        if (!draws.length) { log(_tf(5467, "👥 {$0} 想在 User Group 活动抽 re:Invent 卡，可牌堆抽完了（卡都在各家手牌里），改领 ${$1}", nm(p), credit(p, 100, 'other'))); break; }
+        if (!draws.length) { log(_tf(5554, "👥 {$0} 想在 User Group 活动抽 re:Invent 卡，可牌堆抽完了（卡都在各家手牌里），改领 ${$1}", nm(p), credit(p, 100, 'other'))); break; }
         const pickId = await UI.ask({ who: p.id, title: _tf(2959, "{$0} 在 User Group 活动抽了 {$1} 张 re:Invent 卡，选一张", p.name, draws.length), html: _t(2960, "<p>选一张用，其余放回牌堆底。</p>"), cls: 'quiz', buttons: draws.map(x => ({ label: _tf(2961, "#{$0}「{$1}」：{$2}", x, REI[x].n, REI[x].e.replace(_tr(2747, "^保留：", ""), '')), value: x, disabled: x === 4 && p.role === 'fin' && draws.some(y => y !== 4) })) });
         draws.filter(x => x !== pickId).forEach(x => S.rei.push(x));
         log(_tf(2962, "👥 {$0} 在 User Group 活动抽 {$1} 张 re:Invent 卡，选了「{$2}」", nm(p), draws.length, REI[pickId].n));
@@ -248,7 +249,7 @@ async function spotTakeover(p, i) {
   const bid = Math.max(floor, Math.min(r.inp.bid || floor, s.p, p.cash));
   if (bid < need) { log(_tf(3060, "{$0} 出价想抢 {$1} 的 Spot 服务 {$2}，没压过他的出价，照常付过路费", nm(p), nm(o), sqn(i))); if (!isAI(p.id)) UI.toast(_t(3061, "猜低了，没抢到：照常付过路费")); return false; }
   // 保留卡「收到 Spot 中断前 2 分钟通知」：主人提前把任务切到别的实例上，这次保住，卡用掉；落上来的人出价不扣钱，照常付过路费
-  { const sn = availCard(o, 'SPOTN'); if (sn) { sn.used = true; log(_tf(5468, "📨 {$0} 收到 Spot 中断前 2 分钟通知，及时把任务切走：{$1} 没抢到 {$2}，照常付过路费", nm(o), nm(p), sqn(i))); if (!isAI(p.id)) UI.toast(_tf(5469, "{$0} 用掉「Spot 中断通知」保住了 {$1}：照常付过路费", o.name, s.n)); return false; } }
+  { const sn = availCard(o, 'SPOTN'); if (sn) { sn.used = true; log(_tf(5555, "📨 {$0} 收到 Spot 中断前 2 分钟通知，及时把任务切走：{$1} 没抢到 {$2}，照常付过路费", nm(o), nm(p), sqn(i))); if (!isAI(p.id)) UI.toast(_tf(5556, "{$0} 用掉「Spot 中断通知」保住了 {$1}：照常付过路费", o.name, s.n)); return false; } }
   ST(p).spendBuy = (ST(p).spendBuy || 0) + pay(p, 'bank', bid);   // 复盘里算「买服务」
   const comp = Math.round((pr.spotPaid || 0) / 2); credit(o, comp, 'sell');
   handOver(o, i, p); pr.cap = 0; pr.impaired = false;   // RI、下线拿过多少钱跟着原主人走，不留在格子上

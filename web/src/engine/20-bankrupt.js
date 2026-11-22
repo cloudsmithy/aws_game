@@ -5,6 +5,7 @@ import { P, S, comboOn, cur, debtOf, log, nm, offDrawn, offSpent, ownedBy, reset
 import { giveTo } from './08-money.js';
 import { buyPaid, fullBack, handOver, sellCap, sellProp, sellUpgrade, sellValue, sellZhe, stripValue, svcLeaves, takeOffline } from './09-rent.js';
 import { discardHand } from './16-deck.js';
+import { dropTraps } from './18-reinvent.js';
 import { manage } from './23-manage.js';
 import { evt } from './26b-retro.js';
 import { isParty } from '../rules/35-modes.js';
@@ -101,6 +102,8 @@ async function bankrupt(p) {
   p.alive = false; p.debt = []; p.jail = null; p.skip = 0;
   // 没公开的 re:Invent 手牌不给债主（别人本来就不知道是什么），放进弃牌堆
   discardHand(p);
+  // 他埋下、还没人踩中的 Health 卡也收回来放进弃牌堆（engine/18-reinvent.js 的 S.traps）
+  dropTraps(p);
   // 他自己欠的上面清了，别人欠他的也要注销：留着的话债务人还钱时 giveTo 不入账，那笔钱会消失
   S.players.forEach(q => { if (q !== p && q.debt && q.debt.length) q.debt = q.debt.filter(d => d.to !== p.id); });
   if (!ids.length || total <= 0) {
