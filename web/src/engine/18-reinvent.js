@@ -1,7 +1,7 @@
 import { _t, _tf } from '../core/01-i18n-runtime.js';
 import { BOT, SIM, rnd, waitAnim } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
-import { IX, N, OWNABLE, SQ, capU, lvFull, lvName } from '../rules/03-services.js';
+import { BAL, IX, N, OWNABLE, SQ, capU, lvFull, lvName } from '../rules/03-services.js';
 import { CARDN, CATS, COMBOS, INC, REI, REI_HAND_MAX, comboOpen } from '../rules/04-roles-combos-cards.js';
 import { advanceTo } from '../rules/05-dlc.js';
 import { P, S, cur, hasCombo, inPlay, log, nm, ownedBy, owns, resetProp, sqn } from './07-state.js';
@@ -149,7 +149,7 @@ export async function moneyOrMove(p, card, amt, done) {
 async function drawReinvent0(p, forced, fixed) {
   const id = forced ?? await drawRei();
   // 牌堆抽完了（卡都在各家手里）：不亮卡，改领一笔小钱（和卖掉一张卡一样 $50）
-  if (id == null) { log(_tf(5570, "🎁 {$0} 想抽 re:Invent 卡，可牌堆抽完了（卡都在各家手里），改领 ${$1}", nm(p), credit(p, 50))); return; }
+  if (id == null) { log(_tf(5570, "🎁 {$0} 想抽 re:Invent 卡，可牌堆抽完了（卡都在各家手里），改领 ${$1}", nm(p), credit(p, BAL.reiEmpty))); return; }
   // 真人自己抽的（不是保留卡）先只给自己看，四选一；只有选「现在用」才亮给大家、照旧结算
   if (forced == null && !fixed && !REI[id].keep && humanPick(p) && await reiPick(p, id) !== 'now') return;
   await UI.showCard('rei', id, p);
@@ -161,7 +161,7 @@ async function drawReinvent0(p, forced, fixed) {
 // 卡面只有主人看得到：抽卡窗、手牌窗对别人显示成「X 在看……」（UI.ask 的 priv），联机推状态时别人的手牌换成 0（net/40c-sync.js 的 stateFor）。
 // 日志不写卡名，打出来的时候才写
 export const handOf = p => p.hand || (p.hand = []);
-const sellAmt = () => cardAmt(50);   // 卖一张卡领的钱（卡牌倍率照常算，credit 里乘）
+const sellAmt = () => cardAmt(BAL.reiSell);   // 卖一张卡领的钱（卡牌倍率照常算，credit 里乘）
 const peekHide = p => ({ title: _tf(5407, "{$0} 在看抽到的 re:Invent 卡", p.name) });
 async function reiPick(p, id) {
   const full = handOf(p).length >= REI_HAND_MAX, jail = p.jail !== null;
@@ -173,7 +173,7 @@ async function reiPick(p, id) {
       { label: _tf(5414, "卖掉，领 ${$0}", sellAmt()), value: 'sell' },
       { label: jail ? _t(5415, "丢掉，再掷一次骰子（在维护窗口里不能走）") : _t(5416, "丢掉，再掷一次骰子（这次落地不能买）"), value: 'roll', disabled: jail }] });
   if (v === 'keep') { handOf(p).push(id); log(_tf(5417, "{$0} 把这张卡收进了手牌（不公开）", nm(p))); }
-  else if (v === 'sell') { S.reiDisc.push(id); log(_tf(5418, "{$0} 卖掉了这张卡，领 ${$1}", nm(p), credit(p, 50))); }
+  else if (v === 'sell') { S.reiDisc.push(id); log(_tf(5418, "{$0} 卖掉了这张卡，领 ${$1}", nm(p), credit(p, BAL.reiSell))); }
   else if (v === 'roll') { S.reiDisc.push(id); log(_tf(5419, "{$0} 丢掉这张卡，再掷一次骰子（这次落地不能买）", nm(p))); await rollNoBuy(p); }
   if (v !== 'now') UI.render();   // 玩家卡上的手牌张数、现金马上跟着变
   return v;
@@ -204,7 +204,7 @@ async function handCard(p, k, hide, back) {
   handOf(p).splice(k, 1);
   if (v === 'play') { await UI.showCard('rei', id, p); log(_tf(5427, "🎁 {$0} 打出手牌 re:Invent #{$1}「{$2}」", nm(p), id, REI[id].n)); await reiResolve(p, id); return v; }
   S.reiDisc.push(id);
-  if (v === 'sell') { log(_tf(5428, "{$0} 卖掉一张手牌，领 ${$1}", nm(p), credit(p, 50))); return v; }
+  if (v === 'sell') { log(_tf(5428, "{$0} 卖掉一张手牌，领 ${$1}", nm(p), credit(p, BAL.reiSell))); return v; }
   const n = +String(v).slice(1); p.handWalk = turnKey();
   log(_tf(5429, "{$0} 丢掉一张手牌，往前走 {$1} 格", nm(p), n)); await moveSteps(p, n); await land(p);
   return v;

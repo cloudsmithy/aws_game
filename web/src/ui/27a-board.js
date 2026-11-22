@@ -13,7 +13,7 @@ import { isHidden } from '../rules/35-modes.js';
 import { MP } from '../net/40-host-sync.js';
 import { MPFX } from '../net/41-replay.js';
 // ================= 渲染 =================
-let CORNER_SUB = __rv(() => ({ get go() { return _tf(3926, "经过领 ${$0} Credits", BAL.salary); }, get jail() { return _tf(5675, "停一轮或交 $50 · 关进来付 ${$0} 出", BAL.jailFee); }, free: _t(3928, "经过领 $50 · 停下抽奖或抽卡"), gotojail: _t(2870, "进维护窗口") }), v => { CORNER_SUB = v; }, () => CORNER_SUB);
+let CORNER_SUB = __rv(() => ({ get go() { return _tf(3926, "经过领 ${$0} Credits", BAL.salary); }, get jail() { return _tf(5705, "停一轮或交 ${$1} · 关进来付 ${$0} 出", BAL.jailFee, BAL.jailLand); }, free: _t(3928, "经过领 $50 · 停下抽奖或抽卡"), gotojail: _t(2870, "进维护窗口") }), v => { CORNER_SUB = v; }, () => CORNER_SUB);
 export const sideOf = i => ['b', 'l', 't', 'r'][sideIdx(i)];
 function sqPos(i) {
   const [a, b, c] = CORNERS.slice(1);

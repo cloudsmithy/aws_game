@@ -3259,15 +3259,19 @@ let UPGRADES = __rv(() => ({
   config: [[_t(106, "托管规则"), _t(129, "规则"), 'audit', _t(280, "用托管规则持续检查资源配置合不合规，比如 S3 桶有没有公开、EBS 卷有没有加密")], [_t(154, "自动修正"), _t(154, "自动修正"), 'dataprot', _t(281, "不合规的资源用 Systems Manager 自动化文档自动改回来，比如把公开的 S3 桶改回私有")], [_t(155, "聚合器"), _t(155, "聚合器"), '', _t(282, "把多个账户、多个区域的配置和合规结果汇总到一处看")]],
 }), v => { UPGRADES = v; }, () => UPGRADES);
 Object.entries(UPGRADES).forEach(([k, v]) => { (SVC[k] || UTIL[k]).upg = v; });
-// 平衡参数（?bal={} 能覆盖，地狱模式在 rules/35-modes.js 换一部分）；jailFee 是被送进维护窗口后付钱提前出来的价钱（落在维护窗口格上交的 $50 不算）。
+// 平衡参数（?bal={} 能覆盖，地狱模式在 rules/35-modes.js 换一部分）。jailFee：被送进维护窗口后付钱提前出来；jailLand：自己落在维护窗口格上交钱照常走；
+// reiSell：卖掉一张 re:Invent 卡领的钱；reiEmpty / ugEmpty：re:Invent 牌堆抽空时抽一张 / UG 活动抽 3 张改领的钱；
+// debtLap（SaaS 创业公司 debtLapSaas）：每个技术债让每圈运行费多交的钱；debtUpg：攒到 2 个技术债后升级每级加价；
+// refactorUnit × 手上个数，第 refactorLateRound 轮起 + refactorLate：重构清 1 个技术债；bigRefactor：攒满 3 个的大重构
 // 放在格子数据前面：SPECIAL 的说明要用
-const BAL = Object.assign({ salary: 200, cashMul: 1, hourLow: [5, 10, 20, 30], hourHigh: [10, 20, 30, 40], capLow: 5, capHigh: 10, req: 0.15, token: 0.25, rentBase: 0.2, sell: 0.8, cardGrow: 0.5, protect: 2, growth: 0.75, growthEvery: 5, skillFull: 1.2, seatBonus: 50, rsKeepCombo: 1, rsKeepGroup: 1, rsComboMul: 2, rsCashSum: 1, rsLimitPer: 300, rsHell: 0.2, jailFee: 500 },
+const BAL = Object.assign({ salary: 200, cashMul: 1, hourLow: [5, 10, 20, 30], hourHigh: [10, 20, 30, 40], capLow: 5, capHigh: 10, req: 0.15, token: 0.25, rentBase: 0.2, sell: 0.8, cardGrow: 0.5, protect: 2, growth: 0.75, growthEvery: 5, skillFull: 1.2, seatBonus: 50, rsKeepCombo: 1, rsKeepGroup: 1, rsComboMul: 2, rsCashSum: 1, rsLimitPer: 300, rsHell: 0.2, jailFee: 500, jailLand: 50,
+  reiSell: 50, reiEmpty: 50, ugEmpty: 100, debtLap: 20, debtLapSaas: 30, debtUpg: 50, refactorUnit: 50, refactorLate: 30, refactorLateRound: 10, bigRefactor: 300 },
   (() => { try { return JSON.parse(new URLSearchParams(location.search).get('bal') || '{}'); } catch (e) { return {}; } })());
 
 const BAL0 = { ...BAL };
 let SPECIAL = __rv(() => ({
   go: { t: 'go', n: _t(283, "Startup 扶持"), icon: 'activate', d: _t(284, "经过或停下领 $200 Credits，并交运行费") },
-  jail: { t: 'jail', n: _t(285, "维护窗口"), icon: 'ssm', d: _tf(5674, "落在这里：停一轮，或者交 $50 照常走；被送进来：下回合停一轮，或者付 ${$0} 马上出来", BAL.jailFee) },
+  jail: { t: 'jail', n: _t(285, "维护窗口"), icon: 'ssm', d: _tf(5704, "落在这里：停一轮，或者交 ${$1} 照常走；被送进来：下回合停一轮，或者付 ${$0} 马上出来", BAL.jailFee, BAL.jailLand) },
   free: { t: 'free', n: _t(287, "User Group 活动"), icon: 'users', d: _t(288, "经过 UG 活动领取 $50；停在上面二选一：抽奖 $100～奖池全部（不够亚马逊云科技补）/ 抽 3 张 re:Invent 卡选一张") },
   gotojail: { t: 'gotojail', n: _t(289, "Root 密钥泄露"), icon: 'iam', d: _t(290, "直接进维护窗口") },
   inc: { t: 'inc', n: _t(291, "Health 事件"), icon: 'health', d: _t(292, "抽一张 Health 事件卡") },
@@ -4724,7 +4728,7 @@ const spScope = (r, n) => n === 3 ? r.comp : r.comp + r.db;
 // Savings Plans：每圈固定付承诺额，按折扣价抵扣符合条件的运行费；用不完不退，超出部分按原价
 // 每圈的技术债加价：每个技术债 $20（SaaS $30），开了技术债机制（F.debt()）才收。
 // opCost 把它加进总账；交运行费时 passLaunch 单独拿出这份，不分给代理商
-const debtFee = p => p.techDebt * (p.role === 'saas' ? 30 : 20);
+const debtFee = p => p.techDebt * (p.role === 'saas' ? BAL.debtLapSaas : BAL.debtLap);
 const opCost = p => {
   const r = runAfterRI(p), sp = spActive(p);
   const base = sp ? (sp.scope === 'compute' ? r.comp : r.comp + r.db) : r.spBase;
@@ -4854,7 +4858,7 @@ function upgradeInfo(p, i, viaLanding = false) {
     if (s.g === 'ai' && !active(p, IX.s3)) fees.push({ to: 'bank', amt: 50, why: _t(2694, "训练数据存储费（你没有 S3）") });
   }
   // 技术债攒到 2 个每级 +$50（sur）：这是罚款，不是投入，upPaid 只记前面的升级费，卖回、去掉一级、估值都不算它
-  let sur = F.debt() && p.techDebt >= 2 ? 50 : 0;
+  let sur = F.debt() && p.techDebt >= 2 ? BAL.debtUpg : 0;
   // re:Invent「迁移到 Graviton」记下的一次免费：升 Graviton 这一级不花钱，技术债加价也免
   if (s.k === 'ec2' && eff === 'cost' && p.gravFree) { cost = 0; sur = 0; off = _t(2695, "用掉「迁移到 Graviton」记下的免费"); }
   cost += sur;
@@ -5708,7 +5712,7 @@ async function land0(p, opts = {}) {
       else { const r = await offerLandingUpgrade(p, i, !opts.noJump), j = r === 'jump' && jumpInfo(p, i); if (j) await doJump(p, j.t); else if (r === 'did' && !opts.noJump) await colorJump(p, i); }
       break;
     }
-    case 'jail': if (p.jail === null) await skipOrPay(p, _t(2943, "赶上维护窗口"), 50, _t(2944, "换个时间窗口维护")); break;
+    case 'jail': if (p.jail === null) await skipOrPay(p, _t(2943, "赶上维护窗口"), BAL.jailLand, _t(2944, "换个时间窗口维护")); break;
     case 'tax': await tax(p, 200, true); break;
     case 'tax2': { let a = active(p, IX.vpc) && S.props[IX.vpc].level >= 1 ? 200 : 100; if (p.role === 'ecom') { a *= 2; log(_t(2945, "跨境电商：NAT 账单交双倍")); } await tax(p, a, false); break; }
     case 'inc': await drawIncident(p); break;
@@ -5729,7 +5733,7 @@ async function land0(p, opts = {}) {
       } else {
         // 牌堆和弃牌堆都空了（卡都在各家手牌里）抽不满 3 张：有几张选几张，一张都没有就按抽奖的保底领 $100
         const draws = []; for (let k = 0; k < 3; k++) { const x = await drawRei(); if (x != null) draws.push(x); }
-        if (!draws.length) { log(_tf(5554, "👥 {$0} 想在 User Group 活动抽 re:Invent 卡，可牌堆抽完了（卡都在各家手牌里），改领 ${$1}", nm(p), credit(p, 100, 'other'))); break; }
+        if (!draws.length) { log(_tf(5554, "👥 {$0} 想在 User Group 活动抽 re:Invent 卡，可牌堆抽完了（卡都在各家手牌里），改领 ${$1}", nm(p), credit(p, BAL.ugEmpty, 'other'))); break; }
         const pickId = await UI.ask({ who: p.id, title: _tf(2959, "{$0} 在 User Group 活动抽了 {$1} 张 re:Invent 卡，选一张", p.name, draws.length), html: _t(2960, "<p>选一张用，其余放回牌堆底。</p>"), cls: 'quiz', buttons: draws.map(x => ({ label: _tf(2961, "#{$0}「{$1}」：{$2}", x, REI[x].n, REI[x].e.replace(_tr(2747, "^保留：", ""), '')), value: x, disabled: x === 4 && p.role === 'fin' && draws.some(y => y !== 4) })) });
         draws.filter(x => x !== pickId).forEach(x => S.rei.push(x));
         log(_tf(2962, "👥 {$0} 在 User Group 活动抽 {$1} 张 re:Invent 卡，选了「{$2}」", nm(p), draws.length, REI[pickId].n));
@@ -6083,7 +6087,7 @@ function debtCleared(p) {
   log(go ? _tf(5403, "🧱 {$0} 清完技术债，进维护窗口停一轮{$1}；出来不写复盘、不记技术债", nm(p), svc) : _tf(5558, "🧱 {$0} 清完技术债，本来就在维护窗口里，不再重进{$1}", nm(p), svc));
 }
 // 重构费按梯度：债越多越贵，越往后越贵（欠得越久，利息越高）——手上有 n 个技术债时清 1 个要 $50 × n，第 10 轮起再 +$30
-const refactorCost = p => 50 * Math.max(1, p.techDebt) + (S.round >= 10 ? 30 : 0);
+const refactorCost = p => BAL.refactorUnit * Math.max(1, p.techDebt) + (S.round >= BAL.refactorLateRound ? BAL.refactorLate : 0);
 function payRefactor(p) { const c = refactorCost(p); if (!p.techDebt || p.cash < c) return false; pay(p, 'bank', c); p.techDebt--; p.refactored = true; sfxAll('buy'); log(_tf(3142, "🛠 {$0} 花 ${$1} 重构，清掉 1 个技术债（还剩 {$2} 个）", nm(p), c, p.techDebt)); debtCleared(p); return true; }
 function refactorDebt() {
   const p = cur(); payRefactor(p);
@@ -6129,12 +6133,12 @@ async function penalize(p) {
   ST(p).hit++; speedLose(p, 2, _t(3157, "被事件打中"));
   if (!F.debt()) return;
   p.techDebt++;
-  log(_tf(3161, "🧱 {$0} 欠下 1 个技术债（共 {$1} 个）{$2}", nm(p), p.techDebt, p.techDebt === 1 && !S.debtExplained ? _tf(5405, "。技术债：每个让每圈运行费多 $20；攒到 2 个，升级每级贵 $50；攒到 3 个要大重构，交 ${$0}；重构清 1 个：手上有几个就是 $50 × 几个，第 10 轮起再加 $30。不管怎么清掉的，都要进维护窗口停一轮，名下服务一起下线一轮", cardAmt(300)) : ''));
+  log(_tf(3161, "🧱 {$0} 欠下 1 个技术债（共 {$1} 个）{$2}", nm(p), p.techDebt, p.techDebt === 1 && !S.debtExplained ? _tf(5702, "。技术债：每个让每圈运行费多 ${$1}；攒到 2 个，升级每级贵 ${$2}；攒到 3 个要大重构，交 ${$0}；重构清 1 个：手上有几个就是 ${$3} × 几个，第 {$4} 轮起再加 ${$5}。不管怎么清掉的，都要进维护窗口停一轮，名下服务一起下线一轮", cardAmt(BAL.bigRefactor), p.role === 'saas' ? BAL.debtLapSaas : BAL.debtLap, BAL.debtUpg, BAL.refactorUnit, BAL.refactorLateRound, BAL.refactorLate) : ''));
   S.debtExplained = true;
   if (p.techDebt >= 3) {
     // 技术债攒满 3 个必须大重构：交 $300、清掉 3 个，和别的清债一样马上进维护窗口停一轮（以前能多交 $100 不停，现在清债一律要停）
     p.techDebt -= 3; p.refactored = true;   // 大重构也是重构：成本优化支柱的「重构清过技术债」照样算
-    log(_tf(5406, "{$0} 技术债到 3 个：大重构，交 ${$1}，清掉 3 个", nm(p), pay(p, 'bank', 300)));
+    log(_tf(5406, "{$0} 技术债到 3 个：大重构，交 ${$1}，清掉 3 个", nm(p), pay(p, 'bank', BAL.bigRefactor)));
     debtCleared(p);
   }
 }
@@ -6463,7 +6467,7 @@ async function moneyOrMove(p, card, amt, done) {
 async function drawReinvent0(p, forced, fixed) {
   const id = forced ?? await drawRei();
   // 牌堆抽完了（卡都在各家手里）：不亮卡，改领一笔小钱（和卖掉一张卡一样 $50）
-  if (id == null) { log(_tf(5570, "🎁 {$0} 想抽 re:Invent 卡，可牌堆抽完了（卡都在各家手里），改领 ${$1}", nm(p), credit(p, 50))); return; }
+  if (id == null) { log(_tf(5570, "🎁 {$0} 想抽 re:Invent 卡，可牌堆抽完了（卡都在各家手里），改领 ${$1}", nm(p), credit(p, BAL.reiEmpty))); return; }
   // 真人自己抽的（不是保留卡）先只给自己看，四选一；只有选「现在用」才亮给大家、照旧结算
   if (forced == null && !fixed && !REI[id].keep && humanPick(p) && await reiPick(p, id) !== 'now') return;
   await UI.showCard('rei', id, p);
@@ -6475,7 +6479,7 @@ async function drawReinvent0(p, forced, fixed) {
 // 卡面只有主人看得到：抽卡窗、手牌窗对别人显示成「X 在看……」（UI.ask 的 priv），联机推状态时别人的手牌换成 0（net/40c-sync.js 的 stateFor）。
 // 日志不写卡名，打出来的时候才写
 const handOf = p => p.hand || (p.hand = []);
-const sellAmt = () => cardAmt(50);   // 卖一张卡领的钱（卡牌倍率照常算，credit 里乘）
+const sellAmt = () => cardAmt(BAL.reiSell);   // 卖一张卡领的钱（卡牌倍率照常算，credit 里乘）
 const peekHide = p => ({ title: _tf(5407, "{$0} 在看抽到的 re:Invent 卡", p.name) });
 async function reiPick(p, id) {
   const full = handOf(p).length >= REI_HAND_MAX, jail = p.jail !== null;
@@ -6487,7 +6491,7 @@ async function reiPick(p, id) {
       { label: _tf(5414, "卖掉，领 ${$0}", sellAmt()), value: 'sell' },
       { label: jail ? _t(5415, "丢掉，再掷一次骰子（在维护窗口里不能走）") : _t(5416, "丢掉，再掷一次骰子（这次落地不能买）"), value: 'roll', disabled: jail }] });
   if (v === 'keep') { handOf(p).push(id); log(_tf(5417, "{$0} 把这张卡收进了手牌（不公开）", nm(p))); }
-  else if (v === 'sell') { S.reiDisc.push(id); log(_tf(5418, "{$0} 卖掉了这张卡，领 ${$1}", nm(p), credit(p, 50))); }
+  else if (v === 'sell') { S.reiDisc.push(id); log(_tf(5418, "{$0} 卖掉了这张卡，领 ${$1}", nm(p), credit(p, BAL.reiSell))); }
   else if (v === 'roll') { S.reiDisc.push(id); log(_tf(5419, "{$0} 丢掉这张卡，再掷一次骰子（这次落地不能买）", nm(p))); await rollNoBuy(p); }
   if (v !== 'now') UI.render();   // 玩家卡上的手牌张数、现金马上跟着变
   return v;
@@ -6518,7 +6522,7 @@ async function handCard(p, k, hide, back) {
   handOf(p).splice(k, 1);
   if (v === 'play') { await UI.showCard('rei', id, p); log(_tf(5427, "🎁 {$0} 打出手牌 re:Invent #{$1}「{$2}」", nm(p), id, REI[id].n)); await reiResolve(p, id); return v; }
   S.reiDisc.push(id);
-  if (v === 'sell') { log(_tf(5428, "{$0} 卖掉一张手牌，领 ${$1}", nm(p), credit(p, 50))); return v; }
+  if (v === 'sell') { log(_tf(5428, "{$0} 卖掉一张手牌，领 ${$1}", nm(p), credit(p, BAL.reiSell))); return v; }
   const n = +String(v).slice(1); p.handWalk = turnKey();
   log(_tf(5429, "{$0} 丢掉一张手牌，往前走 {$1} 格", nm(p), n)); await moveSteps(p, n); await land(p);
   return v;
@@ -7074,7 +7078,7 @@ async function activeAction() {
     buttons: [
       { label: _t(3547, "GameDay 演练 $100"), desc: _t(3548, "翻开 Health 事件牌堆顶 2 张，选一张的类别领演练标记；2 张都放回牌堆底"), value: 'gd', disabled: p.cash < 100 },
       { label: _t(3549, "Well-Architected 自查 $50"), desc: _t(3550, "查看 Health 事件牌堆顶 3 张，按你想要的顺序放回"), value: 'wa', disabled: p.cash < 50 },
-      { label: _tf(3551, "重构 ${$0}", refactorCost(p)), desc: _tf(5430, "清掉 1 个技术债（$50 × 手上个数，第 10 轮起 +$30），清完进维护窗口停一轮、名下服务下线一轮{$0}", p.techDebt ? '' : _t(3552, "。你现在没有技术债")), value: 'rf', disabled: p.cash < refactorCost(p) || !p.techDebt },
+      { label: _tf(3551, "重构 ${$0}", refactorCost(p)), desc: _tf(5703, "清掉 1 个技术债（${$1} × 手上个数，第 {$2} 轮起 +${$3}），清完进维护窗口停一轮、名下服务下线一轮{$0}", p.techDebt ? '' : _t(3552, "。你现在没有技术债"), BAL.refactorUnit, BAL.refactorLateRound, BAL.refactorLate), value: 'rf', disabled: p.cash < refactorCost(p) || !p.techDebt },
       { label: _t(3554, "迁移 $100"), desc: _tf(3556, "把一块服务最高的 1 级升级挪到同组另一块{$0}", mg.length ? '' : _t(3555, "。你现在没有能迁移的升级")), value: 'mg', disabled: p.cash < 100 || !mg.length },
       { label: _t(2465, "取消"), value: 'x', botW: 2 },
     ],
@@ -7960,7 +7964,7 @@ async function showManual(full = false) {
   if (v === 'sw') setTimeout(() => showManual(!full), 0);
 }
 // ================= 渲染 =================
-let CORNER_SUB = __rv(() => ({ get go() { return _tf(3926, "经过领 ${$0} Credits", BAL.salary); }, get jail() { return _tf(5675, "停一轮或交 $50 · 关进来付 ${$0} 出", BAL.jailFee); }, free: _t(3928, "经过领 $50 · 停下抽奖或抽卡"), gotojail: _t(2870, "进维护窗口") }), v => { CORNER_SUB = v; }, () => CORNER_SUB);
+let CORNER_SUB = __rv(() => ({ get go() { return _tf(3926, "经过领 ${$0} Credits", BAL.salary); }, get jail() { return _tf(5705, "停一轮或交 ${$1} · 关进来付 ${$0} 出", BAL.jailFee, BAL.jailLand); }, free: _t(3928, "经过领 $50 · 停下抽奖或抽卡"), gotojail: _t(2870, "进维护窗口") }), v => { CORNER_SUB = v; }, () => CORNER_SUB);
 const sideOf = i => ['b', 'l', 't', 'r'][sideIdx(i)];
 function sqPos(i) {
   const [a, b, c] = CORNERS.slice(1);
@@ -8253,7 +8257,7 @@ function renderCenter() {
     // 灰掉的按钮只显示标题：原因在悬停提示里，手机上点一下弹 toast
     // a 是 UI_ACTS 里的名字（data-act="uiAction"）；灰按钮的 data-fk 和能点时的 actKey 一样，重画后焦点认得回来
     const B = (why, a, title, label, short) => why ? `<button class="off" aria-disabled="true" data-fk="uiAction(${a})" data-why="${esc(why)}" data-act="toast" title="${esc(why)}${title ? '&#10;' + title : ''}">${label}</button>` : `<button data-act="uiAction" data-arg="${a}" title="${title}">${label}</button>`;
-    if (F.debt() && p.techDebt > 0) more += B(idleWhy || (p.cash < refactorCost(p) ? _tf(2981, "现金不够 ${$0}", refactorCost(p)) : ''), 'refactorDebt', _t(5433, "重构清掉 1 个技术债：手上有几个就是 $50 × 几个，第 10 轮起再加 $30；不占主动行动，但清完马上进维护窗口停一轮，名下服务一起下线一轮"), _tf(4049, "清技术债 ${$0}（{$1}）", refactorCost(p), p.techDebt));
+    if (F.debt() && p.techDebt > 0) more += B(idleWhy || (p.cash < refactorCost(p) ? _tf(2981, "现金不够 ${$0}", refactorCost(p)) : ''), 'refactorDebt', _tf(5706, "重构清掉 1 个技术债：手上有几个就是 ${$0} × 几个，第 {$1} 轮起再加 ${$2}；不占主动行动，但清完马上进维护窗口停一轮，名下服务一起下线一轮", BAL.refactorUnit, BAL.refactorLateRound, BAL.refactorLate), _tf(4049, "清技术债 ${$0}（{$1}）", refactorCost(p), p.techDebt));
     if (F.actions()) more += B(idleWhy || actionWhy(p), 'activeAction', _t(4050, "每回合可以做一件事：GameDay 演练、查看后面的 Health 事件卡、重构清技术债、迁移升级"), _t(4051, "主动行动"));
     more += B(idleWhy, 'manage', _tf(4053, "给自己的服务升级、加容量；{$0}彻底不要的可以按实付 {$1}卖回亚马逊云科技", isParty() ? '' : _t(4052, "缺钱时把服务下线拿回一半周转，"), sellZhe()), _t(4054, "资产管理"));
     more += B(idleWhy, 'trade', _t(4055, "和别的玩家换服务、换现金（完整局还能换保留卡和标记）"), _t(4056, "交易"));

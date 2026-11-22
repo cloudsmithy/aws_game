@@ -39,7 +39,7 @@ async function land0(p, opts = {}) {
       else { const r = await offerLandingUpgrade(p, i, !opts.noJump), j = r === 'jump' && jumpInfo(p, i); if (j) await doJump(p, j.t); else if (r === 'did' && !opts.noJump) await colorJump(p, i); }
       break;
     }
-    case 'jail': if (p.jail === null) await skipOrPay(p, _t(2943, "赶上维护窗口"), 50, _t(2944, "换个时间窗口维护")); break;
+    case 'jail': if (p.jail === null) await skipOrPay(p, _t(2943, "赶上维护窗口"), BAL.jailLand, _t(2944, "换个时间窗口维护")); break;
     case 'tax': await tax(p, 200, true); break;
     case 'tax2': { let a = active(p, IX.vpc) && S.props[IX.vpc].level >= 1 ? 200 : 100; if (p.role === 'ecom') { a *= 2; log(_t(2945, "跨境电商：NAT 账单交双倍")); } await tax(p, a, false); break; }
     case 'inc': await drawIncident(p); break;
@@ -60,7 +60,7 @@ async function land0(p, opts = {}) {
       } else {
         // 牌堆和弃牌堆都空了（卡都在各家手牌里）抽不满 3 张：有几张选几张，一张都没有就按抽奖的保底领 $100
         const draws = []; for (let k = 0; k < 3; k++) { const x = await drawRei(); if (x != null) draws.push(x); }
-        if (!draws.length) { log(_tf(5554, "👥 {$0} 想在 User Group 活动抽 re:Invent 卡，可牌堆抽完了（卡都在各家手牌里），改领 ${$1}", nm(p), credit(p, 100, 'other'))); break; }
+        if (!draws.length) { log(_tf(5554, "👥 {$0} 想在 User Group 活动抽 re:Invent 卡，可牌堆抽完了（卡都在各家手牌里），改领 ${$1}", nm(p), credit(p, BAL.ugEmpty, 'other'))); break; }
         const pickId = await UI.ask({ who: p.id, title: _tf(2959, "{$0} 在 User Group 活动抽了 {$1} 张 re:Invent 卡，选一张", p.name, draws.length), html: _t(2960, "<p>选一张用，其余放回牌堆底。</p>"), cls: 'quiz', buttons: draws.map(x => ({ label: _tf(2961, "#{$0}「{$1}」：{$2}", x, REI[x].n, REI[x].e.replace(_tr(2747, "^保留：", ""), '')), value: x, disabled: x === 4 && p.role === 'fin' && draws.some(y => y !== 4) })) });
         draws.filter(x => x !== pickId).forEach(x => S.rei.push(x));
         log(_tf(2962, "👥 {$0} 在 User Group 活动抽 {$1} 张 re:Invent 卡，选了「{$2}」", nm(p), draws.length, REI[pickId].n));
