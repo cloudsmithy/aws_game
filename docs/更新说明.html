@@ -49,7 +49,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <h1>亚马逊云科技 User Group 云上大亨 · 这一轮改了什么</h1>
   <p>从「破产逻辑是不是有问题」开始，一路改到新角色、两个新开关、地狱模式和全套文档。每条改动后面写了为什么改；平衡数字都是用电脑玩家对打模拟出来的。</p>
   <nav>
-    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#r17">第十七轮</a><a href="#r18">第十八轮</a><a href="#r19">第十九轮</a><a href="#r20">第二十轮</a><a href="#r21">第二十一轮</a><a href="#todo">待定</a>
+    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#r17">第十七轮</a><a href="#r18">第十八轮</a><a href="#r19">第十九轮</a><a href="#r20">第二十轮</a><a href="#r21">第二十一轮</a><a href="#r22">第二十二轮</a><a href="#todo">待定</a>
   </nav>
 </header>
 
@@ -933,8 +933,18 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   </ul>
 </section>
 
+<section id="r22">
+  <h2><i>30</i>第二十二轮（11-22）：埋卡藏得住、金额统一成参数、修 7 处问题</h2>
+  <ul>
+    <li><span class="tag chg">改</span>埋 Health 卡只能埋在这一回合棋子刚走过的服务格上（路过的、停下的、飞过去的都算），不再是「这局停过的格」：开局停过的格少，日志又紧跟在「买下 X」后面，一看就知道埋在哪。</li>
+    <li><span class="tag chg">改</span>一格能叠好几张埋下的卡（谁埋的都行），有人停上去全部翻开，按埋下的先后结算；没翻开的卡（主人出局、结算到一半破产）扣着放回牌堆底，不进公开的弃牌堆。</li>
+    <li><span class="tag chg">改</span>写死的金额统一成参数（落在维护窗口格交的钱、卖 re:Invent 卡、牌堆抽空改领、技术债加价、重构费、大重构），提示文字都从参数取数；SaaS 创业公司的技术债说明写出它实际的 $30。</li>
+    <li><span class="tag bug">BUG</span>维护窗口付 $500 出来不查现金（远端、老页面点了会直接欠债）；技术债提示还写着已经删掉的「多交 $400 不停」；升级明细里的技术债加价是写死的；选对手、选并购目标这类列表的最后一项被显示成灰色的「放弃」；老板键 <code>:arch</code> 打不开架构讲解（改成 <code>:guides</code>）。</li>
+  </ul>
+</section>
+
 <section id="todo">
-  <h2><i>30</i>待定 / 已知问题</h2>
+  <h2><i>31</i>待定 / 已知问题</h2>
   <ul>
     <li>代理商在完整局（不限轮数约 16%）和地狱模式 15 轮（约 14%）偏弱，公平是 25%；各模式的数字见规则书第 32 节。</li>
     <li>模拟里的电脑不会刻意凑六大支柱，所以 Well-Architected 的达成率只能当下限看。</li>

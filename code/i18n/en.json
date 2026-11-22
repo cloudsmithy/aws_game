@@ -5736,5 +5736,7 @@
  "重构清掉 1 个技术债：手上有几个就是 ${$0} × 几个，第 {$1} 轮起再加 ${$2}；不占主动行动，但清完马上进维护窗口停一轮，名下服务一起下线一轮": "Refactor to clear 1 tech debt: ${$0} × the number you hold, +${$2} from round {$1}. It doesn't use your action, but afterwards you go straight into the maintenance window for one round and all your services go offline for one round",
  "技术债攒到 2 个 +${$0}": "2 tech debt: +${$0}",
  "被 Health 事件罚到又没防护时欠 1 个：每个让每圈运行费多 ${$0}{$1}；2 个升级每级 +${$2}；3 个要大重构，交 ${$3}（抽 Health 卡时攒满的跟着卡牌倍率涨）；重构清 1 个要 ${$4} × 手上的个数（第 {$5} 轮起 +${$6}）；不管怎么清掉的，都要进维护窗口停一轮、名下服务下线一轮": "You take 1 when a Health event hits you with no protection: each one adds ${$0}{$1} to your running costs per lap; at 2, every upgrade level costs +${$2}; at 3 you must do a major refactor and pay ${$3} (when it happens on a Health card draw, this scales with the card multiplier); refactoring 1 costs ${$4} × the number you hold (+${$6} from round {$5}); however it is cleared, you spend a round in the maintenance window and all your services go offline for a round",
- "（SaaS 创业公司，别人是 ${$0}）": " (SaaS startup; others pay ${$0})"
+ "（SaaS 创业公司，别人是 ${$0}）": " (SaaS startup; others pay ${$0})",
+ "第二十二轮": "Round 22",
+ "埋卡藏得住、金额统一成参数、修 7 处问题": "Hidden buried cards, amounts as parameters, 7 fixes"
 }
