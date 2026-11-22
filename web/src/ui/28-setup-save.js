@@ -6,7 +6,7 @@ import { DLC, dlcOn } from '../rules/05-dlc.js';
 import { F, MAX_PLAYERS, S, __set_S, cur, debtOf, isWild, log, nm, resetProp, winParts, winTimed, winWA } from '../engine/07-state.js';
 import { GAIN0 } from '../engine/08-money.js';
 import { PHONE_MQ, TABP_MQ, ask, bgInert, focusBack, info, kbdFocus, modal, modalBlocks, viewOpen } from './10-modal.js';
-import { endTurn } from '../engine/14-turn.js';
+import { endTurn, makePlayer } from '../engine/14-turn.js';
 import { STORM_TXT, roleCash, skillLine, skillMulTxt, startCashOf } from '../engine/21-skills.js';
 import { speedTurnStart } from '../engine/22-speed.js';
 import { ST } from '../engine/26b-retro.js';
@@ -115,7 +115,7 @@ export function newGame(cfg) {
   OWNABLE.forEach(resetProp);
   cfg.names.forEach((name, k) => {
     const r = isRsSeat(k) ? deal(rsRoles, true) : deal(custRoles, false);
-    S.players.push({ id: k, name: esc(name), color: COLORS[k], role: r.id, cash: roleCash(r, cfg), startCash: roleCash(r, cfg), pos: 0, jail: null, jailCat: 'sec', skip: 0, debt: [], techDebt: 0, coe: [], drill: [], cards: [], hand: [], alive: true, speed: 0, reseller: isRsSeat(k), rsRate: 0.9 });
+    S.players.push(makePlayer(k, name, r, roleCash(r, cfg), isRsSeat(k)));
     if (r.id === 'unicorn' && cfg.mode !== 'hell' && S.props[IX.route53].owner == null) { S.props[IX.route53].owner = k; S.props[IX.route53].paid = 0; }   // 送的，没花钱：卖回、下线、Trusted Advisor 退款都按 $0 算，不按标价
   });
   // 代理商的起始资金 = 所有客户起始资金的总和（代理商只靠架构收过路费、地还会被客户买走，要本钱囤货）；娱乐模式只打 10 轮按估值排名，不加。
@@ -264,6 +264,7 @@ export function playerGallery() {
     <h4>${_tf(4698, "公司角色（{$0} 个）", cs.length)}</h4><div class="rcards">${cs.map(card).join('')}</div>${rs.length ? _tf(4696, "<h4>代理商角色（{$0} 个，开了代理商模式时代理商座位从这里抽）</h4><div class=\"rcards\">{$1}</div>", rs.length, rs.map((r, k) => card(r, k + cs.length)).join('')) : ''}`, buttons: [{ label: _t(2610, "关闭"), value: true, cls: 'pri' }] });
 }
 async function roleDraft() {
+  S.drafting = true;   // 三选一挑角色期间不收中途加入（net/40d-host-msgs.js）：挑完会按角色卡重算所有人的开局资金
   const used = new Set(), pools = { c: shuffle(ROLES.filter(r => !r.rs)), r: shuffle(ROLES.filter(r => r.rs)) };
   for (const p of S.players) {
     const pool = p.reseller ? pools.r : pools.c;
@@ -276,7 +277,7 @@ async function roleDraft() {
     } else if (opts.length > 1) pick = opts[rnd(opts.length)];
     used.add(pick.id); p.role = pick.id;
   }
-  rolesRecalc();
+  rolesRecalc(); S.drafting = undefined;
   log(_tf(4702, "🎴 三选一挑好了角色：{$0}", S.players.map(q => _tf(3245, "{$0}（{$1}）", nm(q), roleOf(q).n)).join(_t(349, "、"))));
   save(); render();
 }

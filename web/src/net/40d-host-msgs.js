@@ -3,6 +3,7 @@ import { $, KEY, esc, unesc } from '../core/02-util.js';
 import { wbApply, wbValid } from '../rules/06-qbank.js';
 import { MAX_PLAYERS, S, cur, log, nm } from '../engine/07-state.js';
 import { MODAL_CUR, ask, info } from '../ui/10-modal.js';
+import { joinPlayer } from '../engine/14-turn.js';
 import { timedOver } from '../ui/26e-manual.js';
 import { render } from '../ui/27d-side.js';
 import { applyRename, npVal, renderNames, toast } from '../ui/28-setup-save.js';
@@ -62,7 +63,7 @@ Object.assign(MP, {
     if (m.auth !== this.auth) { this.reject(conn, _t(4986, "密码不对")); return; }
     if (this.banned && this.banned.has(name.replace(/\s+/g, ' ').trim())) { this.reject(conn, _t(4987, "房主把你移出了这个房间")); return; }
     // 名字定位座位，钥匙或房主确认鉴权后再认回。
-    let seat = this.seatFor(name);
+    let seat = this.seatFor(name), joined = false;
     // 身份由座位钥匙证明，名字只用于定位。离线座位也不能仅凭同名接管。
     if (seat == null && S && S.players) seat = this.seatFor(name, true);
     if (seat != null) {
@@ -74,24 +75,36 @@ Object.assign(MP, {
       const old = x.conn; if (old) { old._seat = null; old._closed = true; this.send(old, { t: 'kicked' }); try { old.close({ flush: true }); } catch (e) { } setTimeout(() => { try { old.close(); } catch (e) { } }, 5000); }
     }
     if (seat == null) {
-      if (S && S.players) { const left = this.waiting(); this.reject(conn, left.length ? _tf(4989, "游戏已经开始。原来的玩家用局里的名字重新加入：{$0}", left.join(_t(349, "、"))) : _t(4990, "游戏已经开始，座位都有人了")); return; }
-      // 大厅里不收重名：开局会把后来的改成「小李 2」，两人都掉线时按名字就分不清谁是谁，重连会坐到对方的座位上。
-      // 不像开局后那样同名顶替：大厅里分不清是本人掉线重进还是另一个人重名，顶替会把先来的踢掉。本人没正常关页面就重进的，等 watch 发现旧连接断了、座位删掉再进
-      const key = name.replace(/\s+/g, ' ');
-      if (Object.values(this.seats).some(x => x.name.replace(/\s+/g, ' ') === key)) { this.reject(conn, _tf(4991, "已经有人叫 {$0} 了，换个名字再加入（刚才是你自己掉线的话，等十几秒再用这个名字进）", name)); return; }
-      const used = new Set(Object.keys(this.seats).map(Number));
-      // 房主刷新后还没点「继续上一局」：存档里的联机玩家按名字先坐回原座位，大厅和 welcome 里的座位号就和局里一致；对不上的照旧按先后排
-      const saved = this.savedSeat(name, used);
-      if (saved != null && !(approval && approval.seat === saved && approval.previous === null)) return this.requestSeat(conn, { ...m, name }, saved, null);
-      // 远端座位 1…(上限 - 1)：开局页没开「多人（超过 4 人）」时最多 4 人（3 位远端），开了到 MAX_PLAYERS；观众另算，不占座位
-      const mx = this.seatMax || 4;
-      seat = saved ?? Array.from({ length: mx - 1 }, (_, k) => k + 1).find(k => !used.has(k));
-      if (seat == null) { this.reject(conn, mx > 4 ? _tf(5303, "房间满了（最多 {$0} 人）", mx) : _t(4992, "房间满了（最多 4 人）")); return; }
+      if (S && S.players) {
+        // 开局后来的新名字：中途加入，房主同意了才排到座位最后（engine/14-turn.js 的 joinPlayer）。座位满了照旧拒绝，提示掉线的人用局里的名字回来
+        const left = this.waiting(), mx = Math.min(this.seatMax || 4, MAX_PLAYERS);
+        if (S.over) return this.reject(conn, _t(5450, "这局已经结束了，等房主开下一局再加入"));
+        if (S.drafting) return this.reject(conn, _t(5451, "大家正在挑角色，挑完再加入"));
+        if (S.players.length >= mx) return this.reject(conn, left.length ? _tf(4989, "游戏已经开始。原来的玩家用局里的名字重新加入：{$0}", left.join(_t(349, "、"))) : mx > 4 ? _tf(5303, "房间满了（最多 {$0} 人）", mx) : _t(4992, "房间满了（最多 4 人）"));
+        if (S.cfg.roundLimit && S.round >= S.cfg.roundLimit) return this.reject(conn, _t(5452, "已经是最后一轮了，不能中途加入"));
+        if (S.players.some(q => q.name === esc(name))) return this.reject(conn, _tf(5453, "局里已经有人叫 {$0} 了，换个名字再加入", name));
+        if (!(approval && approval.join && approval.game === S)) return this.requestSeat(conn, { ...m, name }, S.players.length, null, true);
+        seat = joinPlayer(name).id; joined = true;
+        (S.mpSeats = S.mpSeats || []).push(seat);   // 记成联机座位：房主刷新后读档，他照样能按名字坐回来
+      } else {
+        // 大厅里不收重名：开局会把后来的改成「小李 2」，两人都掉线时按名字就分不清谁是谁，重连会坐到对方的座位上。
+        // 不像开局后那样同名顶替：大厅里分不清是本人掉线重进还是另一个人重名，顶替会把先来的踢掉。本人没正常关页面就重进的，等 watch 发现旧连接断了、座位删掉再进
+        const key = name.replace(/\s+/g, ' ');
+        if (Object.values(this.seats).some(x => x.name.replace(/\s+/g, ' ') === key)) { this.reject(conn, _tf(4991, "已经有人叫 {$0} 了，换个名字再加入（刚才是你自己掉线的话，等十几秒再用这个名字进）", name)); return; }
+        const used = new Set(Object.keys(this.seats).map(Number));
+        // 房主刷新后还没点「继续上一局」：存档里的联机玩家按名字先坐回原座位，大厅和 welcome 里的座位号就和局里一致；对不上的照旧按先后排
+        const saved = this.savedSeat(name, used);
+        if (saved != null && !(approval && approval.seat === saved && approval.previous === null)) return this.requestSeat(conn, { ...m, name }, saved, null);
+        // 远端座位 1…(上限 - 1)：开局页没开「多人（超过 4 人）」时最多 4 人（3 位远端），开了到 MAX_PLAYERS；观众另算，不占座位
+        const mx = this.seatMax || 4;
+        seat = saved ?? Array.from({ length: mx - 1 }, (_, k) => k + 1).find(k => !used.has(k));
+        if (seat == null) { this.reject(conn, mx > 4 ? _tf(5303, "房间满了（最多 {$0} 人）", mx) : _t(4992, "房间满了（最多 4 人）")); return; }
+      }
     }
     // key：座位钥匙，每次 welcome 换一把新的（换了设备进来以后旧设备那把就作废）。只放在房主的 MP.seats 和他本人的浏览器里，不能写进 S：S 会推给所有人
     const skey = this.newKey(); conn._admitted = true; conn._seat = seat; this.seats[seat] = { name, conn, online: true, wb: this.wbIn(m.wb), delta: m.delta === 1, walk: m.walk === 1, key: skey };   // delta：新版页面，收得了增量状态
     this.send(conn, { t: 'welcome', seat, room: this.room, key: skey });
-    if (S && S.players) { log(_tf(4993, "🔌 {$0} 重新连上了", nm(S.players[seat]))); render(); this.pushState(true); if (this.cur) { this.send(conn, this.modalFor(this.seats[seat])); const tk = this.cur.who === seat && this.cur.box.querySelector('[data-mptake]'); if (tk) { tk.hidden = true; if (tk._arm) tk._arm(); const ta = this.cur.box.querySelector('[data-mpall]'); if (ta) ta.hidden = true; } } }
+    if (S && S.players) { if (!joined) log(_tf(4993, "🔌 {$0} 重新连上了", nm(S.players[seat]))); render(); this.pushState(true); if (this.cur) { this.send(conn, this.modalFor(this.seats[seat])); const tk = this.cur.who === seat && this.cur.box.querySelector('[data-mptake]'); if (tk) { tk.hidden = true; if (tk._arm) tk._arm(); const ta = this.cur.box.querySelector('[data-mpall]'); if (ta) ta.hidden = true; } } }
     else this.renderLobby();
   },
   // 在掉线的座位里找这个名字：开局后先按局里现在的名字（改过名就是新名字），再按当初加入时用的名字。any：在线的座位也找（顶替还没发现掉线的旧连接）

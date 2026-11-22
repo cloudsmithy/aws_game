@@ -5576,5 +5576,15 @@
  "<button class=\"pri lg\" data-act=\"jailAct\" data-arg=\"stay\">停这一轮（清技术债，不能提前出来）</button>": "<button class=\"pri lg\" data-act=\"jailAct\" data-arg=\"stay\">Wait this round (tech debt refactor, can't leave early)</button>",
  "重构清掉 1 个技术债：手上有几个就是 $50 × 几个，第 10 轮起再加 $30；不占主动行动，但清完马上进维护窗口停一轮，名下服务一起下线一轮": "Refactor to clear 1 tech debt: $50 × the number you hold, +$30 from round 10. It doesn't use your action, but afterwards you go straight into the maintenance window for one round and all your services go offline for one round",
  "第二十轮": "Round 20",
- "re:Invent 手牌、清技术债要停机": "re:Invent hand, clearing tech debt means downtime"
+ "re:Invent 手牌、清技术债要停机": "re:Invent hand, clearing tech debt means downtime",
+ "🔌 {$0} 中途加入，起始资金 ${$1}，从第 {$2} 轮开始": "🔌 {$0} joined mid-game with ${$1} starting cash, playing from round {$2}",
+ "这局已经结束了，等房主开下一局再加入": "This game is already over; join once the host starts the next one",
+ "已经是最后一轮了，不能中途加入": "It's already the last round, so you can't join mid-game",
+ "局里已经有人叫 {$0} 了，换个名字再加入": "Someone in this game is already called {$0}; pick another name and join again",
+ "游戏已经开始，等房主同意你中途加入。": "The game has already started. Waiting for the host to let you join mid-game.",
+ "{$0} 想中途加入，点「确认入座」处理": "{$0} wants to join mid-game; click \"Confirm seat\" to respond",
+ "中途加入": "Join mid-game",
+ "<p>{$0} 想中途加入，同意吗？</p><p class=\"muted\">同意后排在最后一位，从下一轮开始走：站在起点，没有服务和卡牌，起始资金是还在场各家总资产的平均数。</p>": "<p>{$0} wants to join mid-game. Allow it?</p><p class=\"muted\">If you agree, they take the last seat and start playing next round: on the start square, with no services or cards, and starting cash equal to the average total assets of the players still in the game.</p>",
+ "房主没有同意你中途加入": "The host didn't let you join mid-game",
+ "大家正在挑角色，挑完再加入": "Everyone is picking roles; join once they are done"
 }
