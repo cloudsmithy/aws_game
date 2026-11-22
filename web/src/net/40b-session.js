@@ -5,6 +5,7 @@ import { MODAL_CUR, VIEW_CUR, ask } from '../ui/10-modal.js';
 import { render } from '../ui/27d-side.js';
 import { renderNames, toast } from '../ui/28-setup-save.js';
 import { aiKick } from '../engine/36-ai.js';
+import { sigConf } from './40a-signal.js';
 import { MP } from './40-host-sync.js';
 import { MP_PEERJS_TURN, mpTurnEntry } from './42-setup.js';
 Object.assign(MP, {
@@ -61,12 +62,12 @@ Object.assign(MP, {
   // 座位钥匙：不用 crypto.randomUUID，局域网 http 打开的页面不是安全上下文，没有这个函数
   newKey() { const a = new Uint8Array(16); crypto.getRandomValues(a); return [...a].map(x => x.toString(16).padStart(2, '0')).join(''); },
   peerOpts() {
-    const q = new URLSearchParams(location.search), h = q.get('peerhost');
+    const sig = sigConf();   // 公共 / 自建，见 net/40a-signal.js
     // 没填自己的中继：完全用 PeerJS 的默认配置（和之前能连上的版本一模一样，不传 config）。
     // 填了：PeerJS 默认的那几条再加上自己的中继；传了 config 就会整个替换掉默认值，所以 sdpSemantics 也照默认写上
     const t = mpTurnEntry();
     const cfg = t ? { config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, MP_PEERJS_TURN, t], sdpSemantics: 'unified-plan' } } : {};
-    return h ? { ...cfg, host: h, port: +(q.get('peerport') || 443), path: q.get('peerpath') || '/', secure: q.get('peerport') !== '80' } : cfg;
+    return sig.host ? { ...cfg, host: sig.host, port: sig.port, path: sig.path, secure: sig.port !== 80 } : cfg;
   },
   send(conn, msg) { if (this.role === 'client' && this.watching && conn === this.hostConn && !['hello', 'resync'].includes(msg.t)) return; try { if (conn && conn.open) conn.send(msg); } catch (e) { } },
   // 房主接手连着却不动的远端这一个回合（只管这一回合；他自己再点照样算）

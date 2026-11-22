@@ -500,6 +500,9 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:var(--surface-soft
 /* 角格底下那行说明只占一行：允许伸进左右内边距一点，再长就省略号，不再被格子底边切掉半行 */
 .sq.corner .pr{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% + 1cqw);margin:0 -.5cqw;letter-spacing:-.01em}
 .sq .pawn{width:1.5cqw;height:1.5cqw;font-size:.78cqw}
+.sq .toks.many{display:grid!important;grid-template-columns:repeat(2,auto);gap:.1cqw}
+.sq .toks.many3{grid-template-columns:repeat(3,auto)}
+.sq .toks.many .pawn{width:1.2cqw;height:1.2cqw;font-size:.62cqw;box-shadow:0 0 0 .1cqw var(--surface)}
 .imp-pill{font-size:.7cqw}
 
 .c-head .gtitle h1{font-size:1.9cqw}
@@ -682,6 +685,13 @@ html:has(#setup:not([hidden])){scroll-padding-bottom:80px}
 .tile.ck:has(>input:checked)::before{border-width:2px}
 .tiles.win,.tiles.win:has(#winRounds){grid-template-columns:repeat(3,1fr)}
 .tiles.np{grid-template-columns:repeat(3,1fr)}
+/* 多人（超过 4 人）：开关和不推荐的说明在人数格下面；打开后 2…12 人一排排小格子（选择器多一个 class，压过手机上一列、平板上三列的写法） */
+#npMore{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px;margin-top:10px}
+#npMore .switch{margin-top:0}
+#npMore .npwarn{font-size:12px;color:var(--mut2)}
+#npMore.on .npwarn{color:var(--warning-ink);font-weight:600}
+.tiles.np.more{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
+.tiles.np.more b{white-space:nowrap}
 @media (max-width:1220px){#setup{grid-template-columns:1fr;justify-items:center}.hero{max-width:660px;width:100%}}
 @media (max-width:700px){.tiles.win,.tiles.win:has(#winRounds){grid-template-columns:1fr}#setup{grid-template-columns:1fr}.setup-box{min-width:0}.hero .flow .node:nth-child(n+7){display:none}}
 
@@ -947,6 +957,11 @@ table.mpnet tr.bad td.st{color:var(--red)}
   #side.many .plist{gap:10px}
   #side.many .logpanel{max-height:22vh}
 }
+/* 多人局（5 人以上）：收起的玩家卡更紧，「还没有服务」这一行不占地方 */
+#side.crowd .plist{gap:6px}
+#side.crowd .pl.mini .pacc{padding-top:6px}
+#side.crowd .pl.mini .gb{padding-bottom:6px}
+#side.crowd .pl.mini .svcs:has(>.none:only-child){display:none}
 /* 回合顺序条 */
 .turnbar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:.4cqw 0 0;padding:6px 0 10px;border-bottom:1px solid var(--line2)}
 .turnbar .tb{display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 6px;border:1px solid var(--line);background:var(--surface);font-size:13px;white-space:nowrap}
@@ -961,6 +976,10 @@ table.mpnet tr.bad td.st{color:var(--red)}
 .turnbar .tb.dead{opacity:.45}
 .turnbar .tbar{color:var(--mut2);font-size:12px}
 .turnbar .pawn{width:18px;height:18px;font-size:10px}
+/* 多人局（5 人以上）：去掉箭头和资产那一行，一格只留棋子、名字、现金，12 人两三排放得下；资产在悬停说明和侧栏里 */
+.turnbar.crowd{gap:4px}
+.turnbar.crowd .tbar,.turnbar.crowd .tb .tba{display:none}
+.turnbar.crowd .tb{padding:2px 7px 2px 4px;gap:4px;font-size:12px}
 /* 上下两排格子：内容别挤到底部色条上 */
 .sq.t,.sq.b{justify-content:flex-start;padding-top:.8cqw}
 .sq.t .art img.awsi,.sq.b .art img.awsi{width:3.4cqw;height:3.4cqw}
@@ -1462,7 +1481,9 @@ table.mpnet tr.bad td.st{color:var(--red)}
 .report .dtabs button{flex:0 1 auto;min-width:0;min-height:46px;display:flex;align-items:center;gap:8px;padding:0 18px;margin:0;font-size:15px;font-weight:700;color:var(--tx2);background:transparent;border:0;border-radius:0;box-shadow:none}
 .report .dtabs button:hover:not(:disabled){color:#fff;background:rgba(255,255,255,.05)}
 .report .dtabs button b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.report .dtabs button .n{font-size:12px;color:var(--tx3)}
+.report .dtabs button .n{font-size:12px;color:var(--tx3);white-space:nowrap}
+/* 多人局（5 人以上）：档案标签不挤成一字一行，按原宽排开、左右滑 */
+.report .dtabs:has(button:nth-child(5)) button{flex:none;padding:0 12px}
 .report .dtabs button.win .n{color:var(--or)}
 .report .dtabs button.out .pawn{opacity:.6}
 .report .dtabs button[aria-selected=true]{color:#fff;box-shadow:inset 0 -2px 0 #fff}
@@ -1789,6 +1810,7 @@ table.mpnet tr.bad td.st{color:var(--red)}
   .sq.g::before{display:none}
   #board .sq.owned::before{content:'';display:block;position:absolute;left:0;right:0;top:auto;bottom:0;width:auto;height:3px;background:var(--oc)}   /* 主人色条用 ::before，::after 留给「补齐」角标 */
   .toks .pawn{width:12px;height:12px;font-size:8px}
+  .sq .toks.many .pawn{width:9px;height:9px;font-size:6px}
   .c-head{flex-direction:column;gap:8px}
   .c-head .gtitle h1{font-size:18px!important}
   .c-head .sub{font-size:12px}
@@ -2749,10 +2771,10 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 .mulrow label{white-space:nowrap}
 
 /* 通用界面语义色：卡面、层级、状态和文字分别定义，品牌图标与玩家原色保持原样。 */
-:root{color-scheme:light;--surface:#fff;--surface-soft:#fafafa;--surface-muted:#eef1f4;--info-bg:#f1faff;--success-bg:#f2f8f0;--danger-bg:#fdf3f1;--warning-bg:#fff8f1;--purple-bg:#f7f1ff;--control-border:#879596;--warning-ink:#a34a00;--on-accent:#16191f;--danger-fill:#b52c31;--info-fill:#0972d3;--player-0:#c62a2f;--player-1:#1a62d6;--player-2:#15763f;--player-3:#7c3aed;--group-text-storage:#5b790b;--group-text-iaas:#a84c00;--group-text-net:#6b35c8;--group-text-ctr:#a16207;--group-text-integ:#b80b60;--group-text-db:#9f1ca5;--group-text-ana:#1d5ebe;--group-text-sec:#b32740;--group-text-ai:#007d68;--group-text-util:#545b64}
+:root{color-scheme:light;--surface:#fff;--surface-soft:#fafafa;--surface-muted:#eef1f4;--info-bg:#f1faff;--success-bg:#f2f8f0;--danger-bg:#fdf3f1;--warning-bg:#fff8f1;--purple-bg:#f7f1ff;--control-border:#879596;--warning-ink:#a34a00;--on-accent:#16191f;--danger-fill:#b52c31;--info-fill:#0972d3;--player-0:#c62a2f;--player-1:#1a62d6;--player-2:#15763f;--player-3:#7c3aed;--player-4:#b44708;--player-5:#0f766e;--player-6:#be185d;--player-7:#477309;--player-8:#0369a1;--player-9:#8a6200;--player-10:#475569;--player-11:#87592a;--group-text-storage:#5b790b;--group-text-iaas:#a84c00;--group-text-net:#6b35c8;--group-text-ctr:#a16207;--group-text-integ:#b80b60;--group-text-db:#9f1ca5;--group-text-ana:#1d5ebe;--group-text-sec:#b32740;--group-text-ai:#007d68;--group-text-util:#545b64}
 /* 仅屏幕启用深色；浏览器打印继续使用浅色语义色。 */
 @media screen{
-:root[data-theme=dark]{color-scheme:dark;--ink:#e7edf5;--ink2:#c1cedf;--mut:#b7c4d4;--mut2:#9eafc3;--line:#4b5f76;--line2:#304258;--bg:#0c1420;--surface:#172333;--surface-soft:#202f43;--surface-muted:#101c2b;--info-bg:#17324b;--success-bg:#173629;--danger-bg:#3d252c;--warning-bg:#3c2c1b;--purple-bg:#302443;--control-border:#7d93ac;--blue:#85c7ff;--red:#ff9f93;--green:#94d883;--focus:#9ed3ff;--warning-ink:#ffbf79;--player-0:#ff9ea3;--player-1:#99c6ff;--player-2:#8cdda9;--player-3:#cbb0ff;--group-text-storage:#bddb70;--group-text-iaas:#ffb56b;--group-text-net:#c5a2ff;--group-text-ctr:#f2ce65;--group-text-integ:#ff8dc3;--group-text-db:#ed98f5;--group-text-ana:#91bfff;--group-text-sec:#ff9ba9;--group-text-ai:#67d7c2;--group-text-util:#aebdce}
+:root[data-theme=dark]{color-scheme:dark;--ink:#e7edf5;--ink2:#c1cedf;--mut:#b7c4d4;--mut2:#9eafc3;--line:#4b5f76;--line2:#304258;--bg:#0c1420;--surface:#172333;--surface-soft:#202f43;--surface-muted:#101c2b;--info-bg:#17324b;--success-bg:#173629;--danger-bg:#3d252c;--warning-bg:#3c2c1b;--purple-bg:#302443;--control-border:#7d93ac;--blue:#85c7ff;--red:#ff9f93;--green:#94d883;--focus:#9ed3ff;--warning-ink:#ffbf79;--player-0:#ff9ea3;--player-1:#99c6ff;--player-2:#8cdda9;--player-3:#cbb0ff;--player-4:#ffb27a;--player-5:#7fe3d6;--player-6:#ffa3cf;--player-7:#bce67a;--player-8:#9bdcff;--player-9:#ffe27a;--player-10:#cbd5e1;--player-11:#e8c9a6;--group-text-storage:#bddb70;--group-text-iaas:#ffb56b;--group-text-net:#c5a2ff;--group-text-ctr:#f2ce65;--group-text-integ:#ff8dc3;--group-text-db:#ed98f5;--group-text-ana:#91bfff;--group-text-sec:#ff9ba9;--group-text-ai:#67d7c2;--group-text-util:#aebdce}
 :root[data-theme=dark] #mbar{background:var(--surface);border-color:var(--line)}
 :root[data-theme=dark] img.awsi[data-icon=users]{filter:brightness(0) invert(1);opacity:.9}
 /* 老板键的编辑器和命令栏也随本机外观切换。 */
@@ -2820,6 +2842,7 @@ html[lang=ja] .gwild[open] summary::after{content:"折りたたむ"}</style>
         <label class="tile"><input type="radio" name="np" value="3" checked data-act-change="renderNames"><b>3 人</b></label>
         <label class="tile"><input type="radio" name="np" value="4" data-act-change="renderNames"><b>4 人</b></label>
       </div>
+      <div id="npMore"></div>
       <div class="names" id="names"></div>
     </div>
     <div class="sec">

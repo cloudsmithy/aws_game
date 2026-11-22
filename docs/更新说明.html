@@ -49,7 +49,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <h1>亚马逊云科技 User Group 云上大亨 · 这一轮改了什么</h1>
   <p>从「破产逻辑是不是有问题」开始，一路改到新角色、两个新开关、地狱模式和全套文档。每条改动后面写了为什么改；平衡数字都是用电脑玩家对打模拟出来的。</p>
   <nav>
-    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#r17">第十七轮</a><a href="#r18">第十八轮</a><a href="#todo">待定</a>
+    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#r17">第十七轮</a><a href="#r18">第十八轮</a><a href="#r19">第十九轮</a><a href="#todo">待定</a>
   </nav>
 </header>
 
@@ -891,8 +891,23 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   </ul>
 </section>
 
+<section id="r19">
+  <h2><i>27</i>第十九轮（11-22）：Health 扩展包、多人局、信令可选</h2>
+  <ul>
+    <li><span class="tag new">新</span>DLC「Health 事件扩展包（2026）」：10 张新 Health 卡（#43–#52），每张都是真实的技术原因加对口的免疫：Lambda 并发被打满、NAT 网关处理费超支、KMS 密钥被误设成待删除、IAM 权限给成了 *:*、EBS 快照越积越多、重试风暴、定时任务时区配错了、唯一懂 Kubernetes 的人离职了、Docker Hub 拉镜像被限流、黑色星期五大促（全场）。开局在「玩法拓展」里勾上才进牌堆，已有卡的编号不变。</li>
+    <li><span class="tag new">新</span>强制下线不再只有高速部署的 DDoS：Health 卡也能让服务下线几轮（不收过路费、不算持有，运行费照交），格子、玩家卡、日志里写明是哪张卡打下线的；不开高速部署也照常到期恢复。</li>
+    <li><span class="tag chg">改</span>re:Invent 里只给钱的 7 张卡改成自己选：领钱、前进 3 格、后退 3 格，或者再掷一次骰子（这次落地不能买）。电脑照旧领钱。</li>
+    <li><span class="tag new">新</span>开局页加「多人（超过 4 人）」开关，打开后最多 12 人（同屏和联机都行）；默认关着，只有 2–4 人。平衡和界面都是按 2–4 人设计的，尽量不开。角色发完一轮才会重复。</li>
+    <li><span class="tag new">新</span>联机可以选信令服务器：GitHub Pages 上默认用 PeerJS 公共服务器，用 docker compose 自建部署的默认用自建的；每台设备能在「联机设置和测试」里改，建房、加入、大厅里都写着现在用的是哪个。</li>
+    <li><span class="tag new">新</span>自建部署（deploy/peerjs）同时发布游戏网站，和信令在同一个域名下，打开就默认连自建信令。</li>
+    <li><span class="tag new">新</span>手册网页版：规则书、玩法手册、模式手册、图鉴等 PDF 都有了网页版（手机上能自动换行），游戏里的「玩法」弹窗、版本窗口和老板键 <code>:manuals</code> 都能打开。</li>
+    <li><span class="tag chg">改</span>GitHub Pages 发布时用 Vite 从 <code>web/</code> 现打包游戏页面。</li>
+    <li><span class="tag doc">文档</span>黑客模式设计稿（<code>docs/黑客模式设计.md</code>）：黑客、安全工程师、掩护者的身份和投票规则，还没做进游戏。</li>
+  </ul>
+</section>
+
 <section id="todo">
-  <h2><i>27</i>待定 / 已知问题</h2>
+  <h2><i>28</i>待定 / 已知问题</h2>
   <ul>
     <li>代理商在完整局（不限轮数约 16%）和地狱模式 15 轮（约 14%）偏弱，公平是 25%；各模式的数字见规则书第 32 节。</li>
     <li>模拟里的电脑不会刻意凑六大支柱，所以 Well-Architected 的达成率只能当下限看。</li>

@@ -1,7 +1,7 @@
 name: Publish site to GitHub Pages
-# The site is code/ (walkthroughs with their audio, language entries, 404) plus docs/更新说明.html;
+# The site is code/ (walkthroughs with their audio, language entries, 404, manual/ = the manuals as web pages) plus docs/更新说明.html;
 # the game page itself (index.html) is built here from web/ with Vite, not taken from the committed code/index.html.
-# PDFs, Markdown and the translation tables (code/i18n/) stay in the repository and are not published.
+# PDFs, Markdown and the translation tables (code/i18n/) stay in the repository and are not published (manual/ links the PDFs on GitHub).
 # Requires Settings -> Pages -> Build and deployment -> Source: GitHub Actions.
 on:
   push:

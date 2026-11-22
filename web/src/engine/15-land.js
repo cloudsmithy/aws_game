@@ -31,7 +31,7 @@ async function land0(p, opts = {}) {
     case 'prop': case 'util': {
       if (isHidden(i)) { await blindBox(p); break; }
       const pr = S.props[i];
-      if (pr.owner === null) { if (opts.noBuy) log(_tf(2942, "{$0} 同色跳到 {$1}，跳过去不能买", nm(p), sqn(i))); else await offerBuy(p, i, opts); }
+      if (pr.owner === null) { if (opts.noBuy) log(opts.noBuy === 'card' ? _tf(5274, "{$0} 落在 {$1}：这次是卡上再掷的一步，落地不能买", nm(p), sqn(i)) : _tf(2942, "{$0} 同色跳到 {$1}，跳过去不能买", nm(p), sqn(i))); else await offerBuy(p, i, opts); }
       else if (pr.owner !== p.id) { if (pr.offline) await offlineTakeover(p, i); else if (!(await spotTakeover(p, i)) && !(await buyFromReseller(p, i))) await payRent(p, i); }
       // 自己落到自己下线的那一格：免费拉起来（不用等满 3 轮），这一格这回合就不再升级、不同色跳
       else if (pr.offline) { bringOnline(p, i); UI.render(); }
@@ -274,7 +274,7 @@ async function payRent(p, i, opts = {}) {
   const pr = S.props[i], o = P(pr.owner), s = SQ[i];
   if (pr.impaired) { log(_tf(3072, "{$0} 是 Impaired 状态，这次不收过路费", sqn(i))); return 0; }
   if (pr.offline) { log(_tf(3073, "{$0} 已下线，这次不收过路费", sqn(i))); return 0; }
-  if (pr.ddos != null) { log(_tf(3074, "{$0} 正被 DDoS 打到下线，这次不收过路费", sqn(i))); return 0; }
+  if (pr.ddos != null) { log(pr.ddosWhy ? _tf(5295, "{$0} 因「{$1}」下线，这次不收过路费", sqn(i), pr.ddosWhy) : _tf(3074, "{$0} 正被 DDoS 打到下线，这次不收过路费", sqn(i))); return 0; }
   const dice = S.lastDice[0] + S.lastDice[1];
   const jr = jointRent(i, dice);
   if (o.reseller && !jr && !BAL.rsSolo) { log(_tf(3075, "{$0} 是代理商 {$1} 自己的服务，没组成有效架构，这次不收过路费", sqn(i), nm(o))); return 0; }

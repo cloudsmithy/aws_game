@@ -1,5 +1,5 @@
 import { _t, _tf } from '../core/01-i18n-runtime.js';
-import { rnd } from '../core/02-util.js';
+import { BOT, SIM, rnd, waitAnim } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { IX, N, OWNABLE, SQ, capU, lvFull, lvName } from '../rules/03-services.js';
 import { CARDN, CATS, COMBOS, REI, comboOpen } from '../rules/04-roles-combos-cards.js';
@@ -9,6 +9,7 @@ import { cardAmt, credit, giveTo, pay, withGain } from './08-money.js';
 import { SP_PLANS, billAt, commitsOf, halfAt, halfSave, netWorth, runAfterRI, spActive } from './08c-costs.js';
 import { capInfo, fullBack, svcLeaves, upgradeInfo } from './09-rent.js';
 import { moveSteps } from './13-move.js';
+import { rollDice } from './14-turn.js';
 import { land } from './15-land.js';
 import { drawRei } from './16-deck.js';
 import { aiName, drawIncident, tableOK, voteWho } from './17-health.js';
@@ -60,6 +61,23 @@ export function incOne() { return sendIncident('one'); }
 export function incRand() { return sendIncident('rand'); }
 export function incAll() { return sendIncident('all'); }
 export async function drawReinvent(p, forced) { const a0 = MP.actor; MP.actor = p.id; try { return await withCardMul(S.cardMul || cardMulBase(), () => withGain('card', () => drawReinvent0(p, forced))); } finally { MP.actor = a0; } }
+// 11-22：只给抽卡的人钱的 re:Invent 卡（领 $X），真人玩家可以四选一：领钱、前进 3 格、后退 3 格、再掷一次骰子走（这次落地不能买）。
+// 电脑玩家、模拟和挂机测试（SIM、BOT）一律领钱、不弹窗，所以全电脑的模拟和以前一模一样。在维护窗口里的人走不了，也直接领钱。
+// done(实际到手的钱) 记日志：领钱那条和以前一样，在 credit 之后写（卡牌倍率照常由 credit 算）
+// card：抽到的那张卡（弹窗标题写卡名）。DLC 卡的 run 第三个参数就是自己
+export async function moneyOrMove(p, card, amt, done) {
+  if (SIM || BOT || isAI(p.id) || p.jail !== null || !p.alive) { done(credit(p, amt)); return; }
+  const at = k => { const i = (p.pos + k + N) % N; return isHidden(i) ? _t(5275, "盲盒") : SQ[i].n; };
+  const v = await UI.ask({ who: p.id, title: _tf(5276, "「{$0}」：领钱，还是走一步？", card.n), html: _t(5277, "<p>这张卡只给钱。也可以不要钱，改成移动：走到的格子照常结算（经过 Startup 扶持、User Group 活动照常领钱）。</p>"),
+    buttons: [{ label: _tf(5278, "领 ${$0}", cardAmt(amt)), value: 'cash', cls: 'pri', botW: 1 }, { label: _tf(5279, "前进 3 格（到 {$0}）", at(3)), value: 'fwd' }, { label: _tf(5280, "后退 3 格（到 {$0}）", at(-3)), value: 'back' }, { label: _t(5281, "再掷一次骰子（这次落地不能买）"), value: 'roll' }] });
+  if (v === 'fwd' || v === 'back') { log(_tf(5282, "{$0} 不领钱，{$1} 3 格", nm(p), v === 'fwd' ? _t(5283, "前进") : _t(5284, "后退"))); await moveSteps(p, v === 'fwd' ? 3 : -3); await land(p); return; }
+  if (v === 'roll') {
+    log(_tf(5285, "{$0} 不领钱，再掷一次骰子（这次落地不能买）", nm(p)));
+    const d = rollDice(p); UI.render(); await waitAnim(UI.FX.dice(d), 1700);   // SIM 在开头就直接领钱了，这里一定有画面
+    await moveSteps(p, d[0] + d[1]); await land(p, { noBuy: 'card' }); return;
+  }
+  done(credit(p, amt));
+}
 async function drawReinvent0(p, forced) {
   const id = forced ?? await drawRei();
   await UI.showCard('rei', id, p);
@@ -71,9 +89,9 @@ async function drawReinvent0(p, forced) {
   }
   S.reiDisc.push(id);
   const others = S.players.filter(o => o.alive && o.id !== p.id);
-  if (c.run) { await c.run(p, others); return; }
+  if (c.run) { await c.run(p, others, c); return; }
   switch (id) {
-    case 1: { const n = Math.min(4, COMBOS.filter(c => comboOpen(c) && hasCombo(p, c.id)).length); log(_tf(3270, "{$0} {$1}领 ${$2} Credits", nm(p), n ? _tf(3269, "有 {$0} 个生效的架构，", n) : '', credit(p, 100 + 50 * n))); break; }
+    case 1: { const n = Math.min(4, COMBOS.filter(c => comboOpen(c) && hasCombo(p, c.id)).length); await moneyOrMove(p, c, 100 + 50 * n, got => log(_tf(3270, "{$0} {$1}领 ${$2} Credits", nm(p), n ? _tf(3269, "有 {$0} 个生效的架构，", n) : '', got))); break; }
     // 独立开发者的弱点就是不能签 Savings Plans / RI，这张卡也不能绕过去：没有效果、也不给保底，卡照常进弃牌堆。
     // 别人签不了（已经有一份、没有能抵扣的运行费）就改领 $50。签之前还要按下次经过时的实际账单比一比：手上的减半卡让下一圈用量
     // 掉到承诺额以下、或者技能让下一圈全免的，1 年期的承诺额等于白付，也不签、改领 $50，和减半卡「省不下钱就改领」是同一条规则

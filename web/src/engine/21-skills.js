@@ -71,7 +71,7 @@ async function roleSkill0(p) {
     // 按格子上标的过路费排（组成架构的按整套联合收费，Impaired、被 DDoS 的是 $0）；代理商没成架构的库存现在不收，按归你以后的单块过路费排
     const er = x => S.props[x].impaired || S.props[x].ddos != null ? 0 : shownRent(x).r || baseRent(x, 7);
     // 收走这块后对手哪些架构会散：这一环有备用服务顶上的不算（同时有 RDS 和 Aurora，收走一块经典三层 Web 还在）
-    const stag = x => { const pr = S.props[x], sr = shownRent(x), cs = combosBrokenBy(rich, x).map(c => _tf(2766, "「{$0}」", c.n)).join(''); return pr.impaired ? '≈$0 · Impaired' : pr.ddos != null ? _t(3388, "≈$0 · 被 DDoS") : !sr.r ? _tf(3389, "代理商库存现在不收，归你后单块 ≈${$0}", er(x)) : `≈$${sr.r}${!sr.jr ? '' : cs ? _tf(3390, " · 拆散{$0}", cs) : _t(3391, " · 这一环有备用，收走架构不散")}`; };
+    const stag = x => { const pr = S.props[x], sr = shownRent(x), cs = combosBrokenBy(rich, x).map(c => _tf(2766, "「{$0}」", c.n)).join(''); return pr.impaired ? '≈$0 · Impaired' : pr.ddos != null ? (pr.ddosWhy ? '≈$0 · ' + _t(3944, "已下线") : _t(3388, "≈$0 · 被 DDoS")) : !sr.r ? _tf(3389, "代理商库存现在不收，归你后单块 ≈${$0}", er(x)) : `≈$${sr.r}${!sr.jr ? '' : cs ? _tf(3390, " · 拆散{$0}", cs) : _t(3391, " · 这一环有备用，收走架构不散")}`; };
     const cand = ownedBy(rich).filter(i => ['prop', 'util'].includes(SQ[i].t) && !S.props[i].offline).sort((a, b) => er(b) - er(a) || baseRent(b, 7) - baseRent(a, 7));
     if (cand.length) {
       const i = cand.length === 1 ? cand[0] : +(await UI.ask({ who: p.id, cls: 'pick', title: _tf(3392, "战略并购：收购 {$0} 的哪一块服务？", rich.name), html: _tf(3393, "<p>{$0} 是全场总资产最高的对手。你按卖回价付钱给 {$1}，这块服务连同升级和容量都归你；现金不够就先欠着，按欠款规则处理。按格子上标的过路费从高到低排（组成架构的按整套联合收费；标了「拆散」的，收过来对手那套架构就散了）。</p>", nm(rich), nm(rich)), buttons: cand.slice(0, 14).map(x => ({ label: _tf(3394, "{$0}（{$1}，收购价 ${$2}）", SQ[x].n, stag(x), sellValue(x)), value: x })) }));

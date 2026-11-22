@@ -1,14 +1,14 @@
-# 自建联机服务（PeerJS 信令 + TURN 中继）
+# 自建部署（游戏网站 + PeerJS 信令 + TURN 中继）
 
-联机默认用 PeerJS 的公共信令服务器（`0.peerjs.com`）和它的公共 TURN 中继。国内常常连不上或者很慢，线下活动网络也常常打不通点对点，这时候可以自己搭一套。这个目录一条 `docker compose up` 起三个容器：
+联机默认用 PeerJS 的公共信令服务器（`0.peerjs.com`）和它的公共 TURN 中继。国内常常连不上或者很慢，线下活动网络也常常打不通点对点，这时候可以自己搭一套。这个目录一条 `docker compose up` 起三个容器，游戏网站和信令服务器在同一个域名下：
 
 | 容器 | 做什么 | 对外端口 |
 |---|---|---|
 | `peerjs` | PeerServer 1.0.2，**只负责牵线**：两台设备交换连接信息（SDP、ICE），游戏数据不经过它 | 不发布，只在 compose 内部网络里 |
-| `caddy` | 给信令加 HTTPS（游戏页面是 https，浏览器只许连 `wss://`），自动申请、续期证书；只转发 `/peerjs` 路径 | 443/tcp，80/tcp（只用来申请证书） |
+| `caddy` | 自动申请、续期 HTTPS 证书；发布游戏网站（仓库的 `code/`），`/peerjs` 转给信令，`/peer-config.json` 告诉游戏「信令就在本站」 | 443/tcp，80/tcp（只用来申请证书） |
 | `coturn` | TURN 中继：两边点对点打不通（对称 NAT、公司网络、手机运营商网络）时，数据从这里绕一下 | 3478/udp+tcp，49160–49200/udp |
 
-游戏这边**不用改代码**：网址带 `?peerhost=` 就连你的信令；TURN 在开局页填。
+**信令用哪个**：游戏页面启动时读本站的 `peer-config.json`，读到了就默认连这里的信令；GitHub Pages 上没有这个文件，默认走 PeerJS 公共服务器。页面上（建房、加入房间的表单下面，房主的大厅里，「联机设置和测试」里）都写着现在用的是哪个，每台设备也能在「联机设置和测试」里改成公共或别的自建地址。TURN 在同一个窗口里填。
 
 ## 要准备的
 
@@ -45,23 +45,23 @@ docker compose logs -f
 
 ## 游戏里怎么用
 
-1. **信令**：所有人（房主、玩家、观众）都打开带参数的链接：
-   ```
-   https://cloudsmithy.github.io/aws_game/?peerhost=peer.example.com
-   ```
-   端口默认 443、路径默认 `/`（对应这里的配置），不一样的话加 `&peerport=…&peerpath=…`。
-   **房间号、观战邀请码不带服务器地址**：有人用的是默认链接（公共信令）就找不到房间，发链接时把参数一起发。
+1. **打开游戏**：所有人（房主、玩家、观众）打开 `https://peer.example.com/`，页面默认就连这台的信令服务器，不用加参数。
+   - 也可以继续用 GitHub Pages 上的页面：在「联机设置和测试」里把信令服务器选成「自建」、填 `peer.example.com`，或者链接带 `?peerhost=peer.example.com`（网址参数优先级最高）。
+   - **大家要连同一个信令服务器**：有人用的是公共服务器就找不到房间。页面上写着现在用的是哪个，对一下。
 2. **TURN**：每台设备在开局页第 04 步「联机设置和测试」里填：
    - 地址：`turn:peer.example.com:3478`（UDP 不通的网络再加一行 `turn:peer.example.com:3478?transport=tcp`）
    - 用户名、密码：`.env` 里的 `TURN_USER`、`TURN_PASS`
 
    填好点「开始检测」，看到「中继候选」就是通了。只存在这台设备的浏览器里，不进存档、不同步给别人。
+3. **更新游戏**：网站内容就是仓库的 `code/`（`code/index.html` 是 `web/` 打包的产物）。拉新代码后 `cd web && npm ci && npm run build`，Caddy 直接读目录，不用重启。
 
 ## 检查
 
 ```bash
 curl -s https://peer.example.com/peerjs/id      # 返回一串随机 ID：信令通了
-curl -s -o /dev/null -w '%{http_code}\n' https://peer.example.com/   # 404：别的路径不转发
+curl -s https://peer.example.com/peer-config.json   # {"host":"peer.example.com",…}：游戏会默认走自建
+curl -s -o /dev/null -w '%{http_code}\n' https://peer.example.com/   # 200：游戏首页
+curl -s -o /dev/null -w '%{http_code}\n' https://peer.example.com/i18n/en.json   # 404：翻译原表不对外
 docker compose ps                                # 三个都是 running
 ss -lntup | grep -E ':(443|80|3478)\b'           # PUBLIC_BIND=127.0.0.1 时应该只看到 127.0.0.1
 ```
@@ -75,4 +75,3 @@ ss -lntup | grep -E ':(443|80|3478)\b'           # PUBLIC_BIND=127.0.0.1 时应�
 ## 以后可以做的
 
 - **TURN 临时凭证**：现在是一组固定账号密码，发给所有人。更好的做法是 coturn 的 `use-auth-secret`：由一个小接口给每个玩家发几小时就过期的凭证，游戏开局时自动去取。要多写这个接口和游戏里取凭证的代码。
-- **国内域名自动用自建信令**：游戏可以按页面域名（比如成都服务器那个）默认用这里的信令和 TURN，大家就不用手动加 `?peerhost=`、填中继了。

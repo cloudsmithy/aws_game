@@ -2,7 +2,7 @@ import { _t, _tf, _tr } from '../core/01-i18n-runtime.js';
 import { $, SIM_AI, shuffle } from '../core/02-util.js';
 import { N, OWNABLE, SQ } from '../rules/03-services.js';
 import { DLC } from '../rules/05-dlc.js';
-import { S, cur, logBody, ownedBy } from '../engine/07-state.js';
+import { MAX_PLAYERS, S, cur, logBody, ownedBy } from '../engine/07-state.js';
 import { netWorth, valBreak, valuation } from '../engine/08c-costs.js';
 import { doUpgrade, upgradeInfo } from '../engine/09-rent.js';
 import { doRoll, endTurn, jailAct } from '../engine/14-turn.js';
@@ -38,7 +38,7 @@ export function simAct(box, inputs, buttons, done) {
   done((en.find(x => (x.cls || '').includes('pri')) || en[0] || buttons[0]).value);
 }
 async function simGame(n, diff) {
-  const q = new URLSearchParams(location.search), cfg = { names: [_t(4741, "甲"), _t(4742, "乙"), _t(4743, "丙"), _t(4744, "丁")].slice(0, n), diff, wa: false, timed: false, minutes: 90, learn: false, dlc: (q.get('dlc') || '').split(',').filter(Boolean), rs: q.get('rs') ? [true] : [] };
+  const q = new URLSearchParams(location.search), cfg = { names: [_t(4741, "甲"), _t(4742, "乙"), _t(4743, "丙"), _t(4744, "丁"), _t(5286, "戊"), _t(5287, "己"), _t(5288, "庚"), _t(5289, "辛"), _t(5290, "壬"), _t(5291, "癸"), _t(5292, "子"), _t(5293, "丑")].slice(0, n), diff, wa: false, timed: false, minutes: 90, learn: false, dlc: (q.get('dlc') || '').split(',').filter(Boolean), rs: q.get('rs') ? [true] : [] };
   if (q.get('learn')) cfg.learn = true;
   // 和开局页一样映射模式：娱乐 = 入门规则 + 10 轮 + 卡牌 1.5 倍；学习 = 标准规则 + 必答题 + 题库 DLC、不限轮数
   if (diff === 'party') Object.assign(cfg, { mode: 'party', diff: 'basic', cardMul: '1.5', roundLimit: 10 });
@@ -103,7 +103,8 @@ window.addEventListener('error', e => { (SIMOUT.errors = SIMOUT.errors || []).pu
 window.addEventListener('unhandledrejection', e => { (SIMOUT.errors = SIMOUT.errors || []).push('reject: ' + String(e.reason && (e.reason.stack || e.reason)).slice(0, 300)); });
 export async function simMain() {
   const q = new URLSearchParams(location.search);
-  const n = +q.get('sim') || 10, pl = +q.get('players') || 4, diff = q.get('diff') || 'std';
+  const n = +q.get('sim') || 10, pl = Math.min(MAX_PLAYERS, Math.max(2, +q.get('players') || 4)),   // 多人局最多 MAX_PLAYERS（engine/07-state.js），名字表也只有这么多
+    diff = q.get('diff') || 'std';
   simReserve = +(q.get('reserve') || 150);
   for (let k = 0; k < n; k++) { try { await simGame(pl, diff); } catch (e) { (SIMOUT.errors = SIMOUT.errors || []).push(_tf(4774, "第 {$0} 局抛错：", k + 1) + String(e.stack || e).slice(0, 400)); } }
   $('#botout').textContent = 'SIMRESULT ' + JSON.stringify(SIMOUT); $('#botout').hidden = false;

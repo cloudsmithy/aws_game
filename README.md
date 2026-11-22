@@ -49,6 +49,7 @@ aws_game/
 │   ├── index.html    游戏：单文件、多语言（i18n/ 生成），同屏 2–4 人或联机
 │   ├── 404.html      旧链接跳转（以前的 /code/…、/demo/…、/手册/… 地址）
 │   ├── en/ zh/ ja/   按语言打开的入口：/en/ 英文、/zh/ 中文、/ja/ 日文
+│   ├── manual/       手册网页版：docs/ 里的规则书、玩法手册和各本 PDF 手册（web/tools/build-manuals.mjs 生成，别手改）
 │   ├── learn/        学习内容：arch/ 架构讲解（视频 + 图文）、svc/ 服务知识点；en/、ja/ 下是英文版、日文版
 │   └── i18n/         多语言对照表 en.json、ja.json，术语表 GLOSSARY.md（英文）、GLOSSARY.ja.md（日文），en/、ja/ 下是翻译的玩法手册和速览
 ├── docs/             规则书、玩法手册、玩法速览（md），更新说明（html / pdf），手册/、常用手册/（PDF）
@@ -57,7 +58,7 @@ aws_game/
 ├── .github/          工作流：发布 GitHub Pages、自动检查、成都部署
 ```
 
-网站地址：GitHub Pages 上是 https://cloudsmithy.github.io/aws_game/ （游戏就在根上），英文 https://cloudsmithy.github.io/aws_game/en/ ，日文 https://cloudsmithy.github.io/aws_game/ja/ 。以前的 `…/code/index.html` 地址会自动跳过来。网站只发布网页和讲解音频，手册 PDF 不放到网站上，在仓库的 `docs/` 里下载（旧的 PDF 链接会转到 GitHub 上的文件）。
+网站地址：GitHub Pages 上是 https://cloudsmithy.github.io/aws_game/ （游戏就在根上），英文 https://cloudsmithy.github.io/aws_game/en/ ，日文 https://cloudsmithy.github.io/aws_game/ja/ 。以前的 `…/code/index.html` 地址会自动跳过来。手册有网页版：https://cloudsmithy.github.io/aws_game/manual/ （手机上也好读；游戏里「玩法」弹窗最上面、`:manuals` 命令和「版本」窗口都能点过去）。手册 PDF 本身不放到网站上，网页版每页都链到 GitHub 上的原版 PDF，卡牌和棋盘这种打印用的只有 PDF（旧的 PDF 链接会转到 GitHub 上的文件）。
 
 ## 文件
 
@@ -234,6 +235,7 @@ npm run lint:version -- upstream/master
 2. **改两份 md**：`规则书.md`、`玩法手册.md`。大表（棋盘、服务详情、卡牌、角色、架构、题库）不用手改：`node tools/gen_rules.mjs && python3 tools/sync_docs.py` 会从网页数据重新生成并写回去；手写的规则文字要自己改。
 3. **把玩法手册写回网页**：`python3 tools/build_manual.py`，会更新 `code/index.html` 里的 `MANUAL_HTML`（完整版）和 `MANUAL_LITE_HTML`（简版，来自 `玩法速览.md`）。
 4. **出 PDF**：`python3 tools/build_pdfs.py`，一次生成 `手册/` 下全部 PDF 和根目录的 `更新说明.pdf`：两本手册、卡牌、棋盘与配件、速查卡，再调 `tools/build_mode_manuals.py` 出 8 本模式和专题手册、10 本简版手册、分级规则手册、三本图鉴、术语对照、组织者包和 UG 活动流程单、更新说明，最后给所有 PDF 补书签分隔符。改了模式规则的数字记得同步 `build_mode_manuals.py`（专题手册里的角色表和技能表会自动从网页数据取）。流程是先截棋盘图当封面，再把 md 套上 `tools/pdf.css` 打成两本手册，最后用 `tools/build_cards.mjs` 和 `tools/cards.css` 生成卡牌。
+5. **更新手册网页版**：`node web/tools/build-manuals.mjs`（先 `cd web && npm ci` 装好依赖；PDF 那几本要 poppler 的 `pdftotext`），重新生成 `code/manual/`，和改过的 md、PDF 一起提交。规则书、玩法手册、玩法速览，以及从规则书摘章节的服务图鉴、题库与答案，直接从 md 渲染；其余没有 md 源的按 PDF 里文字的位置认出标题、列表和表格，版式以 PDF 为准。`docs/常用手册/` 是同一批文件，网页版不另生成。CI 跑 `node tools/build-manuals.mjs --check`：md 改了没重新生成就报错。
 
 ## 其他工具
 

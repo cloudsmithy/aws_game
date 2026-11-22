@@ -8,6 +8,7 @@ import { toast } from '../ui/28-setup-save.js';
 export const MP = {
   role: null, peer: null, room: '', auth: '', mySeat: null, actor: null,
   seats: {},        // 房主：座位号 → { name, conn, online }
+  seatMax: 4,       // 房主：房间最多几人（含房主）。开局页「多人（超过 4 人）」开关改它（ui/28-setup-save.js 的 renderNpMore），开了是 MAX_PLAYERS
   viewers: {}, pendingJoins: {}, watching: false, watchToken: '', watchLimit: 4,
   // 观众与座位完全分开；邀请是独立随机凭证，不包含玩家房间密码或座位钥匙。
   recipients() { return [...Object.values(this.seats), ...Object.values(this.viewers)]; },

@@ -44,6 +44,8 @@ export let SQPOP_I = null;
 // 演完、等房主收尾的那份状态时，棋子画在落点上（真棋子，不是占位）
 const movingId = () => MP.role === 'client' ? (MPFX.mv ? MPFX.mv.id : null) : S.moving;
 const toksAt = i => S.players.filter(q => q.alive && (q.id === movingId() ? MOVE_TO === i : q.pos === i));
+// 一格里超过 4 颗棋子（多人局，开局都在起点）：排成 2 列、9 颗起 3 列，棋子跟着缩小（index.html 的 .toks.many）；4 颗以内照旧一列
+const toksCls = n => n > 8 ? 'toks many many3' : n > 4 ? 'toks many' : 'toks';
 const tokHtml = q => q.id === movingId() && (MP.role !== 'client' || MPFX.mv.ghost) ? PAWN(q.color).replace('class="pawn"', 'class="pawn ghost"') : PAWN(q.color);
 // 过路费标签的悬停说明：联合收费列出是哪几块加起来的
 function rentTip(i, sr) {
@@ -57,9 +59,9 @@ function rentTip(i, sr) {
 }
 export function cellHtml(i) {
   const s = SQ[i], pr = S.props[i];
-  if (isHidden(i)) { const toks0 = toksAt(i); return _tf(3942, "<div class=\"art\">{$0}{$1}</div><div class=\"txt\"><span class=\"nm\">盲盒</span><span class=\"bill\">随机抽卡 · 效果翻倍</span></div>", awsImg('reinvent'), toks0.length ? `<div class="toks">${toks0.map(tokHtml).join('')}</div>` : ''); }
+  if (isHidden(i)) { const toks0 = toksAt(i); return _tf(3942, "<div class=\"art\">{$0}{$1}</div><div class=\"txt\"><span class=\"nm\">盲盒</span><span class=\"bill\">随机抽卡 · 效果翻倍</span></div>", awsImg('reinvent'), toks0.length ? `<div class="${toksCls(toks0.length)}">${toks0.map(tokHtml).join('')}</div>` : ''); }
   const toks = toksAt(i);
-  const tokH = toks.length ? `<div class="toks">${toks.map(tokHtml).join('')}</div>` : '';
+  const tokH = toks.length ? `<div class="${toksCls(toks.length)}">${toks.map(tokHtml).join('')}</div>` : '';
   if (isCorner(i)) {
     let sub = CORNER_SUB[s.k];
     if (s.k === 'jail') { const j = S.players.filter(q => q.alive && q.jail !== null).length; if (j) sub = _tf(3943, "{$0} 人在里面", j); }
@@ -71,8 +73,8 @@ export function cellHtml(i) {
   // 有主的格子标落上来大概要付多少（shownRent）：整套架构联合收费的标橙底；下线、DDoS、Impaired、代理商没成架构的库存写明不收。
   // 「过路费」「· 不收费」放在 .rk 里，格子窄时只留数字或状态（5 位数的连宽屏也放不下，干脆不写）；按 token 收的另备一个按 7 点估的「≈$xx」，上下两排太窄、放不下「点数×单价」时换成它
   const sr = owner && (s.t === 'prop' || s.t === 'util') ? shownRent(i) : null;
-  const off = !sr ? '' : pr.offline ? _t(3944, "已下线") : pr.ddos != null ? 'DDoS' : pr.impaired ? 'Impaired' : !sr.r ? _t(3945, "没成架构") : '';
-  const rentH = !sr ? '' : off ? _tf(3949, "<span class=\"rent off\" title=\"{$0}\">{$1}<i class=\"rk\"> · 不收费</i></span>", pr.offline ? _t(3946, "已下线，不收过路费") : pr.ddos != null ? _t(3947, "被 DDoS 打到下线，不收过路费") : pr.impaired ? _t(3948, "Impaired，暂停收过路费") : rentTip(i, sr), off)
+  const off = !sr ? '' : pr.offline ? _t(3944, "已下线") : pr.ddos != null ? (pr.ddosWhy ? _t(3944, "已下线") : 'DDoS') : pr.impaired ? 'Impaired' : !sr.r ? _t(3945, "没成架构") : '';
+  const rentH = !sr ? '' : off ? _tf(3949, "<span class=\"rent off\" title=\"{$0}\">{$1}<i class=\"rk\"> · 不收费</i></span>", pr.offline ? _t(3946, "已下线，不收过路费") : pr.ddos != null ? (pr.ddosWhy ? _tf(5392, "因「{$0}」下线，不收过路费", pr.ddosWhy) : _t(3947, "被 DDoS 打到下线，不收过路费")) : pr.impaired ? _t(3948, "Impaired，暂停收过路费") : rentTip(i, sr), off)
     : `<span class="rent${sr.jr ? ' jr' : ''}" title="${rentTip(i, sr)}">${sr.txt.startsWith(_t(3930, "点数")) ? `<span class="tk">${sr.txt}</span><span class="tk2">≈$${sr.r}</span>` : `${sr.r < 1e4 ? _t(3950, "<i class=\"rk\">过路费 </i>") : ''}${sr.txt}`}</span>`;
   const dm = (s.t === 'prop' || s.t === 'util') ? dlcRentMul(i) : 1;
   const dlcH = dm > 1 ? _tf(3951, "<span class=\"dlcm\" title=\"DLC 加成：过路费 ×{$0}\">DLC ×{$1}</span>", Math.round(dm * 100) / 100, Math.round(dm * 100) / 100) : '';
@@ -86,7 +88,7 @@ export function cellHtml(i) {
 export function hereHtml(p) {
   const i = p.pos, s = SQ[i], pr = S.props[i], o = pr && pr.owner !== null ? P(pr.owner) : null;
   if (isHidden(i)) return _tf(3955, "<button class=\"here\" data-act=\"showSquare\" data-arg=\"{$0}\">{$1}<span><b>盲盒</b><em>随机抽卡 · 效果翻倍</em></span></button>", i, awsImg('reinvent'));
-  const rent = o && (s.t === 'prop' || s.t === 'util') ? (pr.offline ? _t(3956, "已下线 · 不收费") : pr.ddos != null ? _t(3957, "DDoS 下线 · 不收费") : pr.impaired ? _t(3958, "Impaired · 暂停收费") : (sr => !sr.r ? _t(3959, "没组成架构 · 不收费") : _tf(3962, "过路费 {$0}{$1}", sr.txt, sr.cap ? _t(3960, "（新账户保护期封顶）") : sr.jr ? _t(3961, "（整套架构联合收费）") : ''))(shownRent(i))) : '';
+  const rent = o && (s.t === 'prop' || s.t === 'util') ? (pr.offline ? _t(3956, "已下线 · 不收费") : pr.ddos != null ? (pr.ddosWhy ? _t(3956, "已下线 · 不收费") : _t(3957, "DDoS 下线 · 不收费")) : pr.impaired ? _t(3958, "Impaired · 暂停收费") : (sr => !sr.r ? _t(3959, "没组成架构 · 不收费") : _tf(3962, "过路费 {$0}{$1}", sr.txt, sr.cap ? _t(3960, "（新账户保护期封顶）") : sr.jr ? _t(3961, "（整套架构联合收费）") : ''))(shownRent(i))) : '';
   const sub = o ? `<i class="pawn" style="--pc:${o.color}"></i>${o.id === p.id ? ((MP.role === 'client' ? p.id === MP.mySeat : !(MP.role === 'host' && MP.isRemote(p.id) && !MP.hostPlays(p.id))) ? _t(2971, "你自己的") : o.name + _t(3963, " 自己的")) : o.name + _t(3964, " 的")}${rent ? ' · ' + rent : ''}` : s.p ? _tf(3965, "没人买 · 售价 ${$0}", s.p) : s.k === 'jail' && p.jail !== null ? _tf(3966, "关在里面：停{$0}轮或付 $50 出来", jailMax(p) > 1 ? ` ${jailMax(p) - p.jail} ` : _t(2874, "一")) : CORNER_SUB[s.k] || (s.t === 'tax' ? _t(3967, "交 $200") : s.t === 'tax2' ? _t(3968, "交 $100") : '');
   return `<button class="here" data-act="showSquare" data-arg="${i}" title="${_t(3969, "看这一格的现状和历史记录")}">${_tf(3970, "{$0}<span><b>{$1} 在 {$2}</b><em>{$3}</em></span><small>记录</small>", awsImg(s.icon), p.name, s.n, sub)}</button>`;
 }
@@ -103,7 +105,7 @@ export function sqTip(i) {
     if (pr.owner === null) L.push(_tf(3977, "没人买 · 价格 ${$0}", s.p), _tf(3979, "买下后过路费约 ${$0}{$1}", rent, float ? _t(3978, "（随对方掷的点数浮动）") : ''));
     else {
       const o = P(pr.owner); let run = 0, sr = { r: rent, jr: null, txt: '' }; try { run = runCost(i); sr = shownRent(i); } catch (e) { }
-      const jr = sr.jr, off = pr.offline ? _t(3944, "已下线") : pr.ddos != null ? _t(3980, "被 DDoS 打到下线") : pr.impaired ? _t(3981, "现在 Impaired") : '';
+      const jr = sr.jr, off = pr.offline ? _t(3944, "已下线") : pr.ddos != null ? (pr.ddosWhy ? _tf(5393, "因「{$0}」下线", pr.ddosWhy) : _t(3980, "被 DDoS 打到下线")) : pr.impaired ? _t(3981, "现在 Impaired") : '';
       L.push(_tf(3983, "主人：{$0}{$1}{$2}", unesc(o.name), s.upg ? ` · ${lvFull(i, pr.level)}` : '', pr.cap ? _tf(3982, " · 容量 {$0} 个{$1}", pr.cap, capU(s.k)) : ''), off ? _tf(3984, "过路费：{$0}，不收", off) : sr.cap ? _tf(3985, "过路费最多 $50（新账户保护期，前 {$0} 轮每笔封顶）；第 {$1} 轮起约 ${$2}{$3}", BAL.protect, BAL.protect + 1, sr.full, jr ? _t(3961, "（整套架构联合收费）") : '') : _tf(3988, "过路费约 ${$0}{$1}{$2}", sr.r, jr ? _tf(3986, "（{$0}{$1}架构联合收费{$2}）", jr.cs.map(c => _tf(2766, "「{$0}」", c.n)).join(''), jr.cs.length > 1 ? _t(2767, "串联") : '', sr.rn ? ` · ${sr.rn}` : '') : sr.rn ? _tf(2769, "（{$0}）", sr.rn) : '', sr.r && (jr ? sr.txt[0] === '≈' : float) ? _t(3987, "（按掷出 7 点算，随点数浮动）") : ''), _tf(3989, "运行费：每圈 ${$0}", run));
     }
   } else if (s.t === 'jail') L.push(_t(286, "落在这里或被送进来：停一轮，或者交 $50 照常走"));

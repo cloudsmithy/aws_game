@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>高速部署与技能简版 · 亚马逊云科技 User Group 云上大亨</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="k">MANUAL · 专题</div>
+<h1>高速部署与技能简版</h1>
+<p>部署点数 12 个技能和专属技能</p>
+<nav class="links"><a href="index.html">← 全部手册</a><a href="https://github.com/cloudsmithy/aws_game/blob/master/docs/%E6%89%8B%E5%86%8C/4-%E4%B8%93%E9%A2%98/%E7%AE%80%E7%89%88/%E9%AB%98%E9%80%9F%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%8A%80%E8%83%BD%E7%AE%80%E7%89%88.pdf">原版 PDF（GitHub）</a></nav>
+<nav class="toc"><a href="#s1">一 部署点数</a><a href="#s2">二 角色专属技能</a></nav>
+</header>
+<section>
+<p class="muted"><b>免责声明</b>：游戏里特定亚马逊云科技生成式人工智能相关的服务仅在亚马逊云科技海外区域可用，亚马逊云科技 User Group 仅为帮助您了解行业前沿技术和发展海外业务选择推介该服务。亚马逊云科技中国区域相关云服务由西云数据和光环新网运营，具体信息以中国区域官网为准。游戏内价格为虚构，不代表实际定价；$ 是游戏币单位。</p>
+</section>
+<section>
+<h2 id="s1">一 部署点数</h2>
+<ul>
+<li>每人一个计数 0–12：每回合 +1，被 Health 事件罚到 −2，进维护窗口 −4。</li>
+<li>花点数发动技能，花掉就没了。攻击（5、6、12）每回合最多 1 次；DDoS 不能连着打同一个人。</li>
+<li>对手有 Shield Advanced 或 CloudFront，DDoS 打不动；被打的人可以花 7 点抵消。</li>
+</ul>
+<div class="tw"><table>
+<thead><tr><th>点</th><th>技能</th><th>效果</th></tr></thead>
+<tbody>
+<tr><td>数</td><td></td><td></td></tr>
+<tr><td>1</td><td>灰度发布</td><td>掷完骰子后多走或少走 1 步</td></tr>
+<tr><td>2</td><td>回滚重发</td><td>掷完骰子后重掷一次</td></tr>
+<tr><td>3</td><td>抽卡</td><td>免费抽一张 re:Invent 卡，掷骰子前后都能用（和花钱抽卡共用每回合一次，每局最多 2 次）</td></tr>
+<tr><td>4</td><td>故障转移</td><td>没做高可用、要被可用性事件打成 Impaired 时（AZ 断电、单点故障、Region 故障、流量暴增…），这次扛住</td></tr>
+<tr><td>5</td><td>混沌注入</td><td>逼一位对手抽一张 Health 事件卡（每回合最多发动一次攻击）</td></tr>
+<tr><td>6</td><td>DDoS（轻）</td><td>让一位对手的一块服务变成 Impaired，到对手下回合开始恢复。对手有 Shield Advanced 或 CloudFront 免疫，也可以花 7 点蓝绿部署抵消；每回合最多攻击一次，不能连着两次打同一个人</td></tr>
+<tr><td>7</td><td>蓝绿部署</td><td>抵消一张打到自己的 Health 事件卡，或者一次 DDoS</td></tr>
+<tr><td>8</td><td>流水线自动化</td><td>选一块能升级的服务免费升一级（不用落在那块服务上）</td></tr>
+<tr><td>9</td><td>自动修复</td><td>自己所有 Impaired 的服务马上恢复，再清掉 1 个技术债</td></tr>
+<tr><td>10</td><td>Global Accelerator</td><td>不掷骰子，直接前进 1–12 中任意步数并结算落点（代替这回合的掷骰子）</td></tr>
+<tr><td>11</td><td>加开一班</td><td>这回合走完再走一次（像掷出对子）</td></tr>
+<tr><td>12</td><td>DDoS（重）</td><td>让一位对手的一块服务下线 2 回合（到你第 2 个回合开始恢复）：不收过路费、不算持有（不凑整组、架构和支柱）。防御同 DDoS（轻）</td></tr>
+</tbody></table></div>
+</section>
+<section>
+<h2 id="s2">二 角色专属技能</h2>
+<ul>
+<li>每个角色一个起死回生的技能，和角色绑定。总资产低于自己开局资金的一半时发动，一局一次。</li>
+<li>发动时先结算你角色自己的技能，再结算所有角色共有的战略并购：按卖回价把全场总资产最高的对手的一块服务买下来（连同升级和容量），钱付给他；先领到技能给的钱再收购，现金还不够就先欠着，按欠款规则处理。</li>
+<li>全部角色的技能见「高速部署与技能手册」或网页「图鉴」。</li>
+</ul>
+</section>
+<footer>本页由 <code>web/tools/build-manuals.mjs</code> 从 PDF 抽取文字自动排版，版式和图片以<a href="https://github.com/cloudsmithy/aws_game/blob/master/docs/%E6%89%8B%E5%86%8C/4-%E4%B8%93%E9%A2%98/%E7%AE%80%E7%89%88/%E9%AB%98%E9%80%9F%E9%83%A8%E7%BD%B2%E4%B8%8E%E6%8A%80%E8%83%BD%E7%AE%80%E7%89%88.pdf">原版 PDF</a> 为准。</footer>
+</div>
+</body>
+</html>

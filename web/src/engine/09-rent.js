@@ -1,5 +1,5 @@
 import { LANG, _t, _tf } from '../core/01-i18n-runtime.js';
-import { BAL, CAP_MAX, IX, OFFLINE_MIN, OFFLINE_OK, SQ, TOKEN, UTILS, capU, effIn, lvFull, lvName, sideCost, upCost } from '../rules/03-services.js';
+import { BAL, CAP_MAX, IX, OFFLINE_MIN, OFFLINE_OK, OWNABLE, SQ, TOKEN, UTILS, capU, effIn, lvFull, lvName, sideCost, upCost } from '../rules/03-services.js';
 import { COMBOS, cAll, rsBuyRate } from '../rules/04-roles-combos-cards.js';
 import { dlcRentMul } from '../rules/05-dlc.js';
 import { F, P, S, active, effActive, hasCombo, log, nm, offlineCash, owns, ownsGroup, resetProp, sqn, wildOf } from './07-state.js';
@@ -132,6 +132,16 @@ export function takeOffline(p, i) {
   const cash = offlineCash(i);
   pr.offline = 1; pr.offTurn = turnKey(); pr.offCash = cash; pr.offAsked = 0; pr.impaired = false; p.wentOffline = true; credit(p, cash, 'sell');
   log(_tf(2701, "⏹ {$0} 把 {$1} 下线，先拿回 ${$2} 周转：不收过路费，运行费只剩存储费；下线 {$3} 轮后自动恢复，拿回的钱不用还；自己落到这一格可以提前免费拉起来，这期间别人落上来可以付原价 ${$4} 把它买走", nm(p), sqn(i), cash, OFFLINE_MIN, SQ[i].p));
+}
+// 强制下线（高速部署的 DDoS、Health 卡）：不收过路费、不算持有（active() 认 ddos），运行费照交；by 那位玩家再开始 n 个回合时恢复。
+// why = 原因（卡名），界面写「因「卡名」下线」；null 是 DDoS，界面写「被某某 DDoS」。和主动下线（offline，相当于抵押）是两回事
+export function forceDown(i, by, n, why = null) { const pr = S.props[i]; pr.ddos = by; pr.ddosLeft = n; pr.ddosWhy = why; }
+export function downTick(p) {
+  OWNABLE.forEach(i => {
+    const pr = S.props[i]; if (pr.ddos !== p.id || --pr.ddosLeft > 0) return;
+    const why = pr.ddosWhy; pr.ddos = null; pr.ddosLeft = 0; pr.ddosWhy = null;
+    log(why ? _tf(5294, "{$0} 恢复上线（{$1}）", sqn(i), why) : _tf(3409, "{$0} 扛过了 {$1} 的 DDoS，恢复上线", sqn(i), nm(p)));
+  });
 }
 export const turnKey = () => S.round * 10 + S.cur;
 export const offRounds = i => Math.max(0, (S.props[i].offline || 1) - 1);   // 已经下线了几轮（下线时是 1，主人每到一个回合开始 +1）

@@ -18,8 +18,12 @@ export const winWA = () => !!(S.cfg.wa || S.cfg.win === 'wa');
 export const winTimed = () => !!(S.cfg.timed || S.cfg.win === 'timed');
 // 这局怎么赢：[标题行上的名字, 一句话说明]；标题行悬停和新手引导用同一套说法
 export const winParts = () => [[_t(2534, "经典"), _t(2535, "别人都破产（账户被暂停），只剩你一家就赢")], winWA() && ['Well-Architected', _t(2536, "谁先把六大支柱都做到本局要求，直接赢")], winTimed() && [_t(2537, "限时"), _tf(2538, "{$0} 分钟到了按估值排名", S.cfg.minutes)], S.cfg.roundLimit && [_tf(2539, "{$0} 轮上限", S.cfg.roundLimit), _tf(2540, "打满 {$0} 轮按估值排名", S.cfg.roundLimit)]].filter(Boolean);
-// 玩家名的字色：棋子颜色在白底上只有 3.5–4:1，名字用同色系深一档的（都在 5:1 以上）；棋子、色条还用原色
-export const INK = { '#e5484d': '#c62a2f', '#2f7cf6': '#1a62d6', '#1f9d55': '#15763f', '#9b5cf6': '#7c3aed' };
+// 玩家名的字色：棋子颜色在白底上只有 3.5–4:1，名字用同色系深一档的（都在 5:1 以上）；棋子、色条还用原色；暗色主题的 --player-0…11 在 index.html 里
+export const INK = { '#e5484d': '#c62a2f', '#2f7cf6': '#1a62d6', '#1f9d55': '#15763f', '#9b5cf6': '#7c3aed', '#f97316': '#b44708', '#14b8a6': '#0f766e', '#ec4899': '#be185d', '#84cc16': '#477309', '#38bdf8': '#0369a1', '#facc15': '#8a6200', '#94a3b8': '#475569', '#c8a27a': '#87592a' };
+// 多人局（开局页「多人（超过 4 人）」）最多几个座位。用户要的是不设上限，这里给一个够用的实际上限，只在这一处改：
+// 12 = 不当代理商的角色正好 12 个（再多就有两家同一个角色）；棋盘 48 格、一圈 12 人时每人每轮只走一回，再多一局要打好几个小时；
+// 起点格里 12 颗棋子缩小后 3×4 排得下，侧栏玩家卡收成一行一张也还能滚着看。想再放开就改这个数，再在 core/02-util.js 的 COLORS 和上面的 INK 补颜色
+export const MAX_PLAYERS = 12;
 const playerInk = color => {
   const seat = COLORS.findIndex(c => c === color || INK[c] === color);
   return seat < 0 ? color : `var(--player-${seat},${INK[COLORS[seat]]})`;

@@ -3,6 +3,7 @@ import { $, esc } from '../core/02-util.js';
 import { S } from '../engine/07-state.js';
 import { ask, modalBlocks } from '../ui/10-modal.js';
 import { toast } from '../ui/28-setup-save.js';
+import { SIG_PUBLIC, sigHost, sigLabel, sigNormalize, sigSave, sigSaved } from './40a-signal.js';
 import { MP } from './40-host-sync.js';
 // ---- 联机设置和测试 ----
 // 中继服务器（TURN）存在这台设备的 localStorage 里，不进存档、不随状态同步。urls 一行一个，可以写多个（比如 turn:…:3478 和 turns:…:443?transport=tcp）
@@ -17,7 +18,6 @@ export function mpTurnEntry(t = mpTurn()) {
   try { new RTCPeerConnection({ iceServers: [e] }).close(); return e; } catch (x) { return null; }
 }
 const mpTurnErr = e => /username|credential/i.test(e.message || '') ? _t(5045, "turn: / turns: 地址要同时填用户名和密码") : _tf(5046, "地址写得不对：{$0}（格式像 turn:turn.example.com:3478）", esc(e.message || String(e)));
-const mpSigHost = () => new URLSearchParams(location.search).get('peerhost') || '0.peerjs.com';
 const mpMask = ip => /^\d+\.\d+\.\d+\.\d+$/.test(ip || '') ? ip.replace(/\.\d+\.\d+$/, '.x.x') : /:/.test(ip || '') ? ip.split(':').slice(0, 2).join(':') + ':…' : ip || '';
 // 收集 ICE 候选：policy 'relay' 时只要中继候选。iceServers 写错（比如地址不是 stun: / turn: 开头）构造时就会抛错
 async function mpGather(iceServers, policy = 'all', ms = 8000) {
@@ -43,7 +43,7 @@ let MPNET_RUN = 0;
 export async function mpNetTest() {
   const run = ++MPNET_RUN, box = $('#mpnet'); if (!box) return;
   const btn = $('#mpnetgo'); if (btn) btn.disabled = true;
-  const rows = [['sig', _tf(5055, "信令服务器（{$0}）", esc(mpSigHost()))], ['loop', _t(5056, "本机点对点（这个浏览器自己连自己）")], ['stun', _t(5057, "公网地址（STUN）")], ['turn', _t(5058, "中继服务器（TURN）")]];
+  const rows = [['sig', _tf(5055, "信令服务器（{$0}）", esc(sigHost()))], ['loop', _t(5056, "本机点对点（这个浏览器自己连自己）")], ['stun', _t(5057, "公网地址（STUN）")], ['turn', _t(5058, "中继服务器（TURN）")]];
   box.innerHTML = `<table class="mpnet">${rows.map(([k, n]) => _tf(5059, "<tr id=\"mpn_{$0}\"><th>{$1}</th><td class=\"st\">等待</td><td class=\"dt\"></td></tr>", k, n)).join('')}</table><div id="mpnetsum" class="mpnetsum" aria-live="polite"></div>`;
   const set = (k, ok, st, dt) => { const r = $('#mpn_' + k); if (!r || run !== MPNET_RUN) return; r.className = ok == null ? 'run' : ok ? 'ok' : ok === 0 ? 'mid' : 'bad'; r.querySelector('.st').textContent = st; r.querySelector('.dt').innerHTML = dt || ''; };
   const R = {};
@@ -122,12 +122,34 @@ export function mpTurnSave(clear) {
   catch (e) { $('#turnmsg').innerHTML = _t(5100, "<span class=\"warn\">没存上：这个浏览器不让网页存数据（无痕模式、存储满了或被禁用）。换个浏览器窗口再填</span>"); return; }
   $('#turnmsg').innerHTML = _tf(5103, "<span class=\"muted\">已保存在这台设备上，{$0}。点上面「开始检测」测一下能不能拿到中继地址。</span>", MP.role ? _t(5101, "下次创建或加入房间时生效") : _t(5102, "创建或加入房间时就会用上"));
 }
+// 「联机设置和测试」里的信令服务器一节：现在用哪个，加上这台设备的选择（跟着网站 / 公共 / 自建）
+function sigFormHtml() {
+  const v = sigSaved(), opt = (val, name) => `<option value="${val}"${(v.mode || 'auto') === val ? ' selected' : ''}>${name}</option>`;
+  return `<h4>${_t(5304, "信令服务器")}</h4>
+    <p class="muted">${_t(5305, "房间号登记在信令服务器上：房主、玩家、观众要用同一个才找得到房间。默认跟着网站走：GitHub Pages 上是 PeerJS 公共服务器，自己用 docker compose 部署的是自建的。只存在这台设备上。")}</p>
+    <p id="sigcur"><b>${esc(sigLabel())}</b></p>
+    <div class="mpturn"><label><select id="sigmode">${opt('auto', _t(5306, "跟着网站默认"))}${opt('public', _tf(5297, "公共 PeerJS（{$0}）", SIG_PUBLIC))}${opt('custom', _t(5307, "自建"))}</select></label>
+    <label>${_t(5308, "域名")}<input id="sighost" autocomplete="off" spellcheck="false" placeholder="peer.example.com" value="${esc(v.host || '')}"></label>
+    <label>${_t(5309, "端口")}<input id="sigport" type="number" min="1" max="65535" value="${esc(String(v.port || 443))}"></label>
+    <label>${_t(5310, "路径")}<input id="sigpath" autocomplete="off" spellcheck="false" value="${esc(v.path || '/')}"></label>
+    <div class="btns"><button type="button" class="sm" data-act="mpSigSave">${_t(5113, "保存")}</button></div><div id="sigmsg"></div></div>`;
+}
+// 保存这台设备选的信令服务器；联机中改了要下次建房、加入才生效
+export function mpSigSave() {
+  const mode = $('#sigmode').value, own = mode === 'custom' && sigNormalize($('#sighost').value, $('#sigport').value, $('#sigpath').value);
+  if (mode === 'custom' && !own) { $('#sigmsg').innerHTML = `<span class="warn">${_t(5311, "填信令服务器的域名，比如 peer.example.com（不带 https://）")}</span>`; return; }
+  sigSave(own ? { mode, ...own } : { mode });
+  $('#sigcur').innerHTML = `<b>${esc(sigLabel())}</b>`;
+  $('#sigmsg').innerHTML = `<span class="muted">${MP.role ? _t(5101, "下次创建或加入房间时生效") : _t(5102, "创建或加入房间时就会用上")}</span>`;
+  document.querySelectorAll('.mpsig').forEach(el => { el.textContent = sigLabel(); });   // 表单下面、大厅里那一行跟着改
+}
 export function mpNetDialog() {
   if (modalBlocks()) return;
   const t = mpTurn() || {};
   ask({ local: true, cancelable: true, cls: 'wide', title: _t(5104, "联机设置和测试"), html: `<p>${_t(5105, "联机走 PeerJS：先连信令服务器登记房间号，再在两台设备之间直接打通一条点对点的数据通道，之后的画面同步都不经过服务器。直连打不通（不在同一个网络、公司网络、VPN）就要靠中继服务器转一手。")}</p>
     <div class="mpnetbar"><button type="button" id="mpnetgo" class="pri" data-act="mpNetTest">${_t(5106, "开始检测")}</button>${_t(5107, "<span class=\"muted\">大约 20 秒。只测这台设备，不会建房间</span>")}</div>
     <div id="mpnet"></div>
+    ${sigFormHtml()}
     <h4>${_t(5108, "中继服务器（TURN，可选）")}</h4>
     <p class="muted">${_t(5109, "PeerJS 原来带的免费中继已经下线。可以用 Cloudflare、Twilio 这类按流量计费的 TURN 服务，或者自己架一台 coturn。只存在这台设备上，不会发给别人；用户名和密码别截图外传。")}</p>
     <div class="mpturn"><label>${_t(5110, "地址（一行一个）")}<textarea id="turnurls" rows="2" spellcheck="false" autocomplete="off" placeholder="turn:turn.example.com:3478&#10;turns:turn.example.com:443?transport=tcp">${esc((t.urls || []).join('\n'))}</textarea></label>
@@ -149,6 +171,7 @@ export function mpUI(kind) {
     // 反过来：在上面名字栏里改玩家 1 的名字，这个框也跟着变（#names 每次重画都还是同一个容器，挂一次就行）
     const nb = $('#names'); if (nb && !nb._mpn) { nb._mpn = true; nb.addEventListener('input', e => { const h = $('#mphname'); if (e.target.id === 'nm0' && h && document.activeElement !== h) { h.value = e.target.value; if (MP.role === 'host' && !(S && S.players)) MP.renderLobby(); } }); } }
   else box.innerHTML = `<div class="mpform"><label>${_t(5120, "房间号")} <input id="mproom" maxlength="6" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" style="text-transform:uppercase;width:7.5em"></label><label>${_t(5266, "加入身份")} <select id="mpmode"><option value="player">${_t(3861, "玩家")}</option><option value="spectator">${_t(5236, "受邀观战")}</option></select></label><label>${_t(5267, "房间密码 / 观战邀请码")} <input id="mppwd" type="password" maxlength="32" autocomplete="off"></label><label>${_t(5117, "你的名字")} <input id="mpname" maxlength="12"></label><button class="pri" data-act="mpJoinGo">${_t(5121, "加入")}</button></div><div id="mpstat"></div>`;
+  box.insertAdjacentHTML('beforeend', `<p class="muted mpsig">${esc(sigLabel())}</p>`);   // 现在连的是公共还是自建的信令服务器
   if (kind !== 'host') { let lj = null; try { lj = JSON.parse(sessionStorage.getItem('aws-tycoon-lastjoin')); } catch (e) { } if (lj && typeof lj.room === 'string') { $('#mproom').value = lj.room.slice(0, 6); $('#mpname').value = String(lj.name || '').slice(0, 12); $('#mpmode').value = lj.watching ? 'spectator' : 'player'; $('#mppwd').focus(); } }
 }
 

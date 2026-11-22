@@ -37,7 +37,8 @@ export const waitAnim = (p, dur) => Promise.race([p, CLK.set(dur)]);
 export const rnd = n => Math.floor(Math.random() * n);
 export const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 export const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-export const COLORS = ['#e5484d', '#2f7cf6', '#1f9d55', '#9b5cf6'];
+// 座位颜色：前 4 个是 1–4 号位（4 人以内的局和存档只用这 4 个），后 8 个给「多人（超过 4 人）」的 5–12 号位（engine/07-state.js 的 MAX_PLAYERS）
+export const COLORS = ['#e5484d', '#2f7cf6', '#1f9d55', '#9b5cf6', '#f97316', '#14b8a6', '#ec4899', '#84cc16', '#38bdf8', '#facc15', '#94a3b8', '#c8a27a'];
 export const clean = s => String(s).replace(/^(?:\p{Extended_Pictographic}|\uFE0F|\u200D|\s)+/u, '');
 export const awsImg = (k, cls = '') => AWSI[k] ? `<img class="awsi ${cls}" data-icon="${k}" src="${AWSI[k]}" alt="" draggable="false">` : '';
 // 座位号圆点；t 可以换掉里面的字：战报抬头和结束动画的冠军大圆写「3号」，免得皇冠下面一个大「3」被看成第 3 名

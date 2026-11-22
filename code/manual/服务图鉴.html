@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>服务图鉴 · 亚马逊云科技 User Group 云上大亨</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="k">MANUAL · 图鉴</div>
+<h1>服务图鉴</h1>
+<p>从「主持人规则书」摘出的服务详情：服务类型、每个服务的特性和升级、运行费与请求费。</p>
+<nav class="links"><a href="index.html">← 全部手册</a><a href="https://github.com/cloudsmithy/aws_game/blob/master/docs/%E6%89%8B%E5%86%8C/5-%E5%9B%BE%E9%89%B4/%E6%9C%8D%E5%8A%A1%E5%9B%BE%E9%89%B4.pdf">原版 PDF（GitHub）</a></nav>
+<nav class="toc"><a href="#s1">5. 服务类型</a><a href="#s2">8. 每个服务的特性和升级</a><a href="#s13">9. 运行费与请求费</a></nav>
+</header>
+<section>
+<h2 id="s1">5. 服务类型</h2>
+<p><strong>色组</strong>按亚马逊云科技控制台里的服务分类分：计算（EC2、Lambda）、存储（S3、EFS、EBS）、数据库（RDS、Aurora、ElastiCache、DynamoDB、DMS）、网络（VPC、ELB、Route 53、CloudFront、API Gateway）、安全（GuardDuty、Inspector、KMS、WAF、Shield Advanced、Cognito）、分析（Kinesis、Glue、Athena、Redshift、OpenSearch）、AI（AgentCore、SageMaker AI、Bedrock）、容器（ECR、ECS、EKS）、应用集成（SQS、EventBridge、Step Functions）；CloudWatch、CloudTrail、Config 是监控组（官方分类叫「管理与治理」），按用量收费，三块都是万能服务；另外 KMS、VPC 也是万能服务，有绑定限制（见第 23 节）。每块服务只属于一个色组；Serverless 是服务的类型（见下表），不是色组，S3、Lambda、DynamoDB、SQS 这些都是 Serverless。各组块数不一样，大组凑齐难，未升级过路费翻倍也就难拿。</p>
+<p>每个服务都有类型，类型决定它怎么收钱、怕不怕 AZ 断电。</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>服务</th>
+<th>买下时</th>
+<th>计费</th>
+<th>AZ 断电</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>IaaS</td>
+<td>EC2、EBS</td>
+<td>单 AZ</td>
+<td>按小时</td>
+<td>会受影响，要升多 AZ</td>
+</tr>
+<tr>
+<td>PaaS</td>
+<td>RDS、Aurora、ElastiCache、DMS、Redshift、OpenSearch、SageMaker AI</td>
+<td>单 AZ（Aurora 的存储本来就跨 3 个 AZ，单 AZ 的是计算实例）</td>
+<td>按小时（比 IaaS 贵）</td>
+<td>会受影响，要升多 AZ；托管数据库和 DMS 复制实例的补丁由亚马逊云科技打，SageMaker AI 要自己管</td>
+</tr>
+<tr>
+<td>容器</td>
+<td>ECS、EKS</td>
+<td>ECS 服务默认跨 AZ 分散任务；EKS 单 AZ</td>
+<td>按小时（EKS 多一笔集群费）</td>
+<td>ECS 不受影响；EKS 要升多 AZ</td>
+</tr>
+<tr>
+<td>Serverless</td>
+<td>S3、EFS、AgentCore、Lambda、API Gateway、DynamoDB、SQS、EventBridge、Step Functions、Glue、Athena</td>
+<td>天生跨多个 AZ</td>
+<td>按用量</td>
+<td>不受影响</td>
+</tr>
+<tr>
+<td>托管服务</td>
+<td>VPC、ELB、ECR、Kinesis、GuardDuty、Inspector、KMS、WAF、Cognito</td>
+<td>天生跨多个 AZ</td>
+<td>大多按用量；ELB、Kinesis（按分片小时）按小时；VPC 免费</td>
+<td>不受影响</td>
+</tr>
+<tr>
+<td>全局服务</td>
+<td>Route 53、CloudFront、Shield Advanced</td>
+<td>不在任何 AZ 或 Region 里</td>
+<td>按用量；Shield Advanced 订阅</td>
+<td>不受影响</td>
+</tr>
+<tr>
+<td>按 token</td>
+<td>Bedrock</td>
+<td>天生跨多个 AZ</td>
+<td>按 token</td>
+<td>不受影响</td>
+</tr>
+</tbody></table></div>
+<p>&quot;实例型&quot;指 IaaS、PaaS、EKS 这几类，只有它们需要自己做多 AZ。例外：EBS 卷只能在一个 AZ 里，升级了也一样；ECS 服务默认就把任务尽量分散到多个 AZ（Fargate 也是），不算单 AZ。</p>
+<p>这里的&quot;按用量&quot;指按请求数、存储量、扫描量这类实际用量收费：主人每次收到过路费交 15% 请求费。按存储量或按个数收月费的（S3、EFS、ECR、Route 53、WAF）另有每圈 $5 固定月费；KMS 升到客户托管密钥（第 1 级）后才有，只用亚马逊云科技托管密钥时不收。见第 9 节。</p>
+<hr>
+</section>
+<section>
+<h2 id="s2">8. 每个服务的特性和升级</h2>
+<p>下面每张表的&quot;游戏效果&quot;在全局生效：比如持有一块带&quot;免疫「依赖的第三方 API 挂了」&quot;功能的服务，你抽到那张卡就免疫。</p>
+<h3 id="s3">存储组</h3>
+<p><strong>S3</strong>（价格 $60 · 升级价 $75 / $100 / $125 · 容量单位：存储桶）<br>Serverless：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；另有固定月费（存储按 GB 每月收费），每圈 $5</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $12（随点数浮动）（集齐整组 约 $24（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>版本控制</td>
+<td>保留每个对象的历史版本，误删、误改都能找回</td>
+<td>免疫误删数据</td>
+<td>约 $60（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>智能分层</td>
+<td>按访问频率自动把数据挪到便宜的存储层</td>
+<td>运行费或请求费减半</td>
+<td>约 $144（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>自动生成缩略图</td>
+<td>图片一上传，S3 事件通知就触发 Lambda 生成缩略图，写回另一个桶或前缀</td>
+<td>这块过路费再 +20%</td>
+<td>约 $288（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>EFS</strong>（价格 $100 · 升级价 $75 / $100 / $125 · 容量单位：吞吐单位）<br>Serverless：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；另有固定月费（存储按 GB 每月收费），每圈 $5</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $20（随点数浮动）（集齐整组 约 $40（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>生命周期管理</td>
+<td>不常用的文件自动转到低频访问存储，更便宜</td>
+<td>运行费或请求费减半</td>
+<td>约 $100（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>自动备份</td>
+<td>用 Backup 每天自动备份文件系统</td>
+<td>免疫误删数据</td>
+<td>约 $240（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>跨区域复制</td>
+<td>把文件系统复制到另一个 Region</td>
+<td>扛住整个 Region 出问题</td>
+<td>约 $400（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>EBS</strong>（价格 $120 · 升级价 $75 / $100 / $125 · 容量单位：卷）<br>IaaS（实例型）：EBS 卷只存在于一个 AZ，升级了也一样，AZ 断电会受影响；按小时：每圈经过起点交运行费，空着也要交</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>单 AZ</td>
+<td>刚买下</td>
+<td>—</td>
+<td>$24（集齐整组 $48）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>自动快照（DLM）</td>
+<td>按计划自动给卷拍快照，误删数据能恢复；卷本身还是只在一个 AZ</td>
+<td>免疫误删数据</td>
+<td>$120</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>gp3 卷</td>
+<td>性能和容量分开计费，比 gp2 便宜</td>
+<td>运行费或请求费减半</td>
+<td>$288</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>跨区域快照复制</td>
+<td>快照复制到另一个 Region 做灾备，出事后能在那边重建卷</td>
+<td>过路费提高</td>
+<td>$480</td>
+</tr>
+</tbody></table></div>
+<h3 id="s4">计算组</h3>
+<p><strong>Lambda</strong>（价格 $220 · 升级价 $75 / $100 / $125 · 容量单位：并发）<br>Serverless：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱；升到预置并发后每圈 +$10</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $44（随点数浮动）（集齐整组 约 $88（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>提高并发配额</td>
+<td>申请更高的并发上限，流量大也不被限流</td>
+<td>免疫「服务配额用完了」；性能效率支柱 +1 分</td>
+<td>约 $220（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>预置并发</td>
+<td>提前准备好执行环境，消除冷启动</td>
+<td>这块过路费再 +20%</td>
+<td>约 $634（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>容器镜像 + Web Adapter</td>
+<td>用容器镜像打包函数（最大 10 GB），配上 Lambda Web Adapter，Express、Flask、Spring Boot 这些 Web 框架基本不用改代码就能跑；不用常开的服务器，按请求付钱</td>
+<td>运行费或请求费减半</td>
+<td>约 $1056（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>EC2</strong>（价格 $100 · 升级价 $75 / $100 / $125 · 容量单位：实例）<br>IaaS（实例型）：买下时是单 AZ，AZ 断电会受影响，升到第 2 级「跨 AZ Auto Scaling」才是多 AZ；按小时：每圈经过起点交运行费，空着也要交</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>单 AZ</td>
+<td>刚买下</td>
+<td>—</td>
+<td>$20（集齐整组 $40）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>自动 AMI</td>
+<td>用 Data Lifecycle Manager 按计划给实例做 AMI（连同挂着的 EBS 卷），实例坏了、被误删了，直接用镜像再起一台</td>
+<td>免疫误删数据</td>
+<td>$100</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>跨 AZ Auto Scaling</td>
+<td>Auto Scaling 组跨几个 AZ 放实例，按 CPU 或请求数自动加减；一个 AZ 出问题，别的 AZ 里的实例顶上</td>
+<td>免疫「EC2 实例硬件退役」；扛住 AZ 断电和单点故障；扛住流量暴增</td>
+<td>$240</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>Graviton</td>
+<td>换成 Arm 架构实例，同样性能更便宜</td>
+<td>运行费或请求费减半</td>
+<td>$400</td>
+</tr>
+</tbody></table></div>
+<h3 id="s5">网络组</h3>
+<p><strong>VPC</strong>（价格 $140 · 升级价 $75 / $100 / $125 · 容量单位：子网）<br>托管服务：天生跨多个 AZ；免费：开了私有子网要交 NAT 网关的钱</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>$28（集齐整组 $56）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>私有子网 + NAT</td>
+<td>实例不直接暴露在公网，也不用付公网 IPv4 地址费（2024 年起按小时收），出网走 NAT 网关</td>
+<td>实例放进私有子网（要开 NAT 网关，多交钱）</td>
+<td>$140</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>Session Manager</td>
+<td>不开 22 端口、不用跳板机，也能登录私有子网里的实例，操作全程有记录</td>
+<td>配合私有子网，不开 22 端口，免疫 SSH 暴力破解</td>
+<td>$336</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>Transit Gateway</td>
+<td>把多个 VPC 和公司机房连成一张网</td>
+<td>这块过路费再 +20%</td>
+<td>$672</td>
+</tr>
+</tbody></table></div>
+<p><strong>CloudFront</strong>（价格 $400 · 升级价 $115 / $150 / $190 · 容量单位：分配）<br>全局服务：不在任何一个 AZ 或 Region 里；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $80（随点数浮动）（集齐整组 约 $160（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>HTTPS（ACM）</td>
+<td>用 ACM 免费证书开 HTTPS</td>
+<td>免疫证书过期</td>
+<td>约 $400（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>源访问控制</td>
+<td>只允许 CloudFront 访问 S3 源站，桶不用公开</td>
+<td>免疫「S3 桶被设成了公开」</td>
+<td>约 $960（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>源故障转移</td>
+<td>主源站挂了自动切到备用源站</td>
+<td>扛住整个 Region 出问题</td>
+<td>约 $1600（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>ELB</strong>（价格 $140 · 升级价 $75 / $100 / $125 · 容量单位：LCU）<br>托管服务：天生跨多个 AZ；按小时：每圈经过起点交运行费，空着也要交</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>$28（集齐整组 $56）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>HTTPS + ACM</td>
+<td>用 ACM 免费证书开 HTTPS，证书自动续期</td>
+<td>免疫证书过期</td>
+<td>$140</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>LCU 预留</td>
+<td>提前预留负载均衡器容量单位（LCU），接得住可预期的流量高峰</td>
+<td>性能效率支柱 +1 分</td>
+<td>$336</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>负载均衡 + Auto Scaling</td>
+<td>目标组挂在 EC2 Auto Scaling 组上：健康检查发现坏实例，Auto Scaling 自动换一台新的；流量高了按每个目标的请求数自动加机器</td>
+<td>你的 EC2 免疫「EC2 实例硬件退役」和「单点故障」（坏实例自动换掉）</td>
+<td>$560</td>
+</tr>
+</tbody></table></div>
+<p><strong>API Gateway</strong>（价格 $220 · 升级价 $75 / $100 / $125 · 容量单位：请求配额）<br>Serverless：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱；开了缓存后每圈 +$10</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $44（随点数浮动）（集齐整组 约 $88（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>使用计划限流</td>
+<td>按阶段和 API 密钥限制请求速率，突发请求不会全压到后端；官方说明这是尽力而为，防 DDoS 要靠 WAF</td>
+<td>免疫「接口被恶意刷爆」（安全攻防 DLC）；性能效率支柱 +1 分</td>
+<td>约 $220（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>接入认证</td>
+<td>用 Cognito 用户池、Lambda 授权方或 IAM 校验调用方：没登录、没权限的请求在网关就被挡掉，到不了后端</td>
+<td>免疫「安全审计没过」</td>
+<td>约 $528（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>缓存</td>
+<td>把响应缓存起来，少调后端，响应更快；缓存按小时收费</td>
+<td>这块过路费再 +20%</td>
+<td>约 $1056（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>Route 53</strong>（价格 $160 · 升级价 $75 / $100 / $125 · 容量单位：托管区域）<br>全局服务：不在任何一个 AZ 或 Region 里；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；另有固定月费（每个托管区域每月收费），每圈 $5</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $32（随点数浮动）（集齐整组 约 $64（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>健康检查</td>
+<td>定期探测后端是否健康，不健康的不再分流量</td>
+<td>免疫「DNS 解析配错了」；这块过路费再 +20%</td>
+<td>约 $192（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>故障转移路由</td>
+<td>主站挂了自动把域名切到备用站</td>
+<td>扛住整个 Region 出问题</td>
+<td>约 $461（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>延迟路由</td>
+<td>把用户导到延迟最低的 Region</td>
+<td>过路费提高</td>
+<td>约 $768（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<h3 id="s6">容器组</h3>
+<p><strong>ECR</strong>（价格 $180 · 升级价 $75 / $100 / $125 · 容量单位：仓库）<br>托管服务：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；另有固定月费（镜像存储按 GB 每月收费），每圈 $5</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $36（随点数浮动）（集齐整组 约 $72（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>基础扫描</td>
+<td>推送镜像时扫一遍已知漏洞</td>
+<td>过路费提高</td>
+<td>约 $180（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>增强扫描</td>
+<td>用 Inspector 持续扫描镜像里的系统包和语言包</td>
+<td>你的 ECS、EKS、SageMaker AI 免疫高危 CVE</td>
+<td>约 $432（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>跨区域复制</td>
+<td>镜像自动复制到别的 Region，就近拉取</td>
+<td>扛住整个 Region 出问题</td>
+<td>约 $720（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>ECS</strong>（价格 $180 · 升级价 $75 / $100 / $125 · 容量单位：任务）<br>容器：服务默认就把任务尽量分散到多个 AZ（Fargate 也是），不算单 AZ；按小时：每圈经过起点交运行费，空着也要交</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>$36（集齐整组 $72）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>Service Connect</td>
+<td>同一命名空间里的 ECS 服务互相发现，代理自动做负载均衡、重试和异常检测；只管服务之间的调用，外部 API 不走这个代理</td>
+<td>过路费提高</td>
+<td>$180</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>Fargate</td>
+<td>不用管服务器：主机和操作系统由亚马逊云科技打补丁，也没有 SSH 可以登录；镜像里的漏洞还要靠 ECR 增强扫描</td>
+<td>这块不会被「暴露在公网的实例被 SSH 暴力破解」打中（别的实例照样会被打）</td>
+<td>$432</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>服务自动扩缩</td>
+<td>按 CPU 或请求数自动加减任务</td>
+<td>扛住流量暴增</td>
+<td>$720</td>
+</tr>
+</tbody></table></div>
+<p><strong>EKS</strong>（价格 $200 · 升级价 $75 / $100 / $125 · 容量单位：节点）<br>容器（实例型）：买下时是单 AZ，AZ 断电会受影响，升到第 1 级「多 AZ」才是多 AZ；按小时：每圈经过起点交运行费，空着也要交</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>单 AZ</td>
+<td>刚买下</td>
+<td>—</td>
+<td>$40（集齐整组 $80）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>多 AZ</td>
+<td>工作节点分散到多个 AZ</td>
+<td>扛住 AZ 断电和单点故障</td>
+<td>$200</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>Karpenter 自动扩缩</td>
+<td>按需快速拉起最合适的节点</td>
+<td>扛住流量暴增</td>
+<td>$480</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>EKS Auto Mode</td>
+<td>节点交给亚马逊云科技管理：自动打补丁，最长 21 天换一批新节点，节点不开 SSH；镜像里的漏洞还要靠 ECR 增强扫描</td>
+<td>这块不会被「暴露在公网的实例被 SSH 暴力破解」打中（别的实例照样会被打）</td>
+<td>$800</td>
+</tr>
+</tbody></table></div>
+<h3 id="s7">应用集成组</h3>
+<p><strong>SQS</strong>（价格 $240 · 升级价 $75 / $100 / $125 · 容量单位：队列）<br>Serverless：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $48（随点数浮动）（集齐整组 约 $96（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>死信队列</td>
+<td>反复处理失败的消息转到单独的队列，方便排查原因</td>
+<td>过路费提高</td>
+<td>约 $240（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>长轮询</td>
+<td>没消息时等一会儿再返回，减少空请求，省钱</td>
+<td>运行费或请求费减半</td>
+<td>约 $576（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>积压告警 + SNS 通知</td>
+<td>CloudWatch 告警盯着队列积压和死信队列里的消息数，超过阈值就通过 SNS 发邮件、短信或推到聊天群，消息堆起来马上有人知道</td>
+<td>这块过路费再 +20%</td>
+<td>约 $1152（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>EventBridge</strong>（价格 $240 · 升级价 $75 / $100 / $125 · 容量单位：规则）<br>Serverless：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $48（随点数浮动）（集齐整组 约 $96（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>定时启停 EC2</td>
+<td>EventBridge Scheduler 按时间表开关实例：开发测试环境晚上、周末自动停机，上班前再开起来</td>
+<td>你的 EC2 每圈运行费减半；免疫「测试环境忘了删」（FinOps 账单 DLC）</td>
+<td>约 $240（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>Health 事件通知</td>
+<td>规则订阅 Health 事件，计划维护、实例退役一来就推到 SNS、Slack，提前处理</td>
+<td>免疫「EC2 实例硬件退役」</td>
+<td>约 $576（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>调用任意 API</td>
+<td>Scheduler 的通用目标能按时间表直接调几乎任何亚马逊云科技 API，不用再写一个 Lambda 转一手</td>
+<td>运行费或请求费减半</td>
+<td>约 $960（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>Step Functions</strong>（价格 $260 · 升级价 $75 / $100 / $125 · 容量单位：状态机）<br>Serverless：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $52（随点数浮动）（集齐整组 约 $104（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>Express 工作流</td>
+<td>适合 5 分钟内跑完的高频短流程：按执行次数和运行时长（按内存折算）计费，不按状态转换数计，步骤多、跑得快时更便宜</td>
+<td>运行费或请求费减半</td>
+<td>约 $260（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>分布式 Map</td>
+<td>并行处理上百万个项目</td>
+<td>这块过路费再 +20%</td>
+<td>约 $749（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>多区域</td>
+<td>在多个 Region 部署状态机（现实里没有一键开关：要自己在另一个 Region 再部署一套，配合 Route 53 或应用自己切换）</td>
+<td>扛住整个 Region 出问题</td>
+<td>约 $1248（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<h3 id="s8">数据库组</h3>
+<p><strong>RDS</strong>（价格 $280 · 升级价 $115 / $150 / $190 · 容量单位：只读节点）<br>PaaS（实例型）：买下时是单 AZ，AZ 断电会受影响，升到第 1 级「多 AZ」才是多 AZ；按小时：每圈经过起点交运行费，空着也要交</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>单 AZ</td>
+<td>刚买下</td>
+<td>—</td>
+<td>$56（集齐整组 $112）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>多 AZ</td>
+<td>备库在另一个 AZ，主库故障自动切换</td>
+<td>扛住 AZ 断电和单点故障</td>
+<td>$280</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>只读副本</td>
+<td>读请求分到副本上，主库压力小</td>
+<td>扛住流量暴增</td>
+<td>$672</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>跨区域只读副本</td>
+<td>在另一个 Region 放一份可以随时提升为主库的副本</td>
+<td>扛住整个 Region 出问题</td>
+<td>$1120</td>
+</tr>
+</tbody></table></div>
+<p><strong>Aurora</strong>（价格 $280 · 升级价 $115 / $150 / $190 · 容量单位：副本节点）<br>PaaS（实例型）：买下时是单 AZ，AZ 断电会受影响，升到第 1 级「多 AZ」才是多 AZ；按小时：每圈经过起点交运行费，空着也要交</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>单 AZ</td>
+<td>刚买下</td>
+<td>—</td>
+<td>$56（集齐整组 $112）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>多 AZ</td>
+<td>在其他 AZ 加 Aurora 副本，主实例故障自动切换；存储本来就在 3 个 AZ 里存 6 份，单 AZ 的只是计算实例</td>
+<td>扛住 AZ 断电和单点故障</td>
+<td>$280</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>Aurora Auto Scaling</td>
+<td>按负载自动加减只读副本</td>
+<td>扛住流量暴增</td>
+<td>$672</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>全球数据库</td>
+<td>跨 Region 复制，通常 1 秒内同步</td>
+<td>扛住整个 Region 出问题</td>
+<td>$1120</td>
+</tr>
+</tbody></table></div>
+<p><strong>DMS</strong>（价格 $340 · 升级价 $115 / $150 / $190 · 容量单位：复制任务）<br>PaaS（实例型）：买下时是单 AZ，AZ 断电会受影响，升到第 1 级「多 AZ 复制实例」才是多 AZ；按小时：每圈经过起点交运行费，空着也要交</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>单 AZ</td>
+<td>刚买下</td>
+<td>—</td>
+<td>$68（集齐整组 $136）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>多 AZ 复制实例</td>
+<td>复制实例在另一个 AZ 放一台同步的备用实例，主实例所在的 AZ 出问题自动切过去，迁移和持续复制不断</td>
+<td>扛住 AZ 断电和单点故障</td>
+<td>$340</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>DMS Serverless</td>
+<td>不用自己挑复制实例的大小，按实际用的容量单位（DCU）自动扩缩、按用量计费</td>
+<td>运行费或请求费减半</td>
+<td>$816</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>Schema Conversion</td>
+<td>把 Oracle、SQL Server 的表结构、存储过程、函数自动转换成 Aurora PostgreSQL、MySQL 能用的，换数据库引擎不用手工重写</td>
+<td>这块过路费再 +20%</td>
+<td>$1632</td>
+</tr>
+</tbody></table></div>
+<p><strong>DynamoDB</strong>（价格 $240 · 升级价 $75 / $100 / $125 · 容量单位：容量单位）<br>Serverless：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $48（随点数浮动）（集齐整组 约 $96（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>预置容量 + Auto Scaling</td>
+<td>流量稳定时改成预置读写容量，配 Auto Scaling 自动调整，比按需便宜</td>
+<td>运行费或请求费减半</td>
+<td>约 $240（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>时间点恢复</td>
+<td>可以把表恢复到最近 35 天内任意一秒</td>
+<td>免疫误删数据</td>
+<td>约 $576（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>全局表</td>
+<td>多个 Region 同时读写、自动同步</td>
+<td>扛住整个 Region 出问题</td>
+<td>约 $960（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>ElastiCache</strong>（价格 $300 · 升级价 $115 / $150 / $190 · 容量单位：缓存节点）<br>PaaS（实例型）：买下时是单 AZ，AZ 断电会受影响，升到第 1 级「多 AZ」才是多 AZ；按小时：每圈经过起点交运行费，空着也要交</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>单 AZ</td>
+<td>刚买下</td>
+<td>—</td>
+<td>$60（集齐整组 $120）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>多 AZ</td>
+<td>主节点故障自动切到另一个 AZ 的副本</td>
+<td>扛住 AZ 断电和单点故障</td>
+<td>$300</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>集群模式</td>
+<td>数据分片到多个节点，容量和吞吐都能横向扩</td>
+<td>扛住流量暴增</td>
+<td>$720</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>全局数据存储</td>
+<td>跨 Region 复制缓存数据</td>
+<td>扛住整个 Region 出问题</td>
+<td>$1200</td>
+</tr>
+</tbody></table></div>
+<h3 id="s9">分析组</h3>
+<p><strong>Kinesis</strong>（价格 $300 · 升级价 $115 / $150 / $190 · 容量单位：分片）<br>托管服务：天生跨多个 AZ；按小时：每圈经过起点交运行费，空着也要交</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>$60（集齐整组 $120）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>按需模式</td>
+<td>不用自己管分片数，按流量自动扩缩（按数据流小时和数据量计费）</td>
+<td>性能效率支柱 +1 分</td>
+<td>$300</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>增强扇出</td>
+<td>每个消费者独享读取吞吐，互不抢</td>
+<td>这块过路费再 +20%</td>
+<td>$864</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>数据转换</td>
+<td>Data Firehose 投递前调用 Lambda 清洗、转换每条记录，或者按 Glue 数据目录里的表结构转成 Parquet 再写进 S3：存得更省，下游用 Athena 查时扫的数据也少</td>
+<td>运行费或请求费减半</td>
+<td>$1440</td>
+</tr>
+</tbody></table></div>
+<p><strong>Redshift</strong>（价格 $340 · 升级价 $115 / $150 / $190 · 容量单位：计算节点）<br>PaaS（实例型）：买下时是单 AZ，AZ 断电会受影响，升到第 1 级「多 AZ」才是多 AZ；按小时：每圈经过起点交运行费，空着也要交</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>单 AZ</td>
+<td>刚买下</td>
+<td>—</td>
+<td>$68（集齐整组 $136）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>多 AZ</td>
+<td>集群部署在两个 AZ</td>
+<td>扛住 AZ 断电和单点故障</td>
+<td>$340</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>并发扩展</td>
+<td>查询多的时候自动加临时集群</td>
+<td>扛住流量暴增</td>
+<td>$816</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>Zero-ETL 集成</td>
+<td>Aurora、RDS for MySQL、DynamoDB 里的数据近实时同步进 Redshift，不用自己搭 ETL 管道；方向是同步进来，要把 Redshift 的数据给别处用，靠数据共享或 UNLOAD 到 S3</td>
+<td>这块过路费再 +20%</td>
+<td>$1632</td>
+</tr>
+</tbody></table></div>
+<p><strong>Glue</strong>（价格 $300 · 升级价 $115 / $150 / $190 · 容量单位：DPU）<br>Serverless：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $60（随点数浮动）（集齐整组 约 $120（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>数据目录</td>
+<td>统一管理所有表的结构，Athena、Redshift 都能直接用</td>
+<td>这块过路费再 +20%</td>
+<td>约 $360（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>作业书签</td>
+<td>只处理新增的数据，不重复跑</td>
+<td>运行费或请求费减半</td>
+<td>约 $864（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>数据质量</td>
+<td>自动检查数据是否完整、是否符合规则</td>
+<td>过路费提高</td>
+<td>约 $1440（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>Athena</strong>（价格 $320 · 升级价 $115 / $150 / $190 · 容量单位：工作组）<br>Serverless：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $64（随点数浮动）（集齐整组 约 $128（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>分区投影</td>
+<td>按规则直接算出分区位置，不用查数据目录；配合分区只扫需要的数据，扫得少花得少</td>
+<td>运行费或请求费减半</td>
+<td>约 $320（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>查询结果复用</td>
+<td>同样的查询直接用上次的结果</td>
+<td>这块过路费再 +20%</td>
+<td>约 $922（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>联合查询</td>
+<td>一条 SQL 同时查 S3、数据库、日志等多个数据源</td>
+<td>过路费提高</td>
+<td>约 $1536（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>OpenSearch</strong>（价格 $360 · 升级价 $115 / $150 / $190 · 容量单位：数据节点）<br>PaaS（实例型）：买下时是单 AZ，AZ 断电会受影响，升到第 1 级「多 AZ（含备用）」才是多 AZ；按小时：每圈经过起点交运行费，空着也要交</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>单 AZ</td>
+<td>刚买下</td>
+<td>—</td>
+<td>$72（集齐整组 $144）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>多 AZ（含备用）</td>
+<td>数据节点分布在多个 AZ，还有一个 AZ 专门备用</td>
+<td>扛住 AZ 断电和单点故障</td>
+<td>$360</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>UltraWarm</td>
+<td>旧数据放到便宜的温存储</td>
+<td>运行费或请求费减半</td>
+<td>$864</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>跨集群复制</td>
+<td>把索引复制到另一个 Region 的集群</td>
+<td>扛住整个 Region 出问题</td>
+<td>$1440</td>
+</tr>
+</tbody></table></div>
+<h3 id="s10">安全组</h3>
+<p><strong>GuardDuty</strong>（价格 $380 · 升级价 $115 / $150 / $190 · 容量单位：受保护账户）<br>托管服务：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $76（随点数浮动）（集齐整组 约 $152（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>S3 保护</td>
+<td>监控 S3 里的可疑访问和数据外泄</td>
+<td>过路费提高</td>
+<td>约 $380（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>运行时监控</td>
+<td>盯 EC2、ECS、EKS 里的可疑进程、文件和网络行为（要装代理，可以自动管理）</td>
+<td>过路费提高</td>
+<td>约 $912（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>所有区域开启</td>
+<td>没在用的 Region 也开启威胁检测，攻击者在偏僻 Region 开机器也能发现；满足合规要求</td>
+<td>免疫「安全审计没过」</td>
+<td>约 $1520（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>Inspector</strong>（价格 $380 · 升级价 $115 / $150 / $190 · 容量单位：扫描账户）<br>托管服务：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $76（随点数浮动）（集齐整组 约 $152（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>EC2 扫描</td>
+<td>持续扫描 EC2 上的软件漏洞</td>
+<td>你的 EC2 免疫高危 CVE</td>
+<td>约 $380（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>ECR 镜像扫描</td>
+<td>持续扫描容器镜像里的漏洞</td>
+<td>你的 ECS、EKS、SageMaker AI 免疫高危 CVE</td>
+<td>约 $912（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>Lambda 扫描</td>
+<td>扫描 Lambda 函数代码和依赖包里的漏洞</td>
+<td>免疫「安全审计没过」</td>
+<td>约 $1520（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>WAF</strong>（价格 $400 · 升级价 $115 / $150 / $190 · 容量单位：规则组）<br>托管服务：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；另有固定月费（每个 Web ACL 和规则每月收费），每圈 $5</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $80（随点数浮动）（集齐整组 约 $160（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>托管规则</td>
+<td>一键启用常见攻击防护规则，满足合规要求</td>
+<td>免疫「安全审计没过」</td>
+<td>约 $400（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>限速规则</td>
+<td>单个 IP 请求太多就拦截</td>
+<td>免疫「接口被恶意刷爆」（安全攻防 DLC）</td>
+<td>约 $960（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>Bot Control</td>
+<td>识别爬虫、扫描器、状态监控、搜索引擎这类机器人流量，可以只计数观察、限速或拦截；用目标检查级别还能质询不报身份的机器人</td>
+<td>这块过路费再 +20%</td>
+<td>约 $1920（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>Cognito</strong>（价格 $80 · 升级价 $75 / $100 / $125 · 容量单位：用户池）<br>托管服务：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $16（随点数浮动）（集齐整组 约 $32（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>MFA 多因素认证</td>
+<td>登录时除了密码再验一次（短信、邮件验证码或身份验证器应用），密码泄露了也登不进去</td>
+<td>免疫「用户账号被撞库」（光有密码登不进去）；免疫「安全审计没过」</td>
+<td>约 $80（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>社交与企业登录</td>
+<td>接入 Google、Apple 这类社交账号和公司的 SAML、OIDC 身份提供商，用户不用再记一套密码，来登录的人更多</td>
+<td>这块过路费再 +20%</td>
+<td>约 $230（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>身份池（联合身份）</td>
+<td>把用户池或社交账号登录后的身份换成临时的亚马逊云科技凭证，权限按角色限定，App 直接调用 S3、DynamoDB 这些服务，不用自己的服务器转一道</td>
+<td>运行费或请求费减半</td>
+<td>约 $384（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>KMS</strong>（价格 $400 · 升级价 $115 / $150 / $190 · 容量单位：密钥）<br>托管服务：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；另有固定月费（每把客户托管密钥每月 $1），升到第 1 级「客户托管密钥」后每圈 $5，只用亚马逊云科技托管密钥时不收</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $80（随点数浮动）（集齐整组 约 $160（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>客户托管密钥</td>
+<td>自己控制密钥策略和权限，没有密钥权限的人拿到数据也解不开</td>
+<td>免疫「S3 桶被设成了公开」</td>
+<td>约 $400（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>自动轮换</td>
+<td>按设定周期（90–2560 天，默认 1 年）自动更换密钥材料，满足合规要求</td>
+<td>免疫「安全审计没过」</td>
+<td>约 $960（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>多区域密钥</td>
+<td>同一把密钥在多个 Region 都能用</td>
+<td>扛住整个 Region 出问题</td>
+<td>约 $1600（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>Shield Advanced</strong>（价格 $420 · 升级价 $115 / $150 / $190 · 容量单位：受保护资源）<br>全局服务：不在任何一个 AZ 或 Region 里；订阅：每圈固定交 $20</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>$84（集齐整组 $168）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>健康检查</td>
+<td>结合健康检查更快、更准地发现攻击</td>
+<td>这块过路费再 +20%</td>
+<td>$504</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>Shield 响应团队（SRT）</td>
+<td>遭到攻击时，Shield 响应团队帮你分析和处置（要订阅 Business Support+ 或 Enterprise Support）</td>
+<td>过路费提高</td>
+<td>$1210</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>DDoS 成本保护</td>
+<td>DDoS 导致的扩容费用可以申请抵扣</td>
+<td>过路费提高</td>
+<td>$2016</td>
+</tr>
+</tbody></table></div>
+<h3 id="s11">AI 组</h3>
+<p><strong>AgentCore</strong>（价格 $100 · 升级价 $115 / $150 / $190 · 容量单位：会话）<br>Serverless：天生跨多个 AZ；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>约 $20（随点数浮动）（集齐整组 约 $40（随点数浮动））</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>Memory 记忆</td>
+<td>短期记忆存这次会话的上下文，长期记忆跨会话记住用户的偏好和关键事实</td>
+<td>过路费提高</td>
+<td>约 $100（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>Gateway 工具网关</td>
+<td>把现有的 API、Lambda 函数接成 MCP 工具，智能体直接调业务接口</td>
+<td>这块过路费再 +20%</td>
+<td>约 $288（随点数浮动）</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>Identity 身份</td>
+<td>智能体有自己的身份：代用户调第三方服务时走 OAuth 授权，不用把密钥写进代码</td>
+<td>免疫「安全审计没过」</td>
+<td>约 $480（随点数浮动）</td>
+</tr>
+</tbody></table></div>
+<p><strong>SageMaker AI</strong>（价格 $460 · 升级价 $115 / $150 / $190 · 容量单位：实例）<br>PaaS（实例型）：买下时是单 AZ，AZ 断电会受影响，升到第 1 级「多 AZ 推理端点」才是多 AZ；按小时：每圈经过起点交运行费，空着也要交</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>单 AZ</td>
+<td>刚买下</td>
+<td>—</td>
+<td>$92（集齐整组 $184）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>多 AZ 推理端点</td>
+<td>推理实例分布在多个 AZ</td>
+<td>扛住 AZ 断电和单点故障</td>
+<td>$460</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>多卡训练（GPU 集群）</td>
+<td>先用训练计划预留一批 GPU，再多卡并行训练，模型更大、训练更快</td>
+<td>免疫「GPU 容量不够用」（GenAI 浪潮 DLC）；这块过路费再 +20%</td>
+<td>$1325</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>训练自己的大模型（HyperPod）</td>
+<td>用 HyperPod 集群训练自己的基础模型，节点坏了自动换</td>
+<td>过路费提高</td>
+<td>$2208</td>
+</tr>
+</tbody></table></div>
+<p><strong>Bedrock</strong>（价格 $500 · 升级价 $115 / $150 / $190 · 容量单位：模型单元）<br>按 token 计费：天生跨多个 AZ；按 token：过路费 = 点数 × 模型档位单价，收到过路费交 token 成本</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>Nova Micro</td>
+<td>刚买下</td>
+<td>—</td>
+<td>点数 × $16（集齐整组 点数 × $16 × 1.5）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>Nova Lite</td>
+<td>换成更强的模型，每个 token 更贵</td>
+<td>过路费提高</td>
+<td>点数 × $48</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>Nova Pro</td>
+<td>再换成更强的模型，每个 token 更贵</td>
+<td>过路费提高</td>
+<td>点数 × $96</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>跨区域推理</td>
+<td>请求自动分到同一地理区域里的多个 Region，扛得住突发流量；本 Region 出故障时照样调不通</td>
+<td>性能效率支柱 +1 分</td>
+<td>点数 × $160</td>
+</tr>
+</tbody></table></div>
+<h3 id="s12">监控组</h3>
+<p><strong>CloudWatch</strong>（价格 $150 · 升级价 $40 / $50 / $65）<br>按用量收费的格子：过路费 = 点数 × 倍数，三格算一组；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>点数 × (倍数 + 0)（集齐整组 点数 × (倍数 + 0)）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>日志保留期</td>
+<td>给日志组设置保留期，过期自动删除，省存储费</td>
+<td>运行费或请求费减半</td>
+<td>点数 × (倍数 + 3)</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>告警与仪表板</td>
+<td>指标超过阈值自动告警</td>
+<td>免疫「服务配额用完了」</td>
+<td>点数 × (倍数 + 6)</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>跨账户可观测性</td>
+<td>在一个账户里看所有账户的指标和日志</td>
+<td>过路费提高</td>
+<td>点数 × (倍数 + 9)</td>
+</tr>
+</tbody></table></div>
+<p><strong>Config</strong>（价格 $150 · 升级价 $40 / $50 / $65）<br>按用量收费的格子：过路费 = 点数 × 倍数，三格算一组；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>点数 × (倍数 + 0)（集齐整组 点数 × (倍数 + 0)）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>托管规则</td>
+<td>用托管规则持续检查资源配置合不合规，比如 S3 桶有没有公开、EBS 卷有没有加密</td>
+<td>免疫「安全审计没过」</td>
+<td>点数 × (倍数 + 3)</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>自动修正</td>
+<td>不合规的资源用 Systems Manager 自动化文档自动改回来，比如把公开的 S3 桶改回私有</td>
+<td>免疫「有人手动改了生产配置」；免疫「S3 桶被设成了公开」</td>
+<td>点数 × (倍数 + 6)</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>聚合器</td>
+<td>把多个账户、多个区域的配置和合规结果汇总到一处看</td>
+<td>过路费提高</td>
+<td>点数 × (倍数 + 9)</td>
+</tr>
+</tbody></table></div>
+<p><strong>CloudTrail</strong>（价格 $150 · 升级价 $40 / $50 / $65）<br>按用量收费的格子：过路费 = 点数 × 倍数，三格算一组；按用量：每次收到过路费交 15% 请求费，过路费随对方点数浮动；没人用就不花钱</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>功能</th>
+<th>现实里是干什么的</th>
+<th>游戏效果</th>
+<th>过路费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>未升级</td>
+<td>基础版</td>
+<td>刚买下</td>
+<td>—</td>
+<td>点数 × (倍数 + 0)（集齐整组 点数 × (倍数 + 0)）</td>
+</tr>
+<tr>
+<td>第 1 级</td>
+<td>数据事件</td>
+<td>记录 S3 对象级、Lambda 调用等细粒度操作</td>
+<td>过路费提高</td>
+<td>点数 × (倍数 + 3)</td>
+</tr>
+<tr>
+<td>第 2 级</td>
+<td>日志文件完整性验证</td>
+<td>每小时生成一份带数字签名的摘要文件，事后能证明日志有没有被改过、删过</td>
+<td>免疫「安全审计没过」</td>
+<td>点数 × (倍数 + 6)</td>
+</tr>
+<tr>
+<td>第 3 级</td>
+<td>组织级跟踪</td>
+<td>一个跟踪覆盖组织里所有账户</td>
+<td>过路费提高</td>
+<td>点数 × (倍数 + 9)</td>
+</tr>
+</tbody></table></div>
+<hr>
+</section>
+<section>
+<h2 id="s13">9. 运行费与请求费</h2>
+<p>每次经过或停在 Startup 扶持：先领 $200 Credits，再按名下的服务交运行费。</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>计费方式</th>
+<th>运行费（每圈）</th>
+<th>收到过路费时</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>按小时：EC2、EBS、ECS、ELB、Kinesis</td>
+<td>未升级 $5、第 1 级 $10、第 2 级 $20、第 3 级 $30</td>
+<td>全归自己</td>
+</tr>
+<tr>
+<td>按小时：PaaS、EKS</td>
+<td>未升级 $10、第 1 级 $20、第 2 级 $30、第 3 级 $40</td>
+<td>全归自己</td>
+</tr>
+<tr>
+<td>按用量：Serverless、大部分托管和全局服务</td>
+<td>无；S3、EFS、ECR、Route 53、WAF 有固定月费每圈 $5，KMS 升到客户托管密钥（第 1 级）后才有；Lambda 预置并发（第 2 级）、API Gateway 缓存（第 3 级）每圈 +$10</td>
+<td>付 15% 请求费给亚马逊云科技</td>
+</tr>
+<tr>
+<td>订阅：Shield Advanced</td>
+<td>固定 $20</td>
+<td>全归自己</td>
+</tr>
+<tr>
+<td>按 token：Bedrock</td>
+<td>无（每份模型单元 $20）</td>
+<td>付 25% token 成本给亚马逊云科技</td>
+</tr>
+<tr>
+<td>免费：VPC</td>
+<td>无；开了私有子网多 $20（NAT 网关）</td>
+<td>全归自己</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>每份容量另加运行费，见 7.4。带&quot;运行费或请求费减半&quot;功能的服务按上表减半。</li>
+<li>标准局起，每个技术债让每圈运行费多 $20（第 12 节）。</li>
+<li>完整局可以签 Savings Plans 或买预留实例（RI）降运行费，见第 15 节。</li>
+<li>Lambda、DynamoDB 这类按请求计费的 Serverless 前期没负担，没人来就不花钱；实例型服务空着也要交钱，适合确定会有人来的位置。</li>
+<li>公网 IPv4：2024 年 2 月起所有公网 IPv4 地址按小时收费，所以 EC2 每圈多 $5；主人的 VPC 开了私有子网（实例不分配公网 IP）就免这笔，但要付 NAT 网关的钱。</li>
+<li>固定月费：现实里 S3、EFS、ECR 按存储量每月收费，KMS 每把客户托管密钥每月 $1（没升到客户托管密钥、只用亚马逊云科技托管密钥时不收），Route 53 每个托管区域、WAF 每个 Web ACL 每月收费，所以这几块空着也要每圈交 $5。Lambda 预置并发、API Gateway 缓存按小时收费，Lambda 升到第 2 级、API Gateway 升到第 3 级后每圈多 $10。</li>
+</ul>
+<hr>
+</section>
+<footer>本页由 <code>web/tools/build-manuals.mjs</code> 从 <code>docs/规则书.md</code> 生成：改内容请改源文件再重新生成。</footer>
+</div>
+</body>
+</html>

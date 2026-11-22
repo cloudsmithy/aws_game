@@ -33,6 +33,7 @@ jobs:
           npm ci
           node tools/i18n.mjs check
           node tools/check-modules.mjs
+          node tools/build-manuals.mjs --check   # code/manual/ 里 Markdown 生成的手册页跟 docs/*.md 一致
           npm run build
           git diff --exit-code -- ../code/index.html || { echo "::error::code/index.html 和 web/ 源码不一致：改 web/ 下的源码后跑 cd web && npm run build，再一起提交"; exit 1; }
       - name: 版本比较基线

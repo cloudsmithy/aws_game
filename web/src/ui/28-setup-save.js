@@ -1,9 +1,9 @@
-import { __rv, _t, _tf } from '../core/01-i18n-runtime.js';
+import { LANG, __rv, _t, _tf } from '../core/01-i18n-runtime.js';
 import { $, BOT, COLORS, DEMO, KEY, MY_REV, PAWN, REV_KEY, SAVE_FAIL, SIM, STALE, __set_MY_REV, __set_SAVE_FAIL, __set_STALE, awsImg, esc, homeUrl, revNow, rnd, shuffle, unesc } from '../core/02-util.js';
 import { BAL, IX, MAX_ROUNDS, OWNABLE } from '../rules/03-services.js';
 import { INC, REI, ROLES, roleOf, rsShort } from '../rules/04-roles-combos-cards.js';
 import { DLC, dlcOn } from '../rules/05-dlc.js';
-import { F, S, __set_S, cur, debtOf, isWild, log, nm, resetProp, winParts, winTimed, winWA } from '../engine/07-state.js';
+import { F, MAX_PLAYERS, S, __set_S, cur, debtOf, isWild, log, nm, resetProp, winParts, winTimed, winWA } from '../engine/07-state.js';
 import { GAIN0 } from '../engine/08-money.js';
 import { PHONE_MQ, TABP_MQ, ask, bgInert, focusBack, info, kbdFocus, modal, modalBlocks, viewOpen } from './10-modal.js';
 import { endTurn } from '../engine/14-turn.js';
@@ -68,7 +68,27 @@ export function staleTab() {
 export const npVal = () => +(document.querySelector('input[name=np]:checked') || { value: 3 }).value;
 // 开局时实际用的轮数上限和限时分钟（输入框里的数夹到允许范围）：开局页摘要也按这个写，和进了游戏看到的一致
 const setupRL = () => Math.min(MAX_ROUNDS, Math.max(5, Math.round(+$('#rounds').value) || 15)), setupMin = () => Math.min(600, Math.max(5, +$('#minutes').value || 90));   // 600 和输入框的 max 一致
+// 多人（超过 4 人）：人数默认只有 2–4 人三格；打开开关才多出 5…MAX_PLAYERS 人（engine/07-state.js）。平衡和界面都按 2–4 人调的，开关旁边一直写着不推荐。
+// 开关和多出来的格子由这里画（文字要跟语言走）：开关所在的 #npMore 换了语言才重画，不然点开关时焦点会被重画丢掉。
+// 关掉时选着 5 人以上的退回 4 人；房主大厅里已经坐了 4 位以上远端玩家时关不掉（关了就有人没座位）
+const npManyOn = () => !!($('#npMany') || {}).checked;
+// 联机房间最多收几位（含房主）：没开「多人」还是 4 人，开了到 MAX_PLAYERS
+const npMax = () => npManyOn() ? MAX_PLAYERS : 4;
+const npMoreTile = k => `<label class="tile more"><input type="radio" name="np" value="${k}" data-act-change="renderNames"><b>${_tf(5395, "{$0} 人", k)}</b></label>`;
+function renderNpMore() {
+  const box = $('#npMore'), tiles = document.querySelector('.tiles.np'); if (!box || !tiles) return;
+  const lang = box.dataset.lang !== LANG;
+  if (lang) { const on = npManyOn(); box.dataset.lang = LANG; box.innerHTML = `<label class="switch" title="${_tf(5396, "人数可以选到 {$0} 人。规则、平衡和界面都是按 2–4 人设计的，人多了每人等得久、棋盘挤、侧栏要滚动", MAX_PLAYERS)}"><input type="checkbox" id="npMany" data-act-change="renderNames"${on ? ' checked' : ''}><span class="tg"></span><b>${_t(5397, "多人（超过 4 人）")}</b></label><span class="npwarn">${_t(5398, "不推荐：平衡和界面都按 2–4 人设计，尽量不开")}</span>`; }
+  const mpNeed = MP.role === 'host' && !(S && S.players) && Object.keys(MP.seats).some(k => +k >= 4);
+  if (mpNeed && !npManyOn()) $('#npMany').checked = true;
+  const on = npManyOn(), more = tiles.querySelectorAll('.tile.more');
+  if (on && (!more.length || lang)) { const c = (tiles.querySelector('input[name=np]:checked') || {}).value; more.forEach(x => x.remove()); tiles.insertAdjacentHTML('beforeend', Array.from({ length: MAX_PLAYERS - 4 }, (_, k) => npMoreTile(k + 5)).join('')); const el = c && tiles.querySelector(`input[name=np][value="${c}"]`); if (el) el.checked = true; }
+  else if (!on && more.length) { const c = tiles.querySelector('input[name=np]:checked'); more.forEach(x => x.remove()); if (!c || +c.value > 4) tiles.querySelector('input[name=np][value="4"]').checked = true; }
+  tiles.classList.toggle('more', on); box.classList.toggle('on', on);
+  MP.seatMax = npMax();   // 房主收几位远端玩家跟着开关走（net/40d-host-msgs.js 的 admit）
+}
 export function renderNames() {
+  renderNpMore();
   const n = npVal(), old = [...document.querySelectorAll('#names input[id^=nm]')].map(x => x.value), oldAi = [...document.querySelectorAll('#names input[id^=ai]')].map(x => x.checked), oldRs = [...document.querySelectorAll('#names input[id^=rs]')].map(x => x.checked);
   $('#names').innerHTML = Array.from({ length: n }, (_, k) => `<div class="nrow">${PAWN(COLORS[k])}<input id="nm${k}" placeholder="${_tf(4634, "玩家 {$0}", k + 1)}" value="${esc(old[k] || '')}" maxlength="12" aria-label="${_tf(4635, "玩家 {$0} 名字", k + 1)}"><label class="aiopt" title="${_t(4636, "这个座位交给电脑玩")}"><input type="checkbox" id="ai${k}" ${oldAi[k] ? 'checked' : ''}>${_t(4278, "电脑")}</label><label class="aiopt rsopt" title="${_t(4637, "这个座位当代理商（代理商模式，最多一半）")}" hidden><input type="checkbox" id="rs${k}" ${oldRs[k] ? 'checked' : ''}>${_t(4638, "代理商")}</label></div>`).join('');
   setupSum();
@@ -79,6 +99,9 @@ export function newGame(cfg) {
   if ((cfg.dlc || []).includes('reseller') && !(cfg.rs || []).some(Boolean)) cfg.dlc = cfg.dlc.filter(k => k !== 'reseller');
   const rsOn = (cfg.dlc || []).includes('reseller'), isRsSeat = k => rsOn && !!(cfg.rs || [])[k];
   const custRoles = shuffle(ROLES.filter(r => !r.rs)), rsRoles = shuffle(ROLES.filter(r => r.rs));
+  // 多人局角色牌不够分（客户角色 12 张、代理商 3 张）：一副发完再洗一副接着发，先把每种都发一遍才会重复。
+  // 4 人以内用不到这一步，洗牌次数和以前一样，同一个种子开出来的局不变
+  const deal = (pool, rs) => pool.shift() || (pool.push(...shuffle(ROLES.filter(r => !r.rs === !rs))), pool.shift());
   if (cfg.anim == null) { try { cfg.anim = localStorage.getItem('amono-anim') || ''; } catch (e) { cfg.anim = ''; } }   // 动画速度沿用上一局的选择
   __set_S({
     cfg, layoutVer: 2, players: [], props: {}, pot: 0, cur: 0, round: 1, phase: 'roll', doubles: 0, again: false,
@@ -91,9 +114,9 @@ export function newGame(cfg) {
   applyBal();
   OWNABLE.forEach(resetProp);
   cfg.names.forEach((name, k) => {
-    const r = isRsSeat(k) ? rsRoles.shift() : custRoles.shift();
+    const r = isRsSeat(k) ? deal(rsRoles, true) : deal(custRoles, false);
     S.players.push({ id: k, name: esc(name), color: COLORS[k], role: r.id, cash: roleCash(r, cfg), startCash: roleCash(r, cfg), pos: 0, jail: null, jailCat: 'sec', skip: 0, debt: [], techDebt: 0, coe: [], drill: [], cards: [], alive: true, speed: 0, reseller: isRsSeat(k), rsRate: 0.9 });
-    if (r.id === 'unicorn' && cfg.mode !== 'hell') { S.props[IX.route53].owner = k; S.props[IX.route53].paid = 0; }   // 送的，没花钱：卖回、下线、Trusted Advisor 退款都按 $0 算，不按标价
+    if (r.id === 'unicorn' && cfg.mode !== 'hell' && S.props[IX.route53].owner == null) { S.props[IX.route53].owner = k; S.props[IX.route53].paid = 0; }   // 送的，没花钱：卖回、下线、Trusted Advisor 退款都按 $0 算，不按标价
   });
   // 代理商的起始资金 = 所有客户起始资金的总和（代理商只靠架构收过路费、地还会被客户买走，要本钱囤货）；娱乐模式只打 10 轮按估值排名，不加。
   // 有轮数上限（开局页默认 15 轮）时打满就按估值排名，囤货的本钱本身算进估值：给足总和（4 人局约 $4800）代理商 15 轮局里 86% 拿第一，
@@ -243,7 +266,9 @@ export function playerGallery() {
 async function roleDraft() {
   const used = new Set(), pools = { c: shuffle(ROLES.filter(r => !r.rs)), r: shuffle(ROLES.filter(r => r.rs)) };
   for (const p of S.players) {
-    const opts = (p.reseller ? pools.r : pools.c).filter(r => !used.has(r.id)).slice(0, 3);
+    const pool = p.reseller ? pools.r : pools.c;
+    let opts = pool.filter(r => !used.has(r.id)).slice(0, 3);
+    if (!opts.length) opts = shuffle([...pool]).slice(0, 3);   // 多人局这一类角色都被挑走了：和随机分一样允许重复，从全部里看 3 张
     let pick = opts[0];
     if (opts.length > 1 && !isAI(p.id) && !BOT && !SIM) {
       const v = await ask({ who: p.id, noAI: true, cls: 'wide', title: _tf(4699, "{$0} 挑一个角色", p.name), html: _tf(4700, "<p class=\"muted\">三张里挑一张，挑走的别人就拿不到了。</p><div class=\"rcards\">{$0}</div>", opts.map(r => roleCardMini(p, r)).join('')), buttons: opts.map((r, k) => ({ label: _tf(4701, "选「{$0}」", r.n), value: k, cls: k === 0 ? 'pri' : '' })) });
@@ -355,6 +380,7 @@ export function setupRestore() {
   if (!v || typeof v !== 'object') return;
   const fire = el => el.dispatchEvent(new Event('change', { bubbles: true }));
   const radio = (name, x) => { const el = [...document.querySelectorAll(`input[name=${name}]`)].find(r => r.value === String(x)); if (el && !el.checked) { el.checked = true; fire(el); } return !!el; };
+  if (+v.np > 4 && $('#npMany') && !npManyOn()) { $('#npMany').checked = true; renderNames(); }   // 上一局是多人局：先打开「多人」，5 人以上的格子才有
   radio('np', v.np); radio('diff', v.diff);
   if (v.diff !== 'hell' && v.cmul && $('#cmul') && [...$('#cmul').options].some(o => o.value === String(v.cmul))) { $('#cmul').value = String(v.cmul); fire($('#cmul')); }   // 地狱模式固定 2 倍、这一项藏着
   const dlc = Array.isArray(v.dlc) ? v.dlc : [];
@@ -428,7 +454,7 @@ export function setupSum() {
   // 学习模式开局时才自动补云从业者题库、勾了题库 DLC 开局时才自动打开答题（startFromSetup），摘要提前照实写出来
   const study = !!diff && diff.value === 'study', qOn = [...document.querySelectorAll('#dlcTiles input:checked')].some(x => DLC[x.value] && DLC[x.value].quiz);
   const win = [$('#winWA').checked && 'Well-Architected', study ? _t(5149, "不限轮数") : $('#winRounds').checked ? _tf(5150, "{$0} 轮", setupRL()) : _tf(5151, "最多 {$0} 轮", MAX_ROUNDS), $('#winTimed').checked && _tf(3773, "{$0} 分钟", setupMin())].filter(Boolean);
-  $('#setupSum').innerHTML = `${_tf(5157, "<b>{$0} 人 · {$1}</b>", npVal(), diff ? diff.parentElement.querySelector('b').textContent : '')}<br>${win.length ? win.join(' / ') : _t(5152, "只看谁没破产")}${nDlc ? _tf(5153, " · {$0} 个 DLC", nDlc) : ''}${rsOn && !rsSeat ? _t(5154, " · 代理商模式没选座位，不生效") : ''}${study && !qOn ? _t(5155, " · 云从业者题库") : ''}${study || qOn || $('#learn').checked ? _t(5156, " · 答题") : ''}`;
+  $('#setupSum').innerHTML = `${_tf(5157, "<b>{$0} 人 · {$1}</b>", npVal(), diff ? diff.parentElement.querySelector('b').textContent : '')}${npVal() > 4 ? _t(5399, "<span class=\"warn\">（超过 4 人，不推荐）</span>") : ''}<br>${win.length ? win.join(' / ') : _t(5152, "只看谁没破产")}${nDlc ? _tf(5153, " · {$0} 个 DLC", nDlc) : ''}${rsOn && !rsSeat ? _t(5154, " · 代理商模式没选座位，不生效") : ''}${study && !qOn ? _t(5155, " · 云从业者题库") : ''}${study || qOn || $('#learn').checked ? _t(5156, " · 答题") : ''}`;
 }
 // （从 core/43-boot.js 挪来：setupSum 要用；分页的按钮和事件仍在启动代码里画、绑）
 // 11-08 DLC 分四页：玩法拓展、题库、代理商模式、技能包。没显示的那页照样在表单里，勾了的数写在标签上

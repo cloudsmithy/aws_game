@@ -1,12 +1,12 @@
 import { __rv, _t, _tf } from '../core/01-i18n-runtime.js';
 import { BOT, waitAnim } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
-import { IX, N, OWNABLE, SQ, lvName } from '../rules/03-services.js';
+import { IX, N, SQ, lvName } from '../rules/03-services.js';
 import { INC } from '../rules/04-roles-combos-cards.js';
 import { dlcOn } from '../rules/05-dlc.js';
 import { P, S, active, combosBrokenBy, cur, log, nm, ownedBy, sqn } from './07-state.js';
 import { netWorth } from './08c-costs.js';
-import { baseRent, shownRent, upgradeInfo } from './09-rent.js';
+import { baseRent, forceDown, shownRent, upgradeInfo } from './09-rent.js';
 import { moveSteps } from './13-move.js';
 import { rollDice } from './14-turn.js';
 import { land } from './15-land.js';
@@ -31,7 +31,6 @@ export function speedSpend(p, n, what) { p.spdLap = p.laps || 0; p.speed -= n; l
 export const haIncident = id => INC[id] && INC[id].c === 'avail' && /Impaired/.test(INC[id].e);
 export function speedTurnStart(p) {
   S.attackUsed = false; S.extraTurn = false;
-  OWNABLE.forEach(i => { const pr = S.props[i]; if (pr.ddos === p.id && --pr.ddosLeft <= 0) { pr.ddos = null; pr.ddosLeft = 0; log(_tf(3409, "{$0} 扛过了 {$1} 的 DDoS，恢复上线", sqn(i), nm(p))); } });
   if (p.speed < SPEED_MAX) p.speed++;
 }
 // 掷完骰子：1 点多走或少走一步，2 点重掷
@@ -85,7 +84,7 @@ async function ddos(p, light) {
     if (ok) { speedSpend(o, 7, _tf(3446, "蓝绿部署，{$0} 扛住了 DDoS", sqn(i))); return; }
   }
   if (light) { S.props[i].impaired = true; fxAll({ co: [i, _tf(3447, "<b>{$0}</b> 被 DDoS 打成 Impaired", SQ[i].n), 'warn'] }); log(_tf(3448, "💥 {$0} 的 {$1} 被 DDoS 打成 Impaired，到 {$2} 下回合开始恢复", nm(o), sqn(i), nm(o))); return; }
-  S.props[i].ddos = p.id; S.props[i].ddosLeft = 2; evt(_tf(3449, "{$0} DDoS 了 {$1} 的 {$2}", p.name, o.name, SQ[i].n), 500); fxAll({ co: [i, _tf(3450, "<b>{$0} 的 {$1} 下线 2 回合</b><small>不收过路费，运行费照交</small>", o.name, SQ[i].n), 'warn'] });
+  forceDown(i, p.id, 2); evt(_tf(3449, "{$0} DDoS 了 {$1} 的 {$2}", p.name, o.name, SQ[i].n), 500); fxAll({ co: [i, _tf(3450, "<b>{$0} 的 {$1} 下线 2 回合</b><small>不收过路费，运行费照交</small>", o.name, SQ[i].n), 'warn'] });
   log(_tf(3451, "💥 {$0} 的 {$1} 被 DDoS 打到下线：不收过路费、不算持有，到 {$2} 第 2 个回合开始恢复", nm(o), sqn(i), nm(p)));
 }
 // 每个技能：c 点数，n 名字，d 效果，ok 返回不能用的原因（空字符串就是能用），run 发动；react 是被动时机才弹出的

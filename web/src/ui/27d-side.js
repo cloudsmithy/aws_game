@@ -188,7 +188,7 @@ export const zhs = h => String(h).replace(ZH_SP, '$1$2$3');
 // 一块服务现在的特殊状态：head + t 是一句规则（玩家卡图标的提示、点格子面板的状态行都用这一句），按要紧程度排
 export function svcState(i) {
   const s = SQ[i], pr = S.props[i], o = pr.owner == null ? null : P(pr.owner), who = o ? o.name : _t(2842, "主人"), out = [];
-  if (pr.ddos != null && P(pr.ddos)) { const a = P(pr.ddos); out.push({ k: 'ddos', head: _tf(4244, "被 {$0} DDoS", a.name), t: _tf(4245, "不收过路费，运行费照交，也不算持有（不凑整组、架构和支柱），{$0} 再轮到 {$1} 次时恢复", a.name, pr.ddosLeft || 1) }); }
+  if (pr.ddos != null && P(pr.ddos)) { const a = P(pr.ddos); out.push({ k: 'ddos', head: pr.ddosWhy ? _tf(5393, "因「{$0}」下线", pr.ddosWhy) : _tf(4244, "被 {$0} DDoS", a.name), t: _tf(4245, "不收过路费，运行费照交，也不算持有（不凑整组、架构和支柱），{$0} 再轮到 {$1} 次时恢复", a.name, pr.ddosLeft || 1) }); }
   // 下线就是地产类桌游里的抵押：规则书第 10 节。拿回的一半记在 offCash（Spot 按出价的一半），上线要还它再加原价 10%（onlineCost）
   if (pr.offline) { const n = pr.offline - 1, st = runCost(i), half = pr.offCash || 0;
     out.push({ k: 'off', head: n > 0 ? _tf(4246, "已下线 {$0} 轮", n) : _t(4247, "刚下线"), t: _tf(4251, "相当于抵押（只有 EC2、RDS、Aurora、Redshift、ECS 能下线），下线时拿回了一半价钱 ${$0}，不用还。下线期间不收过路费，也不算持有（不凑整组、架构和支柱），{$1}；下线 {$2} 轮后自动恢复{$3}，{$4} 落到这一格可以提前免费拉起来；没恢复前别人落上来，付原价 ${$5} 给亚马逊云科技就能买走，{$6} 不再拿钱", half, st ? _tf(4248, "运行费只交存储费 ${$0}/圈", st) : _t(4249, "运行费也不用交"), OFFLINE_MIN, canOnline(i) ? '' : _tf(4250, "（现在第 {$0} 轮）", offRounds(i)), who, s.p, who) }); }
@@ -198,7 +198,7 @@ export function svcState(i) {
   return out;
 }
 // 图标分组：一块只归一组，按要紧程度 DDoS > 下线 > Impaired > Spot（别的状态照样写在这块图标自己的提示里）。组前那个字悬停、点一下看说明
-const svGrp = i => { const pr = S.props[i]; return pr.ddos != null && P(pr.ddos) ? 'ddos' : pr.offline ? 'off' : pr.impaired ? 'imp' : pr.spot ? 'spot' : ''; };
+const svGrp = i => { const pr = S.props[i]; return pr.ddos != null && P(pr.ddos) ? (pr.ddosWhy ? 'off' : 'ddos') : pr.offline ? 'off' : pr.impaired ? 'imp' : pr.spot ? 'spot' : ''; };
 let SV_GRP = __rv(() => ({
   off: [_t(4255, "下线"), _t(4256, "下线就是抵押：只有 EC2、RDS、Aurora、Redshift、ECS 能下线，下线时拿回买价的一半（Spot 按出价），这笔钱不用还。下线期间不收过路费，也不算持有（不凑整组、架构和支柱），运行费只交存储费；下线固定 3 轮，满 3 轮在主人回合开始时自动恢复，主人自己落到这一格可以提前免费拉起来；没恢复前别人落上来，付原价给亚马逊云科技就能买走，主人不再拿钱")],
   imp: ['Impaired', _t(4257, "Impaired：暂停收过路费，到主人下回合开始时恢复")],
@@ -292,8 +292,11 @@ function plCard(p, mine, offSeats) {
   // 要提防的持续状态：红字单独一行，不放进蓝色的技能效果标签里
   const warns = [];
   if (p.reGo > 0) warns.push(_tf(4336, "退回了上一圈：{$0}经过起点不领钱、不交运行费", p.reGo > 1 ? _tf(1834, "接下来 {$0} 次", p.reGo) : _t(1835, "下次")));
-  { const by = new Map(); ownedBy(p).filter(i => S.props[i].ddos != null && P(S.props[i].ddos)).forEach(i => { const k = S.props[i].ddos; by.set(k, [...(by.get(k) || []), i]); });
-    by.forEach((ix, k) => { const a = P(k); warns.push(_tf(4337, "{$0} 被 {$1} DDoS：不收过路费，运行费照交，{$2} 再轮到 {$3} 次时恢复", ix.map(i => SQ[i].n).join(_t(349, "、")), a.name, a.name, Math.max(...ix.map(i => S.props[i].ddosLeft || 1)))); }); }
+  { const by = new Map(); ownedBy(p).filter(i => S.props[i].ddos != null && P(S.props[i].ddos)).forEach(i => { const k = S.props[i].ddos + '|' + (S.props[i].ddosWhy || ''); by.set(k, [...(by.get(k) || []), i]); });
+    by.forEach(ix => {
+      const pr = S.props[ix[0]], a = P(pr.ddos), names = ix.map(i => SQ[i].n).join(_t(349, "、")), left = Math.max(...ix.map(i => S.props[i].ddosLeft || 1));
+      warns.push(pr.ddosWhy ? _tf(5394, "{$0} 因「{$1}」下线：不收过路费，运行费照交，{$2} 再轮到 {$3} 次时恢复", names, pr.ddosWhy, a.name, left) : _tf(4337, "{$0} 被 {$1} DDoS：不收过路费，运行费照交，{$2} 再轮到 {$3} 次时恢复", names, a.name, a.name, left));
+    }); }
   // 技能留下的持续效果：挂在玩家卡上，不然只在日志里，几步就被刷走了
   const fx = [], skn = r.sk ? r.sk.n + _t(2670, "：") : '';
   if (p.rentBoost) fx.push(_tf(4338, "{$0}过路费 ×{$1} · 还剩 {$2} 回合", skn, p.rentBoost, p.rentBoostTurns));
@@ -339,6 +342,7 @@ function renderSide(keep = sideScroll()) {
   // 侧栏整块重写：键盘停在玩家卡名字、服务图标、支柱、「明细和日志」上的焦点放回同一个元素（鼠标点的不放，空格还是掷骰子）
   const fe = document.activeElement, fk = side.contains(fe) && fe.matches(':focus-visible') && fe.dataset.fk;
   side.classList.toggle('many', S.players.length >= 3);
+  side.classList.toggle('crowd', S.players.length > 4);   // 多人局：收起的卡再紧一点（index.html 的 #side.crowd），列表照样能滚
   // 本机是哪个座位，名字后面写「（你）」：远端按 mySeat；房主只在这台只有一位真人时写（同一台轮流玩的不写）；不联机不写。只看本机的 MP，各画各的
   const loc = MP.role === 'host' ? S.players.filter(q => q.alive && !isAI(q.id) && !MP.isRemote(q.id)) : [];
   const mine = MP.role === 'client' ? MP.mySeat : loc.length === 1 ? loc[0].id : null;
