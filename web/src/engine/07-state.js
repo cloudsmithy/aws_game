@@ -104,7 +104,13 @@ export function resetProp(i) { S.props[i] = { owner: null, level: 0, cap: 0, spo
 // ECS 服务默认就把任务尽量分散到多个 AZ（Fargate 也是），不算单 AZ；EBS 卷升了也只在一个 AZ。
 // 其他实例型看「多 AZ」那一级有没有升到，不能只看 level>0：EC2 第 1 级是自动 AMI，第 2 级跨 AZ Auto Scaling 才是多 AZ
 export const singleAZ = i => isInst(i) && SQ[i].k !== 'ecs' && (SQ[i].k === 'ebs' || !effActive(i, 'maz'));
-// 下线：拿回买价的一半先周转（Spot 按出价算），这笔钱不用还；重新上线不要钱
-export const offlineCash = i => Math.round((S.props[i].spot ? S.props[i].spotPaid : (S.props[i].paid ?? SQ[i].p)) / 2);
+// 下线：拿回买价的一半先周转（Spot 按出价算），这笔钱不用还；重新上线不要钱。
+// 同一个主人手里这一半只给一次（规则书第 10 节）：offDrawn 记这位主人下线累计拿走了多少，换主人（svcLeaves）、卖回（resetProp）才清零。
+// 以前自动恢复时连 offCash 一起清掉，再下线又拿一半，卖回、估值也不再扣，反复下线就是刷钱
+const offHalf = i => Math.round((S.props[i].spot ? S.props[i].spotPaid : (S.props[i].paid ?? SQ[i].p)) / 2);
+export const offDrawn = i => S.props[i].offDrawn || 0;
+export const offlineCash = i => Math.max(0, offHalf(i) - offDrawn(i));
+// 这位主人已经下线拿过钱、再下线一分也拿不到了：「下线」按钮灰掉（买价 $0 的本来就拿不到钱，不算）
+export const offSpent = i => offDrawn(i) > 0 && offlineCash(i) <= 0;
 // 别的文件要改这些变量（import 进来是只读的），走这里
 export const __set_S = v => (S = v);

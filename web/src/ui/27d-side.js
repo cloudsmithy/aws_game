@@ -6,12 +6,12 @@ import { CARDE, CARDN, CATS, COMBOS, INC, REI, comboOpen, roleOf, rsRate, slotOp
 import { dlcOn } from '../rules/05-dlc.js';
 import { F, P, S, active, comboMiss, cur, debtOf, hasCombo, logBody, logRow, ownedBy, ownsGroup, wildFits, wildFree, wildOf, wildTargets, winWA } from '../engine/07-state.js';
 import { commitsOf, netWorth, opCost, runCost, valBreak, valTip, valuation } from '../engine/08c-costs.js';
-import { canOnline, capInfo, chainTxt, offRounds, spotMine, turnKey, upgradeInfo } from '../engine/09-rent.js';
+import { canOnline, capInfo, chainTxt, downWhy, offRounds, spotMine, turnKey, upgradeInfo } from '../engine/09-rent.js';
 import { mainBtn, sameEl, viewOpen } from './10-modal.js';
 import { capUpTxt, lvUpTxt } from '../engine/11b-rent-info.js';
 import { jailMax, mspFee } from '../engine/13-move.js';
 import { landHere } from '../engine/15-land.js';
-import { refactorCost } from '../engine/17-health.js';
+import { refactorCost, rfJailTxt, rfJailed } from '../engine/17-health.js';
 import { handOf, handOk, handWalked, incSendCost, incSendOk, reiBuyCost } from '../engine/18-reinvent.js';
 import { canSkill, skillLine, skillMulTxt } from '../engine/21-skills.js';
 import { SPEED, SPEED_MAX } from '../engine/22-speed.js';
@@ -105,7 +105,8 @@ export function playerBrief(p) {
   // 按钮包一层：字和按钮挤不下时按钮整组换到下一行，字不再被挤成一个字一行（两个按钮的「出题考对手」那行）
   const row = (t, b = '', cls = '') => `<div class="todo ${cls}"><span>${t}</span>${b ? `<span class="tb">${b}</span>` : ''}</div>`;
   const out = [];
-  if (p.jail !== null) out.push(row(_tf(4187, "在维护窗口里：付 $50 马上出来、照常掷骰子，或者停{$0}轮再出来", jailMax(p) > 1 ? _tf(4186, "满 {$0} ", jailMax(p)) : _t(2874, "一")), '', 'hot'));
+  if (rfJailed(p)) out.push(row(rfJailTxt(), '', 'hot'));
+  else if (p.jail !== null) out.push(row(_tf(4187, "在维护窗口里：付 $50 马上出来、照常掷骰子，或者停{$0}轮再出来", jailMax(p) > 1 ? _tf(4186, "满 {$0} ", jailMax(p)) : _t(2874, "一")), '', 'hot'));
   else if (S.phase === 'roll') out.push(row(S.again ? _t(4188, "掷出了对子，再掷一次") : _t(4189, "先掷骰子"), '', 'hot'));
   const lh = S.phase === 'post' ? landHere(p) : null;
   if (lh != null) {
@@ -190,8 +191,8 @@ export const zhs = h => String(h).replace(ZH_SP, '$1$2$3');
 // 一块服务现在的特殊状态：head + t 是一句规则（玩家卡图标的提示、点格子面板的状态行都用这一句），按要紧程度排
 export function svcState(i) {
   const s = SQ[i], pr = S.props[i], o = pr.owner == null ? null : P(pr.owner), who = o ? o.name : _t(2842, "主人"), out = [];
-  if (pr.ddos != null && P(pr.ddos)) { const a = P(pr.ddos); out.push({ k: 'ddos', head: pr.ddosWhy ? _tf(5393, "因「{$0}」下线", pr.ddosWhy) : _tf(4244, "被 {$0} DDoS", a.name), t: _tf(4245, "不收过路费，运行费照交，也不算持有（不凑整组、架构和支柱），{$0} 再轮到 {$1} 次时恢复", a.name, pr.ddosLeft || 1) }); }
-  // 下线就是地产类桌游里的抵押：规则书第 10 节。拿回的一半记在 offCash（Spot 按出价的一半），上线要还它再加原价 10%（onlineCost）
+  if (pr.ddos != null && P(pr.ddos)) { const a = P(pr.ddos); out.push({ k: 'ddos', head: pr.ddosWhy ? _tf(5393, "因「{$0}」下线", downWhy(pr)) : _tf(4244, "被 {$0} DDoS", a.name), t: _tf(4245, "不收过路费，运行费照交，也不算持有（不凑整组、架构和支柱），{$0} 再轮到 {$1} 次时恢复", a.name, pr.ddosLeft || 1) }); }
+  // 下线就是地产类桌游里的抵押：规则书第 10 节。这次拿回的一半记在 offCash（Spot 按出价的一半），不用还；同一个主人累计拿了多少记在 offDrawn
   if (pr.offline) { const n = pr.offline - 1, st = runCost(i), half = pr.offCash || 0;
     out.push({ k: 'off', head: n > 0 ? _tf(4246, "已下线 {$0} 轮", n) : _t(4247, "刚下线"), t: _tf(4251, "相当于抵押（只有 EC2、RDS、Aurora、Redshift、ECS 能下线），下线时拿回了一半价钱 ${$0}，不用还。下线期间不收过路费，也不算持有（不凑整组、架构和支柱），{$1}；下线 {$2} 轮后自动恢复{$3}，{$4} 落到这一格可以提前免费拉起来；没恢复前别人落上来，付原价 ${$5} 给亚马逊云科技就能买走，{$6} 不再拿钱", half, st ? _tf(4248, "运行费只交存储费 ${$0}/圈", st) : _t(4249, "运行费也不用交"), OFFLINE_MIN, canOnline(i) ? '' : _tf(4250, "（现在第 {$0} 轮）", offRounds(i)), who, s.p, who) }); }
   if (pr.impaired) out.push({ k: 'imp', head: 'Impaired', t: _tf(4252, "暂停收过路费，到 {$0} 下回合开始恢复", who) });
@@ -256,7 +257,7 @@ function plCard(p, mine, offSeats) {
   const svcs = sg[''].map(svcBtn).join('') + ['off', 'imp', 'ddos', 'spot'].filter(k => sg[k].length).map(k => `<span class="svgrp ${k}"><span class="sgl tipx" tabindex="0" data-fk="sg${p.id}-${k}" title="${SV_GRP[k][1]}">${lb(SV_GRP[k][0])}</span>${sg[k].map(svcBtn).join('')}</span>`).join('');
   // 状态行：只写不是 0 的。要紧的（维护窗口、停几轮）在前，技能能发动时紧跟着写（不能发动的不写，角色那一行有技能名）
   const res = [], kv = [];
-  if (p.jail !== null) res.push(ri(_tf(4299, "在维护窗口 {$0}/{$1} 轮", p.jail, jailMax(p)), _tf(4300, "付 $50 马上出来；或者停满 {$0} 轮自动出来；有 Enterprise Support 卡可以免费出来", jailMax(p)), 'warn', 'jail'));
+  if (p.jail !== null) res.push(ri(_tf(4299, "在维护窗口 {$0}/{$1} 轮", p.jail, jailMax(p)), rfJailed(p) ? rfJailTxt() : _tf(4300, "付 $50 马上出来；或者停满 {$0} 轮自动出来；有 Enterprise Support 卡可以免费出来", jailMax(p)), 'warn', 'jail'));
   if (p.skip) res.push(ri(_tf(4301, "停 {$0} 轮", p.skip), _tf(4302, "下 {$0} 个自己的回合直接跳过", p.skip), 'warn', 'skip'));
   if (r.sk && canSkill(p)) res.push(ri(_tf(4304, "{$0}可以发动", lb(_t(4303, "技能"))), _tf(4305, "技能「{$0}」：{$1}{$2}。总资产 ${$3} 已经低于开局资金的一半 ${$4}，一局一次，轮到自己时点「专属技能」；发动后再战略并购：收购总资产最高的对手的一块服务", r.sk.n, r.sk.d, skillMulTxt(p), netWorth(p), skillLine(p)), 'go', 'sk'));
   // 托管费、渠道维护费也是每圈经过起点时交的：展开的卡分开写，收起的卡合成一个数，拆分在提示里
@@ -282,8 +283,8 @@ function plCard(p, mine, offSeats) {
   if (!mini) { const by = new Map(); ownedBy(p).forEach(i => { const v = S.props[i].via; if (v != null && v !== p.id && P(v)) by.set(v, [...(by.get(v) || []), i]); });
     by.forEach((ix, v) => { const q = P(v), msp = q.role === 'rs_msp' && q.alive;
       res.push(ri(_tf(4329, "{$0} {$1} 块", lb(_tf(4328, "经 {$0} 买", q.name)), ix.length), _tf(4331, "{$0} 是从代理商 {$1} 手里买的：这几块的运行费交给 {$2}（他按拿货价交亚马逊云科技，赚中间的差价）{$3}", ix.map(i => SQ[i].n).join(_t(349, "、")), q.name, q.name, msp ? _tf(4330, "；{$0} 是托管服务商，每块每圈另收 $10 托管费，经过起点时和运行费一起交", q.name) : ''), '', 'via' + v)); }); }
-  // re:Invent 手牌（engine/18-reinvent.js）：大家都看得到几张；是哪几张只在主人自己的提示里写（联机看本机座位，同一台轮流玩看当前回合的人）
-  { const hand = handOf(p), seer = MP.role ? p.id === mine : p.id === S.cur && !isAI(p.id);
+  // re:Invent 手牌（engine/18-reinvent.js）：大家都看得到几张；是哪几张只在主人自己的提示里写（远端看本机座位；房主和不联机时看当前回合的人，房主这台还坐着别的本机座位时也一样，远端座位的手牌房主看不到）
+  { const hand = handOf(p), seer = MP.role === 'client' ? p.id === mine : p.id === mine || (p.id === S.cur && !isAI(p.id) && !MP.isRemote(p.id));
     if (hand.length) res.push(ri(`${lb(_t(5439, "手牌"))} ${hand.length}`, seer && hand.every(id => REI[id]) ? _tf(5440, "没公开的 re:Invent 卡：{$0}。轮到自己时点「手牌」打出、卖掉或弃牌走 1–3 格", hand.map(id => REI[id].n).join(_t(349, "、"))) : _tf(5441, "没公开的 re:Invent 卡 {$0} 张：只有 {$1} 自己知道是什么", hand.length, p.name), '', 'hand')); }
   const prog = archProg(p), done = prog.filter(x => x.done);
   // 收起的卡：保留卡、承诺折扣、生效的架构、支柱只写个数，说明在提示里
@@ -300,7 +301,7 @@ function plCard(p, mine, offSeats) {
   { const by = new Map(); ownedBy(p).filter(i => S.props[i].ddos != null && P(S.props[i].ddos)).forEach(i => { const k = S.props[i].ddos + '|' + (S.props[i].ddosWhy || ''); by.set(k, [...(by.get(k) || []), i]); });
     by.forEach(ix => {
       const pr = S.props[ix[0]], a = P(pr.ddos), names = ix.map(i => SQ[i].n).join(_t(349, "、")), left = Math.max(...ix.map(i => S.props[i].ddosLeft || 1));
-      warns.push(pr.ddosWhy ? _tf(5394, "{$0} 因「{$1}」下线：不收过路费，运行费照交，{$2} 再轮到 {$3} 次时恢复", names, pr.ddosWhy, a.name, left) : _tf(4337, "{$0} 被 {$1} DDoS：不收过路费，运行费照交，{$2} 再轮到 {$3} 次时恢复", names, a.name, a.name, left));
+      warns.push(pr.ddosWhy ? _tf(5394, "{$0} 因「{$1}」下线：不收过路费，运行费照交，{$2} 再轮到 {$3} 次时恢复", names, downWhy(pr), a.name, left) : _tf(4337, "{$0} 被 {$1} DDoS：不收过路费，运行费照交，{$2} 再轮到 {$3} 次时恢复", names, a.name, a.name, left));
     }); }
   // 技能留下的持续效果：挂在玩家卡上，不然只在日志里，几步就被刷走了
   const fx = [], skn = r.sk ? r.sk.n + _t(2670, "：") : '';

@@ -71,7 +71,8 @@ export async function sendToJail(p, cat, why = '') {
   p.pos = IX.jail; p.jail = 0; p.jailCat = cat;
   // 被「根因在上游」甩进来、被混沌注入送进来的不是当前玩家：别清掉当前玩家掷对子的再掷，落点高亮也留在他那格
   const mine = p.id === cur().id; if (mine) { S.lastSq = IX.jail; S.again = false; }
-  log(_tf(2869, "🚨 {$0} 进了维护窗口", nm(p))); speedLose(p, 4, _t(2870, "进维护窗口"));
+  // 高速部署：进维护窗口扣 4 点部署点数，那是出了事故；清技术债（rf）是主动停机维护，不扣
+  log(_tf(2869, "🚨 {$0} 进了维护窗口", nm(p))); if (cat !== 'rf') speedLose(p, 4, _t(2870, "进维护窗口"));
   if (SIM || !why) return;
   UI.render();
   if (isAI(p.id)) { fxAll({ co: [IX.jail, _tf(2871, "<b>{$0} 进了维护窗口</b><small>{$1}</small>", p.name, why), 'warn', 2800] }); return; }

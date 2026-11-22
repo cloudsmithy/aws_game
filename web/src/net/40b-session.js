@@ -2,10 +2,11 @@ import { _t, _tf } from '../core/01-i18n-runtime.js';
 import { $, esc, homeUrl, unesc } from '../core/02-util.js';
 import { S, __set_S, cur, log, nm } from '../engine/07-state.js';
 import { MODAL_CUR, VIEW_CUR, ask } from '../ui/10-modal.js';
+import { discardHand } from '../engine/16-deck.js';
 import { render } from '../ui/27d-side.js';
 import { renderNames, toast } from '../ui/28-setup-save.js';
 import { aiKick } from '../engine/36-ai.js';
-import { sigConf } from './40a-signal.js';
+import { sigConf, sigSecure } from './40a-signal.js';
 import { MP } from './40-host-sync.js';
 import { MP_PEERJS_TURN, mpTurnEntry } from './42-setup.js';
 Object.assign(MP, {
@@ -30,6 +31,8 @@ Object.assign(MP, {
     if (S && S.players) {
       S.cfg.ai[k] = true; if (S.mpSeats) S.mpSeats = S.mpSeats.filter(q => q !== k);
       log(_tf(4957, "🚪 房主把 {$0} 移出了房间，他的座位交给电脑接着打", nm(S.players[k])));
+      // 他没公开的手牌不留给电脑（电脑不会打手牌，房主这台也不该看到是哪几张）：放回弃牌堆，日志只写张数
+      const nh = discardHand(S.players[k]); if (nh) log(_tf(5459, "{$0} 手上 {$1} 张没公开的 re:Invent 卡放回了弃牌堆", nm(S.players[k]), nh));
       // 正等着他选的那个弹窗：这一次放开给房主选，之后的弹窗电脑自己选
       const tk = this.cur && this.cur.who === k && this.cur.box && this.cur.box.querySelector('[data-mptake]'); if (tk && tk.onclick) tk.onclick();
       render(); this.pushState(true); aiKick();
@@ -67,7 +70,7 @@ Object.assign(MP, {
     // 填了：PeerJS 默认的那几条再加上自己的中继；传了 config 就会整个替换掉默认值，所以 sdpSemantics 也照默认写上
     const t = mpTurnEntry();
     const cfg = t ? { config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, MP_PEERJS_TURN, t], sdpSemantics: 'unified-plan' } } : {};
-    return sig.host ? { ...cfg, host: sig.host, port: sig.port, path: sig.path, secure: sig.port !== 80 } : cfg;
+    return sig.host ? { ...cfg, host: sig.host, port: sig.port, path: sig.path, secure: sigSecure(sig.host) } : cfg;   // 互联网上的一律 wss，局域网地址才可能走 ws（net/40a-signal.js）
   },
   send(conn, msg) { if (this.role === 'client' && this.watching && conn === this.hostConn && !['hello', 'resync'].includes(msg.t)) return; try { if (conn && conn.open) conn.send(msg); } catch (e) { } },
   // 房主接手连着却不动的远端这一个回合（只管这一回合；他自己再点照样算）

@@ -118,14 +118,18 @@ export function aiKick() {
     // 电脑结算完（post）：停一下让人看清，再自动轮到下一位；弹窗、新手引导开着或暂停时接着等
     if (S && !S.over && isAI(S.cur) && S.phase === 'post' && UI.modalHidden() && !UI.viewOpen() && !UI.tourOpen() && !AI_PAUSE) { aiBuild(cur()); return endTurn(); }
     if (!S || S.over || !isAI(S.cur) || S.phase !== 'roll' || !UI.modalHidden() || UI.viewOpen() || UI.tourOpen() || AI_PAUSE) return aiKick();
-    const p = cur();
+    const p = cur(), wasIn = p.jail !== null;
+    // 掷骰子前重构、发动技能清了技术债被送进维护窗口（debtCleared）：和真人一样这回合到此为止（uiAction 的 nextPhase 'post'），
+    // 不能接着 jailK 当场停够一轮出来，下一回合才停
+    const sent = () => !wasIn && p.jail !== null;
     aiBuild(p);   // 掷骰子前先看看要不要升级（在维护窗口里、有欠款时不升）
+    if (sent()) { S.phase = 'post'; UI.save(); UI.render(); return; }   // post 时 aiKick 自己去 endTurn
     const jailK = () => jailAct(p.cash > 500 ? 'pay' : availCard(p, 'ES') ? 'es' : 'stay');
     if (p.jail !== null && !canSkill(p)) return jailK();
     if (p.jail === null && !dlcOn('speed') && !canSkill(p) && !(p.reseller && !p.rsSet)) return doRoll();
     (async () => {
       S.phase = 'busy'; S.uiPrev = 'roll'; S.nextPhase = null;
-      try { if (p.reseller && !p.rsSet) { p.rsSet = true; p.rsRate = 0.9; } await aiRoleSkill(p); if (p.jail === null) await aiSpeed(p); } catch (e) { UI.reportErr(e); }
+      try { if (p.reseller && !p.rsSet) { p.rsSet = true; p.rsRate = 0.9; } await aiRoleSkill(p); if (p.jail === null) await aiSpeed(p); if (sent()) S.nextPhase = 'post'; } catch (e) { UI.reportErr(e); }
       await resolveDebts(); if (checkOver()) return; if (!cur().alive) return nextTurn();
       S.phase = S.nextPhase || 'roll'; S.nextPhase = null; UI.save(); UI.render();
       if (S.phase === 'roll' && cur() === p) { S.turnStartAt = 0; if (p.jail !== null) jailK(); else doRoll(); }

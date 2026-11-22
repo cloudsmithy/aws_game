@@ -70,9 +70,11 @@ Object.assign(MP, {
     });
   },
   // 发给 seat 号座位的那份状态（观众的 seat 不是座位号）：别人的 re:Invent 手牌（engine/18-reinvent.js）换成同样张数的 0，只知道有几张。
-  // re:Invent 牌堆的顺序也换成 0：知道下一张是什么，就知道别人抽到、收进手牌的是哪张。远端只用到牌堆还剩几张
+  // re:Invent 牌堆的顺序也换成 0：知道下一张是什么，就知道别人抽到、收进手牌的是哪张。弃牌堆也一样：卖掉、丢掉的手牌是悄悄放进去的，
+  // 看得到弃牌堆就知道别人卖了哪张，洗牌后还能倒推手牌。远端只用到两堆各还剩几张
   stateFor(seat) {
-    return { ...S, rei: (S.rei || []).map(() => 0), players: S.players.map(q => q.hand && q.hand.length && q.id !== seat ? { ...q, hand: q.hand.map(() => 0) } : q) };
+    const zero = a => (a || []).map(() => 0);
+    return { ...S, rei: zero(S.rei), reiDisc: zero(S.reiDisc), players: S.players.map(q => q.hand && q.hand.length && q.id !== seat ? { ...q, hand: q.hand.map(() => 0) } : q) };
   },
   // 第 from 条之后新增的日志（新的在前，跟 S.log 一样）和这期间改过的格子历史（整格发）
   deltaSince(from, seq) {

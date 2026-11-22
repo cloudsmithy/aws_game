@@ -8,7 +8,7 @@ import { askQuestion, pickQuestion, qPoolS } from '../rules/06-qbank.js';
 import { F, P, S, cur, log, nm, ownedBy, ownsGroup, sqn } from './07-state.js';
 import { pay } from './08-money.js';
 import { RI_OK, RI_PLANS, SP_PLANS, commitsOf, riActive, runAfterRI, runCost, spActive, spScope } from './08c-costs.js';
-import { buyPaid, svcLeaves, turnKey } from './09-rent.js';
+import { buyPaid, handOver, turnKey } from './09-rent.js';
 import { uiAction } from './14-turn.js';
 import { aiName } from './17-health.js';
 import { ST } from './26b-retro.js';
@@ -101,7 +101,7 @@ export async function trade(pre) {
   if (isAI(b.id)) { const msg = unesc(`${aiName(b)} ${ok ? _t(3593, "同意了这笔交易") : _t(3594, "觉得不划算，拒绝了")}`); if (MP.isRemote(a.id) && MP.seats[a.id].online) MP.send(MP.seats[a.id].conn, { t: 'toast', msg }); else UI.toast(msg); }
   if (!ok) { log(_tf(3595, "{$0} 拒绝了 {$1} 的交易", nm(b), nm(a))); return; }
   const move = (from, to, X) => {
-    X.props.forEach(i => { svcLeaves(from, i, to.id); S.props[i].owner = to.id; S.props[i].via = null; });
+    X.props.forEach(i => handOver(from, i, to));
     if (X.cash) pay(from, to, X.cash);
     ['cards', 'coe', 'drill'].forEach(key => { [...X[key]].sort((m, n) => n - m).forEach(k => to[key].push(from[key].splice(k, 1)[0])); });
   };

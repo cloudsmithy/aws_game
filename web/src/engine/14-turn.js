@@ -156,6 +156,8 @@ async function startTurn() {
 }
 export async function uiAction(fn) {
   if (!S || (S.phase !== 'roll' && S.phase !== 'post') || UI.modalBlocks()) return;
+  // 先把点数定下来存进存档（lockDice）：卡里的「再掷一次骰子」（engine/18-reinvent.js 的 rollNoBuy）也从这里取，结算中途刷新回到这一步前，再来一次掷出的还是同一个数
+  if (!lockDice()) return;
   const prev = S.phase, wasIn = cur().jail !== null; S.uiPrev = prev; S.nextPhase = null; S.phase = 'busy'; UI.render();
   try { await fn(); } catch (e) { UI.reportErr(e); }
   await resolveDebts();

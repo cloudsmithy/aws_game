@@ -2,13 +2,13 @@ import { __rv, _t, _tf, _tr } from '../core/01-i18n-runtime.js';
 import { BOT, SIM, rnd } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { BAL, CAP_MAX, GRP, IX, N, SQ, TOKEN, capU, grpGap, grpN, isInst, lvName, upCost } from '../rules/03-services.js';
-import { INC, REI, roleOf, rsBuyRate, rsRate } from '../rules/04-roles-combos-cards.js';
+import { INC, REI, roleOf, rsBuyRate, rsRate, rsSold } from '../rules/04-roles-combos-cards.js';
 import { dlcOn, fisCost, flyTo } from '../rules/05-dlc.js';
 import { qPoolS } from '../rules/06-qbank.js';
 import { F, P, S, active, availCard, cur, hasCombo, log, nm, ownedBy, owns, ownsGroup, singleAZ, sqn } from './07-state.js';
 import { credit, pay, withGain } from './08-money.js';
 import { SPOT_OK, netWorth, reqRate } from './08c-costs.js';
-import { addCap, baseRent, bringOnline, buyPaid, capInfo, capPaidSum, doUpgrade, jointRent, roleDisc, tokUnit, turnKey, upPaidSum, upgradeInfo, zhe } from './09-rent.js';
+import { addCap, baseRent, bringOnline, buyPaid, capInfo, capPaidSum, doUpgrade, downWhy, handOver, jointRent, roleDisc, svcLeaves, tokUnit, turnKey, upPaidSum, upgradeInfo, zhe } from './09-rent.js';
 import { capUpTxt, lvUpTxt } from './11b-rent-info.js';
 import { quiz } from './12-quiz.js';
 import { goReiCards, sendToJail } from './13-move.js';
@@ -57,7 +57,9 @@ async function land0(p, opts = {}) {
         S.pot -= fromPot; credit(p, a, 'other');
         log(_tf(2958, "👥 {$0} 在 User Group 活动抽奖，拿到 ${$1}{$2}{$3}", nm(p), a, a > fromPot ? _tf(2955, "（奖池出 ${$0}，亚马逊云科技补 ${$1}）", fromPot, a - fromPot) : '', S.pot ? _tf(2956, "，奖池还剩 ${$0}", S.pot) : _t(2957, "，奖池被拿空了")));
       } else {
-        const draws = []; for (let k = 0; k < 3; k++) draws.push(await drawRei());
+        // 牌堆和弃牌堆都空了（卡都在各家手牌里）抽不满 3 张：有几张选几张，一张都没有就按抽奖的保底领 $100
+        const draws = []; for (let k = 0; k < 3; k++) { const x = await drawRei(); if (x != null) draws.push(x); }
+        if (!draws.length) { log(_tf(5454, "👥 {$0} 想在 User Group 活动抽 re:Invent 卡，可牌堆抽完了（卡都在各家手牌里），改领 ${$1}", nm(p), credit(p, 100, 'other'))); break; }
         const pickId = await UI.ask({ who: p.id, title: _tf(2959, "{$0} 在 User Group 活动抽了 {$1} 张 re:Invent 卡，选一张", p.name, draws.length), html: _t(2960, "<p>选一张用，其余放回牌堆底。</p>"), cls: 'quiz', buttons: draws.map(x => ({ label: _tf(2961, "#{$0}「{$1}」：{$2}", x, REI[x].n, REI[x].e.replace(_tr(2747, "^保留：", ""), '')), value: x, disabled: x === 4 && p.role === 'fin' && draws.some(y => y !== 4) })) });
         draws.filter(x => x !== pickId).forEach(x => S.rei.push(x));
         log(_tf(2962, "👥 {$0} 在 User Group 活动抽 {$1} 张 re:Invent 卡，选了「{$2}」", nm(p), draws.length, REI[pickId].n));
@@ -115,7 +117,7 @@ export async function offerLandingUpgrade(p, i, canJump = false) {
   let html = _t(2985, "<p>落在自己的服务上，可以做一件事：</p>");
   if (u.ok) {
     const next = s.upg[u.next - 1];
-    const base = upCost(i, u.next), why = [...u.fees.map(f => `${f.why} +$${f.amt}`), F.debt() && p.techDebt >= 2 && !(s.k === 'ec2' && s.upg[u.next - 1][2] === 'cost' && p.gravFree) ? _t(2986, "技术债攒到 2 个 +$50") : '', u.off].filter(Boolean);
+    const base = upCost(i, u.next), why = [...u.fees.map(f => `${f.why} +$${f.amt}`), u.sur ? _t(2986, "技术债攒到 2 个 +$50") : '', u.off].filter(Boolean);
     b.push({ label: _tf(2987, "升到第 {$0} 级「{$1}」${$2}", u.next, next[0], u.total), desc: `${next[3] ? next[3] + _t(2988, "。") : ''}${lvUpTxt(i, u.next)}${u.total !== base ? _tf(2991, "。基础价 ${$0}，这次{$1}", base, why.length ? _tf(2989, "：{$0}", why.join(_t(408, "；"))) : _t(2990, "价格不同")) : ''}`, value: 'up', cls: 'pri', disabled: p.cash < u.total });
   } else if (u.why) html += _tf(2992, "<p class=\"muted\">不能加功能：{$0}</p>", u.why);
   if (c.ok) {
@@ -179,7 +181,8 @@ async function offerBuy(p, i, opts = {}) {
       const r = await UI.modal({ title: _tf(3025, "Spot 出价：{$0}（原价 ${$1}）", s.n, s.p), html: `<p>${_tf(3026, "出价越低越便宜。<b>别人看不到你出了多少</b>：落到这里的人只能自己猜，猜的价比你多出原价的 10%（${$0}）以上才抢得走，猜低了就照常付你过路费。出到全价就等于按需购买，没人能抢。", Math.round(s.p * 0.1))}</p><p class="muted">${_t(3027, "同一台电脑上轮流玩的话，出价时请别人先别看屏幕。")}</p><p class="muted">${_t(3028, "被抢时退回你出价的一半。现实里 Spot 已经不用竞价，被收回前只提前 2 分钟通知；游戏用出价模拟「可能被收回」。")}</p>`, inputs: [{ id: 'bid', label: _tf(3029, "出价 $（${$0}–${$1}）", v.min, Math.min(s.p, p.cash)), type: 'number', min: v.min, max: Math.min(s.p, p.cash), step: 10, value: Math.min(Math.max(v.min, Math.round(s.p * 0.5)), p.cash), af: true }], buttons: [{ label: _t(3030, "出价买下"), value: 'ok', cls: 'pri' }, { label: _t(3031, "返回"), value: 'x' }] });
       if (r.v !== 'ok') continue;
       const bid = Math.max(v.min, Math.min(r.inp.bid || v.min, s.p, p.cash));
-      if (availCard(p, 'SPOT')) availCard(p, 'SPOT').used = true;
+      // 出到全价就是按需购买，Spot 卡没派上用场，留着（和上面的购买券一样）
+      if (bid < s.p && availCard(p, 'SPOT')) availCard(p, 'SPOT').used = true;
       v.price = bid;
       if (bid >= s.p) v.k = 'buy';
     }
@@ -197,6 +200,7 @@ async function offlineTakeover(p, i) {
     buttons: [{ label: _tf(3038, "付 ${$0} 拉起来归我", s.p), value: 'take', cls: 'pri', disabled: p.cash < s.p }, { label: _t(3039, "不管它"), value: 'no' }] });
   if (v !== 'take' || p.cash < s.p) { log(_tf(3040, "{$0} 已下线，{$1} 不用付过路费", sqn(i), nm(p))); return; }
   ST(p).spendBuy = (ST(p).spendBuy || 0) + pay(p, 'bank', s.p);   // 复盘里算「买服务」
+  svcLeaves(o, i, p.id);   // 原主人给它买的 RI 作废（RI 记在原主人的 commits 里，格子重建清不掉）
   S.props[i] = { owner: p.id, level: 0, cap: 0, spot: false, spotPaid: 0, impaired: false, offline: 0, offCash: 0 };
   log(_tf(3041, "🔁 {$0} 付 ${$1} 把 {$2} 下线的 {$3} 重新拉起来，归自己", nm(p), s.p, nm(o), sqn(i)));
 }
@@ -221,14 +225,15 @@ async function buyFromReseller(p, i) {
   if (!v) return false;
   const paidBase = v - extra;
   pay(p, r, v); sfxAll('buy'); ST(p).buy++; ST(p).spendBuy = (ST(p).spendBuy || 0) + v; ST(p).viaP = (ST(p).viaP || 0) + v;
-  Object.assign(pr, { owner: p.id, paid: paidBase, via: r.id, spot: false, spotPaid: 0 });
+  svcLeaves(r, i, p.id); Object.assign(pr, { owner: p.id, paid: paidBase, via: r.id, spot: false, spotPaid: 0 }); rsSold(r, p);
   if (p.rsCoupon) { p.rsCoupon = 0; log(_tf(3051, "{$0} 用掉了 Startup 代理商折扣", nm(p))); }
   log(_tf(3052, "🤝 {$0} 从代理商 {$1} 手里花 ${$2} 买下 {$3}；{$4} 当初按进货价拿货花了 ${$5}，赚差价 ${$6}。以后这块的运行费交给 {$7}", nm(p), nm(r), v, sqn(i), nm(r), cost, paidBase - cost, nm(r)));
   return true;
 }
 async function spotTakeover(p, i) {
   const s = SQ[i], pr = S.props[i], o = P(pr.owner);
-  if (!pr.spot) return false;
+  // 被 DDoS、被 Health 卡打下线的不能抢（和从代理商手里买一样）：照常结算，payRent 里不收过路费
+  if (!pr.spot || pr.ddos != null) return false;
   // 主人出了多少不给看，落上来的人靠猜：猜的价比主人的出价多出原价的 10% 以上才抢得走（金融合规公司风控要求最低原价的 40%），猜低了照常付过路费，出价不扣钱
   const finMin = p.role === 'fin' ? Math.round(s.p * 0.4) : 0;
   const need = Math.min(s.p, Math.max(finMin, (pr.spotPaid || 0) + Math.max(10, Math.round(s.p * 0.1))));
@@ -244,7 +249,7 @@ async function spotTakeover(p, i) {
   if (bid < need) { log(_tf(3060, "{$0} 出价想抢 {$1} 的 Spot 服务 {$2}，没压过他的出价，照常付过路费", nm(p), nm(o), sqn(i))); if (!isAI(p.id)) UI.toast(_t(3061, "猜低了，没抢到：照常付过路费")); return false; }
   ST(p).spendBuy = (ST(p).spendBuy || 0) + pay(p, 'bank', bid);   // 复盘里算「买服务」
   const comp = Math.round((pr.spotPaid || 0) / 2); credit(o, comp, 'sell');
-  pr.owner = p.id; pr.cap = 0; pr.impaired = false;
+  handOver(o, i, p); pr.cap = 0; pr.impaired = false;   // RI、下线拿过多少钱跟着原主人走，不留在格子上
   pr.paid = bid; if (bid >= s.p) { pr.spot = false; pr.spotPaid = 0; } else { pr.spot = true; pr.spotPaid = bid; }
   log(_tf(3064, "⚡ {$0} 出更高的价抢走了 {$1} 的 Spot 服务 {$2}{$3}；{$4} 拿回出价的一半", nm(p), nm(o), sqn(i), pr.spot ? _t(3062, "（还是 Spot，别人还能接着抢）") : _t(3063, "，变成按需"), nm(o)));
   return true;
@@ -274,7 +279,7 @@ async function payRent(p, i, opts = {}) {
   const pr = S.props[i], o = P(pr.owner), s = SQ[i];
   if (pr.impaired) { log(_tf(3072, "{$0} 是 Impaired 状态，这次不收过路费", sqn(i))); return 0; }
   if (pr.offline) { log(_tf(3073, "{$0} 已下线，这次不收过路费", sqn(i))); return 0; }
-  if (pr.ddos != null) { log(pr.ddosWhy ? _tf(5295, "{$0} 因「{$1}」下线，这次不收过路费", sqn(i), pr.ddosWhy) : _tf(3074, "{$0} 正被 DDoS 打到下线，这次不收过路费", sqn(i))); return 0; }
+  if (pr.ddos != null) { log(pr.ddosWhy ? _tf(5295, "{$0} 因「{$1}」下线，这次不收过路费", sqn(i), downWhy(pr)) : _tf(3074, "{$0} 正被 DDoS 打到下线，这次不收过路费", sqn(i))); return 0; }
   const dice = S.lastDice[0] + S.lastDice[1];
   const jr = jointRent(i, dice);
   if (o.reseller && !jr && !BAL.rsSolo) { log(_tf(3075, "{$0} 是代理商 {$1} 自己的服务，没组成有效架构，这次不收过路费", sqn(i), nm(o))); return 0; }

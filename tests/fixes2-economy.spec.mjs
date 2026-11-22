@@ -111,7 +111,7 @@ test('破产分资产：下线的服务按扣掉下线时拿走的钱算价值',
   // RDS 实付 400、下线时拿走 250：只值 150；S3 实付 300。两个债主各欠一半：价值高的先分给 B，所以 B 该拿 S3
   await page.evaluate(() => {
     const p = S.players[0], x = S.props[IX.rds], y = S.props[IX.s3];
-    x.owner = 0; x.paid = 400; x.offline = 2; x.offCash = 250; x.offTurn = 0;
+    x.owner = 0; x.paid = 400; x.offline = 2; x.offCash = 250; x.offDrawn = 250; x.offTurn = 0;
     y.owner = 0; y.paid = 300;
     p.cash = 0; p.debt = [{ to: 1, amt: 5000 }, { to: 2, amt: 5000 }];
   });

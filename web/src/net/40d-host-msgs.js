@@ -4,6 +4,7 @@ import { wbApply, wbValid } from '../rules/06-qbank.js';
 import { MAX_PLAYERS, S, cur, log, nm } from '../engine/07-state.js';
 import { MODAL_CUR, ask, info } from '../ui/10-modal.js';
 import { joinPlayer } from '../engine/14-turn.js';
+import { rfJailTxt, rfJailed } from '../engine/17-health.js';
 import { timedOver } from '../ui/26e-manual.js';
 import { render } from '../ui/27d-side.js';
 import { applyRename, npVal, renderNames, toast } from '../ui/28-setup-save.js';
@@ -26,7 +27,10 @@ Object.assign(MP, {
     if (m.t === 'resync') { this.seats[seat].base = null; this.pushState(true, this.seats[seat]); if (this.cur) this.send(conn, this.modalFor(this.seats[seat])); return; }   // 远端的增量接不上了（或刚切回前台）：补一份整的，连同当前的弹窗（切后台、重同步时排着的弹窗会被 cancel 丢掉）
     if (m.t === 'act' && typeof m.a === 'string' && S && S.cur === seat && Object.prototype.hasOwnProperty.call(this.ACTS, m.a)) {
       // 这一下能不能执行：和 doRoll / jailAct / uiAction / endTurn 开头查的阶段一样
-      const a = m.a, p = cur(), ok = a === 'end' ? S.phase === 'post' : a === 'roll' ? S.phase === 'roll' && p.jail === null : /^jail:/.test(a) ? S.phase === 'roll' && p.jail !== null : S.phase === 'roll' || S.phase === 'post';
+      const a = m.a, p = cur();
+      // 清技术债进的维护窗口只能停这一轮：远端（老页面、改过的页面）发来付钱、用卡出来的，直接告诉他，不悄悄改成「停一轮」替他执行
+      if ((a === 'jail:pay' || a === 'jail:es') && rfJailed(p)) return void this.send(conn, { t: 'toast', msg: rfJailTxt() });
+      const ok = a === 'end' ? S.phase === 'post' : a === 'roll' ? S.phase === 'roll' && p.jail === null : /^jail:/.test(a) ? S.phase === 'roll' && p.jail !== null : S.phase === 'roll' || S.phase === 'post';
       // 房主自己开着看的窗口（玩法、图鉴、明细、大图、改名字……）会挡住这些操作，远端点了却毫无反应：真能执行时先替房主关掉。「轮到下一位」不看弹窗，不用关；
       // 只认打了 cancelable 的窗口，「这局在别处接着打了」、开局页那几个问话的最后一个按钮不是取消，不能替房主点
       if (ok && a !== 'end' && MODAL_CUR && MODAL_CUR.cancelable && !$('#modal').hidden) { MODAL_CUR.cancel(); toast(_tf(4974, "{$0} 那边点了操作，先把你开着的窗口关了", unesc(S.players[seat].name))); }

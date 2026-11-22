@@ -3,7 +3,7 @@ import { _t, _tf, _tr } from '../core/01-i18n-runtime.js';
 import { esc } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { IX, OFFLINE_MIN, OFFLINE_OK, SQ, capU, lvName } from '../rules/03-services.js';
-import { F, S, debtOf, offlineCash, ownedBy, owns, ownsGroup } from './07-state.js';
+import { F, S, debtOf, offDrawn, offSpent, offlineCash, ownedBy, owns, ownsGroup } from './07-state.js';
 import { CO_SVCS, opCost, runCost } from './08c-costs.js';
 import { addCap, bringOnline, capBack, capInfo, doUpgrade, offRounds, sellCap, sellProp, sellUpgrade, sellValue, sellZhe, stripValue, takeOffline, upPaidOf, upgradeInfo } from './09-rent.js';
 import { lvUpTxt } from './11b-rent-info.js';
@@ -26,9 +26,11 @@ export async function manage(p, debtMode = false) {
       if (pr.spot && !debtMode) { const c = spotConvCost(i); acts.push(_tf(3508, "<button class=\"sm pri\" data-v=\"conv:{$0}\" data-bw=\"0.4\" {$1}>补 ${$2} 转成按需</button>", i, p.cash < c ? 'disabled' : '', c)); }
       if (s.t === 'prop' && pr.cap > 0) acts.push(_tf(3509, "<button class=\"sm\" data-v=\"uncap:{$0}\" data-bw=\"0.2\">减 1 个{$1} +${$2}</button>", i, capU(s.k), capBack(i)));
       if (s.upg && pr.level > 0 && !pr.cap) acts.push(_tf(3510, "<button class=\"sm\" data-v=\"sell:{$0}\" data-bw=\"0.2\">去掉一级 +${$1}</button>", i, Math.round(upPaidOf(i, pr.level) / 2)));
-      if (OFFLINE_OK.has(s.k) && !pr.offline && !isParty()) acts.push(`<button class="sm" data-v="off:${i}" data-bw="0.2" title="${_tf(3512, "{$0}不收过路费，运行费只剩存储费；下线 {$1} 轮后自动恢复，拿回的钱不用还，自己落到这一格可以提前免费拉起来；期间别人落上来可以付原价 ${$2} 把它买走", pr.level || pr.cap ? _t(3511, "会先自动去掉升级和容量（各退一半）；") : '', OFFLINE_MIN, s.p)}">${_tf(3513, "下线 +${$0}", offlineCash(i) + stripValue(i))}</button>`);
+      // 下线的钱同一个主人只拿一次（offDrawn）：拿过了按钮灰掉，原因写在提示里
+      if (OFFLINE_OK.has(s.k) && !pr.offline && !isParty() && offSpent(i)) acts.push(`<button class="sm" disabled title="${_t(5458, "这块服务在你手里已经下线拿过一次钱了")}">${_tf(3513, "下线 +${$0}", 0)}</button>`);
+      else if (OFFLINE_OK.has(s.k) && !pr.offline && !isParty()) acts.push(`<button class="sm" data-v="off:${i}" data-bw="0.2" title="${_tf(3512, "{$0}不收过路费，运行费只剩存储费；下线 {$1} 轮后自动恢复，拿回的钱不用还，自己落到这一格可以提前免费拉起来；期间别人落上来可以付原价 ${$2} 把它买走", pr.level || pr.cap ? _t(3511, "会先自动去掉升级和容量（各退一半）；") : '', OFFLINE_MIN, s.p)}">${_tf(3513, "下线 +${$0}", offlineCash(i) + stripValue(i))}</button>`);
       if (pr.offline) acts.push(_tf(3515, "<span class=\"muted\" style=\"font-size:12px\">下线第 {$0} 轮，满 {$1} 轮自动恢复；落到这一格可以免费提前拉起来</span>", offRounds(i), OFFLINE_MIN));
-      acts.push(`<button class="sm danger-lite" data-v="sell2:${i}" data-bw="0.1" title="${_tf(3518, "买价{$0}的实付按 {$1}拿回{$2}；以后不用再交它的运行费，这块回到亚马逊云科技，谁落上来都能买", pr.level || pr.cap ? _t(3516, "、升级和容量") : '', sellZhe(), pr.offline ? _t(3517, "（扣掉下线时已经拿走的 $") + (pr.offCash || 0) + _t(3210, "）") : '')}">${_tf(3519, "卖回亚马逊云科技 +${$0}", sellValue(i))}</button>`);
+      acts.push(`<button class="sm danger-lite" data-v="sell2:${i}" data-bw="0.1" title="${_tf(3518, "买价{$0}的实付按 {$1}拿回{$2}；以后不用再交它的运行费，这块回到亚马逊云科技，谁落上来都能买", pr.level || pr.cap ? _t(3516, "、升级和容量") : '', sellZhe(), offDrawn(i) ? _t(3517, "（扣掉下线时已经拿走的 $") + offDrawn(i) + _t(3210, "）") : '')}">${_tf(3519, "卖回亚马逊云科技 +${$0}", sellValue(i))}</button>`);
       return `<tr><td><img src="${AWSI[s.icon]}" alt="" style="width:18px;height:18px;vertical-align:-4px;margin-right:6px">${s.n}</td><td>${s.upg ? lvName(i, pr.level) + (pr.cap ? _tf(2588, " · {$0} 个{$1}", pr.cap, capU(s.k)) : '') : '—'}${pr.impaired ? ' · Impaired' : ''}${pr.offline ? _tf(3520, " · 已下线（{$0} 轮）", pr.offline - 1) : ''}</td><td>${_tf(3523, "${$0}/圈", runCost(i))}</td><td><div class="acts">${acts.join('')}</div>${OFFLINE_OK.has(s.k) && !pr.offline && !isParty() ? _tf(3522, "<div class=\"muted\" style=\"font-size:12px;margin-top:6px\">下线 {$0} 轮后自动恢复，不用还钱{$1}</div>", OFFLINE_MIN, pr.level || pr.cap ? _t(3521, "<br>会先去掉升级和容量（各退一半）") : '') : ''}</td></tr>`;
     });
     let extra = '';
@@ -46,7 +48,7 @@ export async function manage(p, debtMode = false) {
     else if (k === 'sell2') {
       // 卖回不能反悔，又和「去掉一级」「下线」挨着：先问一句，免得手指偏一点把整块连升级卖掉
       // hold：双击「卖回亚马逊云科技」时，第二下别直接点在确认框的「卖回 +$X」上
-      const ok = await UI.ask({ hold: 350, title: _tf(3537, "把 {$0} 卖回亚马逊云科技？", SQ[i].n), html: _tf(3540, "<p>按实付 {$0}拿回 ${$1}{$2}{$3}。卖完这块回到亚马逊云科技，谁落上来都能买，包括你自己。</p>", sellZhe(), sellValue(i), S.props[i].offline ? _tf(3538, "（已扣掉下线时拿走的 ${$0}）", S.props[i].offCash || 0) : '', S.props[i].level || S.props[i].cap ? _t(3539, "，升级和容量一起没了") : ''), buttons: [{ label: _tf(3541, "卖回 +${$0}", sellValue(i)), value: true, cls: 'danger' }, { label: _t(3542, "先不卖"), value: false, cls: 'pri' }] });
+      const ok = await UI.ask({ hold: 350, title: _tf(3537, "把 {$0} 卖回亚马逊云科技？", SQ[i].n), html: _tf(3540, "<p>按实付 {$0}拿回 ${$1}{$2}{$3}。卖完这块回到亚马逊云科技，谁落上来都能买，包括你自己。</p>", sellZhe(), sellValue(i), offDrawn(i) ? _tf(3538, "（已扣掉下线时拿走的 ${$0}）", offDrawn(i)) : '', S.props[i].level || S.props[i].cap ? _t(3539, "，升级和容量一起没了") : ''), buttons: [{ label: _tf(3541, "卖回 +${$0}", sellValue(i)), value: true, cls: 'danger' }, { label: _t(3542, "先不卖"), value: false, cls: 'pri' }] });
       if (ok) sellProp(p, i);
     }
     else if (k === 'off') takeOffline(p, i);

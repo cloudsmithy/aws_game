@@ -1,18 +1,18 @@
 import { __rv, _t, _tf } from '../core/01-i18n-runtime.js';
 import { BAL, IX, OFFLINE_FEE, SQ } from '../rules/03-services.js';
-import { COMBOS, rsCustomers } from '../rules/04-roles-combos-cards.js';
+import { COMBOS, rsEverN } from '../rules/04-roles-combos-cards.js';
 import { dlcRunMul } from '../rules/05-dlc.js';
-import { F, P, S, active, debtOf, effActive, hasCombo, ownedBy, owns } from './07-state.js';
+import { F, P, S, active, debtOf, effActive, hasCombo, offDrawn, ownedBy, owns } from './07-state.js';
 import { buyPaid, capPaidSum, upPaidSum } from './09-rent.js';
 import { fmtMul } from '../rules/35-modes.js';
 export function valBreak(p) {
   let svc = 0, inv = 0;
-  ownedBy(p).forEach(i => { const pr = S.props[i]; svc += (p.reseller ? buyPaid(i) : pr.spot ? pr.spotPaid : SQ[i].p) - (pr.offline ? pr.offCash || 0 : 0); inv += upPaidSum(i) + capPaidSum(i); });
-  const cash = p.cash - debtOf(p), arch = COMBOS.filter(c => hasCombo(p, c.id)).length * 200 + (p.role === 'rs_cons' && S.players ? rsCustomers(p).length * 100 : 0), debt = p.techDebt * 100, coe = p.coe.filter(t => !t.used).length * 50;
+  ownedBy(p).forEach(i => { const pr = S.props[i]; svc += (p.reseller ? buyPaid(i) : pr.spot ? pr.spotPaid : SQ[i].p) - offDrawn(i); inv += upPaidSum(i) + capPaidSum(i); });
+  const cash = p.cash - debtOf(p), arch = COMBOS.filter(c => hasCombo(p, c.id)).length * 200 + (p.role === 'rs_cons' && S.players ? rsEverN(p) * 100 : 0), debt = p.techDebt * 100, coe = p.coe.filter(t => !t.used).length * 50;
   const net = Math.round(cash + svc + inv);
   return { cash: Math.round(cash), svc: Math.round(svc), inv: Math.round(inv), arch, debt, coe, net, val: Math.round(net + inv + arch - debt + coe) };
 }
-// 总资产 = 现金 − 欠款 + 服务买价（Spot 按出价，代理商按进货价，下线的扣掉拿走的一半）+ 升级和容量的实际投入
+// 总资产 = 现金 − 欠款 + 服务买价（Spot 按出价，代理商按进货价，扣掉这位主人下线时拿走的那一半，恢复上线了也扣）+ 升级和容量的实际投入
 export const netWorth = p => valBreak(p).net;
 // 估值（按轮数或时间结束时排名用）= 总资产 + 升级和容量再算一倍 + 每个生效架构 $200 + 每个没用掉的复盘标记 $50 − 每个技术债 $100
 export const valuation = p => valBreak(p).val;

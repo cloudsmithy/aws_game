@@ -66,7 +66,8 @@ function asCard(p, fn) { const a0 = MP.actor; MP.actor = p.id; return withCardMu
 export function drawReinvent(p, forced, fixed) { return asCard(p, () => drawReinvent0(p, forced, fixed)); }
 // 只有真人在自己的画面上选：电脑、模拟和挂机测试（SIM、BOT）不弹窗，全电脑的模拟和以前一模一样
 const humanPick = p => !(SIM || BOT || isAI(p.id) || !p.alive);
-// 再掷一次骰子走，这次落地不能买（卡里的「再掷一次」都走这里）。只给真人，所以一定有画面
+// 再掷一次骰子走，这次落地不能买（卡里的「再掷一次」都走这里）。只给真人，所以一定有画面。
+// 点数和 doRoll 一样从 lockDice 定好的 S.diceQ 里取（掷骰子、uiAction 开始时已经定好存档），结算中途刷新不能换一个点数
 async function rollNoBuy(p) { const d = rollDice(p); UI.render(); await waitAnim(UI.FX.dice(d), 1700); await moveSteps(p, d[0] + d[1]); await land(p, { noBuy: 'card' }); }
 // 11-22：只给抽卡的人钱的 re:Invent 卡（领 $X），真人玩家可以四选一：领钱、前进 3 格、后退 3 格、再掷一次骰子走（这次落地不能买）。
 // 电脑玩家、模拟和挂机测试一律领钱、不弹窗（humanPick）。在维护窗口里的人走不了，也直接领钱。
@@ -83,6 +84,8 @@ export async function moneyOrMove(p, card, amt, done) {
 }
 async function drawReinvent0(p, forced, fixed) {
   const id = forced ?? await drawRei();
+  // 牌堆抽完了（卡都在各家手里）：不亮卡，改领一笔小钱（和卖掉一张卡一样 $50）
+  if (id == null) { log(_tf(5457, "🎁 {$0} 想抽 re:Invent 卡，可牌堆抽完了（卡都在各家手里），改领 ${$1}", nm(p), credit(p, 50))); return; }
   // 真人自己抽的（不是保留卡）先只给自己看，四选一；只有选「现在用」才亮给大家、照旧结算
   if (forced == null && !fixed && !REI[id].keep && humanPick(p) && await reiPick(p, id) !== 'now') return;
   await UI.showCard('rei', id, p);

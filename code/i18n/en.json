@@ -5586,5 +5586,15 @@
  "中途加入": "Join mid-game",
  "<p>{$0} 想中途加入，同意吗？</p><p class=\"muted\">同意后排在最后一位，从下一轮开始走：站在起点，没有服务和卡牌，起始资金是还在场各家总资产的平均数。</p>": "<p>{$0} wants to join mid-game. Allow it?</p><p class=\"muted\">If you agree, they take the last seat and start playing next round: on the start square, with no services or cards, and starting cash equal to the average total assets of the players still in the game.</p>",
  "房主没有同意你中途加入": "The host didn't let you join mid-game",
- "大家正在挑角色，挑完再加入": "Everyone is picking roles; join once they are done"
+ "大家正在挑角色，挑完再加入": "Everyone is picking roles; join once they are done",
+ "👥 {$0} 想在 User Group 活动抽 re:Invent 卡，可牌堆抽完了（卡都在各家手牌里），改领 ${$1}": "👥 {$0} wanted to draw re:Invent cards at the User Group Meetup, but the deck is empty (all cards are in players' hands), so they get ${$1} instead",
+ "在维护窗口里（清技术债）：只能停这一轮，不能付 $50 或用 Enterprise Support 提前出来": "In Maintenance Window (clearing tech debt): you must sit out this round; you can't pay $50 or use Enterprise Support to leave early",
+ "🧱 {$0} 清完技术债，本来就在维护窗口里，不再重进{$1}": "🧱 {$0} cleared tech debt and is already in the Maintenance Window, so they don't go in again{$1}",
+ "🎁 {$0} 想抽 re:Invent 卡，可牌堆抽完了（卡都在各家手里），改领 ${$1}": "🎁 {$0} wanted to draw a re:Invent card, but the deck is empty (all cards are in players' hands), so they get ${$1} instead",
+ "这块服务在你手里已经下线拿过一次钱了": "You already took this service offline and got the cash once while you own it",
+ "{$0} 手上 {$1} 张没公开的 re:Invent 卡放回了弃牌堆": "{$0}'s {$1} unrevealed re:Invent card(s) went back to the discard pile",
+ "互联网上的信令服务器必须用 HTTPS（wss），只有局域网地址（localhost、192.168.x.x、10.x.x.x、.local 这类）可以用 HTTP": "A signaling server on the internet must use HTTPS (wss); only LAN addresses (localhost, 192.168.x.x, 10.x.x.x, .local and the like) can use HTTP",
+ "互联网上的信令服务器必须用 HTTPS（wss），只有局域网地址可以用 HTTP": "A signaling server on the internet must use HTTPS (wss); only LAN addresses can use HTTP",
+ "付 $100 给 CloudWatch 的主人；没人买，或者它下线了、被打下线了，就进奖池；主人是你自己就免付": "Pay $100 to the owner of CloudWatch; if nobody owns it, or it is offline or knocked offline, it goes into the Jackpot; if you are the owner, you pay nothing",
+ "你暴露在公网的实例（EC2，没升到 Fargate 的 ECS，没升到 Auto Mode 的 EKS）：交 $100 进奖池，最贵的一块变成 Impaired；有 GuardDuty 的只交 $50，实例不受影响。别人的 VPC 升到了 Session Manager（而且在线），可以付他 $50 借用，躲过去": "Your internet-exposed instances (EC2, ECS without the Fargate upgrade, EKS without the Auto Mode upgrade): pay $100 into the Jackpot and your most expensive one becomes Impaired; with GuardDuty you only pay $50 and the instance is not affected. If another player's VPC has the Session Manager upgrade (and is online), you can pay them $50 to borrow it and avoid the attack"
 }

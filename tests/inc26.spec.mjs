@@ -23,7 +23,7 @@ const done = page => expect.poll(() => page.evaluate(() => window.__done), { tim
 const imm = (page, name, setup) => page.evaluate(([name, src]) => { (0, eval)(`(${src})`)(); return INC.find(c => c && c.n === name).imm(S.players[0]); }, [name, setup.toString()]);
 // 直接跑卡的 run（不走抵消窗），可选点一个按钮
 async function hit(page, name, click) {
-  await run(page, name => INC.find(c => c && c.n === name).run(S.players[0]), name);
+  await run(page, name => { const id = INC.findIndex(c => c && c.n === name); return INC[id].run(S.players[0], id); }, name);   // 和 incident 一样把卡号传进去（下线原因存的是卡号）
   if (click) { await expect(modalBox(page)).toBeVisible(); await btn(page, click).click(); }
   await done(page);
   return page.evaluate(() => ({ cash: S.players[0].cash, skip: S.players[0].skip, debt: S.players[0].techDebt, r: window.__r }));
@@ -135,7 +135,7 @@ test('唯一懂 Kubernetes 的人离职了：EKS Auto Mode 免疫；打中交 $1
   const r = await hit(page, '唯一懂 Kubernetes 的人离职了', '交 $150');
   expect(r.cash).toBe(2850);
   await hit(page, '唯一懂 Kubernetes 的人离职了', '让 EKS 下线 1 轮');
-  expect(await page.evaluate(() => ({ down: S.props[IX.eks].ddos, why: S.props[IX.eks].ddosWhy, act: active(S.players[0], IX.eks), rent: shownRent(IX.eks).r }))).toEqual({ down: 0, why: '唯一懂 Kubernetes 的人离职了', act: false, rent: 0 });
+  expect(await page.evaluate(() => ({ down: S.props[IX.eks].ddos, why: downWhy(S.props[IX.eks]), act: active(S.players[0], IX.eks), rent: shownRent(IX.eks).r }))).toEqual({ down: 0, why: '唯一懂 Kubernetes 的人离职了', act: false, rent: 0 });
   // 别人的回合开始不恢复，自己的回合开始恢复；没开高速部署也一样
   const back = await page.evaluate(() => { downTick(S.players[1]); const mid = S.props[IX.eks].ddos; downTick(S.players[0]); return [mid, S.props[IX.eks].ddos, active(S.players[0], IX.eks)]; });
   expect(back).toEqual([0, null, true]);

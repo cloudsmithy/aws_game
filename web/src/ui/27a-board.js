@@ -5,7 +5,7 @@ import { COMBOS } from '../rules/04-roles-combos-cards.js';
 import { dlcRentMul } from '../rules/05-dlc.js';
 import { P, S, hasCombo, isWild } from '../engine/07-state.js';
 import { runCost } from '../engine/08c-costs.js';
-import { baseRent, shownRent, tokUnit, trafficMul } from '../engine/09-rent.js';
+import { baseRent, downWhy, shownRent, tokUnit, trafficMul } from '../engine/09-rent.js';
 import { lvBadge } from './11-cards-deeds.js';
 import { jailMax } from '../engine/13-move.js';
 import { showSquare } from './27e-square-gallery.js';
@@ -74,7 +74,7 @@ export function cellHtml(i) {
   // 「过路费」「· 不收费」放在 .rk 里，格子窄时只留数字或状态（5 位数的连宽屏也放不下，干脆不写）；按 token 收的另备一个按 7 点估的「≈$xx」，上下两排太窄、放不下「点数×单价」时换成它
   const sr = owner && (s.t === 'prop' || s.t === 'util') ? shownRent(i) : null;
   const off = !sr ? '' : pr.offline ? _t(3944, "已下线") : pr.ddos != null ? (pr.ddosWhy ? _t(3944, "已下线") : 'DDoS') : pr.impaired ? 'Impaired' : !sr.r ? _t(3945, "没成架构") : '';
-  const rentH = !sr ? '' : off ? _tf(3949, "<span class=\"rent off\" title=\"{$0}\">{$1}<i class=\"rk\"> · 不收费</i></span>", pr.offline ? _t(3946, "已下线，不收过路费") : pr.ddos != null ? (pr.ddosWhy ? _tf(5392, "因「{$0}」下线，不收过路费", pr.ddosWhy) : _t(3947, "被 DDoS 打到下线，不收过路费")) : pr.impaired ? _t(3948, "Impaired，暂停收过路费") : rentTip(i, sr), off)
+  const rentH = !sr ? '' : off ? _tf(3949, "<span class=\"rent off\" title=\"{$0}\">{$1}<i class=\"rk\"> · 不收费</i></span>", pr.offline ? _t(3946, "已下线，不收过路费") : pr.ddos != null ? (pr.ddosWhy ? _tf(5392, "因「{$0}」下线，不收过路费", downWhy(pr)) : _t(3947, "被 DDoS 打到下线，不收过路费")) : pr.impaired ? _t(3948, "Impaired，暂停收过路费") : rentTip(i, sr), off)
     : `<span class="rent${sr.jr ? ' jr' : ''}" title="${rentTip(i, sr)}">${sr.txt.startsWith(_t(3930, "点数")) ? `<span class="tk">${sr.txt}</span><span class="tk2">≈$${sr.r}</span>` : `${sr.r < 1e4 ? _t(3950, "<i class=\"rk\">过路费 </i>") : ''}${sr.txt}`}</span>`;
   const dm = (s.t === 'prop' || s.t === 'util') ? dlcRentMul(i) : 1;
   const dlcH = dm > 1 ? _tf(3951, "<span class=\"dlcm\" title=\"DLC 加成：过路费 ×{$0}\">DLC ×{$1}</span>", Math.round(dm * 100) / 100, Math.round(dm * 100) / 100) : '';
@@ -105,7 +105,7 @@ export function sqTip(i) {
     if (pr.owner === null) L.push(_tf(3977, "没人买 · 价格 ${$0}", s.p), _tf(3979, "买下后过路费约 ${$0}{$1}", rent, float ? _t(3978, "（随对方掷的点数浮动）") : ''));
     else {
       const o = P(pr.owner); let run = 0, sr = { r: rent, jr: null, txt: '' }; try { run = runCost(i); sr = shownRent(i); } catch (e) { }
-      const jr = sr.jr, off = pr.offline ? _t(3944, "已下线") : pr.ddos != null ? (pr.ddosWhy ? _tf(5393, "因「{$0}」下线", pr.ddosWhy) : _t(3980, "被 DDoS 打到下线")) : pr.impaired ? _t(3981, "现在 Impaired") : '';
+      const jr = sr.jr, off = pr.offline ? _t(3944, "已下线") : pr.ddos != null ? (pr.ddosWhy ? _tf(5393, "因「{$0}」下线", downWhy(pr)) : _t(3980, "被 DDoS 打到下线")) : pr.impaired ? _t(3981, "现在 Impaired") : '';
       L.push(_tf(3983, "主人：{$0}{$1}{$2}", unesc(o.name), s.upg ? ` · ${lvFull(i, pr.level)}` : '', pr.cap ? _tf(3982, " · 容量 {$0} 个{$1}", pr.cap, capU(s.k)) : ''), off ? _tf(3984, "过路费：{$0}，不收", off) : sr.cap ? _tf(3985, "过路费最多 $50（新账户保护期，前 {$0} 轮每笔封顶）；第 {$1} 轮起约 ${$2}{$3}", BAL.protect, BAL.protect + 1, sr.full, jr ? _t(3961, "（整套架构联合收费）") : '') : _tf(3988, "过路费约 ${$0}{$1}{$2}", sr.r, jr ? _tf(3986, "（{$0}{$1}架构联合收费{$2}）", jr.cs.map(c => _tf(2766, "「{$0}」", c.n)).join(''), jr.cs.length > 1 ? _t(2767, "串联") : '', sr.rn ? ` · ${sr.rn}` : '') : sr.rn ? _tf(2769, "（{$0}）", sr.rn) : '', sr.r && (jr ? sr.txt[0] === '≈' : float) ? _t(3987, "（按掷出 7 点算，随点数浮动）") : ''), _tf(3989, "运行费：每圈 ${$0}", run));
     }
   } else if (s.t === 'jail') L.push(_t(286, "落在这里或被送进来：停一轮，或者交 $50 照常走"));
