@@ -64,14 +64,15 @@ export function incRand() { return sendIncident('rand'); }
 export function incAll() { return sendIncident('all'); }
 // ---- 埋 Health 卡 ----
 // 和「花钱让对手抽 Health 卡」同价（incSendCost），但不共用每圈一次：每个回合能埋一张（p.buryTurn 记 turnKey）。从 Health 牌堆顶翻几张挑一张扣着，埋在这一回合刚走过的一块服务上（p.path，路过、停下都算；谁的都行、没人买的也行，
-// 已经埋了卡的格子不能再埋）。场上埋几张不限，一格只埋一张。谁停在那一格（埋的人自己也算）、结算完那一格以后翻开，照抽到 Health 卡结算（免疫、抵消、甩锅都照旧）。
+// 一格能叠好几张，谁埋的都行）。场上埋几张不限。谁停在那一格（埋的人自己也算）、结算完那一格以后翻开，照抽到 Health 卡结算（免疫、抵消、甩锅都照旧）。
 // 埋在哪、是哪张只有自己知道：S.traps 只在房主这台是全的，联机推状态时别人的只留 by（net/40c-sync.js 的 stateFor），日志只写花了多少钱。主人出局，他埋的卡收回弃牌堆。
 // 电脑不会埋（全电脑的模拟和以前一模一样）
 const isSvc = i => SQ[i].t === 'prop' || SQ[i].t === 'util';
 export const trapsOf = p => (S.traps || []).filter(t => t.by === p.id);
 // 能埋的格：这一回合棋子刚走过的服务格（路过的、最后停下的都算；掷骰子、卡牌移动都算），回合一换就清空。
 // 别人只看得到你走了哪一段，猜不出埋在其中哪一格；还没走（掷骰子前）就没有能埋的格
-const trapCands = p => p.pathTurn === turnKey() ? (p.path || []).filter(i => isSvc(i) && !(S.traps || []).some(t => t.sq === i)) : [];
+// 一格上能叠好几张（不管是谁埋的、埋了几张），所以已经埋过卡的格子照样能再埋：列表里少一格也就看不出别人埋在哪
+const trapCands = p => p.pathTurn === turnKey() ? (p.path || []).filter(isSvc) : [];
 const buryReady = p => p.buryTurn !== turnKey();
 export const buryOk = p => !!p && p.alive && p.jail === null && buryReady(p) && chFoes(p).length > 0 && trapCands(p).length > 0 && (S.inc.length + S.incDisc.length) > 0;
 // 棋子每走一格记一下（engine/13-move.js 的 moveSteps）：只留这一回合的
@@ -82,11 +83,11 @@ export async function buryIncident() {
   if (!p.alive || p.jail !== null || !chFoes(p).length) return void UI.toast(_t(5560, "现在不能埋 Health 卡"));
   if (!buryReady(p)) return void UI.toast(_t(5672, "这回合已经埋过一张了，下回合再来"));
   const cost = incSendCost(p), cands = trapCands(p).sort((a, b) => a - b);
-  if (!cands.length) return void UI.toast(_t(5695, "没有能埋的格子：只能埋在这一回合刚走过、还没埋卡的服务格上（先掷骰子走一步）"));
+  if (!cands.length) return void UI.toast(_t(5699, "没有能埋的格子：只能埋在这一回合刚走过的服务格上（先掷骰子走一步）"));
   if (p.cash < cost) return void UI.toast(_tf(2981, "现金不够 ${$0}", cost));
   // 格子名写在按钮上：别的座位、观众那边的按钮换成「？」（priv.buttons），正文也换掉，看不出在挑哪几格
   const v = await UI.ask({ who: p.id, cls: 'pick', title: _tf(5563, "花 ${$0} 埋一张 Health 卡：埋在哪一格？（只有你看得到）", cost),
-    html: _tf(5696, "<p>挑好格子后从 Health 牌堆顶翻 {$0} 张，你挑一张扣着埋下去，别人看不到埋在哪、是哪张（你自己在玩家卡上看得到）。谁停在那一格（经过不算），结算完那一格以后翻开，由他照常结算；你自己停上去也一样会翻开。</p><p class=\"muted\">只能埋在这一回合棋子刚走过的服务格上（路过的、停下的都算），已经埋了卡的格子不能再埋；每个回合能埋一张，场上埋几张不限。</p>", BURY_PICK),
+    html: _tf(5700, "<p>挑好格子后从 Health 牌堆顶翻 {$0} 张，你挑一张扣着埋下去，别人看不到埋在哪、是哪张（你自己在玩家卡上看得到）。谁停在那一格（经过不算），结算完那一格以后翻开，由他照常结算；你自己停上去也一样会翻开。</p><p class=\"muted\">只能埋在这一回合棋子刚走过的服务格上（路过的、停下的都算）；一格能叠好几张（谁埋的都行），有人停上去全部翻开；每个回合能埋一张，场上埋几张不限。</p>", BURY_PICK),
     priv: { title: _tf(5565, "{$0} 在决定埋不埋 Health 卡", p.name), html: _t(5566, "<p>埋在哪一格只有他自己知道。</p>"), buttons: [...cands.map(() => '?'), _t(2465, "取消")] },
     buttons: [...cands.map(i => ({ label: SQ[i].n, value: i })), { label: _t(2465, "取消"), value: -1 }] });
   const i = +v; if (!cands.includes(i) || !buryOk(p) || !trapCands(p).includes(i) || p.cash < cost) return;
@@ -109,10 +110,15 @@ export async function buryIncident() {
 // 停在 i 上的 p 踩没踩中对手埋的卡（land 结算完这一格以后调）
 export async function springTrap(p, i) {
   if (!S.traps || !S.traps.length || !p.alive || S.over) return;
-  const k = S.traps.findIndex(t => t.sq === i); if (k < 0) return;   // 埋的人自己停上去也翻开
-  const t = S.traps.splice(k, 1)[0];
-  log(t.by === p.id ? _tf(5688, "💣 {$0} 踩中了自己埋在 {$1} 的 Health 卡「{$2}」", nm(p), sqn(i), INC[t.id].n) : _tf(5568, "💣 {$0} 踩中了 {$1} 埋在 {$2} 的 Health 卡「{$3}」", nm(p), nm(P(t.by)), sqn(i), INC[t.id].n));
-  await drawIncident(p, t.id); UI.render();
+  // 这一格上埋的全翻开（埋的人自己停上去也算），按埋下的先后一张张结算；中途破产或游戏结束就停
+  const hit = S.traps.filter(t => t.sq === i); if (!hit.length) return;
+  S.traps = S.traps.filter(t => t.sq !== i);
+  if (hit.length > 1) log(_tf(5701, "💣 {$0} 停在 {$1}：这一格埋了 {$2} 张 Health 卡，全部翻开", nm(p), sqn(i), hit.length));
+  for (const t of hit) {
+    if (!p.alive || S.over) { S.incDisc.push(t.id); continue; }   // 没轮到结算的放进弃牌堆
+    log(t.by === p.id ? _tf(5688, "💣 {$0} 踩中了自己埋在 {$1} 的 Health 卡「{$2}」", nm(p), sqn(i), INC[t.id].n) : _tf(5568, "💣 {$0} 踩中了 {$1} 埋在 {$2} 的 Health 卡「{$3}」", nm(p), nm(P(t.by)), sqn(i), INC[t.id].n));
+    await drawIncident(p, t.id); UI.render();
+  }
 }
 // 主人出局：他埋的卡收回弃牌堆
 export function dropTraps(p) { if (!S.traps || !S.traps.length) return; S.traps.filter(t => t.by === p.id).forEach(t => S.incDisc.push(t.id)); S.traps = S.traps.filter(t => t.by !== p.id); }
