@@ -5401,5 +5401,7 @@
  "EC2 升了 Auto Scaling（自动换掉要退役的实例），或者 ELB 升了「负载均衡 + Auto Scaling」、EventBridge 升了「Health 事件通知」；多 AZ 挡不住某一台实例被退役": "EC2 upgraded to Auto Scaling (retiring instances are replaced automatically), or ELB upgraded to \"Load balancing + Auto Scaling\", or EventBridge upgraded to \"Health event notifications\"; Multi-AZ can't stop a single instance from being retired",
  "用过 Cost Explorer 卡（开了成本异常检测），或者 EventBridge 升了「定时启停 EC2」": "Used the Cost Explorer card (cost anomaly detection on), or EventBridge upgraded to \"Scheduled EC2 start/stop\"",
  "这一圈用过了，经过起点后再用": "Already used this lap; usable again after you pass Startup",
- "这一圈已经用过技能了，经过起点后再用": "Already used a skill this lap; skills are available again after you pass Startup"
+ "这一圈已经用过技能了，经过起点后再用": "Already used a skill this lap; skills are available again after you pass Startup",
+ "第十八轮": "Round 18",
+ "修 27 处问题、技能一圈一次": "27 fixes, one skill per lap"
 }

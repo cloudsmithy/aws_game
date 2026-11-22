@@ -49,7 +49,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <h1>亚马逊云科技 User Group 云上大亨 · 这一轮改了什么</h1>
   <p>从「破产逻辑是不是有问题」开始，一路改到新角色、两个新开关、地狱模式和全套文档。每条改动后面写了为什么改；平衡数字都是用电脑玩家对打模拟出来的。</p>
   <nav>
-    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#r17">第十七轮</a><a href="#todo">待定</a>
+    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#r17">第十七轮</a><a href="#r18">第十八轮</a><a href="#todo">待定</a>
   </nav>
 </header>
 
@@ -872,8 +872,27 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   </ul>
 </section>
 
+<section id="r18">
+  <h2><i>26</i>第十八轮（11-22）：修 27 处问题、技能一圈一次</h2>
+  <ul>
+    <li><span class="tag chg">改</span>高速部署：一圈之内只能用一次技能（所有技能合计，掷骰子、被事件打中时自动问的灰度发布、回滚重发、故障转移、蓝绿部署也算），经过起点后才能再用。</li>
+    <li><span class="tag bug">BUG</span>服务卖回、交易、破产、战略并购换手后，Reserved Instance 还在，买回来又能接着免运行费；现在按规则书作废。</li>
+    <li><span class="tag bug">BUG</span>Hackathon 免费加的容量，减掉、卖回、全额退款、估值、代理商转卖时都按花了钱算。</li>
+    <li><span class="tag bug">BUG</span>独角兽开局送的 Route 53，用 Trusted Advisor 能按 $160 卖回。</li>
+    <li><span class="tag bug">BUG</span>交易、破产把服务交给发起 DDoS 的人时，DDoS 没清掉，要等两回合才收得到钱；破产分资产时下线的服务按全价算。</li>
+    <li><span class="tag bug">BUG</span>卡牌倍率「每轮随机」第 1 轮不摇，一直是 ×1。</li>
+    <li><span class="tag bug">BUG</span>渠道合规审计、代理合同到期没续、测试环境忘了删等 7 张卡打不中时也先问「要抵消吗」，白白花掉 Enterprise Support。</li>
+    <li><span class="tag bug">BUG</span>「前进到某一格」的卡站在目标上时原地 0 步再落一次（还能再升一次级）；现在绕一整圈，经过起点照常领钱。</li>
+    <li><span class="tag bug">BUG</span>代理商抽到「Startup 拿到代理商折扣」拿到一张用不上的券；DDoS、证书过期能拿已经下线的服务去 Impaired 抵罚款；测试环境忘了删也收下线实例的钱；两张卡的免疫说明漏写。</li>
+    <li><span class="tag bug">BUG</span>退出、回首页、离开房间、多标签页接管时丢掉 <code>?peerhost=</code>，自建信令的房间连回公共服务器。</li>
+    <li><span class="tag bug">BUG</span>远端玩家点「退出」提示「已自动保存」其实没存、也没通知房主；暂停电脑后「再来一局」沿用暂停；读档后马上出现「我来替他操作」；限时分钟数没有上限；地狱模式切语言后锁住的 DLC 看着能点。</li>
+    <li><span class="tag bug">BUG</span>联机房主不看模式就执行远端发来的 SP/RI、主动行动。</li>
+    <li><span class="tag bug">BUG</span>英文、日文版里受邀观战、确认玩家身份、加入房间表单的字是中文；「现在结算」按钮名和说明对不上、引号里的卡名和实际不一致、「停一轮」混用 turn / round、Marketplace 卡在卡牌倍率 ×2 时门槛显示成 $600。</li>
+  </ul>
+</section>
+
 <section id="todo">
-  <h2><i>26</i>待定 / 已知问题</h2>
+  <h2><i>27</i>待定 / 已知问题</h2>
   <ul>
     <li>代理商在完整局（不限轮数约 16%）和地狱模式 15 轮（约 14%）偏弱，公平是 25%；各模式的数字见规则书第 32 节。</li>
     <li>模拟里的电脑不会刻意凑六大支柱，所以 Well-Architected 的达成率只能当下限看。</li>
@@ -881,7 +900,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <div class="note">改动前的网页备份在上一级目录：<code>index.before-speed.html</code>（加高速部署前）、<code>index.before-roles.html</code>（加角色和代理商前）。</div>
 </section>
 
-<footer>亚马逊云科技 User Group 云上大亨 · 作者：亚马逊云科技 User Group · 问题和建议：<a href="https://github.com/cloudsmithy/aws_game/issues">提 issue</a> · 2026-11-21</footer>
+<footer>亚马逊云科技 User Group 云上大亨 · 作者：亚马逊云科技 User Group · 问题和建议：<a href="https://github.com/cloudsmithy/aws_game/issues">提 issue</a> · 2026-11-22</footer>
 </div>
 </body>
 </html>
