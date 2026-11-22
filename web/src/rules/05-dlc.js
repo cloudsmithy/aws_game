@@ -10,7 +10,7 @@ import { CO_SVCS, halfSave } from '../engine/08c-costs.js';
 import { baseRent, sellProp, sellValue, upgradeInfo, zhe } from '../engine/09-rent.js';
 import { moveSteps, passStart, passUG } from '../engine/13-move.js';
 import { land } from '../engine/15-land.js';
-import { impair, secActive, skipOrPay } from '../engine/17-health.js';
+import { debtCleared, impair, secActive, skipOrPay } from '../engine/17-health.js';
 import { moneyOrMove } from '../engine/18-reinvent.js';
 import { wildBind } from '../engine/21-skills.js';
 import { ST } from '../engine/26b-retro.js';
@@ -143,7 +143,7 @@ export let DLC_REI = __rv(() => ([
   { dlc: 'genai', n: _t(1629, "拿到生成式 AI 创新中心支持"), e: _t(1630, "从亚马逊云科技领 $100；你名下每块 AI 组的服务（Bedrock、SageMaker AI 等），再领 $50"), tip: _t(1631, "亚马逊云科技生成式 AI 创新中心会派专家帮客户做 GenAI 落地"), art: 'activate', run: async (p, others, card) => { const ai = ownedBy(p).filter(i => SQ[i].g === 'ai' && active(p, i)); await moneyOrMove(p, card, 100 + 50 * ai.length, got => log(_tf(1633, "{$0} {$1}领 ${$2}", nm(p), ai.length ? _tf(1632, "有 {$0}，", ai.map(sqn).join(_t(349, "、"))) : '', got))); } },
   { dlc: 'genai', n: _t(1634, "AI Agent 上线"), e: _t(1635, "前进到 Lambda；没人买可以打 8 折买"), tip: _t(1636, "Agent 常把 Lambda 函数当工具，让模型调用你的业务接口；Bedrock AgentCore Gateway 能把现有的 API 和 Lambda 函数转成 Agent 可调用的 MCP 工具"), art: 'lambda', run: async p => { await advanceTo(p, IX.lambda); await land(p, { discount: 0.8 }); } },
   { dlc: 'sec', n: _t(1637, "通过了安全合规审计"), e: _t(1638, "持有 2 块以上安全组服务领 $150，否则领 $50"), tip: _t(1639, "Artifact 里可以下载亚马逊云科技的合规报告"), art: 'securityhub', run: async (p, others, card) => { await moneyOrMove(p, card, secActive(p, 'sec') >= 2 ? 150 : 50, got => log(_tf(1640, "{$0} 领 ${$1}", nm(p), got))); } },
-  { dlc: 'sec', n: _t(1641, "Security Hub CSPM 全绿"), e: _t(1642, "清掉 1 个技术债；没有技术债就领 $80"), tip: _t(1643, "Security Hub CSPM 按安全标准持续检查配置"), art: 'securityhub', run: async p => { if (p.techDebt > 0) { p.techDebt--; p.refactored = true; log(_tf(1644, "{$0} 清掉 1 个技术债", nm(p))); } else log(_tf(1645, "{$0} 没有技术债，领 ${$1}", nm(p), credit(p, 80))); } },
+  { dlc: 'sec', n: _t(1641, "Security Hub CSPM 全绿"), e: _t(1642, "清掉 1 个技术债；没有技术债就领 $80"), tip: _t(1643, "Security Hub CSPM 按安全标准持续检查配置"), art: 'securityhub', run: async p => { if (p.techDebt > 0) { p.techDebt--; p.refactored = true; log(_tf(1644, "{$0} 清掉 1 个技术债", nm(p))); debtCleared(p); } else log(_tf(1645, "{$0} 没有技术债，领 ${$1}", nm(p), credit(p, 80))); } },
   { dlc: 'finops', n: _t(1646, "成本异常检测发现一笔浪费"), e: _t(1647, "从亚马逊云科技领 $50；你名下每块实例型服务（IaaS、PaaS、容器），再领 $25（最多再领 $150）"), tip: _t(1648, "成本异常检测免费，用机器学习发现异常支出"), art: 'costexplorer', run: async (p, others, card) => { const n = Math.min(6, ownedBy(p).filter(i => isInst(i) && active(p, i)).length); await moneyOrMove(p, card, 50 + 25 * n, got => log(_tf(1633, "{$0} {$1}领 ${$2}", nm(p), n ? _tf(1649, "有 {$0} 块实例型服务，", n) : '', got))); } },
   { dlc: 'finops', n: _t(1650, "Compute Optimizer 建议降配"), e: _t(1651, "下次经过 Startup 扶持时，EC2、EBS、Lambda、RDS、Aurora 和跑在 Fargate 上的 ECS 运行费减半（Spot 买的、下线的、其他服务、EC2 的公网 IPv4 地址费和 Savings Plans 承诺额照付）；手上已经有一张没用上的运行费减半，或者一分钱都省不下的，改领 $50"), tip: _t(1652, "Compute Optimizer 按实际利用率推荐更合适的实例规格"), art: 'trustedadvisor',
     // 减半卡不叠加：手上已经有一张没用上的，或者按现在的用量省不下钱（名下没有它能降配的服务、技能让下一圈本来就全免），就改领 $50

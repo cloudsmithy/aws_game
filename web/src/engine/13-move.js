@@ -65,7 +65,7 @@ export async function moveSteps(p, n) {
 }
 async function moveTo(p, target) { await moveSteps(p, (target - p.pos + N) % N); }
 // 被送进维护窗口、不交钱要停几轮：传统企业上云 2 轮，其他角色 1 轮（11-06 起不再掷对子出狱）
-export const jailMax = p => p.role === 'legacy' ? 2 : 1;
+export const jailMax = p => p.role === 'legacy' && p.jailCat !== 'rf' ? 2 : 1;   // 清技术债进来的（jailCat 'rf'，见 engine/17-health.js 的 debtCleared）谁都只停一轮
 // 被送进来时棋子是直接瞬移过去的，真人玩家弹一次说明：为什么进来、下回合怎么出来；电脑只在格子上方冒一句，不挡着它跑
 export async function sendToJail(p, cat, why = '') {
   p.pos = IX.jail; p.jail = 0; p.jailCat = cat;

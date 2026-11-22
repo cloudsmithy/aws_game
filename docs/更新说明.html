@@ -49,7 +49,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <h1>亚马逊云科技 User Group 云上大亨 · 这一轮改了什么</h1>
   <p>从「破产逻辑是不是有问题」开始，一路改到新角色、两个新开关、地狱模式和全套文档。每条改动后面写了为什么改；平衡数字都是用电脑玩家对打模拟出来的。</p>
   <nav>
-    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#r17">第十七轮</a><a href="#r18">第十八轮</a><a href="#r19">第十九轮</a><a href="#todo">待定</a>
+    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#r17">第十七轮</a><a href="#r18">第十八轮</a><a href="#r19">第十九轮</a><a href="#r20">第二十轮</a><a href="#todo">待定</a>
   </nav>
 </header>
 
@@ -906,8 +906,18 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   </ul>
 </section>
 
+<section id="r20">
+  <h2><i>28</i>第二十轮（11-22）：re:Invent 手牌、清技术债要停机</h2>
+  <ul>
+    <li><span class="tag new">新</span>re:Invent 手牌：真人抽到 re:Invent 卡时只有自己看得到，四选一：现在用（公开）、收进手牌（不公开）、卖掉领 $50、丢掉再掷一次骰子（这次落地不能买）。手牌最多 3 张，自己回合里可以打出、卖掉，或者弃一张走 1–3 格（每回合一次）。时机不对的卡（比如现在没有能升级的服务）可以先留着。</li>
+    <li><span class="tag new">新</span>联机时别的设备只看得到你有几张手牌：手牌和 re:Invent 牌堆顺序都不发给别人，抽卡时的选择窗别人只看到「在看抽到的 re:Invent 卡」。同屏玩只能靠大家不偷看。</li>
+    <li><span class="tag chg">改</span>清技术债要停机：不管怎么清掉的（花钱重构、大重构、#7 考过认证、Security Hub CSPM 全绿、监管沙盒、紧急救治、自动修复），清掉的那一刻马上进维护窗口停一轮，名下所有服务一起下线一轮。不能付 $50 或用 Enterprise Support 提前出来，出来不写复盘、不记技术债。</li>
+    <li><span class="tag chg">改</span>技术债攒满 3 个的大重构不再有「多交 $100 不停」的选项：交 $300 清掉 3 个，按上一条进维护窗口。</li>
+  </ul>
+</section>
+
 <section id="todo">
-  <h2><i>28</i>待定 / 已知问题</h2>
+  <h2><i>29</i>待定 / 已知问题</h2>
   <ul>
     <li>代理商在完整局（不限轮数约 16%）和地狱模式 15 轮（约 14%）偏弱，公平是 25%；各模式的数字见规则书第 32 节。</li>
     <li>模拟里的电脑不会刻意凑六大支柱，所以 Well-Architected 的达成率只能当下限看。</li>

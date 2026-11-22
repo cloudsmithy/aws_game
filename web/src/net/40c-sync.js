@@ -4,7 +4,7 @@ import { S, cur } from '../engine/07-state.js';
 import { doRoll, endTurn, jailAct, uiAction } from '../engine/14-turn.js';
 import { capHere, upHere } from '../engine/15-land.js';
 import { refactorDebt } from '../engine/17-health.js';
-import { buyReinvent, incAll, incOne, incRand } from '../engine/18-reinvent.js';
+import { buyReinvent, incAll, incOne, incRand, reiHand } from '../engine/18-reinvent.js';
 import { declareBankrupt } from '../engine/20-bankrupt.js';
 import { setRsRate, useRoleSkill, wildDialog } from '../engine/21-skills.js';
 import { speedMenu } from '../engine/22-speed.js';
@@ -56,15 +56,23 @@ Object.assign(MP, {
     // 只有房主这台知道的也带给远端：电脑暂停了没有、哪些联机座位掉线了（远端据此写「已暂停」「掉线了」）。每次推都按此刻重算，进了 core，只按了暂停也会推过去。
     // now：房主此刻的时间，远端拿来对齐限时倒计时；不放进 core，不影响「内容没变就不发」
     S.aiPause = AI_PAUSE || undefined; { const off = Object.keys(this.seats).map(Number).filter(k => !this.seats[k].online && S.players[k]); S.mpOff = off.length ? off : undefined; }
-    const seq = S.logSeq || 0, core = JSON.stringify({ ...S, log: undefined, hist: undefined, diceQ: undefined }), out = {};   // 掷骰前定好的点数（diceQ）不发给远端
+    // 掷骰前定好的点数（diceQ）不发给远端。没人有手牌时大家收到的一样，只序列化一次；有人有手牌时按座位各算一份（stateFor），观众共用一份
+    const seq = S.logSeq || 0, out = {}, views = {}, hands = S.players.some(q => q.hand && q.hand.length);
+    const view = seat => { const v = hands ? '@' + seat : ''; return views[v] || (views[v] = (st => ({ st, core: JSON.stringify({ ...st, log: undefined, hist: undefined, diceQ: undefined }), tag: v }))(this.stateFor(seat))); };
     (only ? [only] : this.recipients()).forEach(x => {
       if (!x.conn || !x.conn.open) return;
+      const { st, core, tag } = view(x.conn._viewer ? 'v' : x.conn._seat);
       const b = x.base && x.base.S === S ? x.base : null;   // 没发过、换了一局（新开、读档）、远端要求补发：发整份
       if (b && b.seq === seq && b.core === core && (lite || !b.lite)) return;
-      const k = !x.delta ? 'old' : b ? 'd' + b.seq : 'all';
-      if (!out[k]) out[k] = k === 'old' ? { t: 'state', S: { ...S, diceQ: undefined }, now: Date.now() } : k === 'all' ? JSON.stringify({ t: 'state', S: { ...S, diceQ: undefined }, now: Date.now() }) : `{"t":"state","now":${Date.now()},"S":${core},"lite":${lite ? 1 : 0},"delta":${JSON.stringify(this.deltaSince(b.seq, seq))}}`;   // old：老版本页面照旧收整份对象
-      this.send(x.conn, out[k]); x.base = { S, seq, core, lite: k !== 'old' && k !== 'all' && lite };   // 整份的远端总是整页重画
+      const k = (!x.delta ? 'old' : b ? 'd' + b.seq : 'all') + tag;
+      if (!out[k]) out[k] = !x.delta ? { t: 'state', S: { ...st, diceQ: undefined }, now: Date.now() } : !b ? JSON.stringify({ t: 'state', S: { ...st, diceQ: undefined }, now: Date.now() }) : `{"t":"state","now":${Date.now()},"S":${core},"lite":${lite ? 1 : 0},"delta":${JSON.stringify(this.deltaSince(b.seq, seq))}}`;   // old：老版本页面照旧收整份对象
+      this.send(x.conn, out[k]); x.base = { S, seq, core, lite: !!x.delta && !!b && lite };   // 整份的远端总是整页重画
     });
+  },
+  // 发给 seat 号座位的那份状态（观众的 seat 不是座位号）：别人的 re:Invent 手牌（engine/18-reinvent.js）换成同样张数的 0，只知道有几张。
+  // re:Invent 牌堆的顺序也换成 0：知道下一张是什么，就知道别人抽到、收进手牌的是哪张。远端只用到牌堆还剩几张
+  stateFor(seat) {
+    return { ...S, rei: (S.rei || []).map(() => 0), players: S.players.map(q => q.hand && q.hand.length && q.id !== seat ? { ...q, hand: q.hand.map(() => 0) } : q) };
   },
   // 第 from 条之后新增的日志（新的在前，跟 S.log 一样）和这期间改过的格子历史（整格发）
   deltaSince(from, seq) {
@@ -78,17 +86,20 @@ Object.assign(MP, {
     this.cur = { id, who, box, onAnswer };
     const clean = { title: spec.title, html: spec.html, cls: spec.cls, aiMin: !!spec.aiMin, hold: spec.hold || 0, inputs: spec.inputs, noAI: !!spec.noAI, hp: this.hostPlays(who), buttons: spec.buttons.map(b => ({ label: b.label, desc: b.desc, cls: b.cls || '', disabled: !!b.disabled })) };
     this.cur.msg = { t: 'modal', id, who, spec: clean };
-    this.broadcast(this.cur.msg);
+    // priv：只给主人看的窗口（re:Invent 手牌）。真的标题和正文只发给主人那个座位，别的座位、观众收到 priv 那份（按钮上不写卡名，照发）
+    this.cur.pub = spec.priv ? { ...this.cur.msg, spec: { ...clean, title: spec.priv.title, html: spec.priv.html || '' } } : null;
+    this.recipients().forEach(x => this.send(x.conn, this.modalFor(x)));
   },
+  modalFor(x) { const c = this.cur; return c.pub && x !== this.seats[c.who] ? c.pub : c.msg; },
   closeModal() { if (this.cur) { this.broadcast({ t: 'modalClose', id: this.cur.id }); this.cur = null; } },
   answer(id, ans, inp) { this.send(this.hostConn, { t: 'ans', id, ...('k' in ans ? { k: ans.k } : { v: String(ans.v) }), inp }); },
   // 远端玩家点的按钮 → 房主这边执行（只认白名单里的操作，而且必须轮到他）
   ACTS: {
     roll: () => doRoll(), end: () => endTurn(), 'jail:roll': () => jailAct('stay'), 'jail:stay': () => jailAct('stay'), 'jail:pay': () => jailAct('pay'), 'jail:es': () => jailAct('es'),
-    manage: () => uiAction(() => manage(cur())), trade: () => uiAction(trade), sp: () => uiAction(edpDialog), action: () => uiAction(activeAction), bankrupt: () => uiAction(declareBankrupt), buyrei: () => uiAction(buyReinvent), refactor: () => uiAction(refactorDebt),
+    manage: () => uiAction(() => manage(cur())), trade: () => uiAction(trade), sp: () => uiAction(edpDialog), action: () => uiAction(activeAction), bankrupt: () => uiAction(declareBankrupt), buyrei: () => uiAction(buyReinvent), reihand: () => uiAction(reiHand), refactor: () => uiAction(refactorDebt),
     skill: () => uiAction(useRoleSkill), wild: () => uiAction(wildDialog), challenge: () => uiAction(quizChallenge), challengeall: () => uiAction(quizAll), incone: () => uiAction(incOne), incrand: () => uiAction(incRand), incall: () => uiAction(incAll), uphere: () => uiAction(upHere), caphere: () => uiAction(capHere), tradefor: m => { const to = m && m.to, w = m && m.want; if (Number.isInteger(to) && S.players[to] && S.players[to].alive && to !== S.cur && Number.isInteger(w) && S.props[w] && S.props[w].owner === to) uiAction(() => trade({ to, want: w })); }, speed: () => uiAction(speedMenu), rsrate: () => uiAction(setRsRate),
   },
   ONCLICK: { 'doRoll()': 'roll', 'endTurn()': 'end', "jailAct('stay')": 'jail:stay', "jailAct('pay')": 'jail:pay', "jailAct('es')": 'jail:es',
-    'uiAction(manage)': 'manage', 'uiAction(trade)': 'trade', 'uiAction(edpDialog)': 'sp', 'uiAction(activeAction)': 'action', 'uiAction(declareBankrupt)': 'bankrupt', 'uiAction(buyReinvent)': 'buyrei', 'uiAction(refactorDebt)': 'refactor', 'uiAction(useRoleSkill)': 'skill', 'uiAction(wildDialog)': 'wild', 'uiAction(quizChallenge)': 'challenge', 'uiAction(quizAll)': 'challengeall', 'uiAction(incOne)': 'incone', 'uiAction(incRand)': 'incrand', 'uiAction(incAll)': 'incall', 'uiAction(upHere)': 'uphere', 'uiAction(capHere)': 'caphere', 'uiAction(speedMenu)': 'speed', 'uiAction(setRsRate)': 'rsrate' },
+    'uiAction(manage)': 'manage', 'uiAction(trade)': 'trade', 'uiAction(edpDialog)': 'sp', 'uiAction(activeAction)': 'action', 'uiAction(declareBankrupt)': 'bankrupt', 'uiAction(buyReinvent)': 'buyrei', 'uiAction(reiHand)': 'reihand', 'uiAction(refactorDebt)': 'refactor', 'uiAction(useRoleSkill)': 'skill', 'uiAction(wildDialog)': 'wild', 'uiAction(quizChallenge)': 'challenge', 'uiAction(quizAll)': 'challengeall', 'uiAction(incOne)': 'incone', 'uiAction(incRand)': 'incrand', 'uiAction(incAll)': 'incall', 'uiAction(upHere)': 'uphere', 'uiAction(capHere)': 'caphere', 'uiAction(speedMenu)': 'speed', 'uiAction(setRsRate)': 'rsrate' },
   scalar(value) { return value == null || ['string', 'number', 'boolean'].includes(typeof value); },
 });
