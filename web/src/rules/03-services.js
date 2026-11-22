@@ -121,9 +121,15 @@ let UPGRADES = __rv(() => ({
   config: [[_t(106, "托管规则"), _t(129, "规则"), 'audit', _t(280, "用托管规则持续检查资源配置合不合规，比如 S3 桶有没有公开、EBS 卷有没有加密")], [_t(154, "自动修正"), _t(154, "自动修正"), 'dataprot', _t(281, "不合规的资源用 Systems Manager 自动化文档自动改回来，比如把公开的 S3 桶改回私有")], [_t(155, "聚合器"), _t(155, "聚合器"), '', _t(282, "把多个账户、多个区域的配置和合规结果汇总到一处看")]],
 }), v => { UPGRADES = v; }, () => UPGRADES);
 Object.entries(UPGRADES).forEach(([k, v]) => { (SVC[k] || UTIL[k]).upg = v; });
+// 平衡参数（?bal={} 能覆盖，地狱模式在 rules/35-modes.js 换一部分）；jailFee 是被送进维护窗口后付钱提前出来的价钱（落在维护窗口格上交的 $50 不算）。
+// 放在格子数据前面：SPECIAL 的说明要用
+export const BAL = Object.assign({ salary: 200, cashMul: 1, hourLow: [5, 10, 20, 30], hourHigh: [10, 20, 30, 40], capLow: 5, capHigh: 10, req: 0.15, token: 0.25, rentBase: 0.2, sell: 0.8, cardGrow: 0.5, protect: 2, growth: 0.75, growthEvery: 5, skillFull: 1.2, seatBonus: 50, rsKeepCombo: 1, rsKeepGroup: 1, rsComboMul: 2, rsCashSum: 1, rsLimitPer: 300, rsHell: 0.2, jailFee: 500 },
+  (() => { try { return JSON.parse(new URLSearchParams(location.search).get('bal') || '{}'); } catch (e) { return {}; } })());
+
+export const BAL0 = { ...BAL };
 export let SPECIAL = __rv(() => ({
   go: { t: 'go', n: _t(283, "Startup 扶持"), icon: 'activate', d: _t(284, "经过或停下领 $200 Credits，并交运行费") },
-  jail: { t: 'jail', n: _t(285, "维护窗口"), icon: 'ssm', d: _t(286, "落在这里或被送进来：停一轮，或者交 $50 照常走") },
+  jail: { t: 'jail', n: _t(285, "维护窗口"), icon: 'ssm', d: _tf(5674, "落在这里：停一轮，或者交 $50 照常走；被送进来：下回合停一轮，或者付 ${$0} 马上出来", BAL.jailFee) },
   free: { t: 'free', n: _t(287, "User Group 活动"), icon: 'users', d: _t(288, "经过 UG 活动领取 $50；停在上面二选一：抽奖 $100～奖池全部（不够亚马逊云科技补）/ 抽 3 张 re:Invent 卡选一张") },
   gotojail: { t: 'gotojail', n: _t(289, "Root 密钥泄露"), icon: 'iam', d: _t(290, "直接进维护窗口") },
   inc: { t: 'inc', n: _t(291, "Health 事件"), icon: 'health', d: _t(292, "抽一张 Health 事件卡") },
@@ -177,7 +183,7 @@ export const LANG_KEY = 'aws-tycoon-lang';   // 记住上次选的语言：根�
 // 有哪些语言：每种语言用它自己的写法（不翻译）。中文版在 code/index.html，别的语言在 code/<代码>/index.html（tools/i18n.mjs build <代码> 按 i18n/<代码>.json 生成）。
 // 以后加语言：这里加一行，再出一份 i18n/<代码>.json
 export let LANGS = __rv(() => ([{ code: 'zh', name: _t(341, "简体中文") }, { code: 'en', name: 'English' }, { code: 'ja', name: _t(342, "日本語") }]), v => { LANGS = v; }, () => LANGS);
-export let GAME_VERSION = __rv(() => ({ major: 1, round: 21, name: _t(5661, "第二十一轮"), title: _t(5662, "中途加入、埋 Health 卡、12 张新卡、修 27 处问题"), commits: 176, changes: 517, since: '2026-10-20', build: 'd9b0081', time: '2026-11-22 08:20' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
+export let GAME_VERSION = __rv(() => ({ major: 1, round: 21, name: _t(5661, "第二十一轮"), title: _t(5662, "中途加入、埋 Health 卡、12 张新卡、修 27 处问题"), commits: 184, changes: 518, since: '2026-10-20', build: 'a550e03', time: '2026-11-22 10:48' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
 export let SQ = __rv(() => (LAYOUT.map(k => SVC[k] ? { t: 'prop', k, icon: k, ...SVC[k] } : UTIL[k] ? { t: 'util', k, icon: k, ...UTIL[k] } : { k, ...SPECIAL[k] })), v => { SQ = v; }, () => SQ);
 export const IX = {}; SQ.forEach((s, i) => { if (!(s.k in IX)) IX[s.k] = i; });
 export const GRP = g => SQ.map((s, i) => s.g === g ? i : -1).filter(i => i >= 0);
@@ -248,10 +254,6 @@ export function effLabel(i, l) {
 export const TOKEN = [16, 48, 96, 160];
 // 一局最多打多少轮（学习模式不限轮数，慢慢答题）：模拟里 4 人局中位约 35 轮能打出胜负，再长就拖沓了
 export const MAX_ROUNDS = 50;
-export const BAL = Object.assign({ salary: 200, cashMul: 1, hourLow: [5, 10, 20, 30], hourHigh: [10, 20, 30, 40], capLow: 5, capHigh: 10, req: 0.15, token: 0.25, rentBase: 0.2, sell: 0.8, cardGrow: 0.5, protect: 2, growth: 0.75, growthEvery: 5, skillFull: 1.2, seatBonus: 50, rsKeepCombo: 1, rsKeepGroup: 1, rsComboMul: 2, rsCashSum: 1, rsLimitPer: 300, rsHell: 0.2 },
-  (() => { try { return JSON.parse(new URLSearchParams(location.search).get('bal') || '{}'); } catch (e) { return {}; } })());
-
-export const BAL0 = { ...BAL };
 // 地狱模式必须答题：答对过路费只减 30%（全答对时对局中位 28 轮；减半的话 32 轮，最早测时要拖到 38 轮）
 // 地狱模式的代理商：7 折进货、自己的地正常收过路费（不再只靠架构），所以架构不翻倍、起始资金也不按客户总和算
 

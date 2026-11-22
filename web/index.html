@@ -310,7 +310,6 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:var(--surface-soft
 .bcard .bh span{font-size:13px;color:var(--mut)}
 .bcard table{margin-top:10px}
 .bcard td:last-child{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
-.bcard tr.hi td{background:var(--info-bg)}
 .bcard .df{font-size:12px;color:var(--mut);line-height:1.6;margin-top:8px}
 .bcard .ow{display:flex;align-items:center;gap:6px;font-size:13px;margin-top:8px}
 
@@ -494,7 +493,7 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:var(--surface-soft
 .ap.done{color:var(--green);font-weight:700}
 /* 图鉴、明细里服务名下面的「现在归谁」 */
 .af .aow{display:block;font-size:11px;font-weight:700;line-height:1.2;margin-top:1px}.af .aow.none{color:var(--mut);font-weight:400}
-.ledger .archl td{vertical-align:top}.ledger .archl tr.done td{background:var(--surface-muted)}.ledger .archl .flow{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}.ledger .pg td:first-child,.ledger .pg td:nth-child(2){white-space:nowrap}.ledger .archl .ok{color:var(--green);font-weight:700}.ledger .archall{margin:4px 0 0;padding-left:18px;line-height:1.8}
+.ledger .archl td{vertical-align:top}.ledger .archl .flow{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}.ledger .pg td:first-child,.ledger .pg td:nth-child(2){white-space:nowrap}.ledger .archl .ok{color:var(--green);font-weight:700}.ledger .archall{margin:4px 0 0;padding-left:18px;line-height:1.8}
 /* 横向长方形棋盘 */
 #board{min-width:760px}
 #center{grid-row:2/11;grid-column:2/15}
@@ -608,6 +607,9 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:var(--surface-soft
 /* 开局页底部吸住的按钮栏露出来时，hero 里和它同名的两个按钮先藏起来，同一屏不出现两组一样的按钮 */
 .hero.dup .cta .twin{display:none}
 .hero .cta button.ondark:hover{background:rgba(255,255,255,.08);border-color:#fff;color:#fff}
+.hero .learn-links{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:14px 0 0;font-size:14px;color:rgba(255,255,255,.72)}
+.hero .learn-links a{color:#fff;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(255,255,255,.45)}
+.hero .learn-links a:hover{text-decoration-color:#fff}
 .dlctabs{display:flex;flex-wrap:wrap;margin:4px 0 12px;border-bottom:1px solid var(--line)}
 .dlctabs [role=tab]{appearance:none;display:inline-flex;align-items:center;gap:6px;min-height:40px;margin-bottom:-1px;padding:0 14px;border:0;border-bottom:2px solid transparent;border-radius:0;background:none;font:inherit;font-size:14px;font-weight:600;color:var(--mut);cursor:pointer}
 .dlctabs [role=tab]:hover{color:var(--ink)}
@@ -822,9 +824,8 @@ button.danger-lite:hover:not(:disabled){border-color:var(--red)}
 .mpbtns{display:flex;gap:8px;flex-wrap:wrap}
 .mpform{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
 .mpnetbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}
-table.mpnet{width:100%;border-collapse:collapse;font-size:13px;margin:4px 0 10px}
-table.mpnet th,table.mpnet td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-table.mpnet th{width:15em;font-weight:600}
+table.mpnet{width:100%}   /* 框、行线、行标题走弹窗表格那一套 */
+table.mpnet th{width:15em}
 table.mpnet td.st{width:9em;font-weight:700;white-space:nowrap;color:var(--mut2)}
 table.mpnet tr.run td.st{color:var(--blue)}
 table.mpnet tr.ok td.st{color:var(--green)}
@@ -835,10 +836,18 @@ table.mpnet tr.bad td.st{color:var(--red)}
 .mpturn{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
 .mpturn label{display:flex;flex-direction:column;gap:4px;font-size:13px}
 .mpturn label:first-child,.mpturn .btns,.mpturn #turnmsg{grid-column:1/-1}
-.mpturn textarea,.mpturn input{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:3px}
 .mpturn .btns{display:flex;gap:8px;justify-content:flex-start}
 .archl td button.sm{white-space:normal;max-width:100%;margin:2px 0}
-@media (max-width:640px){table.mpnet th{width:auto}.mpturn{grid-template-columns:1fr}}
+@media (max-width:640px){.mpturn{grid-template-columns:1fr}}
+/* 手机上联机检测三列挤成一条（说明一行四五个字、折成十行）：改成每项一块，名称和状态一行，说明另起一行铺满 */
+@media (max-width:700px){
+  .box .mb table.mpnet>tbody{display:block}
+  .box .mb table.mpnet tr{display:grid;grid-template-columns:minmax(0,1fr) auto;border-bottom:1px solid var(--tbl-line)}
+  .box .mb table.mpnet tr:last-child{border-bottom:0}
+  .modal .box .mb table.mpnet>tbody>tr>:is(th,td){width:auto;border-bottom:0;background:none}
+  .modal .box .mb table.mpnet td.dt{grid-column:1/-1;padding-top:0;color:var(--mut)}
+  .box .mb table.mpnet td.dt:empty{display:none}
+}
 .mpform label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut)}
 .mpform .mp-watch-option{flex-direction:row;align-items:center;color:var(--ink);gap:6px}
 .mpform .mp-watch-option input{padding:0;margin:0}
@@ -1768,7 +1777,7 @@ table.mpnet tr.bad td.st{color:var(--red)}
 
 .tiles.dlc .tile.qdlc{border-left:3px solid #0972d3}
 .wbtag{display:inline-block;font-size:12px;font-weight:700;color:var(--warning-ink);background:var(--warning-bg);border:1px solid #f5c69a;padding:1px 8px;margin:0 0 6px}
-.prac .bar{height:8px;background:var(--surface-muted);width:180px}.prac .bar i{display:block;height:100%;background:#1d8102}
+.prac .bar{height:8px;background:var(--surface-muted);width:180px}.prac .bar i{display:block;height:100%;background:var(--green)}
 .log .lt{display:inline-block;min-width:62px;margin-right:6px;font-size:11px;color:var(--mut2);font-variant-numeric:tabular-nums}
 
 .ledbtn{margin-top:8px}
@@ -1776,20 +1785,41 @@ table.mpnet tr.bad td.st{color:var(--red)}
 .ledger .lsum div{border:1px solid var(--line);padding:6px 10px;background:var(--surface-soft)}
 .ledger .lsum small{display:block;font-size:11px;color:var(--mut2)}
 .ledger .lsum b{font-size:17px;font-variant-numeric:tabular-nums}
-.ledger td{font-size:13px;vertical-align:middle}
-.ledger td img.awsi{width:20px;height:20px;vertical-align:-5px;margin-right:6px}
+.ledger td{vertical-align:middle}
+.ledger td img.awsi{display:inline-block;width:20px;height:20px;vertical-align:-5px;margin-right:6px}   /* 全局 img.awsi 是 block：图标原来单独占一行，名字挤到下面，每行高一倍 */
 .ledger td small{color:var(--mut2);margin-left:4px}
 .ledger td:first-child{white-space:nowrap}
-.ledger .llog{max-height:260px;overflow:auto;border:1px solid var(--line2);padding:6px 8px;font-size:13px}
-/* 收费明细表 7 列：手机上撑宽的是整个弹窗（标题、「关闭」跟着横滑，最右一列被切）。照图鉴的宽表那样只让表格自己横滑、第一列钉住，
-   滑到右边也知道是哪块服务；表头不在字中间断开；运行费「$5/圈 · 累计 $0」不折成四行 */
-.ledger th{word-break:keep-all}
+.ledger .llog{max-height:260px;overflow:auto;border:1px solid var(--line2);border-radius:6px;padding:6px 8px;font-size:13px}
+/* 收费明细表 7 列：手机上横滑（见下面弹窗表格那段）；级别「第 1 级「私有子网 + NAT」」别折成四行，运行费「$5/圈 · 累计 $0」不拆行 */
+@media (max-width:700px){.ledger .archl td:first-child{min-width:9em;white-space:normal}.ledger td:nth-child(3){min-width:10em}.ledger td:nth-child(6){white-space:nowrap}}
+
+/* ===== 弹窗里的表格：一套样式 =====
+   圆角细框；表头一条灰底、小一号的灰字、不在字中间断开；行与行之间一道细线（不用斑马纹：图鉴、手册原来就是细线，混着用像两套产品）；
+   整列都是金额/数字的（$1640、3/4、+$150）右对齐、等宽数字，表头跟着——列由 ui/10-modal.js 的 numCols 自动标 .num；
+   每行左边是 th 的（服务详情的状态表、联机检测）th 当行标题，浅底灰字。战报的表（.lgr/.dt）自成一套，不吃这些。
+   颜色全走变量：手册（.doc.read）是常驻深色的，在下面改这几个变量就行 */
+:root{--tbl-bg:var(--surface);--tbl-head:var(--surface-muted);--tbl-head-ink:var(--mut);--tbl-border:var(--line);--tbl-line:var(--line2);--tbl-rowh:var(--surface-soft);--tbl-hover:color-mix(in srgb,var(--surface-muted) 60%,var(--surface));--tbl-shadow:rgba(0,28,36,.2)}
+.box .mb table:not(.lgr,.dt){border-collapse:separate;border-spacing:0;margin:8px 0 12px;border:1px solid var(--tbl-border);border-radius:6px;overflow:clip;background:var(--tbl-bg);font-size:13px;line-height:1.5}
+.box .mb table:not(.lgr,.dt)>*>tr>:is(th,td){padding:8px 12px;border-bottom:1px solid var(--tbl-line);text-align:left;vertical-align:top}
+.box .mb table:not(.lgr,.dt)>*>tr:last-child>:is(th,td){border-bottom:0}
+.box .mb table:not(.lgr,.dt)>*>tr:first-child:not(:has(>td))>th{background:var(--tbl-head);color:var(--tbl-head-ink);font-size:12px;font-weight:700;letter-spacing:.02em;line-height:1.4;word-break:keep-all;vertical-align:bottom;border-bottom-color:var(--tbl-border)}
+.box .mb table:not(.lgr,.dt) tr:has(>td)>th{background:var(--tbl-rowh);color:var(--tbl-head-ink);font-size:12.5px;font-weight:600}
+.box .mb table:not(.lgr,.dt) :is(td,th).num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+/* 能点的行（行里有按钮、链接）和手册、图鉴这种查着看的长表：悬停整行一层浅底，眼睛跟得住是哪一行 */
+.box .mb table:not(.lgr,.dt) tr:has(>td):is(:has(button,a),.doc *):hover>td{background:var(--tbl-hover)}
+.box .mb table:not(.lgr,.dt) td{transition:background-color .12s}
+/* 标出来的行：服务详情里现在的级别（.hi）、明细里凑成了的架构（.done） */
+.box .mb table:not(.lgr,.dt) tr.hi>td{background:var(--info-bg)}
+.box .mb table:not(.lgr,.dt) tr.done>td{background:var(--surface-muted)}
+@media (prefers-reduced-motion:reduce){.box .mb table:not(.lgr,.dt) td{transition:none}}
+/* 手机上宽表只让表格自己横滑（原来撑宽的是整个弹窗，标题栏、「关闭」跟着滑走）：表格自成一块滚动区、第一列钉住，滑到右边也知道是哪一行；
+   右边缘一道阴影提示「右边还有」，滑到头阴影被盖住（background-attachment:local 那层跟着内容走）。表格自成一层（isolation），钉住的格子不会盖到标题栏上 */
 @media (max-width:700px){
-  .ledger table{display:block;overflow-x:auto;overscroll-behavior-x:contain;isolation:isolate}
-  .ledger table>tbody{display:table;width:100%}
-  .ledger td:first-child,.ledger th:first-child{position:sticky;left:0;z-index:1;background:var(--surface)}
-  .ledger th:first-child{background:var(--surface-soft)}
-  .ledger td:nth-child(6){white-space:nowrap}
+  .box .mb table:not(.lgr,.dt){display:block;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;isolation:isolate;
+    background:linear-gradient(to left,var(--tbl-bg) 40%,transparent) right/28px 100% no-repeat local,radial-gradient(farthest-side at 100% 50%,var(--tbl-shadow),transparent) right/12px 100% no-repeat scroll,var(--tbl-bg)}
+  .box .mb table:not(.lgr,.dt)>tbody{display:table;width:100%}   /* 表格本身成了块，内容窄的表也照旧铺满一行 */
+  .box .mb table:not(.lgr,.dt,.pstat,.mpnet)>*>tr>:first-child{position:sticky;left:0;z-index:1;background:var(--tbl-bg);box-shadow:inset -1px 0 0 var(--tbl-line)}
+  .box .mb table:not(.lgr,.dt,.pstat,.mpnet)>*>tr:first-child:not(:has(>td))>th:first-child{background:var(--tbl-head)}
 }
 
 .tiles:has(input[value=party]){grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
@@ -1899,6 +1929,10 @@ table.mpnet tr.bad td.st{color:var(--red)}
 .gmenu>summary:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .gm{position:absolute;right:0;top:calc(100% + 4px);z-index:6;min-width:160px;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,28,36,.18);padding:4px}
 .gm button{white-space:nowrap;justify-content:flex-start;border:0;width:100%;min-height:34px;padding:0 12px;color:var(--ink);background:transparent;border-radius:0}
+.gm .gm-learn{display:flex;flex-direction:column;border-bottom:1px solid var(--line)}
+.gm .gm-learn a{display:flex;align-items:center;min-height:34px;padding:0 12px;color:var(--ink);text-decoration:none;white-space:nowrap}
+.gm .gm-learn a::after{content:"↗";margin-left:auto;padding-left:10px;color:var(--mut)}
+.gm .gm-learn a:hover,.gm .gm-learn a:focus-visible{background:var(--surface-muted)}
 .gm button:hover:not(:disabled){background:var(--surface-muted);color:var(--ink)}
 .gm button.danger-lite{color:var(--red);border-top:1px solid var(--line2);margin-top:4px}
 .gm button.danger-lite:hover:not(:disabled){background:var(--danger-bg);color:var(--red)}
@@ -1980,16 +2014,16 @@ table.mpnet tr.bad td.st{color:var(--red)}
    不加 scroll-snap：吸附会把 mark() 设好的位置拉回去，高亮的按钮被切掉半个 */
 @media (max-width:640px),(max-height:500px) and (orientation:landscape){.box.doc .mtoc{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}.box.doc .mtoc button{flex:none}}
 @media (max-width:640px),(max-height:500px) and (orientation:landscape){.box.doc .mtoc.withsearch{flex-wrap:wrap;overflow-x:visible}}
-.box.doc .mb th{word-break:keep-all}
 /* ===== 11-08 文档窗口（玩法速览、玩法手册、图鉴）：正文行宽收窄、字号和行距加大，章节之间留出空，表头、行悬停、条数标签 ===== */
 .box.doc .mb{padding:18px 28px 12px;font-size:14px;line-height:1.7}
 .box.doc .mb h4{font-size:16px;line-height:1.4;margin:30px 0 8px;padding-top:18px;border-top:1px solid var(--line2);color:var(--ink)}
 .box.doc .mb>h4:first-of-type,.box.doc .mb>.gsec:first-of-type>h4,.box.doc .mb>.gintro+h4,.box.doc .mb>.gintro+.gsec>h4{border-top:0;padding-top:0;margin-top:10px}
 .box.doc .mb h4[data-n]::after{content:attr(data-n);display:inline-block;margin-left:8px;padding:0 8px;border-radius:999px;background:var(--surface-muted);color:var(--mut);font-size:12px;font-weight:600;line-height:20px;vertical-align:1px}
-.box.doc .mb table{margin:10px 0 8px;border:1px solid var(--line2)}
-.box.doc .mb th{padding:9px 12px;background:var(--surface-soft);color:var(--mut);font-size:12.5px;border-bottom:1px solid var(--line)}
-.box.doc .mb td{padding:10px 12px;line-height:1.6}
-.box.doc .mb tr:not(:first-child):hover>td{background:var(--surface-soft)}
+.box.doc .mb table:not(.lgr,.dt){margin:10px 0 8px}
+.box.doc .mb table:not(.lgr,.dt) td{line-height:1.6}
+/* 长表（图鉴的服务一览四十多行、手册的服务类型）往下滚时表头吸在章节标签下面；--doc-top 由 docToc 按标题栏 + 章节栏的高度设。
+   手机上表格自己横滑、成了滚动区：表头吸顶会被推到表格中间，只在宽屏开 */
+@media (min-width:701px){.box.doc .mb table:not(.lgr,.dt)>*>tr:first-child:not(:has(>td))>th{position:sticky;top:var(--doc-top,0);z-index:2}}
 .box.doc .mtoc{padding:10px 28px 12px}
 .box.doc .mtoc button{min-height:30px;padding:0 12px;font-size:13px}
 .box.doc.read{max-width:860px}
@@ -2019,9 +2053,8 @@ table.mpnet tr.bad td.st{color:var(--red)}
 .box.doc.read .mb li::marker{color:#ffb266}
 .box.doc.read .mb a{color:#5fb3ff}
 .box.doc.read .mb code{padding:0 4px;background:rgba(255,255,255,.06);color:#ffb266;font-family:var(--vmono)}
-.box.doc.read .mb table{background:rgba(255,255,255,.02);border-color:var(--vl2)}
-.box.doc.read .mb th{background:rgba(255,255,255,.05)!important;color:#aab6c6;border-bottom-color:var(--vl)}
-.box.doc.read .mb td{color:#d3dbe6;border-bottom-color:var(--vl2)}
+.box.doc.read{--tbl-bg:#0b111c;--tbl-head:color-mix(in srgb,#fff 6%,#0b111c);--tbl-rowh:color-mix(in srgb,#fff 4%,#0b111c);--tbl-hover:color-mix(in srgb,#fff 5%,#0b111c);--tbl-shadow:rgba(0,0,0,.7);--tbl-head-ink:#aab6c6;--tbl-border:var(--vl);--tbl-line:var(--vl2)}   /* 手册常驻深色：表格的底、表头、悬停、钉住的第一列都换成实色深底（原来钉住的第一列是 --surface，浅色外观下是白底配浅灰字，看不见） */
+.box.doc.read .mb td{color:#d3dbe6}
 .box.doc.read .btns{background:rgba(11,17,28,.94);border-top:1px solid var(--vl)}
 .box.doc.read .btns button{border-radius:0}.box.doc.read .btns button:not(.pri){background:transparent;border-color:var(--vl);color:#f3f6fa}.box.doc.read .btns button:not(.pri):hover{border-color:#ff9900;color:#fff}
 .mtoc .gsearch input{padding-left:34px;background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23687078' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 10px 50%/16px 16px}
@@ -2100,6 +2133,7 @@ table.mpnet tr.bad td.st{color:var(--red)}
 .gfil .gf-n{margin-left:auto;font-size:13px;color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap}
 .mtoc .gsearch input{height:36px;border-radius:18px!important;border-color:var(--line)!important}
 table.gsvct td{vertical-align:top}
+@media (max-width:700px){table.gsvct td:last-child{min-width:19em}}   /* 手机上横滑的服务一览：升级路线那列别挤成一行四五个字、一行服务高过一屏 */
 .gsn{display:flex;align-items:center;gap:8px;white-space:nowrap}.gsn img.awsi{width:24px;height:24px;flex:none}.gsn>span{display:flex;flex-direction:column;line-height:1.3}.gsn small{color:var(--mut2);font-size:12px}
 td.gcol{white-space:nowrap}
 .gdot{display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--gc);margin-right:6px}
@@ -2148,10 +2182,7 @@ tr.gempty td{padding:20px;text-align:center;color:var(--mut2)}
 .box.gal .mb h4{counter-increment:gsec;display:flex;align-items:baseline;gap:10px;border-top-color:var(--gline)}
 .box.gal .mb h4::before{content:counter(gsec,decimal-leading-zero);font:800 13px var(--gmono);letter-spacing:.06em;color:#ec7211}
 .box.gal .mb h4[data-n]::after{margin-left:0;border-radius:0;background:transparent;border:1px solid #f5c99e;color:var(--warning-ink);font-family:var(--gmono)}
-.box.gal .mb table{background:var(--surface);border-color:var(--gline)}
-.box.gal th{background:var(--surface-muted)!important;color:var(--mut);border-bottom-color:var(--gline)}
-.box.gal td{border-bottom-color:var(--gline2)}
-.box.doc.gal .mb tr.ggrp>th{background:var(--surface-soft)!important}
+.box.doc.gal .mb tr.ggrp>th{background:var(--surface-soft)}
 .box.gal .rlv b{font-family:var(--gmono)}
 .box.gal .gfil .gf{border-radius:0;background:var(--surface)}
 .box.gal .ccat{border-radius:0}
@@ -2236,15 +2267,6 @@ table.gwho{table-layout:fixed;width:100%}table.gwho th:first-child,table.gwho td
 /* 图鉴里 Health、re:Invent 表第一列只是编号，不吃上面的 8.5em，省下的宽度给类别和正文 */
 .box.doc .mb td.no{min-width:0;width:2.5em}
 .box.doc .mb td.cat{white-space:nowrap}
-/* 手机上宽表（图鉴的服务一览、角色，完整版手册的角色、服务类型）只让表格自己横滑：原来撑宽的是整个弹窗，
-   一横滑标题栏、章节标签、「关闭」和第一列一起滑出屏幕。第一列钉住，滑到右边也知道是哪一行。
-   表格自成一层（isolation），钉住的格子往上滚时不会盖到标题栏、章节标签上面 */
-@media (max-width:700px){
-  .box.doc .mb table{display:block;overflow-x:auto;overscroll-behavior-x:contain;isolation:isolate}
-  .box.doc .mb table>tbody{display:table;width:100%}   /* 表格本身成了块，内容窄的表不再撑满整行；里面那层照旧铺满 */
-  .box.doc .mb td:first-child,.box.doc .mb th:first-child{position:sticky;left:0;z-index:1;background:var(--surface)}
-  .box.doc .mb th:first-child{background:var(--surface-soft)}
-}
 
 /* ===== 第四轮润色（UI/UX 复查）===== */
 /* 开局页：代理商勾选只在代理商模式里出现；座位那一行放不下就换行 */
@@ -2407,10 +2429,9 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 .todo{padding:4px 0;font-size:12.5px}
 
 /* 服务详情：现在的状态 */
-.pstat{width:100%;margin:10px 0 8px;border:1px solid var(--line);border-collapse:collapse;font-size:13px}
-.pstat th{width:96px;text-align:left;font-weight:600;color:var(--mut2);background:var(--surface-soft);padding:6px 10px;vertical-align:top;white-space:nowrap}
-.pstat td{padding:6px 10px;border-bottom:1px solid var(--line2);text-align:left!important}
-.pstat tr:last-child td{border-bottom:0}
+.pstat{width:100%}   /* 框、行线、行标题的底色走弹窗表格那一套 */
+.pstat th{width:96px;white-space:nowrap}
+.pstat td{text-align:left!important}
 .pstat .runc .lvr{white-space:nowrap}.pstat .runc .cur{font-weight:700;color:var(--ink)}
 .pstat .pawn{margin-right:6px}   /* 「谁拥有」一行的 td 不是 flex，圆点和名字之间要自己留空 */
 .lvt th{white-space:nowrap}
@@ -2780,6 +2801,69 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 .mulrow>.muted{order:5;flex-basis:100%;font-size:12px}
 .mulrow label{white-space:nowrap}
 
+/* ===== 表单：一套输入框 =====
+   弹窗的 inputs（改名字、Spot 出价、写复盘、交易、投票）、开局页的玩家名字、联机建房 / 加入、联机设置里的信令服务器和 TURN：
+   同样的高度（触屏 44px）、圆角、边框色（--control-border，对底色过 3:1）、内边距；聚焦一圈 --focus；填错（离开后才算，:user-invalid）边框变红；
+   数字右对齐、等宽数字；占位字用 --mut2（过 4.5:1）。手机上字号 16px（上面 pointer:coarse 那条），点进去不放大页面 */
+:root{--field-h:34px}
+@media (pointer:coarse){:root{--field-h:44px}}
+:is(.inps,.mpform,.mpturn,.names) :is(input:not([type=checkbox],[type=radio]),select,textarea){box-sizing:border-box;max-width:100%;min-height:var(--field-h);padding:6px 10px;font:inherit;font-size:14px;line-height:1.4;font-weight:400;color:var(--ink);background:var(--surface);border:1px solid var(--control-border);border-radius:2px;transition:border-color .12s,box-shadow .12s}
+:is(.inps,.mpform,.mpturn,.names) :is(input:not([type=checkbox],[type=radio]),select,textarea):hover:not(:disabled,:focus){border-color:var(--ink2)}
+:is(.inps,.mpform,.mpturn,.names) :is(input:not([type=checkbox],[type=radio]),select,textarea):focus-visible{outline:2px solid var(--focus);outline-offset:0;border-color:var(--focus)}
+:is(.inps,.mpform,.mpturn,.names) :is(input,select,textarea):user-invalid{border-color:var(--red);box-shadow:inset 0 0 0 1px var(--red)}
+:is(.inps,.mpform,.mpturn,.names) :is(input,select,textarea):disabled{background:var(--surface-muted);color:var(--mut2);cursor:not-allowed}
+:is(.inps,.mpform,.mpturn,.names) :is(input,textarea)::placeholder{color:var(--mut2);opacity:1}
+:is(.inps,.mpform,.mpturn) textarea{display:block;width:100%;min-height:calc(var(--field-h) * 2.2);resize:vertical;line-height:1.5}
+input[type=number]{text-align:right;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){:is(.inps,.mpform,.mpturn,.names) :is(input,select,textarea){transition:none}}
+/* 弹窗的 inputs：标签在上、控件在下，一项一块；数字框、下拉框不拉满（出价、现金几位数，拉满一整行反而不好读）；
+   复选框整行都能点，行高 36px（触屏 44px），悬停一层浅底；不能勾的（交易里有升级的服务）整行变灰、鼠标是禁止；分组小标题加一道细线 */
+.box .inps{display:flex;flex-direction:column;gap:4px;padding:4px 20px 0}
+.inps label{margin:0}
+.inps label:not(.cb){display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin:6px 0;font-size:13px;font-weight:600;color:var(--ink)}
+.inps label:not(.cb) :is(input,textarea){margin-top:0!important}   /* 文本框、多行框原来行内写了 margin-top:6px，和 gap 叠成 12px */
+.inps label:not(.cb) input[type=number]{width:10em}
+.inps label:not(.cb) select{min-width:12em}
+.inps label.cb{display:flex;align-items:center;gap:10px;min-height:36px;margin:0 -8px;padding:4px 8px;border-radius:4px;line-height:1.45;cursor:pointer;transition:background-color .12s}
+.inps label.cb:hover:not(:has(input:disabled)){background:var(--surface-soft)}
+.inps label.cb:has(input:disabled){color:var(--mut2);cursor:not-allowed}
+.inps input[type=checkbox]{flex:none;width:18px;height:18px;margin:0;accent-color:var(--blue)}
+.inps label.cb:has(input:focus-visible){outline:2px solid var(--focus);outline-offset:-2px}
+.inps .ih{margin:12px 0 2px;padding-bottom:6px;border-bottom:1px solid var(--line2);font-size:13px;font-weight:700;color:var(--ink)}
+.inps .ih:first-child{margin-top:4px}
+@media (pointer:coarse){.inps label.cb{min-height:44px}}
+@media (max-width:640px){.inps label:not(.cb) :is(input,select){width:100%}}
+@media (prefers-reduced-motion:reduce){.inps label.cb{transition:none}}
+/* 联机建房 / 加入、信令服务器、TURN：标签小字在上；保存按钮是表单里的一行，不是弹窗底栏（原来吃了 .box .btns 的吸底、内边距和上边线） */
+.mpturn .btns{position:static;margin:2px 0 0;padding:0;border-top:0;background:none}
+.mpturn label:has(>select:only-child){align-self:end}
+.mpform label,.mpturn label{font-weight:600}
+.mpturn label :is(input,select,textarea){width:100%}   /* 端口原来是全局数字框的 110px，和旁边的域名框不一样宽 */
+@media (max-width:640px){.mpform label:not(.mp-watch-option){flex:1 1 100%}.mpform label:not(.mp-watch-option) :is(input,select){width:100%!important}}   /* 房间号框行内写了 7.5em */
+/* 表单里的错误提示（信令地址、TURN 地址不对）：红字左边一道红线，浅红底，不是只有一行看不出来的文字 */
+:is(#sigmsg,#turnmsg) .warn{display:block;margin-top:6px;padding:6px 10px;border-left:3px solid var(--red);background:var(--danger-bg);color:var(--red);font-size:13px;line-height:1.5}
+:is(#sigmsg,#turnmsg) .muted{display:block;margin-top:6px;font-size:13px}
+
+/* ===== 选项列表弹窗（选格子、选对手、选题库、答题、落在自己服务上做什么）=====
+   选项本身就是正文：按钮栏不吸底（长列表吸底会把整列顶上去盖住说明）；每个选项至少 42px（触屏 44px），左对齐，标题粗一点、desc 第二行灰字；
+   灰掉的选项虚线框、浅灰底，字用 --mut2 还读得清（原来 #aab7b8 只有 2:1，看不清为什么不能选）；
+   最后那个「算了 / 不买 / 取消 / 什么都不做」居中、淡一点，和上面的选项隔开，列表长时吸在窗口底部，不用滚到底才找得到；
+   电脑上（有鼠标、有键盘）每个选项左边一个小键帽标 1–9，对应数字快捷键（ui/39-bosskey.js 按看得见的位置数，灰的也占一个）。
+   键帽是生成内容，用 / "" 不进读屏和按钮名字 */
+.box:is(.pick,.quiz,.opts) .btns{position:static;gap:8px}
+.box:is(.pick,.quiz,.opts) .btns>button{position:relative;min-height:42px;padding:8px 14px;line-height:1.4;white-space:normal;transition:background-color .12s,border-color .12s}
+@media (pointer:coarse){.box:is(.pick,.quiz,.opts) .btns>button{min-height:44px}}
+.box:is(.pick,.quiz,.opts) .btns>button:disabled:not(.qopt){border-style:dashed;border-color:var(--control-border);background:var(--surface-muted);color:var(--mut2)}
+.box.pick .btns>button:last-of-type:nth-of-type(n+3):not(.pri),.box.opts .btns>button:last-of-type:not(.opt,.pri){position:sticky;bottom:16px;justify-content:center;text-align:center;margin-top:4px;border-color:var(--line);color:var(--mut);box-shadow:0 0 0 8px var(--surface)}
+.box.pick .btns>button:last-of-type:nth-of-type(n+3):not(.pri):hover,.box.opts .btns>button:last-of-type:not(.opt,.pri):hover{border-color:var(--ink);color:var(--ink)}
+@media (hover:hover) and (pointer:fine){
+  #modal .box:is(.pick,.quiz,.opts):not(.mpwait) .btns{counter-reset:hk}
+  #modal .box:is(.pick,.quiz,.opts):not(.mpwait) .btns>button{counter-increment:hk;padding-left:42px}
+  #modal .box:is(.pick,.quiz,.opts):not(.mpwait) .btns>button:nth-of-type(-n+9)::before{content:counter(hk) / "";position:absolute;left:12px;top:calc(min(50%, 21px) - 10px);display:grid;place-items:center;box-sizing:border-box;min-width:20px;height:20px;padding:0 5px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;background:var(--surface);color:var(--mut);font:600 11px/1 var(--sans);font-variant-numeric:tabular-nums}
+  #modal .box:is(.pick,.quiz,.opts):not(.mpwait) .btns>button:nth-of-type(n+10){padding-left:14px}
+}
+@media (prefers-reduced-motion:reduce){.box:is(.pick,.quiz,.opts) .btns>button{transition:none}}
+
 /* 通用界面语义色：卡面、层级、状态和文字分别定义，品牌图标与玩家原色保持原样。 */
 :root{color-scheme:light;--surface:#fff;--surface-soft:#fafafa;--surface-muted:#eef1f4;--info-bg:#f1faff;--success-bg:#f2f8f0;--danger-bg:#fdf3f1;--warning-bg:#fff8f1;--purple-bg:#f7f1ff;--control-border:#879596;--warning-ink:#a34a00;--on-accent:#16191f;--danger-fill:#b52c31;--info-fill:#0972d3;--player-0:#c62a2f;--player-1:#1a62d6;--player-2:#15763f;--player-3:#7c3aed;--player-4:#b44708;--player-5:#0f766e;--player-6:#be185d;--player-7:#477309;--player-8:#0369a1;--player-9:#8a6200;--player-10:#475569;--player-11:#87592a;--group-text-storage:#5b790b;--group-text-iaas:#a84c00;--group-text-net:#6b35c8;--group-text-ctr:#a16207;--group-text-integ:#b80b60;--group-text-db:#9f1ca5;--group-text-ana:#1d5ebe;--group-text-sec:#b32740;--group-text-ai:#007d68;--group-text-util:#545b64}
 /* 仅屏幕启用深色；浏览器打印继续使用浅色语义色。 */
@@ -2806,6 +2890,8 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 :root[data-theme=dark] :is(.sec h5 i,.mtoc button.on){background:#334860;color:var(--ink)}
 :root[data-theme=dark] .pcard .ph{color:#fff}
 :root[data-theme=dark] :is(input,textarea,select){accent-color:var(--blue)}
+:root[data-theme=dark]{--tbl-shadow:rgba(0,0,0,.6)}
+:root[data-theme=dark] .box.gal{--gline:var(--line);--gline2:var(--line2)}   /* 图鉴的细线原来写死浅灰，深色下表格、标题栏的线亮得刺眼 */
 }
 .tbar{color:var(--mut2)}
 .pawn{color:var(--pawn-ink,#fff);font-weight:800}

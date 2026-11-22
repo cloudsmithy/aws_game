@@ -2,7 +2,7 @@
 
 [![Cloudflare Pages](https://img.shields.io/github/check-runs/cloudsmithy/aws_game/master?nameFilter=Cloudflare%20Pages&label=Cloudflare%20Pages&logo=cloudflare&logoColor=white)](https://github.com/cloudsmithy/aws_game/commits/master)
 
-**官网（直接开玩）：<https://aws-game.usergroup.cn/>** · 备用：[GitHub Pages](https://cloudsmithy.github.io/aws_game/) · [English](https://aws-game.usergroup.cn/en/) · [日本語](https://aws-game.usergroup.cn/ja/) · [手册网页版](https://aws-game.usergroup.cn/manual/)
+**官网（直接开玩）：<https://aws-game.usergroup.cn/>** · 备用：[GitHub Pages](https://cloudsmithy.github.io/aws_game/) · [English](https://aws-game.usergroup.cn/en/) · [日本語](https://aws-game.usergroup.cn/ja/) · [手册网页版](https://aws-game.usergroup.cn/manual/) · [架构讲解](https://aws-game.usergroup.cn/learn/arch/index.html) · [服务知识点](https://aws-game.usergroup.cn/learn/svc/index.html)（游戏开局页「学习资料」和对局菜单里都能点过去）
 
 作者：亚马逊云科技 User Group · 云上大亨开发小组。规则有疑问、游戏有 bug，都可以在这里反馈给我们：https://github.com/cloudsmithy/aws_game/issues
 
@@ -35,7 +35,7 @@
 
 - 2–4 人（开局页打开「多人（超过 4 人）」最多 12 人，平衡和界面都按 2–4 人设计，尽量不开），约 20 分钟一局（默认打满 15 轮按估值排名）；不设轮数上限时最多 50 轮（学习模式不限），电脑对打模拟里 4 人局不限轮数时中位约 32 轮分出胜负（完整局约 30 轮，地狱模式约 21 轮）
 - 48 格棋盘：35 个服务 + 3 个按用量收费的格子
-- 30 张 Health 事件卡（机会）、50 张 re:Invent 卡（命运），5 个玩法 DLC 和代理商模式全开时一共 52 张、65 张；其中有现场社交卡（踩坑大会、Office Hours、白板画架构、技术分享会等）和指向别人的卡（这次事故谁背锅、根因在上游）；要你停一轮的卡都能交钱立刻处理、照常走；真人抽到的 re:Invent 卡只有自己看得到，可以现在用、收进手牌（最多 3 张，自己回合再打）、卖掉或丢掉再掷一次；还能花钱把一张 Health 卡面朝下埋在自己停过的服务格上，对手停上去才翻开；15 个角色（12 个客户 + 3 个代理商）、48 种有效架构（很多格子可以二选一，几个架构能串联收费）、114 道题（4 个玩法 DLC 另带 18 道，共 132 道）
+- 30 张 Health 事件卡（机会）、50 张 re:Invent 卡（命运），5 个玩法 DLC 和代理商模式全开时一共 52 张、65 张；其中有现场社交卡（踩坑大会、Office Hours、白板画架构、技术分享会等）和指向别人的卡（这次事故谁背锅、根因在上游）；要你停一轮的卡都能交钱立刻处理、照常走；真人抽到的 re:Invent 卡只有自己看得到，可以现在用、收进手牌（最多 3 张，自己回合再打）、卖掉或丢掉再掷一次；还能每回合花钱从 Health 牌堆顶 3 张里挑一张，面朝下埋在自己停过的服务格上，谁停上去都会翻开（自己也算）；15 个角色（12 个客户 + 3 个代理商）、48 种有效架构（很多格子可以二选一，几个架构能串联收费）、114 道题（4 个玩法 DLC 另带 18 道，共 132 道）
 - 每个角色一个起死回生的专属技能：总资产低于开局资金一半时发动，一局一次；发动时先结算角色自己的技能，再「战略并购」：按卖回价买下全场总资产最高的对手的一块服务。模拟里快不行的人翻盘率约 12%（不开技能 0–1%）
 - 6 个模式：娱乐、入门、标准、完整、学习、地狱（全部加压项拉满、必须答题、每个角色多一条地狱限制）
 - 5 个玩法 DLC（GenAI 浪潮、安全攻防、FinOps 账单大战、全球出海各带规则、卡牌和题目；Health 事件扩展包（2026）多 10 张 Health 卡）

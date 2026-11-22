@@ -77,7 +77,7 @@ export async function sendToJail(p, cat, why = '') {
   UI.render();
   if (isAI(p.id)) { fxAll({ co: [IX.jail, _tf(2871, "<b>{$0} 进了维护窗口</b><small>{$1}</small>", p.name, why), 'warn', 2800] }); return; }
   const m = jailMax(p);
-  await UI.ask({ who: p.id, title: _tf(2872, "{$0} 进了维护窗口", p.name), html: `<p>${why}</p><p>${_tf(2878, "{$0}轮到你的下一回合二选一：", mine ? _t(2873, "这回合不再往前走。") : '')}</p><ul><li>${_t(2879, "<b>付 $50 开 Support Case</b>：马上出来，当回合照常掷骰子走")}</li><li>${_tf(2880, "<b>停{$0}轮</b>：{$1}", m > 1 ? ` ${m} ` : _t(2874, "一"), m > 1 ? _tf(2875, "接下来 {$0} 个回合都不走（传统企业上云的限制），停完出来", m) : _t(2876, "那一回合不走，停完出来，再下一回合照常掷骰子"))}</li>${availCard(p, 'ES') ? _t(2877, "<li><b>用掉 Enterprise Support 卡</b>：免费出来，照常掷骰子</li>") : ''}</ul><p class="muted">${_tf(2881, "关在里面照样收过路费。出来时用一句话讲清这次的根因，能领 1 个{$0}类复盘标记。", CATS[cat])}</p>`, buttons: [{ label: _t(2478, "知道了"), value: true, cls: 'pri' }] });
+  await UI.ask({ who: p.id, title: _tf(2872, "{$0} 进了维护窗口", p.name), html: `<p>${why}</p><p>${_tf(2878, "{$0}轮到你的下一回合二选一：", mine ? _t(2873, "这回合不再往前走。") : '')}</p><ul><li>${_tf(5668, "<b>付 ${$0} 开 Support Case</b>：马上出来，当回合照常掷骰子走", BAL.jailFee)}</li><li>${_tf(2880, "<b>停{$0}轮</b>：{$1}", m > 1 ? ` ${m} ` : _t(2874, "一"), m > 1 ? _tf(2875, "接下来 {$0} 个回合都不走（传统企业上云的限制），停完出来", m) : _t(2876, "那一回合不走，停完出来，再下一回合照常掷骰子"))}</li>${availCard(p, 'ES') ? _t(2877, "<li><b>用掉 Enterprise Support 卡</b>：免费出来，照常掷骰子</li>") : ''}</ul><p class="muted">${_tf(2881, "关在里面照样收过路费。出来时用一句话讲清这次的根因，能领 1 个{$0}类复盘标记。", CATS[cat])}</p>`, buttons: [{ label: _t(2478, "知道了"), value: true, cls: 'pri' }] });
 }
 // debt 是 oc 里的技术债加价：客户自己欠的，直接交亚马逊云科技，不切给代理商。
 // 切给代理商的比例按扣掉 RI 之后的单块运行费算（和 runAfterRI 一个口径），RI 全额抵掉的那块不会分走别的服务的钱

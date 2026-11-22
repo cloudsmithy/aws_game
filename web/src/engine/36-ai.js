@@ -28,9 +28,10 @@ let AI_COE = __rv(() => ({
 //   { title: 标题文字, text: 整个弹窗的文字, quiz: 是不是答题窗, inputs: { 输入框 id: { type, min, max, nOpt: 下拉选项数 } } }（页面上没有的输入框不在里面）
 // 返回 { v: 选中的值, set: { 输入框 id: 要填的值（下拉框是 { selectedIndex }） } }：界面层先把 set 写进输入框，再按 v 关窗。
 // 随机数的取用顺序和以前直接改页面时一样（先给下拉框挑选项，再按标题分支），模拟对照逐局一致
+const RES = 250;   // 安全线：花完现金至少留这么多（弹窗里的选择、维护窗口付不付钱出来都看它）
 export function aiDecide(view, inputs, buttons, who) {
   let out; const set = {}, done = v => { out = v; return { v, set }; };   // 每条 return go(…) / return done(…) 都把结果带出去
-  const p = S.players[who] || cur(), RES = 250;
+  const p = S.players[who] || cur();
   const en = buttons.map((b, k) => ({ ...b, k, l: String(b.label) })).filter(b => !b.disabled);
   const money = l => +((l.match(/\$(\d+)/) || [0, 0])[1]);
   const pick = f => en.find(b => f(b.l));
@@ -124,7 +125,7 @@ export function aiKick() {
     const sent = () => !wasIn && p.jail !== null;
     aiBuild(p);   // 掷骰子前先看看要不要升级（在维护窗口里、有欠款时不升）
     if (sent()) { S.phase = 'post'; UI.save(); UI.render(); return; }   // post 时 aiKick 自己去 endTurn
-    const jailK = () => jailAct(p.cash > 500 ? 'pay' : availCard(p, 'ES') ? 'es' : 'stay');
+    const jailK = () => jailAct(availCard(p, 'ES') ? 'es' : p.cash - BAL.jailFee >= RES + 300 ? 'pay' : 'stay');   // 有免费的卡先用卡，付完还剩安全线 + $300 才花钱出来
     if (p.jail !== null && !canSkill(p)) return jailK();
     if (p.jail === null && !dlcOn('speed') && !canSkill(p) && !(p.reseller && !p.rsSet)) return doRoll();
     (async () => {

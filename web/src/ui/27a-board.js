@@ -13,7 +13,7 @@ import { isHidden } from '../rules/35-modes.js';
 import { MP } from '../net/40-host-sync.js';
 import { MPFX } from '../net/41-replay.js';
 // ================= 渲染 =================
-let CORNER_SUB = __rv(() => ({ get go() { return _tf(3926, "经过领 ${$0} Credits", BAL.salary); }, jail: _t(3927, "停一轮或交 $50"), free: _t(3928, "经过领 $50 · 停下抽奖或抽卡"), gotojail: _t(2870, "进维护窗口") }), v => { CORNER_SUB = v; }, () => CORNER_SUB);
+let CORNER_SUB = __rv(() => ({ get go() { return _tf(3926, "经过领 ${$0} Credits", BAL.salary); }, get jail() { return _tf(5675, "停一轮或交 $50 · 关进来付 ${$0} 出", BAL.jailFee); }, free: _t(3928, "经过领 $50 · 停下抽奖或抽卡"), gotojail: _t(2870, "进维护窗口") }), v => { CORNER_SUB = v; }, () => CORNER_SUB);
 export const sideOf = i => ['b', 'l', 't', 'r'][sideIdx(i)];
 function sqPos(i) {
   const [a, b, c] = CORNERS.slice(1);
@@ -89,7 +89,7 @@ export function hereHtml(p) {
   const i = p.pos, s = SQ[i], pr = S.props[i], o = pr && pr.owner !== null ? P(pr.owner) : null;
   if (isHidden(i)) return _tf(3955, "<button class=\"here\" data-act=\"showSquare\" data-arg=\"{$0}\">{$1}<span><b>盲盒</b><em>随机抽卡 · 效果翻倍</em></span></button>", i, awsImg('reinvent'));
   const rent = o && (s.t === 'prop' || s.t === 'util') ? (pr.offline ? _t(3956, "已下线 · 不收费") : pr.ddos != null ? (pr.ddosWhy ? _t(3956, "已下线 · 不收费") : _t(3957, "DDoS 下线 · 不收费")) : pr.impaired ? _t(3958, "Impaired · 暂停收费") : (sr => !sr.r ? _t(3959, "没组成架构 · 不收费") : _tf(3962, "过路费 {$0}{$1}", sr.txt, sr.cap ? _t(3960, "（新账户保护期封顶）") : sr.jr ? _t(3961, "（整套架构联合收费）") : ''))(shownRent(i))) : '';
-  const sub = o ? `<i class="pawn" style="--pc:${o.color}"></i>${o.id === p.id ? ((MP.role === 'client' ? p.id === MP.mySeat : !(MP.role === 'host' && MP.isRemote(p.id) && !MP.hostPlays(p.id))) ? _t(2971, "你自己的") : o.name + _t(3963, " 自己的")) : o.name + _t(3964, " 的")}${rent ? ' · ' + rent : ''}` : s.p ? _tf(3965, "没人买 · 售价 ${$0}", s.p) : s.k === 'jail' && p.jail !== null ? _tf(3966, "关在里面：停{$0}轮或付 $50 出来", jailMax(p) > 1 ? ` ${jailMax(p) - p.jail} ` : _t(2874, "一")) : CORNER_SUB[s.k] || (s.t === 'tax' ? _t(3967, "交 $200") : s.t === 'tax2' ? _t(3968, "交 $100") : '');
+  const sub = o ? `<i class="pawn" style="--pc:${o.color}"></i>${o.id === p.id ? ((MP.role === 'client' ? p.id === MP.mySeat : !(MP.role === 'host' && MP.isRemote(p.id) && !MP.hostPlays(p.id))) ? _t(2971, "你自己的") : o.name + _t(3963, " 自己的")) : o.name + _t(3964, " 的")}${rent ? ' · ' + rent : ''}` : s.p ? _tf(3965, "没人买 · 售价 ${$0}", s.p) : s.k === 'jail' && p.jail !== null ? _tf(5676, "关在里面：停{$0}轮或付 ${$1} 出来", jailMax(p) > 1 ? ` ${jailMax(p) - p.jail} ` : _t(2874, "一"), BAL.jailFee) : CORNER_SUB[s.k] || (s.t === 'tax' ? _t(3967, "交 $200") : s.t === 'tax2' ? _t(3968, "交 $100") : '');
   return `<button class="here" data-act="showSquare" data-arg="${i}" title="${_t(3969, "看这一格的现状和历史记录")}">${_tf(3970, "{$0}<span><b>{$1} 在 {$2}</b><em>{$3}</em></span><small>记录</small>", awsImg(s.icon), p.name, s.n, sub)}</button>`;
 }
 // 鼠标停在格子上看收费情况：服务格看价格、过路费、运行费和主人；角落格和账单格看收多少、给多少
@@ -108,8 +108,7 @@ export function sqTip(i) {
       const jr = sr.jr, off = pr.offline ? _t(3944, "已下线") : pr.ddos != null ? (pr.ddosWhy ? _tf(5393, "因「{$0}」下线", downWhy(pr)) : _t(3980, "被 DDoS 打到下线")) : pr.impaired ? _t(3981, "现在 Impaired") : '';
       L.push(_tf(3983, "主人：{$0}{$1}{$2}", unesc(o.name), s.upg ? ` · ${lvFull(i, pr.level)}` : '', pr.cap ? _tf(3982, " · 容量 {$0} 个{$1}", pr.cap, capU(s.k)) : ''), off ? _tf(3984, "过路费：{$0}，不收", off) : sr.cap ? _tf(3985, "过路费最多 $50（新账户保护期，前 {$0} 轮每笔封顶）；第 {$1} 轮起约 ${$2}{$3}", BAL.protect, BAL.protect + 1, sr.full, jr ? _t(3961, "（整套架构联合收费）") : '') : _tf(3988, "过路费约 ${$0}{$1}{$2}", sr.r, jr ? _tf(3986, "（{$0}{$1}架构联合收费{$2}）", jr.cs.map(c => _tf(2766, "「{$0}」", c.n)).join(''), jr.cs.length > 1 ? _t(2767, "串联") : '', sr.rn ? ` · ${sr.rn}` : '') : sr.rn ? _tf(2769, "（{$0}）", sr.rn) : '', sr.r && (jr ? sr.txt[0] === '≈' : float) ? _t(3987, "（按掷出 7 点算，随点数浮动）") : ''), _tf(3989, "运行费：每圈 ${$0}", run));
     }
-  } else if (s.t === 'jail') L.push(_t(286, "落在这里或被送进来：停一轮，或者交 $50 照常走"));
-  else if (s.d) L.push(s.d.replace(/<[^>]+>/g, ''));
+  } else if (s.d) L.push(s.d.replace(/<[^>]+>/g, ''));
   const n = ((S.hist || {})[i] || []).length; L.push(n ? _tf(3990, "点一下看这一格的 {$0} 条记录", n) : _t(3991, "点一下看这一格的详情"));
   return L.join('\n');
 }

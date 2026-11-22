@@ -52,12 +52,12 @@ function immuneByProp(o, id) {
   }
 }
 // 11-22：技术债不管怎么清掉的（花钱重构、卡牌、角色技能、自动修复、攒满 3 个的大重构），清掉的那一刻马上进维护窗口停一轮，
-// 名下所有服务一起下线一轮（不收过路费、不算持有，运行费照交，到自己下回合开始恢复）。没有免疫，不能付 $50 或用 Enterprise Support 提前出来。
+// 名下所有服务一起下线一轮（不收过路费、不算持有，运行费照交，到自己下回合开始恢复）。没有免疫，不能付钱或用 Enterprise Support 提前出来。
 // 这次进维护窗口不是事件：出来不写复盘、不领复盘标记，也不会再记技术债。已经在维护窗口里的（被事件送进来的）不重进，只让服务下线
 export const RF_JAIL = 'rf';   // 维护窗口的原因（p.jailCat）：清技术债；事件进来的是 CATS 里的类别
-// 清技术债进来的维护窗口：界面上不写「付 $50 出来」「Enterprise Support」，这次只能停够一轮（中间状态行、右栏待办、玩家卡共用这一句）
+// 清技术债进来的维护窗口：界面上不写「付钱出来」「Enterprise Support」，这次只能停够一轮（中间状态行、右栏待办、玩家卡共用这一句）
 export const rfJailed = p => p.jail !== null && p.jailCat === RF_JAIL;
-export const rfJailTxt = () => _t(5557, "在维护窗口里（清技术债）：只能停这一轮，不能付 $50 或用 Enterprise Support 提前出来");
+export const rfJailTxt = () => _t(5671, "在维护窗口里（清技术债）：只能停这一轮，不能付钱或用 Enterprise Support 提前出来");
 export function debtCleared(p) {
   const down = ownedBy(p).filter(i => !S.props[i].offline && S.props[i].ddos == null), go = p.jail === null;
   down.forEach(i => forceDown(i, p.id, 1, RF_JAIL));   // 原因存键，显示时 downWhy 翻成「清技术债」

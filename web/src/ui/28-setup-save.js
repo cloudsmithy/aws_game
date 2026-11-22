@@ -1,6 +1,6 @@
 import { LANG, __rv, _t, _tf } from '../core/01-i18n-runtime.js';
 import { $, BOT, COLORS, DEMO, KEY, MY_REV, PAWN, REV_KEY, SAVE_FAIL, SIM, STALE, __set_MY_REV, __set_SAVE_FAIL, __set_STALE, awsImg, esc, homeUrl, revNow, rnd, shuffle, unesc } from '../core/02-util.js';
-import { BAL, IX, MAX_ROUNDS, OWNABLE } from '../rules/03-services.js';
+import { BAL, IX, MAX_ROUNDS, OWNABLE, SQ } from '../rules/03-services.js';
 import { INC, REI, ROLES, roleOf, rsCustomers, rsShort } from '../rules/04-roles-combos-cards.js';
 import { DLC, dlcOn } from '../rules/05-dlc.js';
 import { F, MAX_PLAYERS, S, __set_S, cur, debtOf, isWild, log, nm, resetProp, winParts, winTimed, winWA } from '../engine/07-state.js';
@@ -318,7 +318,8 @@ export async function resumeGame() {
     delete pr.forced;
   });
   if (!Array.isArray(S.traps)) S.traps = [];   // 老存档没有埋下的 Health 卡
-  S.players.forEach(q => { q.cards = q.cards || []; q.hand = q.hand || []; q.stops = q.stops || []; q.coe = q.coe || []; q.drill = q.drill || []; q.debt = q.debt || []; q.speed = q.speed || 0; q.rsRate = q.rsRate || 0.9; if (q.rentBoost && !q.rentBoostTurns) q.rentBoostTurns = 1; q.startCash = q.startCash || startCashOf(q); q.rsCoupon = q.rsCoupon || 0; q.buyCoupon = q.buyCoupon || 0; q.commits = (q.commits || []).filter(c => c.laps > 0); });
+  // stops：老存档没记停过哪些格（能埋 Health 卡的地方），先按名下的服务和现在站的格补上
+  S.players.forEach(q => { q.cards = q.cards || []; q.hand = q.hand || []; if (!q.stops) q.stops = [...new Set([...OWNABLE.filter(i => S.props[i] && S.props[i].owner === q.id), q.pos])].filter(i => SQ[i] && (SQ[i].t === 'prop' || SQ[i].t === 'util')); q.coe = q.coe || []; q.drill = q.drill || []; q.debt = q.debt || []; q.speed = q.speed || 0; q.rsRate = q.rsRate || 0.9; if (q.rentBoost && !q.rentBoostTurns) q.rentBoostTurns = 1; q.startCash = q.startCash || startCashOf(q); q.rsCoupon = q.rsCoupon || 0; q.buyCoupon = q.buyCoupon || 0; q.commits = (q.commits || []).filter(c => c.laps > 0); });
   // 咨询合作伙伴的估值按「买过的客户」算（rsSold）：老存档没记，先按现在还经他付费的客户补上
   S.players.forEach(q => { if (q.reseller && !q.rsEver) q.rsEver = rsCustomers(q).map(c => c.id); });
   // 回合编号改成 round × 100 + 座位（engine/09-rent.js 的 turnKey）：老存档里记着的按 round × 10 + 座位换算，不然「这回合已经做过」全都对不上

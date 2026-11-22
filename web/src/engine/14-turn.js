@@ -64,13 +64,13 @@ export async function jailAct(kind) {
   if (p.jailCat === RF_JAIL) kind = 'stay';   // 清技术债进来的只能停够一轮，不能付钱、用卡提前出来
   S.phase = 'busy'; UI.render();
   try {
-    if (kind === 'pay') { pay(p, 'pot', 50); await leaveJail(p, _t(2917, "付 $50 开 Support Case")); await resolveDebts(); if (checkOver()) return; if (!cur().alive) return nextTurn(); S.phase = 'roll'; UI.save(); UI.render(); return; }
+    if (kind === 'pay') { pay(p, 'pot', BAL.jailFee); await leaveJail(p, _tf(5669, "付 ${$0} 开 Support Case", BAL.jailFee)); await resolveDebts(); if (checkOver()) return; if (!cur().alive) return nextTurn(); S.phase = 'roll'; UI.save(); UI.render(); return; }
     if (kind === 'es') { const c = availCard(p, 'ES'); if (c) { c.used = true; await leaveJail(p, _t(2918, "用掉 Enterprise Support")); } S.phase = 'roll'; UI.save(); UI.render(); return; }
     // 停一轮：这回合不走；停够了（传统企业上云要 2 轮）就出来，下回合照常掷骰子
     p.jail++;
     const max = jailMax(p);
     if (p.jail >= max) await leaveJail(p, _tf(2919, "停了 {$0} 轮", max));
-    else log(_tf(2920, "{$0} 在维护窗口里停一轮（{$1}/{$2}），下回合再停一轮或交 $50 出来", nm(p), p.jail, max));
+    else log(_tf(5670, "{$0} 在维护窗口里停一轮（{$1}/{$2}），下回合再停一轮或交 ${$3} 出来", nm(p), p.jail, max, BAL.jailFee));
     S.again = false;
   } catch (e) { UI.reportErr(e); }
   await afterAction();

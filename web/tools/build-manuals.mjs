@@ -14,6 +14,9 @@ import { Marked } from 'marked';
 
 const ROOT = resolve(import.meta.dirname, '../..'), DOCS = join(ROOT, 'docs'), OUT = join(ROOT, 'code/manual');
 const GH = 'https://github.com/cloudsmithy/aws_game/blob/master/docs/';
+// 官网（成都服务器，master 更新后自动部署）：每页页脚都放一个，GitHub Pages 上打开的人也能跳过去
+const SITE = 'https://aws-game.usergroup.cn/';
+const SITE_LINE = `官网（直接开玩）：<a href="${SITE}">aws-game.usergroup.cn</a> · <a href="${SITE}manual/">手册网页版</a>`;
 const CHECK = process.argv.includes('--check');
 
 // 目录照 docs/手册 分组。md：有源文件；only：只取规则书里这几节（图鉴就是规则书的摘录）；print：留 PDF
@@ -70,7 +73,7 @@ function page({ title, kicker, lead, pdfPath, toc, body, note, back = '<a href="
 <nav class="links">${links}</nav>${nav}
 </header>
 ${body}
-<footer>${note}</footer>
+<footer>${note}<br>${SITE_LINE}</footer>
 </div>
 </body>
 </html>
