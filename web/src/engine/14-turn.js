@@ -120,7 +120,7 @@ export async function nextTurn() {
   await startTurn();
 }
 // 一位玩家开局时的全部字段：开局（ui/28-setup-save.js 的 newGame）和联机中途加入（joinPlayer）共用。name 是原文，这里转义
-export const makePlayer = (id, name, r, cash, reseller = false) => ({ id, name: esc(name), color: COLORS[id], role: r.id, cash, startCash: cash, pos: 0, jail: null, jailCat: 'sec', skip: 0, debt: [], techDebt: 0, coe: [], drill: [], cards: [], hand: [], stops: [], alive: true, speed: 0, reseller, rsRate: 0.9 });
+export const makePlayer = (id, name, r, cash, reseller = false) => ({ id, name: esc(name), color: COLORS[id], role: r.id, cash, startCash: cash, pos: 0, jail: null, jailCat: 'sec', skip: 0, debt: [], techDebt: 0, coe: [], drill: [], cards: [], hand: [], alive: true, speed: 0, reseller, rsRate: 0.9 });
 // 联机中途加入（房主同意后由 net/40d-host-msgs.js 的 admit 调）：排在座位最后，站在起点，没有服务和卡牌。
 // 角色从还没人用的客户角色里随机挑（都用过了就随便一个客户角色）；起始资金是还活着的各家总资产的平均数，取整到 $10；
 // 这一轮已经排好了，从下一轮开始走（nextTurn 按 joinRound 跳过）

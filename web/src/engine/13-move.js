@@ -7,7 +7,7 @@ import { reGoLog } from '../rules/05-dlc.js';
 import { F, P, S, availCard, cur, hasCombo, log, nm, ownedBy, owns } from './07-state.js';
 import { credit, pay } from './08-money.js';
 import { CO_SVCS, coKind, coRightsize, debtFee, opCost, runCost, spActive, svcRunDue } from './08c-costs.js';
-import { drawReinvent } from './18-reinvent.js';
+import { drawReinvent, notePath } from './18-reinvent.js';
 import { quarterly } from './19-balance.js';
 import { speedLose } from './22-speed.js';
 import { ST } from './26b-retro.js';
@@ -45,7 +45,7 @@ export async function moveSteps(p, n) {
       const path = walkSegment(p.pos, Math.abs(n) - k, dir); batchEnd += path.length;
       fxCast('walk', { p: p.id, seq: MP.walkSeq = (MP.walkSeq || 0) + 1, from: p.pos, path, ms: paceMs, last: batchEnd === Math.abs(n) });
     }
-    p.pos = (p.pos + dir + N) % N;
+    p.pos = (p.pos + dir + N) % N; notePath(p, p.pos);   // 埋 Health 卡能选的格：这一回合走过的
     if (hop && k === Math.abs(n) - 1) { UI.__set_MOVE_TO(p.pos); UI.hopRender(); }   // 最后一跳前才在终点格放占位，3D 棋子落在占位上
     // 老版本客户端只认逐格的 ws/wh，两种分支都要发；本机能不能播只影响下面那行 pawnHop
     if (!SIM) fxCast('wh', { p: p.id, from: (p.pos - dir + N) % N, to: p.pos, ms: paceMs, last: k === Math.abs(n) - 1 });

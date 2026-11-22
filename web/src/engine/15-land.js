@@ -14,7 +14,7 @@ import { quiz } from './12-quiz.js';
 import { goReiCards, sendToJail } from './13-move.js';
 import { drawRei } from './16-deck.js';
 import { drawIncident, incident, skipOrPay } from './17-health.js';
-import { drawReinvent, noteStop, springTrap } from './18-reinvent.js';
+import { drawReinvent, springTrap } from './18-reinvent.js';
 import { raiseValue } from './20-bankrupt.js';
 import { manage } from './23-manage.js';
 import { ST, evt } from './26b-retro.js';
@@ -23,8 +23,8 @@ import { isAI } from './36-ai.js';
 import { MP } from '../net/40-host-sync.js';
 import { fxAll, fxCast, fxPot, sfxAll } from '../net/41-replay.js';
 // ================= 落点 =================
-// 停在服务格上记进 p.stops（埋 Health 卡只能埋在自己停过的格子上，经过不算）；这一格结算完（过路费、买地、升级都做完）再看有没有对手埋的 Health 卡
-export async function land(p, opts = {}) { const prev = S.histSq, at = S.histSq = p.pos; let r; try { noteStop(p, at); r = await withCardMul(0, () => land0(p, opts)); await withCardMul(0, () => springTrap(p, at)); } finally { S.histSq = prev; } await goReiCards(p); return r; }
+// 这一格结算完（过路费、买地、升级等）以后，看有没有踩中埋下的 Health 卡
+export async function land(p, opts = {}) { const prev = S.histSq, at = S.histSq = p.pos; let r; try { r = await withCardMul(0, () => land0(p, opts)); await withCardMul(0, () => springTrap(p, at)); } finally { S.histSq = prev; } await goReiCards(p); return r; }
 async function land0(p, opts = {}) {
   const i = p.pos, s = SQ[i];
   S.lastSq = i; if (!BOT && !SIM) fxAll({ sq: [i, 'fx-land', 900] });
