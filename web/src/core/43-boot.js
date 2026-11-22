@@ -21,11 +21,10 @@ import { edpDialog, quizAll, quizChallenge, trade, tradeFor } from '../engine/25
 import { repKey, repSt, repTab } from '../ui/26c-report.js';
 import { showReport } from '../ui/26f-over-screens.js';
 import { showManual } from '../ui/26e-manual.js';
-import { toggleArchTip } from '../ui/27b-arch-notes.js';
 import { fmtTime } from '../ui/27c-center.js';
 import { jumpPl, render, togglePl, toggleRole } from '../ui/27d-side.js';
 import { closeSqPop, gallery, showSquare, showSquareFull, themeControl } from '../ui/27e-square-gallery.js';
-import { DLC_TABS, backToSetup, confirmNew, dlcCat, dlcCounts, endNow, maybeTour, playerGallery, quitGame, renameDialog, renderNames, resumeGame, setupRestore, setupSum, staleTab, startFromSetup, toast, toggleAnim } from '../ui/28-setup-save.js';
+import { DLC_TABS, backToSetup, confirmNew, dlcCat, dlcCounts, endNow, maybeTour, playerGallery, quitGame, renameDialog, renderNames, resumeGame, setupRestore, setupSum, staleTab, startFromSetup, toast } from '../ui/28-setup-save.js';
 import { botMain } from '../dev/29-bot.js';
 import { simMain } from '../dev/30-sim.js';
 import { demo } from '../dev/31-demo.js';
@@ -58,7 +57,7 @@ Object.assign(ACTS, {
   uiAction: (el, e, a) => { const f = UI_ACTS[a]; if (f) uiAction(f); else console.error('unknown uiAction', a); },
   backToSetup: () => backToSetup(), toHome: () => { location.href = homeUrl(); }, showReport: () => showReport(), endNow: () => endNow(),
   gallery: () => gallery(), maybeTour: (el, e, a) => maybeTour(a === 'true'), keysHelp: () => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' })),
-  toggleSfx: () => toggleSfx(), renameDialog: (el, e, a) => renameDialog(a), toggleBoss: () => toggleBoss(), toggleArchTip: () => toggleArchTip(), toggleAnim: () => toggleAnim(),
+  toggleSfx: () => toggleSfx(), renameDialog: (el, e, a) => { e.stopPropagation(); renameDialog(a); },   // 玩家卡上的 ✎ 在可折叠的那一行里：不顺带收起 / 展开 toggleBoss: () => toggleBoss(), toggleArchTip: () => toggleArchTip(), toggleAnim: () => toggleAnim(),
   quitGame: () => quitGame(), confirmNew: () => confirmNew(), langMenu: el => langMenu(el),
   // 灰按钮：有 data-arg 念它，没有就念 data-why
   toast: (el, e, a) => toast(a ?? el.dataset.why), dlcToast: (el, e, a) => toast((a ?? '') + el.title, 5000),   // data-arg 是前缀（「这局开了：」，跟着翻译串走）

@@ -4,7 +4,7 @@ import { UI } from '../core/02b-ui-port.js';
 import { IX, N, OWNABLE, SQ, capU, lvFull, lvName } from '../rules/03-services.js';
 import { CARDN, CATS, COMBOS, INC, REI, REI_HAND_MAX, comboOpen } from '../rules/04-roles-combos-cards.js';
 import { advanceTo } from '../rules/05-dlc.js';
-import { P, S, cur, hasCombo, log, nm, ownedBy, owns, resetProp, sqn } from './07-state.js';
+import { P, S, cur, hasCombo, inPlay, log, nm, ownedBy, owns, resetProp, sqn } from './07-state.js';
 import { cardAmt, credit, giveTo, pay, withGain } from './08-money.js';
 import { SP_PLANS, billAt, commitsOf, halfAt, halfSave, netWorth, runAfterRI, spActive } from './08c-costs.js';
 import { capInfo, fullBack, svcLeaves, turnKey, upgradeInfo } from './09-rent.js';
@@ -31,10 +31,12 @@ function saTarget(p) {
   const free = OWNABLE.filter(i => S.props[i].owner === null && !isHidden(i)).sort((a, b) => dist(a) - dist(b));
   return free.length ? free[0] : null;
 }
+export const reiLeft = () => (S.rei || []).length + (S.reiDisc || []).length;
 // 花钱抽 re:Invent 卡：总资产的 4%（取整到 $10），最低 $50，越有钱越贵
 export const reiBuyCost = p => Math.max(50, Math.round(netWorth(p) * 0.04 / 10) * 10);
 export async function buyReinvent() {
   const p = cur(), cost = reiBuyCost(p); if (S.reiBought || p.cash < cost || p.jail !== null || S.phase !== 'busy') return;
+  if (!reiLeft()) return void UI.toast(_t(5664, "re:Invent 牌堆抽完了（卡都在各家手里），现在抽不了"));   // 先查再收钱：抽空了只给 $50 保底，比买卡的钱少
   S.reiBought = true; ST(p).spendMisc = (ST(p).spendMisc || 0) + pay(p, 'bank', cost);
   log(_tf(3259, "🎟 {$0} 花 ${$1} Credits 抽一张 re:Invent 卡（总资产的 4%）", nm(p), cost));
   await drawReinvent(p);
@@ -49,7 +51,7 @@ async function sendIncident(kind) {
   const foes = chFoes(p), one = incSendCost(p), cost = kind === 'all' ? one * 2 : one;
   if (p.cash < cost) return void UI.toast(_tf(2981, "现金不够 ${$0}", cost));
   let ts;
-  if (kind === 'all') { const n = S.players.length; ts = Array.from({ length: n - 1 }, (_, k) => S.players[(p.id + 1 + k) % n]).filter(o => o.alive); }   // 从下一位开始按座位顺序
+  if (kind === 'all') { const n = S.players.length; ts = Array.from({ length: n - 1 }, (_, k) => S.players[(p.id + 1 + k) % n]).filter(inPlay); }   // 从下一位开始按座位顺序
   else if (kind === 'rand') ts = [foes[rnd(foes.length)]];
   else { const t = foes.length === 1 ? foes[0] : await pickPartner(_tf(3262, "让谁抽一张 Health 卡？（花 ${$0}）", one)); if (!t) return; ts = [t]; }
   p.incLap = p.laps || 0;
@@ -80,7 +82,7 @@ export async function buryIncident() {
   if (p.cash < cost) return void UI.toast(_tf(2981, "现金不够 ${$0}", cost));
   // 格子名写在按钮上：别的座位、观众那边的按钮换成「？」（priv.buttons），正文也换掉，看不出在挑哪几格
   const v = await UI.ask({ who: p.id, cls: 'pick', title: _tf(5563, "花 ${$0} 埋一张 Health 卡：埋在哪一格？（只有你看得到）", cost),
-    html: _tf(5564, "<p>从 Health 牌堆抽一张扣着埋下去，你自己也先不看。对手停在那一格（经过不算），结算完那一格以后翻开，由他照常结算。你自己停上去没事。</p><p class=\"muted\">只能埋在你这局停过的服务上，已经埋了卡的格子不能再埋；场上最多 {$0} 张，和发 Health 卡共用每圈一次。</p>", TRAP_MAX),
+    html: _tf(5564, "<p>从 Health 牌堆抽一张扣着埋下去，别人看不到埋在哪、是哪张（你自己在玩家卡上看得到）。对手停在那一格（经过不算），结算完那一格以后翻开，由他照常结算。你自己停上去没事。</p><p class=\"muted\">只能埋在你这局停过的服务上，已经埋了卡的格子不能再埋；每人同时最多 {$0} 张，和发 Health 卡共用每圈一次。</p>", TRAP_MAX),
     priv: { title: _tf(5565, "{$0} 在决定埋不埋 Health 卡", p.name), html: _t(5566, "<p>埋在哪一格只有他自己知道。</p>"), buttons: [...cands.map(() => '?'), _t(2465, "取消")] },
     buttons: [...cands.map(i => ({ label: SQ[i].n, value: i })), { label: _t(2465, "取消"), value: -1 }] });
   const i = +v; if (!cands.includes(i) || !buryOk(p) || !trapCands(p).includes(i) || p.cash < cost) return;
@@ -197,7 +199,7 @@ async function reiResolve(p, id) {
     p.cards.push({ id: c.keep, used: false }); log(_tf(3268, "{$0} 获得保留卡「{$1}」", nm(p), CARDN[c.keep])); return;
   }
   S.reiDisc.push(id);
-  const others = S.players.filter(o => o.alive && o.id !== p.id);
+  const others = S.players.filter(o => inPlay(o) && o.id !== p.id);
   if (c.run) { await c.run(p, others, c); return; }
   switch (id) {
     case 1: { const n = Math.min(4, COMBOS.filter(c => comboOpen(c) && hasCombo(p, c.id)).length); await moneyOrMove(p, c, 100 + 50 * n, got => log(_tf(3270, "{$0} {$1}领 ${$2} Credits", nm(p), n ? _tf(3269, "有 {$0} 个生效的架构，", n) : '', got))); break; }

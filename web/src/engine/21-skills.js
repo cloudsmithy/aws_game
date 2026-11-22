@@ -2,7 +2,7 @@ import { __rv, _t, _tf } from '../core/01-i18n-runtime.js';
 import { UI } from '../core/02b-ui-port.js';
 import { BAL, OWNABLE, SQ, isInst, lvFull } from '../rules/03-services.js';
 import { COMBOS, roleOf, rsBuyRate, rsCustomers, rsRate, slotOpen, viaOf } from '../rules/04-roles-combos-cards.js';
-import { S, active, comboMiss, combosBrokenBy, cur, log, nm, ownedBy, sqn, wildFits, wildFree, wildTargets } from './07-state.js';
+import { S, active, comboMiss, combosBrokenBy, cur, inPlay, log, nm, ownedBy, sqn, wildFits, wildFree, wildTargets } from './07-state.js';
 import { giveTo, pay, withGain } from './08-money.js';
 import { netWorth } from './08c-costs.js';
 import { baseRent, handOver, sellValue, shownRent, trafficMul, upgradeInfo, zhe } from './09-rent.js';
@@ -37,7 +37,7 @@ export async function useRoleSkill() { const p = cur(); if (!canSkill(p)) return
 async function roleSkill(p) { return withGain('card', () => roleSkill0(p)); }
 async function roleSkill0(p) {
   // 金额倍数见 skillMul()：跟着流量涨，完整局再 ×1.2，地狱模式不涨
-  const r = roleOf(p), m = skillMul(), $m = x => Math.round(x * m), others = S.players.filter(o => o.alive && o.id !== p.id);
+  const r = roleOf(p), m = skillMul(), $m = x => Math.round(x * m), others = S.players.filter(o => inPlay(o) && o.id !== p.id);
   const freeUp = i => { S.props[i].level++; (S.props[i].upPaid = S.props[i].upPaid || [])[S.props[i].level - 1] = 0; log(_tf(3374, "🔧 {$0} 免费给 {$1} 升到{$2}", nm(p), sqn(i), lvFull(i, S.props[i].level))); };
   const unowned = OWNABLE.filter(i => S.props[i].owner === null && SQ[i].t === 'prop' && !isHidden(i));
   const take = i => { S.props[i].owner = p.id; S.props[i].paid = 0; log(_tf(3375, "📈 {$0} 靠技能拿下 {$1}", nm(p), sqn(i))); };

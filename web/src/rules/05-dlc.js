@@ -4,7 +4,7 @@ import { UI } from '../core/02b-ui-port.js';
 import { IX, N, OWNABLE, SQ, isInst, lvFull, lvName } from './03-services.js';
 import { COMBOS, comboOpen, rsBuyRate, rsCustomers, rsRate, rsSold, slotOpen, viaOf } from './04-roles-combos-cards.js';
 import { askQuestion, pickQuestion, qPoolS } from './06-qbank.js';
-import { P, S, active, comboMiss, comboOn, effActive, hasCombo, isWild, log, nm, ownedBy, owns, sqn, wildFits, wildOf } from '../engine/07-state.js';
+import { P, S, active, comboMiss, comboOn, effActive, hasCombo, inPlay, isWild, log, nm, ownedBy, owns, sqn, wildFits, wildOf } from '../engine/07-state.js';
 import { cardAmt, credit, pay } from '../engine/08-money.js';
 import { CO_SVCS, halfSave } from '../engine/08c-costs.js';
 import { baseRent, handOver, sellProp, sellValue, upgradeInfo, zhe } from '../engine/09-rent.js';
@@ -46,7 +46,7 @@ const idleInst = p => ownedBy(p).filter(i => isInst(i) && !S.props[i].level && !
 const topMr = p => ownedBy(p).filter(i => effActive(i, 'mr') && SQ[i].upg[S.props[i].level - 1] && SQ[i].upg[S.props[i].level - 1][2] === 'mr');
 // 「前进到某一格」：已经站在那一格上（技能抽卡、经过起点送的卡）就往前绕一整圈，经过起点、UG 照常结算；moveTo 走 0 步会原地再结算一次落点
 export const advanceTo = (p, t) => moveSteps(p, ((t - p.pos + N) % N) || N);
-const hijackTo = p => S.players.filter(q => q.alive && q.id !== p.id && q.jail === null);
+const hijackTo = p => S.players.filter(q => inPlay(q) && q.id !== p.id && q.jail === null);
 // 只给 DLC 的卡挂 run：Health 卡 run 返回 'nopen' 表示这次不算罚；imm 返回免疫原因
 export let DLC_INC = __rv(() => ([
   { dlc: 'reseller', n: _t(1508, "代理商涨价"), c: 'cost', e: _t(1509, "所有代理商的转售价上调一档（最多到原价）；你从代理商手里买的服务，每块补交 $20 差价给对应的代理商"), im: _t(1510, "你自己就是代理商"), tip: _t(1511, "经代理商采购的价格写在合同里，续约时可能调价；多比几家、签长期合同能锁住价格"), art: 'billing',

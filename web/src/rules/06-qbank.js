@@ -72,7 +72,8 @@ export function pickQuestion(g) {
 export async function askQuestion(q, id, why, { local = false, skip = true, again = false, skipLabel = _t(2444, "不答了，按原价算"), inline = false } = {}) {
   const opts = shuffle(q.o.map((t, k) => ({ t, ok: k === 0 })));
   // 按钮的值是第几个选项（结果里要标出选的是哪个）；qok 给电脑认对错，联机时不会发给远端
-  const k = await UI.ask({ local, cls: 'quiz', title: qLabel(id), html: `${why ? `<p class="muted">${why}</p>` : ''}${again ? _t(2445, "<p class=\"wbtag\">错题本里的题，再练一次</p>") : ''}<p class="q">${q.q}</p>`, buttons: [...opts.map((o, n) => ({ label: o.t, value: n, qok: o.ok })), ...(skip ? [{ label: skipLabel, value: 'skip', cls: 'skipq' }] : [])] });
+  const head = `${why ? `<p class="muted">${why}</p>` : ''}${again ? _t(2445, "<p class=\"wbtag\">错题本里的题，再练一次</p>") : ''}<p class="q">${q.q}</p>`;
+  const k = await UI.ask({ local, cls: 'quiz', title: qLabel(id), html: head, buttons: [...opts.map((o, n) => ({ label: o.t, value: n, qok: o.ok })), ...(skip ? [{ label: skipLabel, value: 'skip', cls: 'skipq' }] : [])] });
   if (k === 'skip') return k;
   let ok = !!(opts[k] && opts[k].ok); const w = wbMark(id, ok, local), mine = !ok && opts[k] ? opts[k].t : '';
   // 联机局里别人也看得到这个结果、电脑答题时看屏幕的也不是答题人：「你选的」改写答题人的名字。单机热座答题人就坐在屏幕前，照旧写「你」
@@ -84,8 +85,11 @@ export async function askQuestion(q, id, why, { local = false, skip = true, agai
   const wsc = !ok && !local && qp && availCard(qp, 'WS'); if (wsc) { wsc.used = true; ok = true; log(_tf(2452, "🧪 {$0} 答错了，用掉「{$1}」：这题算答对", nm(qp), CARDN.WS)); }
   const okT = wsc ? _t(2453, "答错了，Workshop 卡算你答对") : ok ? _t(2454, "答对了") : _t(2455, "答错了");
   if (inline) return { ok, html: `<div class="qbox ${ok ? 'ok' : 'bad'}" data-desc><p>${_tf(2458, "<b>{$0}</b>：正确答案是 <b>{$1}</b>{$2}", okT, esc(q.o[0]), mine ? _tf(2457, "，{$0}选的是「{$1}」", named ? nm(qp) + ' ' : _t(2456, "你"), esc(mine)) : '')}</p>${tail}</div>` };
-  // 结果窗沿用题目窗的版式：题干照写，选项改成不能点的行；读屏念的是这几行（data-desc），不再把题干念一遍
-  await UI.ask({ local, cls: 'quiz', title: okT, html: `<p class="qs">${q.q}</p><ul class="qres" data-desc>${opts.map((o, n) => `<li class="${o.ok ? 'ok' : n === k ? 'bad' : ''}">${esc(o.t)}${o.ok ? _t(2459, "<em>正确答案</em>") : n === k ? _tf(2460, "<em>{$0}选的</em>", named ? qp.name + ' ' : _t(2456, "你")) : ''}</li>`).join('')}</ul>${tail}`, buttons: [{ label: _t(2461, "继续"), value: 1, cls: 'pri' }] });
+  // 结果和题目在同一页（issue #32）：标题、说明、题干原样不动，选项还是那几个按钮、顺序和位置不变，只是不能点了，
+  // 正确的标绿、选错的标红；对错和解析接在题干下面，最后一个按钮「继续」。读屏念对错那一块（data-desc），不再把题干念一遍
+  const who = named ? qp.name + ' ' : _t(2456, "你");
+  await UI.ask({ local, cls: 'quiz qdone', title: qLabel(id), html: `${head}<div class="qbox ${ok ? 'ok' : 'bad'}" data-desc><p><b>${okT}</b>${mine ? _tf(5663, "：{$0}选的是「{$1}」", who, esc(mine)) : ''}</p>${tail}</div>`,
+    buttons: [...opts.map((o, n) => ({ label: `${o.t}${o.ok ? _t(2459, "<em>正确答案</em>") : n === k ? _tf(2460, "<em>{$0}选的</em>", who) : ''}`, value: 'q' + n, disabled: true, cls: o.ok ? 'qopt ok' : n === k ? 'qopt bad' : 'qopt' })), { label: _t(2461, "继续"), value: 1, cls: 'pri' }] });
   return ok;
 }
 // 刷题模式：不玩棋盘，只刷一套题，最后按考点给正确率

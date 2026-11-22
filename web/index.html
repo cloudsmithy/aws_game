@@ -280,6 +280,14 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:var(--surface-soft
 .qbox{border-left:3px solid var(--green);background:var(--surface-muted);padding:8px 12px;margin:0 0 12px}
 .qbox.bad{border-color:var(--red);background:var(--danger-bg)}
 .qbox p{margin:4px 0}
+/* 答题结果和题目同一页（issue #32）：选项还是原来的按钮，只是不能点；不要灰掉，正确的标绿、选错的标红，别的照常 */
+.box.qdone .qbox{margin:12px 0 0}
+.box.qdone .btns button.qopt:disabled{cursor:default;color:var(--ink);background:var(--surface);border-color:var(--line)}
+.box.qdone .btns button.qopt.ok:disabled{border-color:var(--green);background:var(--surface-muted);font-weight:700}
+.box.qdone .btns button.qopt.bad:disabled{border-color:var(--red);background:var(--danger-bg)}
+.box.qdone .btns button.qopt em{margin-left:auto;padding-left:10px;font-style:normal;font-size:12px;font-weight:700}
+.box.qdone .btns button.qopt.ok em{color:var(--green)}.box.qdone .btns button.qopt.bad em{color:var(--red)}
+.box.qdone .btns button.pri{justify-content:center;margin-top:6px}
 .inps label{display:flex;align-items:center;gap:8px;margin:7px 0}
 .inps label.cb{cursor:pointer}
 .inps input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue)}

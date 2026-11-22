@@ -4,7 +4,7 @@ import { UI } from '../core/02b-ui-port.js';
 import { IX, SQ } from './03-services.js';
 import { REI } from './04-roles-combos-cards.js';
 import { askQuestion, pickQuestion } from './06-qbank.js';
-import { P, S, log, nm, ownedBy, owns, sqn } from '../engine/07-state.js';
+import { P, S, inPlay, log, nm, ownedBy, owns, sqn } from '../engine/07-state.js';
 import { cardAmt, credit, pay } from '../engine/08-money.js';
 import { runCutSave } from '../engine/08c-costs.js';
 import { baseRent } from '../engine/09-rent.js';
@@ -61,7 +61,7 @@ export let REI26 = __rv(() => ([
     } },
   { n: _t(5620, "在 Organizations 里共享 Savings Plans"), e: _t(5621, "你和下一位玩家下次经过 Startup 扶持时，运行费都打 75 折"), tip: _t(5622, "同一个组织里的账户默认共享 Savings Plans 和 RI 的折扣：一个账户用不完的承诺额，自动抵扣别的账户的用量"), art: 'savingsplans',
     run: async (p, others, card) => {
-      const n = S.players.length, nx = Array.from({ length: n - 1 }, (_, k) => S.players[(p.id + 1 + k) % n]).find(o => o.alive), c = r26Id(card);
+      const n = S.players.length, nx = Array.from({ length: n - 1 }, (_, k) => S.players[(p.id + 1 + k) % n]).find(inPlay), c = r26Id(card);
       const got = [p, nx].filter(Boolean).map(q => [q, r26Cut(q, { m: 0.75, c })]);
       log(_tf(5623, "🤝 {$0} 下次经过 Startup 扶持时运行费都打 75 折（按现在的用量大约少交：{$1}）", got.map(([q]) => nm(q)).join(_t(349, "、")), got.map(([q, s]) => _tf(3245, "{$0}（{$1}）", nm(q), '$' + s)).join(_t(349, "、"))));
     } },

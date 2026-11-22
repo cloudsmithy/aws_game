@@ -186,7 +186,7 @@ export const sellValue = i => Math.max(0, Math.round((buyPaid(i) + upPaidSum(i) 
 export function svcLeaves(from, i, to) {
   const pr = S.props[i];
   if (from && from.commits) from.commits = from.commits.filter(c => !(c.type === 'ri' && c.svc === i));
-  if (pr) { pr.ri = null; pr.offDrawn = 0; if (to != null && pr.ddos === to) { pr.ddos = null; pr.ddosLeft = 0; } }   // offDrawn 是原主人下线拿走的钱，新主人没拿过
+  if (pr) { pr.ri = null; pr.offDrawn = pr.offline ? (pr.offCash || 0) : 0; if (to != null && pr.ddos === to) { pr.ddos = null; pr.ddosLeft = 0; } }   // offDrawn：原主人下线拿走的钱新主人没拿过，清零；但还在下线的那一半跟着服务走（卖回、估值照扣，恢复前也不能再下线拿钱），不然转手一次就能把那一半再卖一遍
 }
 // 服务整块换主人（交易、破产分给债主、战略并购、抢 Spot、代理商清仓）：先 svcLeaves，再改主人、断开代理关系。
 // 代理商按进货价拿的库存（pr.paid 是 5 折）给了不是代理商的人，买价改按原价：客户的估值本来就按原价算服务（valBreak），卖回、下线不改的话按 5 折，两边对不上

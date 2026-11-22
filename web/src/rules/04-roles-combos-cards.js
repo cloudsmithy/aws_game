@@ -3,7 +3,7 @@ import { SIM, SIM_AI, rnd } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { BAL, IX, MAX_ROUNDS, SQ } from './03-services.js';
 import { askQuestion, pickQuestion, qPoolS } from './06-qbank.js';
-import { P, S, hasCombo, log, nm, ownedBy } from '../engine/07-state.js';
+import { P, S, hasCombo, inPlay, log, nm, ownedBy } from '../engine/07-state.js';
 import { cardAmt, credit, pay } from '../engine/08-money.js';
 import { aiName, tableOK, vote } from '../engine/17-health.js';
 import { ST } from '../engine/26b-retro.js';
@@ -145,7 +145,7 @@ export let INC = __rv(() => ([null,
   { n: _t(738, "高危 CVE 爆出"), c: 'sec', e: _t(739, "你名下每块没被漏洞扫描保护的 EC2、ECS、EKS、SageMaker AI：交 $30，并变成 Impaired"), im: _t(740, "持有「漏洞管理」架构；或者按块算：Inspector「EC2 扫描」保护 EC2，ECR「增强扫描」或 Inspector「ECR 镜像扫描」保护 ECS、EKS、SageMaker AI。RDS 这类托管数据库和 Serverless 由亚马逊云科技打补丁，不受影响"), tip: _t(741, "Amazon Inspector 会持续扫描 EC2、ECR 镜像和 Lambda 里的已知漏洞"), art: 'inspector' },
   { n: _t(742, "这次事故谁背锅"), c: 'ops', e: _t(743, "开复盘会找背锅的：指一位其他玩家，说出他的服务怎么连累了你；其他人（不算你们俩）投票，过半同意他就交 $100 进奖池，不然你自己交 $100。只有两个人玩时掷骰子，4–6 甩锅成功"), im: _t(708, "无"), tip: _t(744, "好的事故复盘对事不对人（Blameless Postmortem）：找的是流程和系统的漏洞，不是找人背锅"), art: 'cloudwatch',
     run: async p => {
-      const others = S.players.filter(o => o.alive && o.id !== p.id); if (!others.length) return 'nopen';
+      const others = S.players.filter(o => inPlay(o) && o.id !== p.id); if (!others.length) return 'nopen';
       const t = others.length === 1 ? others[0] : (isAI(p.id) || (SIM && SIM_AI)) ? others[rnd(others.length)] : P(+(await UI.ask({ who: p.id, cls: 'pick', title: _t(745, "这次事故甩给谁？"), html: _tf(746, "<p>指一位其他玩家，说清他的服务怎么连累了你。其他人投票，过半同意他就交 ${$0} 进奖池，不然你自己交。</p>", cardAmt(100)), buttons: others.map(o => ({ label: o.name, value: o.id })) })));
       const voters = others.filter(o => o.id !== t.id);
       let ok;
