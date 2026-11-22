@@ -4,11 +4,12 @@ import { $, BOT, PAWN, SIM, awsImg, esc, usd } from '../core/02-util.js';
 import { BAL, OFFLINE_MIN, SQ, capU, lvFull, lvName } from '../rules/03-services.js';
 import { CARDE, CARDN, CATS, COMBOS, INC, REI, comboOpen, roleOf, rsRate, slotOpen, viaOf } from '../rules/04-roles-combos-cards.js';
 import { dlcOn } from '../rules/05-dlc.js';
-import { F, P, S, active, comboMiss, cur, debtOf, hasCombo, lapFx, logBody, logRow, ownedBy, ownsGroup, wildFits, wildFree, wildOf, wildTargets, winWA } from '../engine/07-state.js';
+import { F, P, S, active, comboMiss, cur, debtOf, downLeft, hasCombo, lapFx, logBody, logRow, ownedBy, ownsGroup, wildFits, wildFree, wildOf, wildTargets, winWA } from '../engine/07-state.js';
 import { cardAmt } from '../engine/08-money.js';
 import { commitsOf, netWorth, opCost, runCost, valBreak, valTip, valuation } from '../engine/08c-costs.js';
 import { canOnline, capInfo, chainTxt, downWhy, offRounds, spotMine, turnKey, upgradeInfo } from '../engine/09-rent.js';
 import { mainBtn, sameEl, viewOpen } from './10-modal.js';
+import { seesPrivate } from './11-cards-deeds.js';
 import { capUpTxt, lvUpTxt } from '../engine/11b-rent-info.js';
 import { jailMax, mspFee } from '../engine/13-move.js';
 import { landHere } from '../engine/15-land.js';
@@ -197,11 +198,11 @@ export const zhs = h => String(h).replace(ZH_SP, '$1$2$3');
 const canRename = p => !!S && !S.over && p.alive && (MP.role === 'client' ? !MP.watching && p.id === MP.mySeat : !MP.isRemote(p.id) && !isAI(p.id));
 export function svcState(i) {
   const s = SQ[i], pr = S.props[i], o = pr.owner == null ? null : P(pr.owner), who = o ? o.name : _t(2842, "主人"), out = [];
-  if (pr.ddos != null && P(pr.ddos)) { const a = P(pr.ddos); out.push({ k: 'ddos', head: pr.ddosWhy ? _tf(5393, "因「{$0}」下线", downWhy(pr)) : _tf(4244, "被 {$0} DDoS", a.name), t: _tf(4245, "不收过路费，运行费照交，也不算持有（不凑整组、架构和支柱），{$0} 再轮到 {$1} 次时恢复", a.name, pr.ddosLeft || 1) }); }
+  if (pr.ddos != null && P(pr.ddos)) { const a = P(pr.ddos); out.push({ k: 'ddos', head: pr.ddosWhy ? _tf(5393, "因「{$0}」下线", downWhy(pr)) : _tf(4244, "被 {$0} DDoS", a.name), t: _tf(4245, "不收过路费，运行费照交，也不算持有（不凑整组、架构和支柱），{$0} 再轮到 {$1} 次时恢复", a.name, downLeft(i)) }); }
   // 下线就是地产类桌游里的抵押：规则书第 10 节。这次拿回的一半记在 offCash（Spot 按出价的一半），不用还；同一个主人累计拿了多少记在 offDrawn
-  if (pr.offline) { const n = pr.offline - 1, st = runCost(i), half = pr.offCash || 0;
+  if (pr.offline) { const n = pr.offline - 1, st = runCost(i), half = pr.spot && !spotMine(i) ? '?' : pr.offCash || 0;   // Spot 的一半就是出价的一半：不是主人看不到
     out.push({ k: 'off', head: n > 0 ? _tf(4246, "已下线 {$0} 轮", n) : _t(4247, "刚下线"), t: _tf(4251, "相当于抵押（只有 EC2、RDS、Aurora、Redshift、ECS 能下线），下线时拿回了一半价钱 ${$0}，不用还。下线期间不收过路费，也不算持有（不凑整组、架构和支柱），{$1}；下线 {$2} 轮后自动恢复{$3}，{$4} 落到这一格可以提前免费拉起来；没恢复前别人落上来，付原价 ${$5} 给亚马逊云科技就能买走，{$6} 不再拿钱", half, st ? _tf(4248, "运行费只交存储费 ${$0}/圈", st) : _t(4249, "运行费也不用交"), OFFLINE_MIN, canOnline(i) ? '' : _tf(4250, "（现在第 {$0} 轮）", offRounds(i)), who, s.p, who) }); }
-  if (pr.impaired) out.push({ k: 'imp', head: 'Impaired', t: _tf(4252, "暂停收过路费，到 {$0} 下回合开始恢复", who) });
+  if (pr.impaired) out.push({ k: 'imp', head: 'Impaired', t: _tf(5729, "暂停收过路费一整轮：所有人各走一回合后，到 {$0} 回合开始恢复", who) });
   if (pr.spot) out.push({ k: 'spot', head: spotMine(i) ? _tf(2703, "Spot 出价 ${$0}", pr.spotPaid) : 'Spot', t: spotMine(i) ? _t(4253, "别人猜的价比你多出原价 10% 就能抢走") : _t(4254, "出价多少看不到，猜得够高就能抢走") });
   out.forEach(x => { x.head = zhs(x.head); x.t = zhs(x.t); });
   return out;
@@ -210,7 +211,7 @@ export function svcState(i) {
 const svGrp = i => { const pr = S.props[i]; return pr.ddos != null && P(pr.ddos) ? (pr.ddosWhy ? 'off' : 'ddos') : pr.offline ? 'off' : pr.impaired ? 'imp' : pr.spot ? 'spot' : ''; };
 let SV_GRP = __rv(() => ({
   off: [_t(4255, "下线"), _t(4256, "下线就是抵押：只有 EC2、RDS、Aurora、Redshift、ECS 能下线，下线时拿回买价的一半（Spot 按出价），这笔钱不用还。下线期间不收过路费，也不算持有（不凑整组、架构和支柱），运行费只交存储费；下线固定 3 轮，满 3 轮在主人回合开始时自动恢复，主人自己落到这一格可以提前免费拉起来；没恢复前别人落上来，付原价给亚马逊云科技就能买走，主人不再拿钱")],
-  imp: ['Impaired', _t(4257, "Impaired：暂停收过路费，到主人下回合开始时恢复")],
+  imp: ['Impaired', _t(5730, "Impaired：暂停收过路费一整轮，所有人各走一回合后，到主人回合开始时恢复")],
   ddos: ['DDoS', _t(4258, "被 DDoS：不收过路费，运行费照交，也不算持有（不凑整组、架构和支柱），到攻击的人第 2 个自己的回合开始时恢复")],
   spot: ['Spot', _t(4259, "Spot：按出价买的，别人落上来出价比你多出原价的 10% 就能抢走（抢的人不付这次的过路费，你拿回出价的一半）；不能升级、不能加容量")],
 }), v => { SV_GRP = v; }, () => SV_GRP);
@@ -290,11 +291,12 @@ function plCard(p, mine, offSeats) {
     by.forEach((ix, v) => { const q = P(v), msp = q.role === 'rs_msp' && q.alive;
       res.push(ri(_tf(4329, "{$0} {$1} 块", lb(_tf(4328, "经 {$0} 买", q.name)), ix.length), _tf(4331, "{$0} 是从代理商 {$1} 手里买的：这几块的运行费交给 {$2}（他按拿货价交亚马逊云科技，赚中间的差价）{$3}", ix.map(i => SQ[i].n).join(_t(349, "、")), q.name, q.name, msp ? _tf(4330, "；{$0} 是托管服务商，每块每圈另收 $10 托管费，经过起点时和运行费一起交", q.name) : ''), '', 'via' + v)); }); }
   // re:Invent 手牌（engine/18-reinvent.js）：大家都看得到几张；是哪几张只在主人自己的提示里写（远端看本机座位；房主和不联机时看当前回合的人，房主这台还坐着别的本机座位时也一样，远端座位的手牌房主看不到）
-  { const hand = handOf(p), seer = MP.role === 'client' ? p.id === mine : p.id === mine || (p.id === S.cur && !isAI(p.id) && !MP.isRemote(p.id));
+  const seer = seesPrivate(p);
+  { const hand = handOf(p);
     if (hand.length) res.push(ri(`${lb(_t(5439, "手牌"))} ${hand.length}`, seer && hand.every(id => REI[id]) ? _tf(5440, "没公开的 re:Invent 卡：{$0}。轮到自己时点「手牌」打出、卖掉或弃牌走 1–3 格", hand.map(id => REI[id].n).join(_t(349, "、"))) : _tf(5441, "没公开的 re:Invent 卡 {$0} 张：只有 {$1} 自己知道是什么", hand.length, p.name), '', 'hand')); }
-  // 埋下的 Health 卡（engine/18-reinvent.js 的 S.traps）：大家都看得到埋了几张；埋在哪、是哪张只在主人自己的提示里写，看的人和手牌一样。联机时别人的那几条只有 by
-  { const tr = trapsOf(p), seer = MP.role === 'client' ? p.id === mine : p.id === mine || (p.id === S.cur && !isAI(p.id) && !MP.isRemote(p.id));
-    if (tr.length) res.push(ri(`${lb(_t(5653, "埋卡"))} ${tr.length}`, seer && tr.every(t => SQ[t.sq] && INC[t.id]) ? tr.map(t => _tf(5656, "埋在 {$0}：{$1}", SQ[t.sq].n, INC[t.id].n)).join(_t(408, "；")) : _tf(5657, "埋了 {$0} 张 Health 卡：埋在哪、是哪张只有 {$1} 自己知道", tr.length, p.name), '', 'trap')); }
+  // 埋下的 Health 卡（engine/18-reinvent.js 的 S.traps）：大家都看得到埋了几张；埋在哪、是哪张只有主人自己看得到（提示里，外加卡上单独一行），看的人和手牌一样（seesPrivate）。联机时别人的那几条只有 by
+  const tr = trapsOf(p), trSeen = seer && tr.length && tr.every(t => SQ[t.sq] && INC[t.id]) ? tr.map(t => _tf(5656, "埋在 {$0}：{$1}", SQ[t.sq].n, INC[t.id].n)).join(_t(408, "；")) : '';
+  if (tr.length) res.push(ri(`${lb(_t(5653, "埋卡"))} ${tr.length}`, trSeen || _tf(5657, "埋了 {$0} 张 Health 卡：埋在哪、是哪张只有 {$1} 自己知道", tr.length, p.name), '', 'trap'));
   const prog = archProg(p), done = prog.filter(x => x.done);
   // 收起的卡：保留卡、承诺折扣、生效的架构、支柱只写个数，说明在提示里
   if (mini) {
@@ -309,7 +311,7 @@ function plCard(p, mine, offSeats) {
   if (p.reGo > 0) warns.push(_tf(4336, "退回了上一圈：{$0}经过起点不领钱、不交运行费", p.reGo > 1 ? _tf(1834, "接下来 {$0} 次", p.reGo) : _t(1835, "下次")));
   { const by = new Map(); ownedBy(p).filter(i => S.props[i].ddos != null && P(S.props[i].ddos)).forEach(i => { const k = S.props[i].ddos + '|' + (S.props[i].ddosWhy || ''); by.set(k, [...(by.get(k) || []), i]); });
     by.forEach(ix => {
-      const pr = S.props[ix[0]], a = P(pr.ddos), names = ix.map(i => SQ[i].n).join(_t(349, "、")), left = Math.max(...ix.map(i => S.props[i].ddosLeft || 1));
+      const pr = S.props[ix[0]], a = P(pr.ddos), names = ix.map(i => SQ[i].n).join(_t(349, "、")), left = Math.max(...ix.map(downLeft));
       warns.push(pr.ddosWhy ? _tf(5394, "{$0} 因「{$1}」下线：不收过路费，运行费照交，{$2} 再轮到 {$3} 次时恢复", names, downWhy(pr), a.name, left) : _tf(4337, "{$0} 被 {$1} DDoS：不收过路费，运行费照交，{$2} 再轮到 {$3} 次时恢复", names, a.name, a.name, left));
     }); }
   // 技能留下的持续效果：挂在玩家卡上，不然只在日志里，几步就被刷走了
@@ -352,7 +354,7 @@ function plCard(p, mine, offSeats) {
   // 展开的卡：总资产 · 估值 · 运行费在服务图标上面，紧挨着头部的现金
   return zhs(`<div class="grp pl ${isCur ? 'cur' : ''} ${mini ? 'mini' : ''} ${p.id === mine ? 'me' : ''}">${head}<div class="gb" id="plb${p.id}">
       ${kv.length ? `<div class="res pkv">${kv.join(' ')}</div>` : ''}<div class="svcs">${svcs || _t(4366, "<span class=\"none\">还没有服务</span>")}</div>
-      ${mini ? '' : resH}${warns.map(t => `<div class="pwarn">${t}</div>`).join('')}${fx.length ? `<div class="fxrow">${fx.map(t => `<span class="fxchip">${t}</span>`).join('')}</div>` : ''}${mini ? resH : rows.join('')}
+      ${mini ? '' : resH}${warns.map(t => `<div class="pwarn">${t}</div>`).join('')}${trSeen ? `<div class="pline ptrap">${_tf(5734, "你埋的卡：{$0}", trSeen)}</div>` : ''}${fx.length ? `<div class="fxrow">${fx.map(t => `<span class="fxchip">${t}</span>`).join('')}</div>` : ''}${mini ? resH : rows.join('')}
     </div></div>`);
 }
 function renderSide(keep = sideScroll()) {

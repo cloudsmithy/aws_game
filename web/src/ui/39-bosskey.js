@@ -265,6 +265,8 @@ document.addEventListener('keydown', e => {
     // 收起时别的键都不管；焦点没停在任何东西上时空格 / 回车照样点主按钮，收起的查资料窗由掷骰子、轮到下一位替玩家关掉（收起的是流程窗时主按钮是灰的，mainBtn 找不到）
     if ($('#modal').classList.contains('min')) { if ((e.key === ' ' || e.key === 'Enter') && idle && MODAL_CUR && MODAL_CUR.cancelable) click(mainBtn()); return; }
     if (box.classList.contains('mpwait')) return;   // 别人（或电脑）在选：只能看，按键不替他选
+    // 按住不放的自动重复不算（焦点在按钮上的回车也挡，浏览器会每次重复都点一下）：不然一个窗关掉、下一个窗（下一位的买地、竞价）接着被同一下按键点掉
+    if (e.repeat && (e.key === 'Enter' || e.key === ' ' || /^[1-9]$/.test(e.key))) { e.preventDefault(); return; }
     const all = [...box.querySelectorAll('.btns button')], bs = all.filter(b => !b.disabled), pri = box.querySelector('.btns button.pri:not(:disabled)') || bs[0];
     if ((e.key === 'Enter' || e.key === ' ') && e.target.closest && e.target.closest('#modal .box') && e.target.closest('button, a[href], [data-v], summary')) return;   // 焦点在弹窗里的按钮、链接上：回车空格点它自己，别抢成主按钮（会误买、答错题）
     // 焦点跑到了弹窗外（背后已经 inert，正常到不了）：只把焦点拉回弹窗，不替玩家点主按钮

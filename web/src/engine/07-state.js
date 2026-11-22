@@ -64,6 +64,18 @@ export const logBody = l => String(l).replace(/<time data-t="\d+"><\/time>/, '')
 export const owns = (p, i) => S.props[i] && S.props[i].owner === p.id;
 // 在局里、能被别人的卡牌技能指到：中途加入的人（joinRound，engine/14-turn.js 的 joinPlayer）排到下一轮才开始走，这一轮里还不算，免得没走过一步就被发卡、出题、收订阅费
 export const inPlay = q => !!q && q.alive && !(q.joinRound > S.round);
+// 一整轮：Impaired、强制下线至少要停一整轮，不管是谁的回合被打中的（规则书第 19 节）。S.turnNo 每开始一个回合 +1（engine/14-turn.js startTurn），
+// 打中时记下 pr.impAt / pr.downAt；在局里的人（inPlay）各开始过一次回合以后，才在主人（强制下线是 by 那位）的回合开始恢复。
+// 以前到主人下回合开始就恢复：主人上家的回合里被打中，几乎马上就好了，等于没罚。老存档、老数据没记 at 的照旧到下回合开始恢复
+export const turnNo = () => (S && S.turnNo) || 0;
+export const fullRound = at => at == null || turnNo() - at >= S.players.filter(inPlay).length;
+// 强制下线还要等 by 那位再开始几次回合才恢复（界面写「再轮到 N 次」）：到他下次开始回合时还没满一整轮的，那一次不倒数，要多等一次
+export function downLeft(i) {
+  const pr = S.props[i], left = pr.ddosLeft || 1; if (pr.downAt == null) return left;
+  const seats = S.players.filter(inPlay).map(q => q.id), n = seats.length, k = seats.indexOf(S.cur), b = seats.indexOf(pr.ddos);
+  const d = b < 0 || k < 0 ? n : ((b - k + n) % n) || n;   // 从现在到 by 下次开始回合还要过几个回合
+  return left + (turnNo() + d - pr.downAt < n ? 1 : 0);
+}
 export const active = (p, i) => owns(p, i) && !S.props[i].offline && S.props[i].ddos == null;
 export const ownedBy = p => OWNABLE.filter(i => owns(p, i));
 // 娱乐模式的盲盒格买不到，整组只看买得到的那几块（数据库组少 DMS、安全组少 GuardDuty/Inspector/KMS），不然这两组永远凑不齐；

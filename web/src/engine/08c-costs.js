@@ -105,9 +105,13 @@ export const opCost = p => {
 export function billAt(p, k, h) {
   const c0 = p.commits, h0 = p.halfRunNow, r0 = p.runCutNow;
   p.commits = (c0 || []).filter(c => c.laps > k); p.halfRunNow = h; p.runCutNow = k === 0 ? p.runCut : null;   // 按服务打折的只管下一次
-  const v = opCost(p); p.commits = c0; p.halfRunNow = h0; p.runCutNow = r0;
-  return Math.round(v * (p.runLaps > k ? p.runMul : 1));
+  const v = opCost(p), due = p.runLaps > k ? runMulDue(p, v) : v; p.commits = c0; p.halfRunNow = h0; p.runCutNow = r0;
+  return due;
 }
+// Savings Plans 承诺额签了就得付：角色技能免运行费、减半，Credits 抵运行费，都免不掉这份（和减半卡一样照付）。
+// oc 是这一圈的总账（opCost），spKeep 是里面照付的承诺额，runMulDue 是技能打完折后要交的
+export const spKeep = (p, oc) => { const sp = spActive(p); return sp ? Math.min(oc, sp.amt) : 0; };
+export const runMulDue = (p, oc) => { const keep = spKeep(p, oc); return keep + Math.round((oc - keep) * p.runMul); };
 // 手上的减半卡第 k 次经过时还管不管；老存档的 halfRun 是 true、没有 halfLaps，按整单减 1 圈
 export const halfAt = (p, k) => !p.halfRun || k >= (p.halfLaps || 1) ? '' : p.halfRun === 'hour' ? 'hour' : 'all';
 // 减半卡 h 管接下来 laps 圈，一共少交多少（Savings Plans 承诺额照付、技术债加价不减）

@@ -2,7 +2,7 @@ import { LANG, _t, _tf } from '../core/01-i18n-runtime.js';
 import { BAL, CAP_MAX, IX, OFFLINE_MIN, OFFLINE_OK, OWNABLE, SQ, TOKEN, UTILS, capU, effIn, lvFull, lvName, sideCost, upCost } from '../rules/03-services.js';
 import { COMBOS, INC, cAll, rsBuyRate } from '../rules/04-roles-combos-cards.js';
 import { dlcRentMul } from '../rules/05-dlc.js';
-import { F, P, S, active, effActive, hasCombo, log, nm, offDrawn, offSpent, offlineCash, owns, ownsGroup, resetProp, sqn, wildOf } from './07-state.js';
+import { F, P, S, active, effActive, fullRound, hasCombo, log, nm, offDrawn, offSpent, offlineCash, owns, ownsGroup, resetProp, sqn, turnNo, wildOf } from './07-state.js';
 import { credit, pay } from './08-money.js';
 import { rsAdj } from './15-land.js';
 import { ST } from './26b-retro.js';
@@ -138,7 +138,10 @@ export function takeOffline(p, i) {
 // 强制下线（高速部署的 DDoS、Health 卡）：不收过路费、不算持有（active() 认 ddos），运行费照交；by 那位玩家再开始 n 个回合时恢复。
 // why = 原因的键：'rf' 清技术债，'inc:卡号' 某张 Health 卡（界面写「因「卡名」下线」，用 downWhy 按当前语言翻）；null 是 DDoS，界面写「被某某 DDoS」。
 // 存键不存文字：联机时房主和远端的语言可以不一样，中途切语言也跟着变。和主动下线（offline，相当于抵押）是两回事
-export function forceDown(i, by, n, why = null) { const pr = S.props[i]; pr.ddos = by; pr.ddosLeft = n; pr.ddosWhy = why; }
+// downAt：第几个回合下线的。至少一整轮以后 downTick 才开始倒数（fullRound），哪个回合被打下线都一样
+export function forceDown(i, by, n, why = null) { const pr = S.props[i]; pr.ddos = by; pr.ddosLeft = n; pr.ddosWhy = why; pr.downAt = turnNo(); }
+// 解除强制下线：三个字段一起清。只清 ddos 的话 ddosLeft、ddosWhy 留着，下次被 DDoS 时界面会把旧原因当成这次的
+export function clearDown(i) { const pr = S.props[i]; pr.ddos = null; pr.ddosLeft = 0; pr.ddosWhy = null; pr.downAt = null; }
 // 强制下线的原因，显示用；老存档里存的是当时翻好的文字，照原样显示
 export function downWhy(pr) {
   const w = pr && pr.ddosWhy; if (!w) return '';
@@ -147,8 +150,8 @@ export function downWhy(pr) {
 }
 export function downTick(p) {
   OWNABLE.forEach(i => {
-    const pr = S.props[i]; if (pr.ddos !== p.id || --pr.ddosLeft > 0) return;
-    const why = downWhy(pr); pr.ddos = null; pr.ddosLeft = 0; pr.ddosWhy = null;
+    const pr = S.props[i]; if (pr.ddos !== p.id || !fullRound(pr.downAt) || --pr.ddosLeft > 0) return;   // 不满一整轮不倒数：DDoS 2 回合的第一下也要等一整轮
+    const why = downWhy(pr); clearDown(i);
     log(why ? _tf(5294, "{$0} 恢复上线（{$1}）", sqn(i), why) : _tf(3409, "{$0} 扛过了 {$1} 的 DDoS，恢复上线", sqn(i), nm(p)));
   });
 }
@@ -186,7 +189,7 @@ export const sellValue = i => Math.max(0, Math.round((buyPaid(i) + upPaidSum(i) 
 export function svcLeaves(from, i, to) {
   const pr = S.props[i];
   if (from && from.commits) from.commits = from.commits.filter(c => !(c.type === 'ri' && c.svc === i));
-  if (pr) { pr.ri = null; pr.offDrawn = pr.offline ? (pr.offCash || 0) : 0; if (to != null && pr.ddos === to) { pr.ddos = null; pr.ddosLeft = 0; } }   // offDrawn：原主人下线拿走的钱新主人没拿过，清零；但还在下线的那一半跟着服务走（卖回、估值照扣，恢复前也不能再下线拿钱），不然转手一次就能把那一半再卖一遍
+  if (pr) { pr.ri = null; pr.offDrawn = pr.offline ? (pr.offCash || 0) : 0; if (to != null && pr.ddos === to) clearDown(i); }   // offDrawn：原主人下线拿走的钱新主人没拿过，清零；但还在下线的那一半跟着服务走（卖回、估值照扣，恢复前也不能再下线拿钱），不然转手一次就能把那一半再卖一遍
 }
 // 服务整块换主人（交易、破产分给债主、战略并购、抢 Spot、代理商清仓）：先 svcLeaves，再改主人、断开代理关系。
 // 代理商按进货价拿的库存（pr.paid 是 5 折）给了不是代理商的人，买价改按原价：客户的估值本来就按原价算服务（valBreak），卖回、下线不改的话按 5 折，两边对不上

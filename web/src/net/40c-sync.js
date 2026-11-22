@@ -57,8 +57,8 @@ Object.assign(MP, {
     // now：房主此刻的时间，远端拿来对齐限时倒计时；不放进 core，不影响「内容没变就不发」
     S.aiPause = AI_PAUSE || undefined; { const off = Object.keys(this.seats).map(Number).filter(k => !this.seats[k].online && S.players[k]); S.mpOff = off.length ? off : undefined; }
     // 掷骰前定好的点数（diceQ）不发给远端。没人有手牌时大家收到的一样，只序列化一次；有人有手牌时按座位各算一份（stateFor），观众共用一份
-    const seq = S.logSeq || 0, out = {}, views = {}, hands = S.players.some(q => q.hand && q.hand.length) || (S.traps || []).length > 0;
-    const view = seat => { const v = hands ? '@' + seat : ''; return views[v] || (views[v] = (st => ({ st, core: JSON.stringify({ ...st, log: undefined, hist: undefined, diceQ: undefined }), tag: v }))(this.stateFor(seat))); };
+    const seq = S.logSeq || 0, out = {}, views = {}, hands = S.players.some(q => q.hand && q.hand.length) || (S.traps || []).length > 0, spots = S.phase !== 'over' && Object.values(S.props).some(pr => pr && pr.spot);
+    const view = seat => { const v = hands || spots ? '@' + seat : ''; return views[v] || (views[v] = (st => ({ st, core: JSON.stringify({ ...st, log: undefined, hist: undefined, diceQ: undefined }), tag: v }))(this.stateFor(seat))); };
     (only ? [only] : this.recipients()).forEach(x => {
       if (!x.conn || !x.conn.open) return;
       const { st, core, tag } = view(x.conn._viewer ? 'v' : x.conn._seat);
@@ -76,7 +76,10 @@ Object.assign(MP, {
   // 埋卡是从牌堆顶拿的，知道埋之前的牌堆顺序就知道埋的是哪张（远端也只用到还剩几张）
   stateFor(seat) {
     const zero = a => (a || []).map(() => 0), over = S.phase === 'over', traps = S.traps && S.traps.length && !over ? S.traps.map(t => t.by === seat ? t : { by: t.by }) : S.traps;
-    return { ...S, rei: zero(S.rei), reiDisc: zero(S.reiDisc), inc: zero(S.inc), traps, players: S.players.map(q => q.hand && q.hand.length && q.id !== seat ? { ...q, hand: q.hand.map(() => 0) } : q) };
+    // Spot 出价只有主人自己知道（engine/07-state.js spotMine）：别人的 Spot 服务把出价和由它算出来的数（买价 paid、下线拿走的一半 offCash / offDrawn）换成 0，观众一律看不到，结束以后全亮。
+    // 远端界面只在 spotMine 时显示这些数；估值、退款都在房主这边算，不受影响
+    const props = over ? S.props : Object.fromEntries(Object.entries(S.props).map(([i, pr]) => [i, pr && pr.spot && pr.owner !== seat ? { ...pr, spotPaid: 0, paid: 0, offCash: 0, offDrawn: 0 } : pr]));
+    return { ...S, props, rei: zero(S.rei), reiDisc: zero(S.reiDisc), inc: zero(S.inc), traps, players: S.players.map(q => q.hand && q.hand.length && q.id !== seat ? { ...q, hand: q.hand.map(() => 0) } : q) };
   },
   // 第 from 条之后新增的日志（新的在前，跟 S.log 一样）和这期间改过的格子历史（整格发）
   deltaSince(from, seq) {
@@ -87,7 +90,9 @@ Object.assign(MP, {
     // 先把最新状态推过去，远端才有棋盘可以垫在弹窗下面
     this.pushState(true);
     const id = ++this.mid;
-    this.cur = { id, who, box, onAnswer };
+    // priv 窗口记下放弃的那一项（decl，没有就最后一个能点的）：移出这位玩家时直接按它结掉，不在房主这边揭开（见 kick）
+    const okK = spec.buttons.map((b, k) => b.disabled ? -1 : k).filter(k => k >= 0), declK = spec.priv ? [...okK].reverse().find(k => /\bdecl\b/.test(spec.buttons[k].cls || '')) ?? okK[okK.length - 1] : null;
+    this.cur = { id, who, box, onAnswer, declK };
     const clean = { title: spec.title, html: spec.html, cls: spec.cls, aiMin: !!spec.aiMin, hold: spec.hold || 0, inputs: spec.inputs, noAI: !!spec.noAI, hp: this.hostPlays(who), buttons: spec.buttons.map(b => ({ label: b.label, desc: b.desc, cls: b.cls || '', disabled: !!b.disabled })) };
     this.cur.msg = { t: 'modal', id, who, spec: clean };
     // priv：只给主人看的窗口（re:Invent 手牌）。真的标题和正文只发给主人那个座位，别的座位、观众收到 priv 那份（按钮上不写卡名，照发）

@@ -298,4 +298,5 @@ export function downloadLog(w, why) {
     ...((S.events || []).length ? [_t(3876, "关键时刻："), ...S.events.map(e => _tf(3877, "第 {$0} 轮　{$1}", e.r, e.t)), ''] : []), ...statTxt(w), _tf(3878, "完整日志（从早到晚，时间是本机时区 {$0}）：", Intl.DateTimeFormat().resolvedOptions().timeZone), ...[...S.log].reverse().map(l => _tf(3879, "{$0}　{$1}", logTime(l), strip(clean(logBody(l)))))];
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lines.map(unesc).join('\n')], { type: 'text/plain;charset=utf-8' }));
   a.download = _tf(3880, "云上大亨对局记录-{$0}.txt", new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')); document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);   // 下载已经开始，放掉这块 Blob；不放的话每存一次就在页面里多占一份日志的内存，直到关页面
 }

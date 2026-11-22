@@ -79,15 +79,18 @@ export async function askQuestion(q, id, why, { local = false, skip = true, agai
   // 联机局里别人也看得到这个结果、电脑答题时看屏幕的也不是答题人：「你选的」改写答题人的名字。单机热座答题人就坐在屏幕前，照旧写「你」
   // 错题本：联机时各记各的（远端的记进他自己的浏览器），写上是谁的；单机整个浏览器共用一本，不写名字
   const qw = local ? null : quizWho(), qp = qw != null && S && S.players ? S.players[qw] : null, named = !!qp && (MP.role === 'host' || isAI(qw));
-  const wbN = MP.role === 'host' && qp ? _tf(2446, " {$0} 的错题本", qp.name) : _t(2447, "错题本");
-  const tail = `<p class="muted">${q.a || ''}</p>${q.ref ? _tf(2448, "<p><a href=\"{$0}\" target=\"_blank\" rel=\"noopener\">去看官方文档</a></p>", esc(q.ref)) : ''}<p class="muted">${!w ? '' : !ok ? _tf(2449, "已记进{$0}，以后会再考。", wbN) : w[id] ? _tf(2450, "{$0}里这道还要再答对 {$1} 次。", wbN.trim(), 2 - w[id].n) : again ? _tf(2451, "这道题已经从{$0}移出。", wbN) : ''}</p>`;
+  // 联机时房主按第三人称写（「X 选的」「X 的错题本」）发给大家；答题人自己那台把 data-you 标着的地方换成「你」的写法（net/40f-client.js youView）。
+  // 换成什么由房主按自己的语言写进 data-you：远端不用拿自己的语言去匹配房主那台的文字，两边语言不同也换得对
+  const you = (txt, alt) => MP.role === 'host' && qp ? `<span data-you-seat="${qw}" data-you="${esc(alt)}">${txt}</span>` : txt;
+  const wb0 = MP.role === 'host' && qp ? _tf(2446, " {$0} 的错题本", qp.name) : _t(2447, "错题本"), wbN = you(wb0, _t(2447, "错题本")), wbT = you(wb0.trim(), _t(2447, "错题本"));
+  const tail = `<p class="muted">${q.a || ''}</p>${q.ref ? _tf(2448, "<p><a href=\"{$0}\" target=\"_blank\" rel=\"noopener\">去看官方文档</a></p>", esc(q.ref)) : ''}<p class="muted">${!w ? '' : !ok ? _tf(2449, "已记进{$0}，以后会再考。", wbN) : w[id] ? _tf(2450, "{$0}里这道还要再答对 {$1} 次。", wbT, 2 - w[id].n) : again ? _tf(2451, "这道题已经从{$0}移出。", wbN) : ''}</p>`;
   // 「去上了一节 Workshop」保留卡：答错了自动用掉，按答对算（错题本照记这道错题）
   const wsc = !ok && !local && qp && availCard(qp, 'WS'); if (wsc) { wsc.used = true; ok = true; log(_tf(2452, "🧪 {$0} 答错了，用掉「{$1}」：这题算答对", nm(qp), CARDN.WS)); }
   const okT = wsc ? _t(2453, "答错了，Workshop 卡算你答对") : ok ? _t(2454, "答对了") : _t(2455, "答错了");
-  if (inline) return { ok, html: `<div class="qbox ${ok ? 'ok' : 'bad'}" data-desc><p>${_tf(2458, "<b>{$0}</b>：正确答案是 <b>{$1}</b>{$2}", okT, esc(q.o[0]), mine ? _tf(2457, "，{$0}选的是「{$1}」", named ? nm(qp) + ' ' : _t(2456, "你"), esc(mine)) : '')}</p>${tail}</div>` };
+  if (inline) return { ok, html: `<div class="qbox ${ok ? 'ok' : 'bad'}" data-desc><p>${_tf(2458, "<b>{$0}</b>：正确答案是 <b>{$1}</b>{$2}", okT, esc(q.o[0]), mine ? _tf(2457, "，{$0}选的是「{$1}」", named ? you(nm(qp) + ' ', _t(2456, "你")) : _t(2456, "你"), esc(mine)) : '')}</p>${tail}</div>` };
   // 结果和题目在同一页（issue #32）：标题、说明、题干原样不动，选项还是那几个按钮、顺序和位置不变，只是不能点了，
   // 正确的标绿、选错的标红；对错和解析接在题干下面，最后一个按钮「继续」。读屏念对错那一块（data-desc），不再把题干念一遍
-  const who = named ? qp.name + ' ' : _t(2456, "你");
+  const who = named ? you(qp.name + ' ', _t(2456, "你")) : _t(2456, "你");
   await UI.ask({ local, cls: 'quiz qdone', title: qLabel(id), html: `${head}<div class="qbox ${ok ? 'ok' : 'bad'}" data-desc><p><b>${okT}</b>${mine ? _tf(5663, "：{$0}选的是「{$1}」", who, esc(mine)) : ''}</p>${tail}</div>`,
     buttons: [...opts.map((o, n) => ({ label: `${o.t}${o.ok ? _t(2459, "<em>正确答案</em>") : n === k ? _tf(2460, "<em>{$0}选的</em>", who) : ''}`, value: 'q' + n, disabled: true, cls: o.ok ? 'qopt ok' : n === k ? 'qopt bad' : 'qopt' })), { label: _t(2461, "继续"), value: 1, cls: 'pri' }] });
   return ok;

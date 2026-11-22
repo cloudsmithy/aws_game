@@ -233,7 +233,7 @@ async function reiResolve(p, id) {
     case 5: await advanceTo(p, IX.bedrock); await land(p, { discount: 0.8 }); break;
     case 6: { const fans = await voteWho(others, _tf(3281, "{$0} 的 Keynote 精彩吗？", p.name), _tf(3282, "<p>{$0} 用 30 秒介绍了自己的公司和架构。觉得精彩就付 ${$1}。</p>", nm(p), cardAmt(50)), _tf(3283, "精彩，付 ${$0}", cardAmt(50)), _t(3284, "一般"), 0.7); fans.forEach(o => pay(o, p, 50)); log(fans.length ? _tf(3285, "{$0} 觉得精彩，各付 {$1} ${$2}", fans.map(nm).join(_t(349, "、")), nm(p), cardAmt(50)) : _tf(3286, "没人觉得精彩，{$0} 没收到钱", nm(p))); break; }
     case 7:
-      if (p.techDebt > 0) { p.techDebt--; p.refactored = true; log(_tf(3287, "{$0} 考过认证，按最佳实践重构，清掉 1 个技术债", nm(p))); debtCleared(p); } else log(_tf(1645, "{$0} 没有技术债，领 ${$1}", nm(p), credit(p, 100)));
+      if (p.techDebt > 0) { p.techDebt--; log(_tf(3287, "{$0} 考过认证，按最佳实践重构，清掉 1 个技术债", nm(p))); debtCleared(p); } else log(_tf(1645, "{$0} 没有技术债，领 ${$1}", nm(p), credit(p, 100)));
       break;
     case 9: {
       const own = ownedBy(p);

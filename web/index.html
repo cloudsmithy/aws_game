@@ -425,6 +425,17 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:var(--surface-soft
 .sq>.toks,.art>.toks{position:absolute!important;left:.35cqw!important;top:.6cqw!important;right:auto!important;bottom:auto!important;flex-direction:column;gap:.15cqw}
 .sq .art{position:static}
 .sq{position:relative}
+/* 自己埋下的 Health 卡（ui/11-cards-deeds.js trapBadge）：格子右上角一张扣着的小 Health 卡，卡背和发牌时同一个样子（深底斜纹、粉边、Health 图标）；
+   叠埋的画成一摞、右下角写张数。只有埋的人看得到。卡背自己是深色，浅色、深色主题下都看得清；左上角是棋子，中间、下面是价格和主人，不挡 */
+.trapb{position:absolute;top:.8cqw;right:.4cqw;z-index:2;width:1.5cqw;height:2cqw}
+.sq.t .trapb{top:.35cqw}   /* 顶排的色条在下边，右上角不用让 */
+.trapb .tcb,.trapb.many::before{position:absolute;inset:0;border:.12cqw solid #e7157b;border-radius:.22cqw;background:repeating-linear-gradient(45deg,rgba(255,255,255,.08) 0 .28cqw,transparent .28cqw .56cqw),#232f3e;box-shadow:0 .08cqw .22cqw rgba(0,0,0,.35)}
+.trapb .tcb{display:flex;align-items:center;justify-content:center}
+.trapb .tcb img.awsi{width:1cqw!important;height:1cqw!important;margin:0!important}
+.trapb.many::before{content:'';transform:translate(-.3cqw,.3cqw)}   /* 下面那张往左下错开：格子 overflow:hidden，往外错会被裁掉 */
+.trapb.many .tcb{z-index:1}
+.trapb b{position:absolute;right:-.35cqw;bottom:-.35cqw;min-width:1cqw;height:1cqw;padding:0 .15cqw;border-radius:1cqw;background:#e7157b;color:#fff;font-size:.72cqw;line-height:1cqw;text-align:center;font-weight:800;box-sizing:border-box;z-index:2}
+#side .ptrap,#sqpop .sp-trap{border-left:3px solid #e7157b;padding-left:6px;margin:4px 0}
 .cap{color:var(--blue);font-weight:700;white-space:nowrap}
 /* 抽卡：卡背从牌堆飞过来 → 3D 翻面露出真正的卡面 → 背后迸开一圈光；Health / FIS 抖一下，re:Invent 扫过一道光。三层各管一个动画，免得抢同一个 transform */
 .deal{position:relative;width:fit-content;max-width:100%;margin:0 auto;perspective:1600px;animation:dealShake .42s 1.12s ease-in-out both}
@@ -1844,6 +1855,9 @@ table.mpnet tr.bad td.st{color:var(--red)}
   #center{grid-row:12!important;grid-column:1/-1!important;border-left:1px solid var(--line);padding:12px!important;gap:12px!important}
   .sq{position:relative;padding:1px!important;gap:0!important;flex-direction:column!important;justify-content:center!important;align-items:center!important}
   .sq .txt,.sq .bill,.sq .lv,.corner .nm,.corner .pr{display:none!important}
+  .trapb{top:1px;right:1px;width:calc(var(--cw) * .3);height:calc(var(--cw) * .4)}   /* 手机：格子只剩图标，小卡按格宽缩放，最小也认得出 */
+  .trapb .tcb img.awsi{width:calc(var(--cw) * .2)!important;height:calc(var(--cw) * .2)!important}
+  .trapb b{font-size:9px;min-width:12px;height:12px;line-height:12px;right:-2px;bottom:-2px}
   .sq .art img.awsi,.sq.l .art img.awsi,.sq.r .art img.awsi{width:calc(var(--cw) * .7)!important;height:calc(var(--cw) * .7)!important}
   .sq.g::before{display:none}
   #board .sq.owned::before{content:'';display:block;position:absolute;left:0;right:0;top:auto;bottom:0;width:auto;height:3px;background:var(--oc)}   /* 主人色条用 ::before，::after 留给「补齐」角标 */

@@ -12,7 +12,10 @@ import { AI_PAUSE, isAI, toggleAiPause } from '../engine/36-ai.js';
 import { applyCheat, reportCheat } from '../engine/38-cheats.js';
 import { sigLabel } from './40a-signal.js';
 import { MP } from './40-host-sync.js';
+const END_ASK_CD = 10000;   // 远端提议结算被答复后，隔多久才能再提（毫秒）
 Object.assign(MP, {
+  // 远端某个座位的某种请求（k）多久只认一次：ms 内再来的不认
+  gateOk(seat, k, ms) { const g = this.gates || (this.gates = {}), key = seat + ':' + k, now = Date.now(); if (now - (g[key] || 0) < ms) return false; g[key] = now; return true; },
   onHostMsg(conn, m) {
     if (this.role !== 'host' || !conn.open || conn._closed || !m || typeof m !== 'object') return;
     const seat = conn._seat;
@@ -39,8 +42,13 @@ Object.assign(MP, {
       if (why) this.send(conn, { t: 'toast', msg: why });
       this.ACTS[a](m);
     }
-    else if (m.t === 'aipause' && S && !S.over) { toggleAiPause(); toast(`${unesc(S.players[seat].name)} ${AI_PAUSE ? _t(4978, "暂停了电脑") : _t(4979, "让电脑接着跑")}`); }
-    else if (m.t === 'endask' && S && !S.over) { const n = unesc(S.players[seat].name); if (S.phase === 'roll' || S.phase === 'post') ask({ local: true, cancelable: true, title: _tf(4980, "{$0} 提议现在结算", n), html: _t(4981, "<p>按每家的估值排名，估值最高的赢。结算后这一局就结束了，不能接着打。</p>"), buttons: [{ label: _t(4719, "现在结算"), value: true, cls: 'pri' }, { label: _t(4982, "接着打"), value: false }] }).then(v => { if (v && S && !S.over) { log(_tf(4983, "🏁 {$0} 提议、房主同意现在结算", n)); timedOver(_t(4722, "大家决定现在结算")); } else this.send(conn, { t: 'toast', msg: _t(4984, "房主选了接着打") }); }); else this.send(conn, { t: 'toast', msg: _t(4985, "房主那边还在结算，等一下再提") }); }
+    // 暂停电脑：远端的按钮只在电脑的回合出现（ui/27c-center.js），别的时候发来的不认；连点 1.5 秒内只算一次，免得被来回切
+    else if (m.t === 'aipause' && S && !S.over) { if (!(isAI(S.cur) || AI_PAUSE) || !this.gateOk(seat, 'aip', 1500)) return; toggleAiPause(); toast(`${unesc(S.players[seat].name)} ${AI_PAUSE ? _t(4978, "暂停了电脑") : _t(4979, "让电脑接着跑")}`); }
+    // 提议结算：每个座位同时只挂一个，答复后 END_ASK_CD 内不能再提。不限的话改过的页面一直发，房主这边的窗一个顶一个；
+    // 房主开着流程弹窗（不是能替他关的窗）时也不弹，免得把正在选的窗顶掉
+    else if (m.t === 'endask' && S && !S.over) { const n = unesc(S.players[seat].name), g = this.gates || (this.gates = {}), k = seat + ':end';
+      if (g[k] === -1 || Date.now() - (g[k] || 0) < END_ASK_CD) return void this.send(conn, { t: 'toast', msg: _t(5714, "刚提过，等房主答复，或者过一会儿再提") });
+      if ((S.phase === 'roll' || S.phase === 'post') && !(MODAL_CUR && !MODAL_CUR.cancelable && !$('#modal').hidden)) { g[k] = -1; ask({ local: true, cancelable: true, title: _tf(4980, "{$0} 提议现在结算", n), html: _t(4981, "<p>按每家的估值排名，估值最高的赢。结算后这一局就结束了，不能接着打。</p>"), buttons: [{ label: _t(4719, "现在结算"), value: true, cls: 'pri' }, { label: _t(4982, "接着打"), value: false }] }).then(v => { g[k] = Date.now(); if (v && S && !S.over) { log(_tf(4983, "🏁 {$0} 提议、房主同意现在结算", n)); timedOver(_t(4722, "大家决定现在结算")); } else this.send(conn, { t: 'toast', msg: _t(4984, "房主选了接着打") }); }); } else this.send(conn, { t: 'toast', msg: _t(4985, "房主那边还在结算，等一下再提") }); }
     else if (m.t === 'rename' && !(S && S.players) && typeof m.name === 'string') { const why = this.lobbyRename(seat, m.name); this.send(conn, why ? { t: 'renameFail', why } : { t: 'renamed', name: this.seats[seat].name }); }
     else if (m.t === 'rename' && S && !S.over && typeof m.name === 'string') { const why = applyRename(seat, m.name); if (why) this.send(conn, { t: 'renameFail', why }); }
     else if (m.t === 'cheat' && S && !S.over && typeof m.c === 'string' && Array.isArray(m.a) && m.a.slice(0, 3).every(x => this.scalar(x))) { const why = applyCheat(seat, m.c, m.a.slice(0, 3).map(x => String(x).slice(0, 20))); if (why) this.send(conn, { t: 'toast', msg: why }); }
@@ -56,7 +64,7 @@ Object.assign(MP, {
     if (m.name != null && typeof m.name !== 'string') return this.reject(conn, _t(5253, "名字必须是文字"));
     const name = (m.name || '').replace(/\s+/g, ' ').trim().slice(0, 12) || _t(3861, "玩家");
     if (m.mode === 'spectator') {
-      if (!this.watchToken || m.invite !== this.watchToken) return this.reject(conn, _t(5254, "观战邀请无效或已关闭"));
+      if (!this.watchToken || m.invite !== this.watchToken) return this.reject(conn, _t(5254, "观战邀请无效或已关闭"), true);
       if (Object.keys(this.viewers).length >= this.watchLimit) return this.reject(conn, _t(5255, "观战人数已满"));
       const id = this.newKey(); conn._viewer = id; conn._admitted = true;
       this.viewers[id] = { name, conn, online: true, delta: m.delta === 1, walk: m.walk === 1 };
@@ -65,8 +73,8 @@ Object.assign(MP, {
       this.refreshMembers(); return;
     }
     if (m.mode != null && m.mode !== 'player') return this.reject(conn, _t(5256, "不支持的入房身份"));
-    if (m.auth !== this.auth) { this.reject(conn, _t(4986, "密码不对")); return; }
-    if (this.banned && this.banned.has(name.replace(/\s+/g, ' ').trim())) { this.reject(conn, _t(4987, "房主把你移出了这个房间")); return; }
+    if (m.auth !== this.auth) { this.reject(conn, _t(4986, "密码不对"), true); return; }
+    if (this.banned && this.banned.has(name.replace(/\s+/g, ' ').trim())) { this.reject(conn, _t(4987, "房主把你移出了这个房间"), true); return; }
     // 名字定位座位，钥匙或房主确认鉴权后再认回。
     let seat = this.seatFor(name), joined = false;
     // 身份由座位钥匙证明，名字只用于定位。离线座位也不能仅凭同名接管。
@@ -83,7 +91,7 @@ Object.assign(MP, {
       if (S && S.players) {
         // 开局后来的新名字：中途加入，房主同意了才排到座位最后（engine/14-turn.js 的 joinPlayer）。座位满了照旧拒绝，提示掉线的人用局里的名字回来
         const left = this.waiting(), mx = Math.min(this.seatMax || 4, MAX_PLAYERS);
-        if (S.over) return this.reject(conn, _t(5578, "这局已经结束了，等房主开下一局再加入"));
+        if (S.over) return this.reject(conn, _t(5578, "这局已经结束了，等房主开下一局再加入"), true);
         if (S.drafting) return this.reject(conn, _t(5579, "大家正在挑角色，挑完再加入"));
         if (S.players.length >= mx) return this.reject(conn, left.length ? _tf(4989, "游戏已经开始。原来的玩家用局里的名字重新加入：{$0}", left.join(_t(349, "、"))) : mx > 4 ? _tf(5303, "房间满了（最多 {$0} 人）", mx) : _t(4992, "房间满了（最多 4 人）"));
         if (S.cfg.roundLimit && S.round >= S.cfg.roundLimit) return this.reject(conn, _t(5580, "已经是最后一轮了，不能中途加入"));

@@ -126,7 +126,7 @@ test('定时任务时区配错了：EventBridge Scheduler 写明时区免疫；�
   expect([r.cash, r.skip]).toEqual([2920, 1]);
 });
 
-test('唯一懂 Kubernetes 的人离职了：EKS Auto Mode 免疫；打中交 $150 或 EKS 下线 1 轮（不收费、不算持有，自己下回合开始恢复）', async ({ page }) => {
+test('唯一懂 Kubernetes 的人离职了：EKS Auto Mode 免疫；打中交 $150 或 EKS 下线一整轮（不收费、不算持有，满一整轮到自己回合开始恢复）', async ({ page }) => {
   await start(page);
   expect(await imm(page, '唯一懂 Kubernetes 的人离职了', () => {})).toBe('没有 EKS');
   expect(await imm(page, '唯一懂 Kubernetes 的人离职了', () => { S.props[IX.eks].owner = 0; S.props[IX.eks].level = 2; })).toBe('');
@@ -136,8 +136,8 @@ test('唯一懂 Kubernetes 的人离职了：EKS Auto Mode 免疫；打中交 $1
   expect(r.cash).toBe(2850);
   await hit(page, '唯一懂 Kubernetes 的人离职了', '让 EKS 下线 1 轮');
   expect(await page.evaluate(() => ({ down: S.props[IX.eks].ddos, why: downWhy(S.props[IX.eks]), act: active(S.players[0], IX.eks), rent: shownRent(IX.eks).r }))).toEqual({ down: 0, why: '唯一懂 Kubernetes 的人离职了', act: false, rent: 0 });
-  // 别人的回合开始不恢复，自己的回合开始恢复；没开高速部署也一样
-  const back = await page.evaluate(() => { downTick(S.players[1]); const mid = S.props[IX.eks].ddos; downTick(S.players[0]); return [mid, S.props[IX.eks].ddos, active(S.players[0], IX.eks)]; });
+  // 别人的回合开始不恢复；所有人各走一回合（一整轮）后，自己的回合开始恢复；没开高速部署也一样
+  const back = await page.evaluate(() => { downTick(S.players[1]); const mid = S.props[IX.eks].ddos; S.turnNo = (S.turnNo || 0) + S.players.length; downTick(S.players[0]); return [mid, S.props[IX.eks].ddos, active(S.players[0], IX.eks)]; });
   expect(back).toEqual([0, null, true]);
 });
 

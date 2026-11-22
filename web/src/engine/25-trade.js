@@ -26,7 +26,7 @@ export const chFoes = p => S.players.filter(o => inPlay(o) && o.id !== p.id);
 export const canChallengeAll = p => !!p && p.alive && p.chTurn !== turnKey() && !chaWait(p) && chFoes(p).length >= 2 && p.cash >= CHA_COST * chFoes(p).length;
 export async function quizAll() {
   const p = cur(); if (!canChallengeAll(p)) return void UI.toast(!p ? '' : p.chTurn === turnKey() ? _t(3566, "这回合已经出过题了") : chaWait(p) ? _tf(3567, "考全场每 3 圈一次：还要再经过 {$0} 次 Startup 扶持", chaWait(p)) : _tf(2981, "现金不够 ${$0}", CHA_COST * chFoes(p).length));
-  const n = S.players.length, foes = Array.from({ length: n - 1 }, (_, k) => S.players[(p.id + 1 + k) % n]).filter(o => o.alive); p.chTurn = turnKey(); p.chaLap = p.laps || 0;   // 从出题人的下一位开始，按座位顺序轮流答
+  const n = S.players.length, foes = Array.from({ length: n - 1 }, (_, k) => S.players[(p.id + 1 + k) % n]).filter(o => chFoes(p).includes(o)); p.chTurn = turnKey(); p.chaLap = p.laps || 0;   // 从出题人的下一位开始，按座位顺序轮流答；答题的人和上面查现金用同一份名单（chFoes：中途加入还没开始走的不算）
   log(_tf(3568, "❓ {$0} 出题考全场：每人一道，答对的拿走 ${$1}，答错的赔 ${$2}", nm(p), CHA_COST, CHA_WIN));
   let win = 0, lose = 0;
   for (const t of foes) {
@@ -55,7 +55,7 @@ export async function quizChallenge() {
   UI.render();
 }
 export async function pickPartner(title) {
-  const a = cur(), others = S.players.filter(q => q.alive && q.id !== a.id);
+  const a = cur(), others = S.players.filter(q => inPlay(q) && q.id !== a.id);   // 中途加入、下一轮才开始走的人不在候选里（inPlay）
   if (!others.length) return null;
   const id = await UI.ask({ title, buttons: [...others.map(q => ({ label: q.name, value: q.id })), { label: _t(2465, "取消"), value: -1, botW: 2 }] });
   return id === -1 ? null : P(id);
@@ -68,7 +68,7 @@ export function tradeFor(to, want) {
   setTimeout(() => uiAction(() => trade({ to, want })), 0);
 }
 export async function trade(pre) {
-  const a = cur(), b = pre && S.players[pre.to] && S.players[pre.to].alive && pre.to !== a.id ? S.players[pre.to] : await pickPartner(_t(3576, "和谁交易？"));
+  const a = cur(), b = pre && inPlay(S.players[pre.to]) && pre.to !== a.id ? S.players[pre.to] : await pickPartner(_t(3576, "和谁交易？"));
   if (!b) return;
   const full = F.full();
   const side = (q, x) => {

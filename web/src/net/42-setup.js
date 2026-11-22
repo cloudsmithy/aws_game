@@ -167,7 +167,7 @@ export function mpHostName() {
 }
 export function mpUI(kind) {
   const box = $('#mpbox');
-  if (kind === 'host') { box.innerHTML = `<div class="mpform"><label>${_t(5115, "房间密码")} <input id="mppwd" type="password" maxlength="32" autocomplete="off" placeholder="${_t(5116, "至少 4 位")}"></label><label>${_t(5117, "你的名字")} <input id="mphname" maxlength="12" autocomplete="off" placeholder="${_t(4999, "玩家 1")}"></label><label class="mp-watch-option" title="允许观众在开赛前进入大厅，观战邀请码与玩家密码分开"><input id="mpallowwatch" type="checkbox">开启受邀观战</label><button class="pri" data-act="mpHostGo">${_t(5118, "创建房间")}</button></div><div id="mpstat"></div>`;
+  if (kind === 'host') { box.innerHTML = `<div class="mpform"><label>${_t(5115, "房间密码")} <input id="mppwd" type="password" maxlength="32" autocomplete="off" placeholder="${_t(5116, "至少 4 位")}"></label><label>${_t(5117, "你的名字")} <input id="mphname" maxlength="12" autocomplete="off" placeholder="${_t(4999, "玩家 1")}"></label><label class="mp-watch-option" title="${esc(_t(5716, "允许观众在开赛前进入大厅，观战邀请码与玩家密码分开"))}"><input id="mpallowwatch" type="checkbox">${_t(5241, "开启受邀观战")}</label><button class="pri" data-act="mpHostGo">${_t(5118, "创建房间")}</button></div><div id="mpstat"></div>`;
     // 房主的名字就是玩家 1 的名字：两个框填的是同一个，这里改了写回名字栏（照常存进开局设置），大厅名单跟着改
     const hn = $('#mphname'), n0 = $('#nm0'); if (n0 && !_tr(5119, "^玩家 ?1$", "").test(n0.value.trim())) hn.value = n0.value;
     hn.addEventListener('input', () => { mpHostName(); if (MP.role === 'host' && !(S && S.players)) MP.renderLobby(); });

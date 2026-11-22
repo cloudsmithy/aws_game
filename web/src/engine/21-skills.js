@@ -5,7 +5,7 @@ import { COMBOS, roleOf, rsBuyRate, rsCustomers, rsRate, slotOpen, viaOf } from 
 import { S, active, comboMiss, combosBrokenBy, cur, inPlay, log, nm, ownedBy, sqn, wildFits, wildFree, wildTargets } from './07-state.js';
 import { giveTo, pay, withGain } from './08-money.js';
 import { netWorth } from './08c-costs.js';
-import { baseRent, handOver, sellValue, shownRent, trafficMul, upgradeInfo, zhe } from './09-rent.js';
+import { baseRent, clearDown, handOver, sellValue, shownRent, trafficMul, upgradeInfo, zhe } from './09-rent.js';
 import { debtCleared } from './17-health.js';
 import { evt } from './26b-retro.js';
 import { hx, isHell, isHidden } from '../rules/35-modes.js';
@@ -59,7 +59,7 @@ async function roleSkill0(p) {
     case 'indie': grant($m(400)); if (!(await pick2(unowned, _t(3386, "开源走红：白拿哪一块？")))) grant($m(600)); break;
     case 'data': grant($m(hx('data') ? 120 : 200) * Math.max(4, ownedBy(p).length)); break;
     case 'media': others.forEach(o => pay(o, p, $m(hx('media') ? 200 : 300))); break;
-    case 'health': ownedBy(p).forEach(i => { S.props[i].impaired = false; S.props[i].ddos = null; }); if (p.techDebt > 0) { p.techDebt = 0; debtCleared(p); } grant($m(1000)); break;
+    case 'health': ownedBy(p).forEach(i => { S.props[i].impaired = false; clearDown(i); });   // 规则书：被 DDoS 打下线的也恢复（强制下线一律解除） if (p.techDebt > 0) { p.techDebt = 0; debtCleared(p); } grant($m(1000)); break;
     case 'rs_dist': grant(Math.max(800, Math.round(rsTot0 * 0.5))); break;
     case 'rs_msp': { const cs = rsCust0.filter(o => o.alive); if (!cs.length) { grant($m(800)); break; } cs.forEach(o => pay(o, p, $m(400))); grant($m(300)); break; }
     case 'rs_cons': grant($m(400)); if (!(await pick2(unowned.filter(i => SQ[i].p <= 400), _t(3387, "解决方案打包：拿下哪一块？")))) grant($m(600)); break;
