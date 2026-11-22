@@ -10,6 +10,7 @@ import { credit, pay } from './08-money.js';
 import { bringOnline, canOnline, downTick, offRounds, turnKey } from './09-rent.js';
 import { goReiCards, jailMax, moveSteps, sendToJail } from './13-move.js';
 import { land } from './15-land.js';
+import { RF_JAIL } from './17-health.js';
 import { drawReinvent } from './18-reinvent.js';
 import { resolveDebts } from './20-bankrupt.js';
 import { speedRoll, speedTurnStart } from './22-speed.js';
@@ -59,6 +60,7 @@ async function hellPopQuiz(p) {
 export async function jailAct(kind) {
   if (!S || S.phase !== 'roll' || (!BOT && Date.now() - (S.turnStartAt || 0) < 300) || UI.modalBlocks()) return;
   const p = cur(); if (p.jail === null) return;
+  if (p.jailCat === RF_JAIL) kind = 'stay';   // 清技术债进来的只能停够一轮，不能付钱、用卡提前出来
   S.phase = 'busy'; UI.render();
   try {
     if (kind === 'pay') { pay(p, 'pot', 50); await leaveJail(p, _t(2917, "付 $50 开 Support Case")); await resolveDebts(); if (checkOver()) return; if (!cur().alive) return nextTurn(); S.phase = 'roll'; UI.save(); UI.render(); return; }
@@ -75,6 +77,7 @@ export async function jailAct(kind) {
 async function leaveJail(p, why) {
   p.jail = null;
   log(_tf(2921, "🔓 {$0} 离开维护窗口：{$1}", nm(p), why));
+  if (p.jailCat === RF_JAIL) return;   // 清技术债不是事件，没有根因可复盘
   const r = await UI.modal({
     title: _t(2922, "写复盘"),
     html: _tf(2923, "<p>{$0} 离开维护窗口。用一句话讲清这次事件（{$1}）的根因，可以领 1 个复盘标记，以后抵消一张同类 Health 事件卡。</p>", nm(p), CATS[p.jailCat]),

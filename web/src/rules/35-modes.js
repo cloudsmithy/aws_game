@@ -29,7 +29,7 @@ export async function blindBox(p) {
   const rei = Math.random() < 0.55;
   log(_tf(4797, "🎁 {$0} 打开盲盒：{$1}卡，效果翻倍", nm(p), rei ? 're:Invent' : _t(291, "Health 事件")));
   sfxAll('magic');
-  await withCardMul(cardMulBase() * 2, () => rei ? drawReinvent(p) : drawIncident(p));
+  await withCardMul(cardMulBase() * 2, () => rei ? drawReinvent(p, null, true) : drawIncident(p));   // 翻倍的效果是盲盒定的：直接亮卡结算，不能收进手牌、卖掉
 }
 
 // （以下从 rules/03-services.js 挪来：用到 S、isParty、isHell、ROLES、DLC，放在服务数据里会让底层文件依赖后面的文件）

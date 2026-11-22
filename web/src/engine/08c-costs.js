@@ -116,4 +116,4 @@ export const reqRate = i => SQ[i].bill === 'token' ? BAL.token : SQ[i].bill === 
 
 // （从 ui/11-cards-deeds.js 挪来）
 // 卡牌倍率不是 1 时的一句说明。抽卡窗、日志里不再写：卡面上的金额已经按倍率换算好（cardMulTxt），日志里的钱数也是实际金额；只剩技术债大重构的弹窗还用
-export const mulNote = () => S && S.cardMul && Math.abs(S.cardMul - 1) > 0.004 ? _tf(2750, "（卡牌金额 {$0}）", fmtMul(S.cardMul)) : '';
+const mulNote = () => S && S.cardMul && Math.abs(S.cardMul - 1) > 0.004 ? _tf(2750, "（卡牌金额 {$0}）", fmtMul(S.cardMul)) : '';

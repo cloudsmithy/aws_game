@@ -98,6 +98,8 @@ async function bankrupt(p) {
   const props = ownedBy(p);
   OWNABLE.forEach(i => { if (S.props[i].ddos === p.id) S.props[i].ddos = null; if (S.props[i].via === p.id) S.props[i].via = null; });
   p.alive = false; p.debt = []; p.jail = null; p.skip = 0;
+  // 没公开的 re:Invent 手牌不给债主（别人本来就不知道是什么），放进弃牌堆
+  if (p.hand && p.hand.length) { S.reiDisc.push(...p.hand); p.hand = []; }
   // 他自己欠的上面清了，别人欠他的也要注销：留着的话债务人还钱时 giveTo 不入账，那笔钱会消失
   S.players.forEach(q => { if (q !== p && q.debt && q.debt.length) q.debt = q.debt.filter(d => d.to !== p.id); });
   if (!ids.length || total <= 0) {

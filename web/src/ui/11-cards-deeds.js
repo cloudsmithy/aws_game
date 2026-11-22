@@ -42,6 +42,10 @@ const dealFrom = kind => { const d = document.querySelector(kind === 'rei' ? '#c
 export const dealHtml = (kind, front) => `<div class="deal ${kind}${FX.ok() ? ' fx' : ''}" style="${dealFrom(kind)}"><div class="glow"></div><div class="mv"><div class="c3">${cardBack(kind)}<div class="face front">${front}</div></div></div></div>`;
 export const dealSfx = kind => { sfx('card'); setTimeout(() => sfx(kind === 'rei' ? 'magic' : 'alarm'), 820); };
 export const showCard = async (kind, id, p) => (S.lastCard = { kind, id, who: p.id }, render(), dealSfx(kind), setTimeout(() => FX.dealIn(), 0), ask({ title: _tf(2753, "{$0} 抽到一张{$1}", p.name, kind === 'inc' ? _t(2751, " Health 事件卡") : _t(2752, " re:Invent 卡")), html: dealHtml(kind, cardHtml(kind, id)), buttons: [{ label: _t(2754, "执行"), value: true, cls: 'pri' }] }));
+// 只给抽卡的人看的抽卡窗（re:Invent 手牌，engine/18-reinvent.js）：卡面和 spec 的说明、按钮放在一起，别人只看到 spec.priv（见 modal 的 priv）。
+// 「最近抽到」那里只写谁抽了一张、不写哪张（S.lastCard 会推给所有人），选了现在用再由 showCard 亮出来
+export const peekCard = async (id, p, spec) => (S.lastCard = { kind: 'rei', id: null, who: p.id }, render(), dealSfx('rei'), setTimeout(() => FX.dealIn(), 0),
+  ask({ ...spec, who: p.id, html: dealHtml('rei', cardHtml('rei', id)) + (spec.html || ''), priv: { html: _tf(5431, "<p>{$0} 抽到一张 re:Invent 卡，正在决定怎么用。卡面只有他自己看得到。</p>", p.name), ...spec.priv } }));
 // 服务详情顶部的「现在的状态」：谁拥有、在哪一级、现在的过路费、每圈运行费、关联的有效架构
 export function propStatusHtml(i) {
   const s = SQ[i], pr = S && S.props && S.props[i];

@@ -17,12 +17,12 @@ Object.assign(MP, {
     // 观众只允许补发状态；伪造 seat、who、角色或游戏消息都不进入玩家处理器。
     const viewer = this.viewers[conn._viewer];
     if (viewer && viewer.conn === conn) {
-      if (m.t === 'resync') { viewer.base = null; this.pushState(true, viewer); if (this.cur) this.send(conn, this.cur.msg); }
+      if (m.t === 'resync') { viewer.base = null; this.pushState(true, viewer); if (this.cur) this.send(conn, this.modalFor(viewer)); }
       return;
     }
     if (m.t === 'hello') return this.admit(conn, m);
     if (seat == null || !this.seats[seat] || this.seats[seat].conn !== conn || !this.seats[seat].online) return;
-    if (m.t === 'resync') { this.seats[seat].base = null; this.pushState(true, this.seats[seat]); if (this.cur) this.send(conn, this.cur.msg); return; }   // 远端的增量接不上了（或刚切回前台）：补一份整的，连同当前的弹窗（切后台、重同步时排着的弹窗会被 cancel 丢掉）
+    if (m.t === 'resync') { this.seats[seat].base = null; this.pushState(true, this.seats[seat]); if (this.cur) this.send(conn, this.modalFor(this.seats[seat])); return; }   // 远端的增量接不上了（或刚切回前台）：补一份整的，连同当前的弹窗（切后台、重同步时排着的弹窗会被 cancel 丢掉）
     if (m.t === 'act' && typeof m.a === 'string' && S && S.cur === seat && Object.prototype.hasOwnProperty.call(this.ACTS, m.a)) {
       // 这一下能不能执行：和 doRoll / jailAct / uiAction / endTurn 开头查的阶段一样
       const a = m.a, p = cur(), ok = a === 'end' ? S.phase === 'post' : a === 'roll' ? S.phase === 'roll' && p.jail === null : /^jail:/.test(a) ? S.phase === 'roll' && p.jail !== null : S.phase === 'roll' || S.phase === 'post';
@@ -55,7 +55,7 @@ Object.assign(MP, {
       const id = this.newKey(); conn._viewer = id; conn._admitted = true;
       this.viewers[id] = { name, conn, online: true, delta: m.delta === 1, walk: m.walk === 1 };
       this.send(conn, { t: 'welcome', mode: 'spectator', seat: null, room: this.room });
-      this.pushState(true, this.viewers[id]); if (this.cur) this.send(conn, this.cur.msg);
+      this.pushState(true, this.viewers[id]); if (this.cur) this.send(conn, this.modalFor(this.viewers[id]));
       this.refreshMembers(); return;
     }
     if (m.mode != null && m.mode !== 'player') return this.reject(conn, _t(5256, "不支持的入房身份"));
@@ -91,7 +91,7 @@ Object.assign(MP, {
     // key：座位钥匙，每次 welcome 换一把新的（换了设备进来以后旧设备那把就作废）。只放在房主的 MP.seats 和他本人的浏览器里，不能写进 S：S 会推给所有人
     const skey = this.newKey(); conn._admitted = true; conn._seat = seat; this.seats[seat] = { name, conn, online: true, wb: this.wbIn(m.wb), delta: m.delta === 1, walk: m.walk === 1, key: skey };   // delta：新版页面，收得了增量状态
     this.send(conn, { t: 'welcome', seat, room: this.room, key: skey });
-    if (S && S.players) { log(_tf(4993, "🔌 {$0} 重新连上了", nm(S.players[seat]))); render(); this.pushState(true); if (this.cur) { this.send(conn, this.cur.msg); const tk = this.cur.who === seat && this.cur.box.querySelector('[data-mptake]'); if (tk) { tk.hidden = true; if (tk._arm) tk._arm(); const ta = this.cur.box.querySelector('[data-mpall]'); if (ta) ta.hidden = true; } } }
+    if (S && S.players) { log(_tf(4993, "🔌 {$0} 重新连上了", nm(S.players[seat]))); render(); this.pushState(true); if (this.cur) { this.send(conn, this.modalFor(this.seats[seat])); const tk = this.cur.who === seat && this.cur.box.querySelector('[data-mptake]'); if (tk) { tk.hidden = true; if (tk._arm) tk._arm(); const ta = this.cur.box.querySelector('[data-mpall]'); if (ta) ta.hidden = true; } } }
     else this.renderLobby();
   },
   // 在掉线的座位里找这个名字：开局后先按局里现在的名字（改过名就是新名字），再按当初加入时用的名字。any：在线的座位也找（顶替还没发现掉线的旧连接）

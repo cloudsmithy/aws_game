@@ -6,6 +6,7 @@ import { S, active, comboMiss, combosBrokenBy, cur, log, nm, ownedBy, sqn, wildF
 import { giveTo, pay, withGain } from './08-money.js';
 import { netWorth } from './08c-costs.js';
 import { baseRent, buyPaid, sellValue, shownRent, svcLeaves, trafficMul, upgradeInfo, zhe } from './09-rent.js';
+import { debtCleared } from './17-health.js';
 import { evt } from './26b-retro.js';
 import { hx, isHell, isHidden } from '../rules/35-modes.js';
 import { fxCast, sfxAll } from '../net/41-replay.js';
@@ -50,7 +51,7 @@ async function roleSkill0(p) {
     case 'garage': grant($m(1200)); p.runMul = 0; p.runLaps = 3; break;
     case 'legacy': { const ups = ownedBy(p).filter(i => SQ[i].t === 'prop' && isInst(i) && upgradeInfo(p, i, true).ok); ups.forEach(freeUp); grant($m(ups.length ? 300 : 800)); p.runMul = 0.5; p.runLaps = 3; break; }
     case 'unicorn': grant(Math.max(1000, Math.min(2000, Math.round(skillLine(p) * 2 - nw0 + 500)))); break;
-    case 'fin': p.techDebt = 0; p.immuneTill = S.round + (hx('fin') ? 1 : 2); grant($m(800)); log(_tf(3382, "🛡️ {$0} 进了监管沙盒：到第 {$1} 轮结束都免疫 Health 事件", nm(p), p.immuneTill)); break;
+    case 'fin': { const had = p.techDebt > 0; p.techDebt = 0; if (had) debtCleared(p); } p.immuneTill = S.round + (hx('fin') ? 1 : 2); grant($m(800)); log(_tf(3382, "🛡️ {$0} 进了监管沙盒：到第 {$1} 轮结束都免疫 Health 事件", nm(p), p.immuneTill)); break;
     case 'ai': { const ups = ownedBy(p).filter(i => SQ[i].g === 'ai' && upgradeInfo(p, i, true).ok); ups.forEach(freeUp); grant($m(ups.length ? 400 : 1000)); p.aiBoostTill = S.round + 2; log(_tf(3383, "{$0} 的 AI 组过路费 ×2，到第 {$1} 轮结束", nm(p), p.aiBoostTill)); break; }
     case 'ecom': p.rentBoost = 2; p.rentBoostTurns = hx('ecom') ? 2 : 3; grant($m(500)); log(_tf(3384, "{$0} 接下来 {$1} 个回合过路费 ×2", nm(p), p.rentBoostTurns)); break;
     case 'saas': p.subsTurns = hx('saas') ? 3 : 4; p.subsAmt = $m(150); log(_tf(3385, "{$0} 接下来 {$1} 个回合开始时，每位对手付订阅费 ${$2}", nm(p), p.subsTurns, p.subsAmt)); break;
@@ -58,7 +59,7 @@ async function roleSkill0(p) {
     case 'indie': grant($m(400)); if (!(await pick2(unowned, _t(3386, "开源走红：白拿哪一块？")))) grant($m(600)); break;
     case 'data': grant($m(hx('data') ? 120 : 200) * Math.max(4, ownedBy(p).length)); break;
     case 'media': others.forEach(o => pay(o, p, $m(hx('media') ? 200 : 300))); break;
-    case 'health': ownedBy(p).forEach(i => { S.props[i].impaired = false; S.props[i].ddos = null; }); p.techDebt = 0; grant($m(1000)); break;
+    case 'health': ownedBy(p).forEach(i => { S.props[i].impaired = false; S.props[i].ddos = null; }); if (p.techDebt > 0) { p.techDebt = 0; debtCleared(p); } grant($m(1000)); break;
     case 'rs_dist': grant(Math.max(800, Math.round(rsTot0 * 0.5))); break;
     case 'rs_msp': { const cs = rsCust0.filter(o => o.alive); if (!cs.length) { grant($m(800)); break; } cs.forEach(o => pay(o, p, $m(400))); grant($m(300)); break; }
     case 'rs_cons': grant($m(400)); if (!(await pick2(unowned.filter(i => SQ[i].p <= 400), _t(3387, "解决方案打包：拿下哪一块？")))) grant($m(600)); break;

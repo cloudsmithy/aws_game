@@ -115,7 +115,7 @@ export function newGame(cfg) {
   OWNABLE.forEach(resetProp);
   cfg.names.forEach((name, k) => {
     const r = isRsSeat(k) ? deal(rsRoles, true) : deal(custRoles, false);
-    S.players.push({ id: k, name: esc(name), color: COLORS[k], role: r.id, cash: roleCash(r, cfg), startCash: roleCash(r, cfg), pos: 0, jail: null, jailCat: 'sec', skip: 0, debt: [], techDebt: 0, coe: [], drill: [], cards: [], alive: true, speed: 0, reseller: isRsSeat(k), rsRate: 0.9 });
+    S.players.push({ id: k, name: esc(name), color: COLORS[k], role: r.id, cash: roleCash(r, cfg), startCash: roleCash(r, cfg), pos: 0, jail: null, jailCat: 'sec', skip: 0, debt: [], techDebt: 0, coe: [], drill: [], cards: [], hand: [], alive: true, speed: 0, reseller: isRsSeat(k), rsRate: 0.9 });
     if (r.id === 'unicorn' && cfg.mode !== 'hell' && S.props[IX.route53].owner == null) { S.props[IX.route53].owner = k; S.props[IX.route53].paid = 0; }   // 送的，没花钱：卖回、下线、Trusted Advisor 退款都按 $0 算，不按标价
   });
   // 代理商的起始资金 = 所有客户起始资金的总和（代理商只靠架构收过路费、地还会被客户买走，要本钱囤货）；娱乐模式只打 10 轮按估值排名，不加。
@@ -313,7 +313,7 @@ export async function resumeGame() {
     if (pr.wild && !isWild(+i)) pr.wild = null;   // 老存档：Config 以前是万能服务，绑过的解开
     delete pr.forced;
   });
-  S.players.forEach(q => { q.cards = q.cards || []; q.coe = q.coe || []; q.drill = q.drill || []; q.debt = q.debt || []; q.speed = q.speed || 0; q.rsRate = q.rsRate || 0.9; if (q.rentBoost && !q.rentBoostTurns) q.rentBoostTurns = 1; q.startCash = q.startCash || startCashOf(q); q.rsCoupon = q.rsCoupon || 0; q.buyCoupon = q.buyCoupon || 0; q.commits = (q.commits || []).filter(c => c.laps > 0); });
+  S.players.forEach(q => { q.cards = q.cards || []; q.hand = q.hand || []; q.coe = q.coe || []; q.drill = q.drill || []; q.debt = q.debt || []; q.speed = q.speed || 0; q.rsRate = q.rsRate || 0.9; if (q.rentBoost && !q.rentBoostTurns) q.rentBoostTurns = 1; q.startCash = q.startCash || startCashOf(q); q.rsCoupon = q.rsCoupon || 0; q.buyCoupon = q.buyCoupon || 0; q.commits = (q.commits || []).filter(c => c.laps > 0); });
   // 战报新指标：老存档没有估值走势，从读档这一刻开始记，mFrom 记下从第几轮起才有（战报据此不显示不全的钱从哪来、手气、最低现金）
   if (!Array.isArray(S.valHist)) { S.mFrom = S.round; S.valHist = []; valSnap(); }
   S.players.forEach(q => { const t = ST(q); t.gain = t.gain || GAIN0(); t.dice = t.dice || { n: 0, pips: 0, dbl: 0 }; t.low = t.low || { cash: q.cash - debtOf(q), r: S.round }; });

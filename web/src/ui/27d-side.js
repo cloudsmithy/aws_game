@@ -12,7 +12,7 @@ import { capUpTxt, lvUpTxt } from '../engine/11b-rent-info.js';
 import { jailMax, mspFee } from '../engine/13-move.js';
 import { landHere } from '../engine/15-land.js';
 import { refactorCost } from '../engine/17-health.js';
-import { incSendCost, incSendOk, reiBuyCost } from '../engine/18-reinvent.js';
+import { handOf, handOk, handWalked, incSendCost, incSendOk, reiBuyCost } from '../engine/18-reinvent.js';
 import { canSkill, skillLine, skillMulTxt } from '../engine/21-skills.js';
 import { SPEED, SPEED_MAX } from '../engine/22-speed.js';
 import { CHA_COST, CHA_WIN, CH_COST, CH_WIN, canChallenge, canChallengeAll, chFoes, chaWait } from '../engine/25-trade.js';
@@ -87,6 +87,7 @@ document.addEventListener('click', e => {
 export function lastCardHtml() {
   const c = S.lastCard;
   if (!c) return _t(4181, "<div class=\"lastcard muted\">还没有人抽过卡</div>");
+  if (c.id == null) return _tf(5434, "<div class=\"lastcard {$0}\"><small>最近抽到 · {$1}</small><b>re:Invent</b><span>没公开（只有他自己看得到）</span></div>", c.kind, P(c.who).name);   // 自己抽的 re:Invent 卡还没亮出来（peekCard）
   const d = c.kind === 'inc' ? INC[c.id] : REI[c.id];
   return _tf(4182, "<div class=\"lastcard {$0}\"><small>最近抽到 · {$1}</small><b>{$2}</b><span>{$3}</span></div>", c.kind, P(c.who).name, d.n, d.e.replace(_tr(2747, "^保留：", ""), ''));
 }
@@ -124,6 +125,7 @@ export function playerBrief(p) {
   if (dlcOn('speed')) { const n = SPEED.filter(x => !x.react && p.speed >= x.c && !x.ok(p, S.phase)).length; if (n) out.push(row(_tf(4205, "部署点数 {$0} 点，能发动 {$1} 个技能", p.speed, n), btn(_t(4206, "部署点数"), 'speedMenu'))); }
   if (F.debt() && p.techDebt > 0) out.push(row(_tf(4207, "技术债 {$0} 个，重构清 1 个要 ${$1}", p.techDebt, refactorCost(p)), btn(_t(4208, "清技术债"), 'refactorDebt', p.cash >= refactorCost(p))));
   if ((S.phase === 'roll' || S.phase === 'post') && p.jail === null && !S.reiBought && p.cash >= reiBuyCost(p)) out.push(row(_tf(4209, "花 ${$0} 抽 re:Invent 卡", reiBuyCost(p)), btn(_t(3457, "抽卡"), 'buyReinvent')));
+  if ((S.phase === 'roll' || S.phase === 'post') && handOk(p)) out.push(row(_tf(5435, "手牌 {$0} 张：打出、卖掉，或者弃牌往前走 1–3 格{$1}", handOf(p).length, handWalked(p) ? _t(5436, "（弃牌走格子这回合已经用过）") : _t(5437, "（每回合一次）")), btn(_tf(5438, "手牌（{$0}）", handOf(p).length), 'reiHand')));
   if ((S.phase === 'roll' || S.phase === 'post') && incSendOk(p)) { const one = incSendCost(p), n = chFoes(p).length;
     const tip = w => _tf(4210, "什么时候能点：自己的回合里，掷骰子前后都行；每走一圈只能发一次（经过 Startup 扶持以后才能再发）。\n{$0}价钱是你抽 re:Invent 卡的 1.5 倍，跟着总资产涨；对方抽到的卡照常结算，能用 Enterprise Support 抵消。", w);
     out.push(row(_tf(4212, "花 ${$0} 让对手抽一张 Health 卡（每圈一次）{$1}", one, n >= 2 ? _tf(4211, "；付 ${$0} 让每位对手各抽一张", one * 2) : ''),
@@ -280,6 +282,9 @@ function plCard(p, mine, offSeats) {
   if (!mini) { const by = new Map(); ownedBy(p).forEach(i => { const v = S.props[i].via; if (v != null && v !== p.id && P(v)) by.set(v, [...(by.get(v) || []), i]); });
     by.forEach((ix, v) => { const q = P(v), msp = q.role === 'rs_msp' && q.alive;
       res.push(ri(_tf(4329, "{$0} {$1} 块", lb(_tf(4328, "经 {$0} 买", q.name)), ix.length), _tf(4331, "{$0} 是从代理商 {$1} 手里买的：这几块的运行费交给 {$2}（他按拿货价交亚马逊云科技，赚中间的差价）{$3}", ix.map(i => SQ[i].n).join(_t(349, "、")), q.name, q.name, msp ? _tf(4330, "；{$0} 是托管服务商，每块每圈另收 $10 托管费，经过起点时和运行费一起交", q.name) : ''), '', 'via' + v)); }); }
+  // re:Invent 手牌（engine/18-reinvent.js）：大家都看得到几张；是哪几张只在主人自己的提示里写（联机看本机座位，同一台轮流玩看当前回合的人）
+  { const hand = handOf(p), seer = MP.role ? p.id === mine : p.id === S.cur && !isAI(p.id);
+    if (hand.length) res.push(ri(`${lb(_t(5439, "手牌"))} ${hand.length}`, seer && hand.every(id => REI[id]) ? _tf(5440, "没公开的 re:Invent 卡：{$0}。轮到自己时点「手牌」打出、卖掉或弃牌走 1–3 格", hand.map(id => REI[id].n).join(_t(349, "、"))) : _tf(5441, "没公开的 re:Invent 卡 {$0} 张：只有 {$1} 自己知道是什么", hand.length, p.name), '', 'hand')); }
   const prog = archProg(p), done = prog.filter(x => x.done);
   // 收起的卡：保留卡、承诺折扣、生效的架构、支柱只写个数，说明在提示里
   if (mini) {

@@ -10,7 +10,7 @@ import { baseRent, forceDown, shownRent, upgradeInfo } from './09-rent.js';
 import { moveSteps } from './13-move.js';
 import { rollDice } from './14-turn.js';
 import { land } from './15-land.js';
-import { drawIncident } from './17-health.js';
+import { debtCleared, drawIncident } from './17-health.js';
 import { drawReinvent } from './18-reinvent.js';
 import { evt } from './26b-retro.js';
 import { isAI } from './36-ai.js';
@@ -112,6 +112,7 @@ export let SPEED = __rv(() => ([
     const imp = ownedBy(p).filter(i => S.props[i].impaired); imp.forEach(i => { S.props[i].impaired = false; });
     const td = p.techDebt > 0; if (td) p.techDebt--;
     speedSpend(p, 9, _tf(3486, "自动修复{$0}{$1}", imp.length ? _tf(3484, "，{$0} 恢复正常", imp.map(sqn).join(_t(349, "、"))) : '', td ? _t(3485, "，清掉 1 个技术债") : ''));
+    if (td) debtCleared(p);
   } },
   { c: 10, n: 'Global Accelerator', d: _t(3487, "不掷骰子，直接前进 1–12 中任意步数并结算落点（代替这回合的掷骰子）"), ok: (p, ph) => ph !== 'roll' ? _t(3488, "要在掷骰子之前用") : p.jail !== null ? _t(3489, "在维护窗口里不能用") : '', run: async p => {
     const r = await UI.modal({ who: p.id, title: _t(3490, "Global Accelerator：前进几步？"), inputs: [{ id: 'n', label: _t(3491, "步数（1–12）"), type: 'number', min: 1, max: 12, step: 1, value: 7 }], buttons: [{ label: _t(3492, "出发"), value: true, cls: 'pri' }, { label: _t(3005, "算了"), value: false }] });

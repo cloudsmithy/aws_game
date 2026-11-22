@@ -6,8 +6,7 @@ import { CATS, COMBOS, INC } from '../rules/04-roles-combos-cards.js';
 import { dlcOn, flyTo } from '../rules/05-dlc.js';
 import { F, P, S, active, availCard, cur, effActive, hasCombo, log, nm, ownedBy, owns, singleAZ, sqn } from './07-state.js';
 import { cardAmt, credit, pay, withGain } from './08-money.js';
-import { mulNote } from './08c-costs.js';
-import { baseRent } from './09-rent.js';
+import { baseRent, forceDown } from './09-rent.js';
 import { moveSteps, sendToJail } from './13-move.js';
 import { land } from './15-land.js';
 import { ensureInc } from './16-deck.js';
@@ -52,9 +51,19 @@ function immuneByProp(o, id) {
     default: return '';
   }
 }
+// 11-22：技术债不管怎么清掉的（花钱重构、卡牌、角色技能、自动修复、攒满 3 个的大重构），清掉的那一刻马上进维护窗口停一轮，
+// 名下所有服务一起下线一轮（不收过路费、不算持有，运行费照交，到自己下回合开始恢复）。没有免疫，不能付 $50 或用 Enterprise Support 提前出来。
+// 这次进维护窗口不是事件：出来不写复盘、不领复盘标记，也不会再记技术债。已经在维护窗口里的（被事件送进来的）不重进，只让服务下线
+export const RF_JAIL = 'rf';   // 维护窗口的原因（p.jailCat）：清技术债；事件进来的是 CATS 里的类别
+export function debtCleared(p) {
+  const why = _t(4208, "清技术债"), down = ownedBy(p).filter(i => !S.props[i].offline && S.props[i].ddos == null);
+  down.forEach(i => forceDown(i, p.id, 1, why));
+  if (p.jail === null) void sendToJail(p, RF_JAIL);   // 不带说明文字：sendToJail 不弹窗、不等待，这里照常同步往下走
+  log(_tf(5403, "🧱 {$0} 清完技术债，进维护窗口停一轮{$1}；出来不写复盘、不记技术债", nm(p), down.length ? _tf(5404, "，名下 {$0} 块服务一起下线一轮", down.length) : ''));
+}
 // 重构费按梯度：债越多越贵，越往后越贵（欠得越久，利息越高）——手上有 n 个技术债时清 1 个要 $50 × n，第 10 轮起再 +$30
 export const refactorCost = p => 50 * Math.max(1, p.techDebt) + (S.round >= 10 ? 30 : 0);
-export function payRefactor(p) { const c = refactorCost(p); if (!p.techDebt || p.cash < c) return false; pay(p, 'bank', c); p.techDebt--; p.refactored = true; sfxAll('buy'); log(_tf(3142, "🛠 {$0} 花 ${$1} 重构，清掉 1 个技术债（还剩 {$2} 个）", nm(p), c, p.techDebt)); return true; }
+export function payRefactor(p) { const c = refactorCost(p); if (!p.techDebt || p.cash < c) return false; pay(p, 'bank', c); p.techDebt--; p.refactored = true; sfxAll('buy'); log(_tf(3142, "🛠 {$0} 花 ${$1} 重构，清掉 1 个技术债（还剩 {$2} 个）", nm(p), c, p.techDebt)); debtCleared(p); return true; }
 export function refactorDebt() {
   const p = cur(); payRefactor(p);
 }
@@ -99,15 +108,13 @@ async function penalize(p) {
   ST(p).hit++; speedLose(p, 2, _t(3157, "被事件打中"));
   if (!F.debt()) return;
   p.techDebt++;
-  log(_tf(3161, "🧱 {$0} 欠下 1 个技术债（共 {$1} 个）{$2}", nm(p), p.techDebt, p.techDebt === 1 && !S.debtExplained ? _t(3158, "。技术债：每个让每圈运行费多 $20；攒到 2 个，升级每级贵 $50；攒到 3 个大重构：停一轮交 $") + cardAmt(300) + _t(3159, "，或者不停交 $") + cardAmt(400) + _t(3160, "；重构清 1 个：手上有几个就是 $50 × 几个，第 10 轮起再加 $30") : ''));
+  log(_tf(3161, "🧱 {$0} 欠下 1 个技术债（共 {$1} 个）{$2}", nm(p), p.techDebt, p.techDebt === 1 && !S.debtExplained ? _tf(5405, "。技术债：每个让每圈运行费多 $20；攒到 2 个，升级每级贵 $50；攒到 3 个要大重构，交 ${$0}；重构清 1 个：手上有几个就是 $50 × 几个，第 10 轮起再加 $30。不管怎么清掉的，都要进维护窗口停一轮，名下服务一起下线一轮", cardAmt(300)) : ''));
   S.debtExplained = true;
   if (p.techDebt >= 3) {
-    // 技术债攒满 3 个必须大重构，也给个出口：不停，多交 $100
+    // 技术债攒满 3 个必须大重构：交 $300、清掉 3 个，和别的清债一样马上进维护窗口停一轮（以前能多交 $100 不停，现在清债一律要停）
     p.techDebt -= 3;
-    const a3 = cardAmt(300), a4 = cardAmt(400);
-    const v = await UI.ask({ who: p.id, title: _tf(3162, "{$0}：技术债攒到 3 个，要大重构", p.name), html: _tf(3163, "<p>二选一：停一轮大重构、交 ${$0}；或者不停，加人手边跑边重构、交 ${$1}{$2}。两种都清掉 3 个技术债。</p>", a3, a4, mulNote()), buttons: [{ label: _tf(3164, "交 ${$0} 边跑边重构，继续走", a4), value: 'go', cls: 'pri', disabled: p.cash < a4 }, { label: _tf(3165, "停一轮，交 ${$0}", a3), value: 'stop' }] });
-    if (v === 'go') { pay(p, 'bank', 400); log(_tf(3166, "{$0} 技术债到 3 个：不停，交 ${$1} 边跑边重构，清掉 3 个", nm(p), a4)); }
-    else { p.skip++; pay(p, 'bank', 300); log(_tf(3167, "{$0} 技术债到 3 个：停一轮大重构、交 ${$1}，清掉 3 个", nm(p), a3)); }
+    log(_tf(5406, "{$0} 技术债到 3 个：大重构，交 ${$1}，清掉 3 个", nm(p), pay(p, 'bank', 300)));
+    debtCleared(p);
   }
 }
 // 抵消、托管的选项：drawIncident0 先用它判断要不要把发牌推迟到抵消窗里，tryCancel 再用它出按钮

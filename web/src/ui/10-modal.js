@@ -85,7 +85,7 @@ export function greyWhy(b, box) {
 }
 // cancelable：房主本机自己看的窗口（玩法、图鉴、明细、大图、改名字、新游戏 / 退出 / 现在结算的确认），轮到的远端玩家点了掷骰子或操作时替房主关掉，最后一个按钮必须是关闭 / 取消。
 // hp：远端收到的弹窗里带着，表示房主点了「他回来之前都由我来选」，正在替掉线的那个座位选
-export function modal({ title, html = '', inputs = [], buttons = [{ label: _t(2716, "确定"), value: true, cls: 'pri' }], cls = '', who, _mp, local = false, noAI = false, aiMin = false, deal = false, hold = 0, cancelable = false, hp = false, view = false }) {
+export function modal({ title, html = '', inputs = [], buttons = [{ label: _t(2716, "确定"), value: true, cls: 'pri' }], cls = '', who, _mp, local = false, noAI = false, aiMin = false, deal = false, hold = 0, cancelable = false, hp = false, view = false, priv = null }) {
   // 推迟亮的卡还没亮出来，中间却要先弹别的窗（选哪一块挂了、借 Session Manager……）：先补一个原来的发牌窗，再弹这个
   if (CARD_DEAL && !local && !deal) { const spec = arguments[0]; return dealNow().then(() => modal(spec)); }
   return new Promise(res => {
@@ -100,10 +100,13 @@ export function modal({ title, html = '', inputs = [], buttons = [{ label: _t(27
     // noAI 的窗口（角色分配）没有电脑代点，谁在看谁点：不然全是电脑的局按钮是灰的，又没人替它点，谁也关不掉
     const aiSeat = !noAI && !BOT && !local && !clientView && !(MP.role === 'host' && MP.isRemote(mpWho)) && isAI(mpWho);
     const interactive = !aiSeat && (local || (clientView ? _mp.interactive : !(MP.role === 'host' && MP.isRemote(mpWho) && !MP.hostPlays(mpWho))));   // hostPlays：房主接手了的掉线座位，按本机座位处理
+    // priv：只给主人看的窗口（re:Invent 手牌，engine/18-reinvent.js），{ title, html } 是给别人看的那份。远端由 openModal 只把真的发给主人；
+    // 房主看远端玩家的这种窗也只显示 priv 那份（veil），替掉线的人选时再换回真的。同一台轮流玩的大家共用屏幕，不遮
+    const veil = !!priv && !interactive && MP.role === 'host', T = veil ? priv.title : title;
     const m = view ? $('#vmodal') : $('#modal'), box = m.querySelector('.box');
     box.className = 'box ' + cls + (buttons.some(b => b.desc) ? ' opts' : '');
     m.classList.remove('min'); m.style.padding = '';
-    let h = `<h3><span>${clean(title)}</span>${view ? '' : _t(2717, "<button class=\"sm minbtn\" type=\"button\" title=\"先收起这个窗口看看棋盘，再点一下展开（快捷键 H，也可以点窗口外面的空白处）\">收起看棋盘</button>")}</h3><div class="mb">${html}</div>`;
+    let h = `<h3><span>${clean(T)}</span>${view ? '' : _t(2717, "<button class=\"sm minbtn\" type=\"button\" title=\"先收起这个窗口看看棋盘，再点一下展开（快捷键 H，也可以点窗口外面的空白处）\">收起看棋盘</button>")}</h3><div class="mb">${veil ? priv.html || '' : html}</div>`;
     if (inputs.length) {
       h += '<div class="inps">' + inputs.map(inp => {
         if (inp.type === 'header') return `<div class="ih">${inp.label}</div>`;
@@ -134,7 +137,7 @@ export function modal({ title, html = '', inputs = [], buttons = [{ label: _t(27
     m.onclick = e => { if (e.target === m && !m.classList.contains('min') && !(hold && performance.now() - openAt < hold)) toggleMin(); };
     m.toggleMin = toggleMin;
     }
-    box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', clean(title).replace(/<[^>]+>/g, '')); box.tabIndex = -1;
+    box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', clean(T).replace(/<[^>]+>/g, '')); box.tabIndex = -1;
     // 读屏：打开就念说明，答题弹窗只念题干（不把解释和错题本标签一起念）；手册、图鉴这种长文不挂，免得一打开念几千字
     { const d = box.querySelector('.mb [data-desc]') || box.querySelector('.mb .q') || box.querySelector('.mb'); if (d && d.textContent.trim() && d.textContent.length < 400) { d.id = 'mdesc'; box.setAttribute('aria-describedby', 'mdesc'); } else box.removeAttribute('aria-describedby'); }
     if (!interactive) {
@@ -152,7 +155,7 @@ export function modal({ title, html = '', inputs = [], buttons = [{ label: _t(27
       if (ap) { const upd = () => { ap.previousElementSibling.innerHTML = AI_PAUSE ? _tf(2731, "{$0} 已暂停，点「继续」它再选", nmAI) : _tf(2732, "{$0} 在选…", nmAI); ap.textContent = AI_PAUSE ? _t(2461, "继续") : _t(2733, "暂停"); }; upd(); ap._upd = upd; ap.onclick = toggleAiPause; }
       box.querySelectorAll('.btns button,[data-v],.inps input,.inps textarea,.inps select').forEach(el => { el._d0 = el.disabled; el.disabled = true; });
       const tk = box.querySelector('[data-mptake]');
-      if (tk) tk.onclick = () => { box.classList.remove('mpwait'); tk.parentNode.remove(); box.querySelectorAll('.btns button,[data-v],.inps input,.inps textarea,.inps select').forEach(el => { el.disabled = !!el._d0; }); buttons.forEach((b, k) => { if (b.disabled) box.querySelector(`button[data-k="${k}"]`).disabled = true; }); };
+      if (tk) tk.onclick = () => { if (veil) { box.querySelector('h3 span').innerHTML = clean(title); box.querySelector('.mb').innerHTML = html; } box.classList.remove('mpwait'); tk.parentNode.remove(); box.querySelectorAll('.btns button,[data-v],.inps input,.inps textarea,.inps select').forEach(el => { el.disabled = !!el._d0; }); buttons.forEach((b, k) => { if (b.disabled) box.querySelector(`button[data-k="${k}"]`).disabled = true; }); };
       // 人走了不回来：点一次「他回来之前都由我来选」，之后他的买地、抽卡、竞价、投票、交易确认都直接在房主这台选，不用每个窗再点。
       // 只认真掉线的座位（hostPlays 还要求 !online，30 秒没动的计时只露出上面那个按钮）；他用同一个名字连回来，admit 换掉整个座位对象，标记跟着没了
       const ta = box.querySelector('[data-mpall]');
@@ -189,7 +192,7 @@ export function modal({ title, html = '', inputs = [], buttons = [{ label: _t(27
       if ('k' in ans) { if (buttons[ans.k] && !buttons[ans.k].disabled) done(buttons[ans.k].value); }
       else done(ans.v);
     };
-    if (MP.role === 'host' && !BOT && !local) MP.openModal({ title, html, inputs, buttons, cls, noAI, aiMin, hold }, mpWho, box, (ans, inp) => {
+    if (MP.role === 'host' && !BOT && !local) MP.openModal({ title, html, inputs, buttons, cls, noAI, aiMin, hold, priv }, mpWho, box, (ans, inp) => {
       Object.entries(inp || {}).forEach(([id, val]) => { const el = box.querySelector('#in_' + CSS.escape(id)); if (el) { if (el.type === 'checkbox') el.checked = !!val; else el.value = String(val).slice(0, 200); } });
       if ('v' in ans) { const el = [...box.querySelectorAll('[data-v]')].find(e => e.dataset.v === String(ans.v)); if (!el || (el._d0 ?? el.disabled)) return; }   // 认的是加 mpwait 之前的状态：mpwait 把房主这边的按钮全灰了，不能拿来判断远端点得对不对
       pick(ans);

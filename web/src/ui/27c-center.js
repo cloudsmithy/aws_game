@@ -10,7 +10,7 @@ import { netWorth } from '../engine/08c-costs.js';
 import { sellZhe, trafficMul, zhe } from '../engine/09-rent.js';
 import { minPlace } from './10-modal.js';
 import { jailMax } from '../engine/13-move.js';
-import { aiName, refactorCost } from '../engine/17-health.js';
+import { RF_JAIL, aiName, refactorCost } from '../engine/17-health.js';
 import { STORM_TXT, skillLine, skillMulTxt, skillWhy } from '../engine/21-skills.js';
 import { actionWhy } from '../engine/24-actions.js';
 import { edpWhy } from '../engine/25-trade.js';
@@ -61,6 +61,7 @@ export function renderCenter() {
   let main = '';
   if (over) main = MP.role === 'client' ? _t(4031, "<button class=\"pri lg\" data-act=\"toHome\">回开局页</button>") : _t(4032, "<button class=\"pri lg\" data-act=\"backToSetup\">再来一局</button>");   // 远端没有这局的存档，不能走 backToSetup（会清掉他自己本机的存档）
   if (over) main += _t(4033, "<button class=\"lg\" data-act=\"showReport\">查看战报</button>");   // 战报关了还能再看、再导出（远端也能点，只在自己设备上开）
+  else if (S.phase === 'roll' && p.jail !== null && p.jailCat === RF_JAIL) main = _t(5432, "<button class=\"pri lg\" data-act=\"jailAct\" data-arg=\"stay\">停这一轮（清技术债，不能提前出来）</button>");
   else if (S.phase === 'roll' && p.jail !== null) {
     main = _tf(4036, "{$0}<button class=\"{$1}lg\" data-act=\"jailAct\" data-arg=\"stay\">停这一轮</button>", p.cash < 50 ? _t(4034, "<button class=\"lg off\" aria-disabled=\"true\" data-act=\"toast\" data-arg=\"现金不够 $50\" title=\"现金不够 $50\">付 $50 出来，照常走</button>") : _t(4035, "<button class=\"pri lg\" data-act=\"jailAct\" data-arg=\"pay\">付 $50 出来，照常走</button>"), p.cash < 50 ? 'pri ' : '');
     if (availCard(p, 'ES')) main += _t(4037, "<button class=\"lg\" data-act=\"jailAct\" data-arg=\"es\">用 Enterprise Support</button>");
@@ -76,7 +77,7 @@ export function renderCenter() {
     // 灰掉的按钮只显示标题：原因在悬停提示里，手机上点一下弹 toast
     // a 是 UI_ACTS 里的名字（data-act="uiAction"）；灰按钮的 data-fk 和能点时的 actKey 一样，重画后焦点认得回来
     const B = (why, a, title, label, short) => why ? `<button class="off" aria-disabled="true" data-fk="uiAction(${a})" data-why="${esc(why)}" data-act="toast" title="${esc(why)}${title ? '&#10;' + title : ''}">${label}</button>` : `<button data-act="uiAction" data-arg="${a}" title="${title}">${label}</button>`;
-    if (F.debt() && p.techDebt > 0) more += B(idleWhy || (p.cash < refactorCost(p) ? _tf(2981, "现金不够 ${$0}", refactorCost(p)) : ''), 'refactorDebt', _t(4048, "重构清掉 1 个技术债：手上有几个就是 $50 × 几个，第 10 轮起再加 $30；随时可以做，不占主动行动"), _tf(4049, "清技术债 ${$0}（{$1}）", refactorCost(p), p.techDebt));
+    if (F.debt() && p.techDebt > 0) more += B(idleWhy || (p.cash < refactorCost(p) ? _tf(2981, "现金不够 ${$0}", refactorCost(p)) : ''), 'refactorDebt', _t(5433, "重构清掉 1 个技术债：手上有几个就是 $50 × 几个，第 10 轮起再加 $30；不占主动行动，但清完马上进维护窗口停一轮，名下服务一起下线一轮"), _tf(4049, "清技术债 ${$0}（{$1}）", refactorCost(p), p.techDebt));
     if (F.actions()) more += B(idleWhy || actionWhy(p), 'activeAction', _t(4050, "每回合可以做一件事：GameDay 演练、查看后面的 Health 事件卡、重构清技术债、迁移升级"), _t(4051, "主动行动"));
     more += B(idleWhy, 'manage', _tf(4053, "给自己的服务升级、加容量；{$0}彻底不要的可以按实付 {$1}卖回亚马逊云科技", isParty() ? '' : _t(4052, "缺钱时把服务下线拿回一半周转，"), sellZhe()), _t(4054, "资产管理"));
     more += B(idleWhy, 'trade', _t(4055, "和别的玩家换服务、换现金（完整局还能换保留卡和标记）"), _t(4056, "交易"));

@@ -237,6 +237,8 @@ export let REI = __rv(() => ([null,
     } },
   { n: _t(869, "根因在上游"), keep: 'BLAME', e: _t(870, "保留：抽到 Health 事件卡时，可以用它把那张卡甩给另一位玩家承受（他对那张卡免疫的话就作废）"), tip: _t(871, "CloudWatch 里的 X-Ray 追踪地图按调用关系把服务连成图，出问题的节点会描色：红色是 5xx 故障，黄色是 4xx 客户端错误，紫色是 429 限流；顺着连线就能看出是哪个依赖在报错"), art: 'cloudwatch' },
 ]), v => { REI = v; }, () => REI);
+// 手牌：真人自己抽到、先不公开的 re:Invent 卡最多留几张（engine/18-reinvent.js）。满了就只能现在用、卖掉或丢掉
+export const REI_HAND_MAX = 3;
 export let CARDN = __rv(() => ({ BLAME: _t(869, "根因在上游"), ES: 'Enterprise Support', SP: 'Savings Plans', SPOT: _t(872, "Spot 实例"), CE: 'Cost Explorer', MAP: _t(873, "MAP 迁移加速"), WS: _t(874, "Workshop 动手实验") }), v => { CARDN = v; }, () => CARDN);
 export let CARDE = __rv(() => ({ BLAME: _t(875, "下次抽到 Health 事件时，可以把它甩给另一位玩家承受"), ES: _t(876, "免费离开维护窗口，或抵消一张任意 Health 事件卡"), SP: _t(877, "付过路费时用掉，这次减半（旧存档里的卡）"), SPOT: _t(878, "下次 Spot 购买时自动用掉，最低出价降到原价的 10%"), CE: _t(879, "踩到账单格时用掉免交一次，或抵消一次「月底账单爆了」"), MAP: _t(880, "下次买 IaaS、PaaS 或容器服务时用掉，打 7 折"), WS: _t(881, "下一次答题答错了，算你答对") }), v => { CARDE = v; }, () => CARDE);
 

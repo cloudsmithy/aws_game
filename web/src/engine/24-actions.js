@@ -29,7 +29,7 @@ export async function activeAction() {
     buttons: [
       { label: _t(3547, "GameDay 演练 $100"), desc: _t(3548, "翻开 Health 事件牌堆顶 2 张，选一张的类别领演练标记；2 张都放回牌堆底"), value: 'gd', disabled: p.cash < 100 },
       { label: _t(3549, "Well-Architected 自查 $50"), desc: _t(3550, "查看 Health 事件牌堆顶 3 张，按你想要的顺序放回"), value: 'wa', disabled: p.cash < 50 },
-      { label: _tf(3551, "重构 ${$0}", refactorCost(p)), desc: _tf(3553, "清掉 1 个技术债（$50 × 手上个数，第 10 轮起 +$30）{$0}", p.techDebt ? '' : _t(3552, "。你现在没有技术债")), value: 'rf', disabled: p.cash < refactorCost(p) || !p.techDebt },
+      { label: _tf(3551, "重构 ${$0}", refactorCost(p)), desc: _tf(5430, "清掉 1 个技术债（$50 × 手上个数，第 10 轮起 +$30），清完进维护窗口停一轮、名下服务下线一轮{$0}", p.techDebt ? '' : _t(3552, "。你现在没有技术债")), value: 'rf', disabled: p.cash < refactorCost(p) || !p.techDebt },
       { label: _t(3554, "迁移 $100"), desc: _tf(3556, "把一块服务最高的 1 级升级挪到同组另一块{$0}", mg.length ? '' : _t(3555, "。你现在没有能迁移的升级")), value: 'mg', disabled: p.cash < 100 || !mg.length },
       { label: _t(2465, "取消"), value: 'x', botW: 2 },
     ],
