@@ -2634,6 +2634,8 @@ ul.ways{margin:6px 0 8px;padding-left:20px}ul.ways li{margin:3px 0}
 #side .pl .pacc .pn b{align-items:baseline;column-gap:6px}
 #side .pl .pacc .pla{display:inline-block;width:13px;font-size:12px;font-weight:400;color:var(--mut)}
 #side .pl .pacc .pme{margin-left:-5px;font-size:13px;font-weight:400;color:var(--ink2);white-space:nowrap}
+#side .pl .pacc .pren{margin:0 2px;padding:0 4px;border:0;background:none;font:inherit;font-size:13px;font-weight:400;line-height:1;color:var(--ink2);cursor:pointer;border-radius:4px}
+#side .pl .pacc .pren:hover,#side .pl .pacc .pren:focus-visible{color:var(--ink);background:var(--line,rgba(0,0,0,.08))}
 #side .pl .pacc .ptags{font-size:12px;font-weight:400;color:var(--mut2);white-space:nowrap}
 #side .pl .pacc .ptags .warn{color:var(--red);font-weight:700}
 #side .pl .now{margin-left:0}
@@ -8327,6 +8329,8 @@ const archProg = p => COMBOS.filter(comboOpen).map(c => {
 const ZH = '[\\u3400-\\u9fff\\u3000-\\u303f\\uff01-\\uff60]', ZH_SP = new RegExp(`(${ZH})((?:</[a-z]+>)*) +((?:<[a-z][^<>]*>)*)(?=${ZH})`, 'g');
 const zhs = h => String(h).replace(ZH_SP, '$1$2$3');
 // 一块服务现在的特殊状态：head + t 是一句规则（玩家卡图标的提示、点格子面板的状态行都用这一句），按要紧程度排
+// 玩家卡名字旁边的 ✎：这台设备能改的人才有（联机远端只能改自己，观众不能改；房主和同屏能改本机的真人座位，电脑不改）
+const canRename = p => !!S && !S.over && p.alive && (MP.role === 'client' ? !MP.watching && p.id === MP.mySeat : !MP.isRemote(p.id) && !isAI(p.id));
 function svcState(i) {
   const s = SQ[i], pr = S.props[i], o = pr.owner == null ? null : P(pr.owner), who = o ? o.name : _t(2842, "主人"), out = [];
   if (pr.ddos != null && P(pr.ddos)) { const a = P(pr.ddos); out.push({ k: 'ddos', head: pr.ddosWhy ? _tf(5393, "因「{$0}」下线", downWhy(pr)) : _tf(4244, "被 {$0} DDoS", a.name), t: _tf(4245, "不收过路费，运行费照交，也不算持有（不凑整组、架构和支柱），{$0} 再轮到 {$1} 次时恢复", a.name, pr.ddosLeft || 1) }); }
@@ -8379,7 +8383,7 @@ function plCard(p, mine, offSeats) {
     (offSeats || []).includes(p.id) ? _t(4282, "<span class=\"warn\">掉线</span>") : ''].filter(Boolean);
   const nameH = fold ? `<button type="button" class="pnm plt" data-fk="pl${p.id}" aria-expanded="${!mini}" aria-controls="plb${p.id}"><span class="pla" aria-hidden="true">${mini ? '▸' : '▾'}</span>${p.name}</button>` : `<span class="pnm">${p.name}</span>`;
   const debtT = p.debt.length ? _tf(4284, "欠 {$0}：要先卖服务或拆升级来还，还不上就破产", p.debt.map(d => `${d.to === 'pot' ? _t(3238, "奖池") : typeof d.to === 'number' && P(d.to) ? P(d.to).name : _t(4283, "亚马逊云科技")} $${d.amt}`).join(_t(349, "、"))) : '';
-  const head = `<div class="pacc" ${fold ? `data-act="togglePl" data-arg="${p.id}" title="${mini ? _t(4285, "展开看详情") : _t(4286, "收起")}"` : ''}>${PAWN(p.color)}<div class="pn"><b>${nameH}${p.id === mine ? _t(4287, "<span class=\"pme\">（你）</span>") : ''}${tags.length ? `<span class="ptags">${tags.join(' · ')}</span>` : ''}${isCur ? _t(4288, "<span class=\"now\">当前回合</span>") : ''}</b><small>${r.n}</small></div>`
+  const head = `<div class="pacc" ${fold ? `data-act="togglePl" data-arg="${p.id}" title="${mini ? _t(4285, "展开看详情") : _t(4286, "收起")}"` : ''}>${PAWN(p.color)}<div class="pn"><b>${nameH}${canRename(p) ? _tf(5555, "<button type=\"button\" class=\"pren\" data-act=\"renameDialog\" data-arg=\"{$0}\" title=\"改名字\" aria-label=\"给 {$1} 改名字\">✎</button>", p.id, p.name) : ''}${p.id === mine ? _t(4287, "<span class=\"pme\">（你）</span>") : ''}${tags.length ? `<span class="ptags">${tags.join(' · ')}</span>` : ''}${isCur ? _t(4288, "<span class=\"now\">当前回合</span>") : ''}</b><small>${r.n}</small></div>`
     // 估值在收起的卡上写在现金下面；展开的卡（2 人局一直展开）写在下面「总资产 · 估值 · 运行费」那一行里，头部不重复
     + _tf(4290, "<span class=\"cash\"><span class=\"sr-only\">现金</span>${$0}{$1}{$2}</span></div>", p.cash, debtT ? _tf(4289, "<small class=\"pdebt tipx\" tabindex=\"0\" data-fk=\"db{$0}\" title=\"{$1}\">欠 ${$2}</small>", p.id, debtT, debtOf(p)) : '', mini ? `<small class="nw tipx" tabindex="0" data-fk="nw${p.id}" title="${valTip(p)}">${lb(_t(3714, "估值"))} $${valuation(p)}</small>` : '');
   const led = `<button type="button" class="ledbtn" data-fk="led${p.id}" data-act="showLedger" data-arg="${p.id}" title="${_tf(4294, "看 {$0} 每块服务的收费明细和相关日志", p.name)}"${mini ? _tf(4291, " aria-label=\"{$0} 的明细和日志\"", p.name) : ''}>${mini ? _t(4292, "明细") : _t(4293, "明细和日志")}</button>`;
@@ -8865,11 +8869,13 @@ function themeControl() {
   const text = [_t(5122, "外观"), _t(5123, "跟随系统"), _t(5124, "浅色"), _t(5125, "深色")];
   return `<label class="theme-control"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M10 3a7 7 0 0 0 0 14Z" fill="currentColor" stroke="none"/></svg><span class="sr-only">${text[0]}</span><select data-theme-select aria-label="${text[0]}">${['auto', 'light', 'dark'].map((value, i) => `<option value="${value}" ${GameTheme.preference === value ? 'selected' : ''}>${text[i + 1]}</option>`).join('')}</select></label>`;
 }
-async function renameDialog() {
+// id：玩家卡上点了谁名字旁边的 ✎，直接改这一位（得是这台设备能改的人）；不带 id 是对局菜单里的「改名字」，这台设备上不止一位时先问改谁
+async function renameDialog(id) {
   if (!S || S.over || modalBlocks(true)) return;
   const list = (MP.role === 'client' ? [MP.mySeat] : S.players.map(q => q.id).filter(id => !(MP.role === 'host' && MP.isRemote(id)))).map(id => S.players[id]).filter(Boolean);
   if (!list.length) return;
-  const q = list.length === 1 ? list[0] : S.players[await ask({ local: true, cancelable: true, cls: 'pick', title: _t(4622, "改谁的名字？"), buttons: [...list.map(x => ({ label: x.name, value: x.id })), { label: _t(2465, "取消"), value: -1 }] })];
+  const pick = id != null && id !== '' ? list.find(x => x.id === +id) : null;
+  const q = pick || (list.length === 1 ? list[0] : S.players[await ask({ local: true, cancelable: true, cls: 'pick', title: _t(4622, "改谁的名字？"), buttons: [...list.map(x => ({ label: x.name, value: x.id })), { label: _t(2465, "取消"), value: -1 }] })]);
   if (!q) return;
   const res = await modal({ local: true, cancelable: true, title: _tf(4623, "给 {$0} 改名字", q.name), inputs: [{ id: 'nm', type: 'text', label: _t(4624, "新名字（最多 12 个字）"), value: unesc(q.name), af: true }], buttons: [{ label: _t(4625, "改好了"), value: 'ok', cls: 'pri' }, { label: _t(2465, "取消"), value: 'x' }] });
   if (res.v !== 'ok') return;
@@ -11270,6 +11276,7 @@ Object.assign(MP, {
     }
     else if (m.t === 'aipause' && S && !S.over) { toggleAiPause(); toast(`${unesc(S.players[seat].name)} ${AI_PAUSE ? _t(4978, "暂停了电脑") : _t(4979, "让电脑接着跑")}`); }
     else if (m.t === 'endask' && S && !S.over) { const n = unesc(S.players[seat].name); if (S.phase === 'roll' || S.phase === 'post') ask({ local: true, cancelable: true, title: _tf(4980, "{$0} 提议现在结算", n), html: _t(4981, "<p>按每家的估值排名，估值最高的赢。结算后这一局就结束了，不能接着打。</p>"), buttons: [{ label: _t(4719, "现在结算"), value: true, cls: 'pri' }, { label: _t(4982, "接着打"), value: false }] }).then(v => { if (v && S && !S.over) { log(_tf(4983, "🏁 {$0} 提议、房主同意现在结算", n)); timedOver(_t(4722, "大家决定现在结算")); } else this.send(conn, { t: 'toast', msg: _t(4984, "房主选了接着打") }); }); else this.send(conn, { t: 'toast', msg: _t(4985, "房主那边还在结算，等一下再提") }); }
+    else if (m.t === 'rename' && !(S && S.players) && typeof m.name === 'string') { const why = this.lobbyRename(seat, m.name); this.send(conn, why ? { t: 'renameFail', why } : { t: 'renamed', name: this.seats[seat].name }); }
     else if (m.t === 'rename' && S && !S.over && typeof m.name === 'string') { const why = applyRename(seat, m.name); if (why) this.send(conn, { t: 'renameFail', why }); }
     else if (m.t === 'cheat' && S && !S.over && typeof m.c === 'string' && Array.isArray(m.a) && m.a.slice(0, 3).every(x => this.scalar(x))) { const why = applyCheat(seat, m.c, m.a.slice(0, 3).map(x => String(x).slice(0, 20))); if (why) this.send(conn, { t: 'toast', msg: why }); }
     else if (m.t === 'report' && S && !S.over && Number.isInteger(m.id)) { const why = reportCheat(m.id, seat); if (why) this.send(conn, { t: 'toast', msg: why }); }
@@ -11371,6 +11378,15 @@ Object.assign(MP, {
   wbIn(w) { const o = {}; if (w && typeof w === 'object') Object.keys(w).slice(0, 2000).forEach(id => { if (wbValid(id)) o[id] = { n: w[id] && w[id].n === 1 ? 1 : 0, t: 0 }; }); return o; },
   // 远端玩家答了一道题：发给他记进自己的错题本，房主这边的副本也跟着改
   wbMark(seat, id, ok) { const x = this.seats[seat]; this.send(x.conn, { t: 'wb', id, ok: !!ok }); return wbApply(x.wb || (x.wb = {}), id, ok); },
+  // 大厅里（还没开局）远端玩家改自己的名字：和入房时一样整理、查重（大厅不收重名，见 admit），被移出过的名字不能用；房主这边的座位表跟着刷新
+  lobbyRename(seat, raw) {
+    const x = this.seats[seat]; if (!x) return _t(5551, "你不在这个房间的座位上");
+    const name = raw.replace(/\s+/g, ' ').trim().slice(0, 12); if (!name) return _t(4628, "名字不能是空的");
+    if (this.banned && this.banned.has(name)) return _t(4987, "房主把你移出了这个房间");
+    const host = (($('#nm0') || {}).value || '').replace(/\s+/g, ' ').trim();
+    if (name === host || Object.entries(this.seats).some(([k, y]) => +k !== seat && y.name.replace(/\s+/g, ' ') === name)) return _tf(5552, "已经有人叫 {$0} 了，换一个", name);
+    x.name = name; this.renderLobby(); return '';
+  },
   renderLobby() {
     const watch = $('#mpallowwatch'); if (watch) { watch.checked = !!this.watchToken; watch.disabled = true; }
     const n = 1 + Math.max(0, ...Object.keys(this.seats).map(Number));   // 按最大的座位号算：按存档排座时可能只有 3 号位有人，按人数算会把玩家 4 截掉
@@ -11482,7 +11498,7 @@ Object.assign(MP, {
     // 房主把我移出了房间：不再自动重连；还在大厅里的，回到能重新填房间号的样子
     if (m.t === 'removed') { MPFX.cancel(); this.kicked = true; this.removed = true; this.gone = true; if (!(S && S.players)) { this.role = null; this.hostConn = null; $('#mpstat').innerHTML = _t(5029, "<span class=\"warn\">房主把你移出了房间</span>"); const jb = $('#mpbox .mpform button'); if (jb) jb.disabled = false; } else info(_t(5030, "你被移出了房间"), this.watching ? _t(5261, "<p>房主已结束你的观战或更新了邀请。请联系房主获取新邀请。</p>") : _t(5031, "<p>房主把你移出了这个房间，你的座位交给电脑接着打。</p>"), true); return; }   // 同一个浏览器的另一个页面用这个名字接手了座位，房主马上会关掉这条连接
     if (m.t === 'pending') { if ($('#mpstat')) $('#mpstat').textContent = String(m.why || _t(5262, "等待房主确认")); return; }
-    if (m.t === 'welcome') { this.watching = m.mode === 'spectator'; MPFX.cancel(); MPFX.lastWalk = 0; if (this.hostConn) this.hostConn._ok = true; clearTimeout(this.rjT); if (this.gone) toast(_t(5032, "重新连上房主了")); this.role = 'client'; this.gone = false; this.kicked = false; this.removed = false; this.mySeat = m.seat; if (!this.watching && typeof m.key === 'string') this.seatKeys(this.room, m.key.slice(0, 64)); try { sessionStorage.setItem('aws-tycoon-lastjoin', JSON.stringify({ room: this.room, name: this.myName, watching: this.watching })); } catch (e) { } $('#mpstat').innerHTML = this.watching ? _tf(5263, "已加入房间 {$0}，你是只读观众，等待房主开始…", esc(this.room)) : _tf(5033, "<span class=\"ok\">已加入房间 {$0}，你是玩家 {$1}。等房主开始游戏…</span>", esc(this.room), m.seat + 1); const sb = $('#startBtn'); if (sb) { sb.disabled = true; sb.textContent = _t(5034, "等房主开始"); } /* hero 和 UG 活动局的开局按钮也要灰掉：平板、矮屏手机首屏只看得到它们，点了会在客户端本地另开一局；「继续上一局」会读这台自己的旧存档 */ document.querySelectorAll('.hero .cta .twin.pri, .ugbar button, #resume button').forEach(b => { b.disabled = true; b.title = _t(5035, "已加入房间，等房主开始"); if (b.classList.contains('twin')) b.textContent = _t(5034, "等房主开始"); }); return; }
+    if (m.t === 'welcome') { this.watching = m.mode === 'spectator'; MPFX.cancel(); MPFX.lastWalk = 0; if (this.hostConn) this.hostConn._ok = true; clearTimeout(this.rjT); if (this.gone) toast(_t(5032, "重新连上房主了")); this.role = 'client'; this.gone = false; this.kicked = false; this.removed = false; this.mySeat = m.seat; if (!this.watching && typeof m.key === 'string') this.seatKeys(this.room, m.key.slice(0, 64)); try { sessionStorage.setItem('aws-tycoon-lastjoin', JSON.stringify({ room: this.room, name: this.myName, watching: this.watching })); } catch (e) { } $('#mpstat').innerHTML = this.watching ? _tf(5263, "已加入房间 {$0}，你是只读观众，等待房主开始…", esc(this.room)) : _tf(5033, "<span class=\"ok\">已加入房间 {$0}，你是玩家 {$1}。等房主开始游戏…</span>", esc(this.room), m.seat + 1) + (S && S.players ? '' : _t(5553, " <button type=\"button\" class=\"sm\" data-act=\"MP.lobbyRenameAsk\">改名字</button>")); const sb = $('#startBtn'); if (sb) { sb.disabled = true; sb.textContent = _t(5034, "等房主开始"); } /* hero 和 UG 活动局的开局按钮也要灰掉：平板、矮屏手机首屏只看得到它们，点了会在客户端本地另开一局；「继续上一局」会读这台自己的旧存档 */ document.querySelectorAll('.hero .cta .twin.pri, .ugbar button, #resume button').forEach(b => { b.disabled = true; b.title = _t(5035, "已加入房间，等房主开始"); if (b.classList.contains('twin')) b.textContent = _t(5034, "等房主开始"); }); return; }
     if (this.role !== 'client') return;
     if (m.t === 'again') {
       MPFX.cancel();
@@ -11522,10 +11538,17 @@ Object.assign(MP, {
     } else if (m.t === 'wb') { if (wbValid(m.id)) wbMark(m.id, !!m.ok, true); }   // 自己答的题记进自己浏览器里的错题本
     else if (m.t === 'fx' && typeof m.k === 'string') MPFX.push(m);   // 房主那边播的动画：排队照着播（过路费、走棋、飞行、UG 活动、小特效）
     else if (m.t === 'toast' && typeof m.msg === 'string') toast(m.msg.slice(0, 120));   // 房主替远端做的事有了结果（电脑同不同意交易）、远端点的操作没执行：在他自己的设备上提示
+    else if (m.t === 'renamed' && typeof m.name === 'string') { this.myName = m.name.slice(0, 12); try { sessionStorage.setItem('aws-tycoon-lastjoin', JSON.stringify({ room: this.room, name: this.myName, watching: false })); } catch (e) { } toast(_tf(5554, "改好了，现在叫 {$0}", esc(this.myName))); }
     else if (m.t === 'renameFail') info(_t(4626, "没改成"), `<p>${esc(unesc(String(m.why || '')))}</p>`, true);
     else if (m.t === 'modalClose') { this.closedMid = Math.max(this.closedMid || 0, m.id || 0); if (this.peek && this.peek.id <= this.closedMid) this.peek = null; if (this.closeLocal && this.openMid === m.id) { this.closeLocal(); this.closeLocal = null; } }
   },
   // 远端：打开房主发来的弹窗（收到时，或者自己的窗口关掉后补开）
+  // 大厅里（房主还没开局）改自己的名字：发给房主查重、改座位表，回 renamed / renameFail。开局后改名走对局菜单或玩家卡上的 ✎（ui/28-setup-save.js 的 renameDialog）
+  async lobbyRenameAsk() {
+    if (this.role !== 'client' || this.watching || (S && S.players)) return;
+    const r = await modal({ local: true, cancelable: true, title: _t(4124, "改名字"), inputs: [{ id: 'nm', type: 'text', label: _t(4624, "新名字（最多 12 个字）"), value: this.myName || '', af: true }], buttons: [{ label: _t(4625, "改好了"), value: 'ok', cls: 'pri' }, { label: _t(2465, "取消"), value: 'x' }] });
+    if (r.v === 'ok' && !(S && S.players)) this.send(this.hostConn, { t: 'rename', name: String(r.inp.nm || '').slice(0, 12) });
+  },
   showRemote(m) {
     this.peek = null; this.shown = m;
     const k = (m.spec.html || '').match(/class="deal (inc|rei|fis)\b/); if (k) dealSfx(k[1]);
@@ -11941,7 +11964,7 @@ Object.assign(ACTS, {
   uiAction: (el, e, a) => { const f = UI_ACTS[a]; if (f) uiAction(f); else console.error('unknown uiAction', a); },
   backToSetup: () => backToSetup(), toHome: () => { location.href = homeUrl(); }, showReport: () => showReport(), endNow: () => endNow(),
   gallery: () => gallery(), maybeTour: (el, e, a) => maybeTour(a === 'true'), keysHelp: () => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' })),
-  toggleSfx: () => toggleSfx(), renameDialog: () => renameDialog(), toggleBoss: () => toggleBoss(), toggleArchTip: () => toggleArchTip(), toggleAnim: () => toggleAnim(),
+  toggleSfx: () => toggleSfx(), renameDialog: (el, e, a) => renameDialog(a), toggleBoss: () => toggleBoss(), toggleArchTip: () => toggleArchTip(), toggleAnim: () => toggleAnim(),
   quitGame: () => quitGame(), confirmNew: () => confirmNew(), langMenu: el => langMenu(el),
   // 灰按钮：有 data-arg 念它，没有就念 data-why
   toast: (el, e, a) => toast(a ?? el.dataset.why), dlcToast: (el, e, a) => toast((a ?? '') + el.title, 5000),   // data-arg 是前缀（「这局开了：」，跟着翻译串走）
@@ -11954,7 +11977,7 @@ Object.assign(ACTS, {
   // 战报
   repTab: (el, e, a) => repTab(+a), repKey: (el, e) => repKey(e, el), repOpen: el => { repSt().open = el.open; },
   // 联机
-  'MP.leave': () => MP.leave(), 'MP.proposeEnd': () => MP.proposeEnd(), 'MP.kickDialog': () => MP.kickDialog(), 'MP.kick': (el, e, a) => MP.kick(+a),
+  'MP.leave': () => MP.leave(), 'MP.proposeEnd': () => MP.proposeEnd(), 'MP.kickDialog': () => MP.kickDialog(), 'MP.kick': (el, e, a) => MP.kick(+a), 'MP.lobbyRenameAsk': () => MP.lobbyRenameAsk(),
   'MP.idleTake': () => MP.idleTake(), 'MP.watchDialog': () => MP.watchDialog(), 'MP.reviewJoin': (el, e, a) => MP.reviewJoin(a), 'MP.copyWatchInvite': () => MP.copyWatchInvite(),
   'MP.rejoin': () => { MP.reN = 0; MP.rejoin(); }, mpNetTest: () => mpNetTest(), mpSigSave: () => mpSigSave(), mpTurnSave: (el, e, a) => mpTurnSave(a === 'true' || undefined),
   mpHostGo: el => { if ($('#mppwd').value.length < 4) { $('#mpstat').innerHTML = '<span class=warn>密码至少 4 位</span>'; } else { mpHostName(); MP.host($('#mppwd').value, $('#mpallowwatch').checked); el.disabled = true; } },

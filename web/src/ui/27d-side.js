@@ -189,6 +189,8 @@ const archProg = p => COMBOS.filter(comboOpen).map(c => {
 const ZH = '[\\u3400-\\u9fff\\u3000-\\u303f\\uff01-\\uff60]', ZH_SP = new RegExp(`(${ZH})((?:</[a-z]+>)*) +((?:<[a-z][^<>]*>)*)(?=${ZH})`, 'g');
 export const zhs = h => String(h).replace(ZH_SP, '$1$2$3');
 // 一块服务现在的特殊状态：head + t 是一句规则（玩家卡图标的提示、点格子面板的状态行都用这一句），按要紧程度排
+// 玩家卡名字旁边的 ✎：这台设备能改的人才有（联机远端只能改自己，观众不能改；房主和同屏能改本机的真人座位，电脑不改）
+const canRename = p => !!S && !S.over && p.alive && (MP.role === 'client' ? !MP.watching && p.id === MP.mySeat : !MP.isRemote(p.id) && !isAI(p.id));
 export function svcState(i) {
   const s = SQ[i], pr = S.props[i], o = pr.owner == null ? null : P(pr.owner), who = o ? o.name : _t(2842, "主人"), out = [];
   if (pr.ddos != null && P(pr.ddos)) { const a = P(pr.ddos); out.push({ k: 'ddos', head: pr.ddosWhy ? _tf(5393, "因「{$0}」下线", downWhy(pr)) : _tf(4244, "被 {$0} DDoS", a.name), t: _tf(4245, "不收过路费，运行费照交，也不算持有（不凑整组、架构和支柱），{$0} 再轮到 {$1} 次时恢复", a.name, pr.ddosLeft || 1) }); }
@@ -241,7 +243,7 @@ function plCard(p, mine, offSeats) {
     (offSeats || []).includes(p.id) ? _t(4282, "<span class=\"warn\">掉线</span>") : ''].filter(Boolean);
   const nameH = fold ? `<button type="button" class="pnm plt" data-fk="pl${p.id}" aria-expanded="${!mini}" aria-controls="plb${p.id}"><span class="pla" aria-hidden="true">${mini ? '▸' : '▾'}</span>${p.name}</button>` : `<span class="pnm">${p.name}</span>`;
   const debtT = p.debt.length ? _tf(4284, "欠 {$0}：要先卖服务或拆升级来还，还不上就破产", p.debt.map(d => `${d.to === 'pot' ? _t(3238, "奖池") : typeof d.to === 'number' && P(d.to) ? P(d.to).name : _t(4283, "亚马逊云科技")} $${d.amt}`).join(_t(349, "、"))) : '';
-  const head = `<div class="pacc" ${fold ? `data-act="togglePl" data-arg="${p.id}" title="${mini ? _t(4285, "展开看详情") : _t(4286, "收起")}"` : ''}>${PAWN(p.color)}<div class="pn"><b>${nameH}${p.id === mine ? _t(4287, "<span class=\"pme\">（你）</span>") : ''}${tags.length ? `<span class="ptags">${tags.join(' · ')}</span>` : ''}${isCur ? _t(4288, "<span class=\"now\">当前回合</span>") : ''}</b><small>${r.n}</small></div>`
+  const head = `<div class="pacc" ${fold ? `data-act="togglePl" data-arg="${p.id}" title="${mini ? _t(4285, "展开看详情") : _t(4286, "收起")}"` : ''}>${PAWN(p.color)}<div class="pn"><b>${nameH}${canRename(p) ? _tf(5555, "<button type=\"button\" class=\"pren\" data-act=\"renameDialog\" data-arg=\"{$0}\" title=\"改名字\" aria-label=\"给 {$1} 改名字\">✎</button>", p.id, p.name) : ''}${p.id === mine ? _t(4287, "<span class=\"pme\">（你）</span>") : ''}${tags.length ? `<span class="ptags">${tags.join(' · ')}</span>` : ''}${isCur ? _t(4288, "<span class=\"now\">当前回合</span>") : ''}</b><small>${r.n}</small></div>`
     // 估值在收起的卡上写在现金下面；展开的卡（2 人局一直展开）写在下面「总资产 · 估值 · 运行费」那一行里，头部不重复
     + _tf(4290, "<span class=\"cash\"><span class=\"sr-only\">现金</span>${$0}{$1}{$2}</span></div>", p.cash, debtT ? _tf(4289, "<small class=\"pdebt tipx\" tabindex=\"0\" data-fk=\"db{$0}\" title=\"{$1}\">欠 ${$2}</small>", p.id, debtT, debtOf(p)) : '', mini ? `<small class="nw tipx" tabindex="0" data-fk="nw${p.id}" title="${valTip(p)}">${lb(_t(3714, "估值"))} $${valuation(p)}</small>` : '');
   const led = `<button type="button" class="ledbtn" data-fk="led${p.id}" data-act="showLedger" data-arg="${p.id}" title="${_tf(4294, "看 {$0} 每块服务的收费明细和相关日志", p.name)}"${mini ? _tf(4291, " aria-label=\"{$0} 的明细和日志\"", p.name) : ''}>${mini ? _t(4292, "明细") : _t(4293, "明细和日志")}</button>`;

@@ -41,6 +41,7 @@ Object.assign(MP, {
     }
     else if (m.t === 'aipause' && S && !S.over) { toggleAiPause(); toast(`${unesc(S.players[seat].name)} ${AI_PAUSE ? _t(4978, "暂停了电脑") : _t(4979, "让电脑接着跑")}`); }
     else if (m.t === 'endask' && S && !S.over) { const n = unesc(S.players[seat].name); if (S.phase === 'roll' || S.phase === 'post') ask({ local: true, cancelable: true, title: _tf(4980, "{$0} 提议现在结算", n), html: _t(4981, "<p>按每家的估值排名，估值最高的赢。结算后这一局就结束了，不能接着打。</p>"), buttons: [{ label: _t(4719, "现在结算"), value: true, cls: 'pri' }, { label: _t(4982, "接着打"), value: false }] }).then(v => { if (v && S && !S.over) { log(_tf(4983, "🏁 {$0} 提议、房主同意现在结算", n)); timedOver(_t(4722, "大家决定现在结算")); } else this.send(conn, { t: 'toast', msg: _t(4984, "房主选了接着打") }); }); else this.send(conn, { t: 'toast', msg: _t(4985, "房主那边还在结算，等一下再提") }); }
+    else if (m.t === 'rename' && !(S && S.players) && typeof m.name === 'string') { const why = this.lobbyRename(seat, m.name); this.send(conn, why ? { t: 'renameFail', why } : { t: 'renamed', name: this.seats[seat].name }); }
     else if (m.t === 'rename' && S && !S.over && typeof m.name === 'string') { const why = applyRename(seat, m.name); if (why) this.send(conn, { t: 'renameFail', why }); }
     else if (m.t === 'cheat' && S && !S.over && typeof m.c === 'string' && Array.isArray(m.a) && m.a.slice(0, 3).every(x => this.scalar(x))) { const why = applyCheat(seat, m.c, m.a.slice(0, 3).map(x => String(x).slice(0, 20))); if (why) this.send(conn, { t: 'toast', msg: why }); }
     else if (m.t === 'report' && S && !S.over && Number.isInteger(m.id)) { const why = reportCheat(m.id, seat); if (why) this.send(conn, { t: 'toast', msg: why }); }
@@ -142,6 +143,15 @@ Object.assign(MP, {
   wbIn(w) { const o = {}; if (w && typeof w === 'object') Object.keys(w).slice(0, 2000).forEach(id => { if (wbValid(id)) o[id] = { n: w[id] && w[id].n === 1 ? 1 : 0, t: 0 }; }); return o; },
   // 远端玩家答了一道题：发给他记进自己的错题本，房主这边的副本也跟着改
   wbMark(seat, id, ok) { const x = this.seats[seat]; this.send(x.conn, { t: 'wb', id, ok: !!ok }); return wbApply(x.wb || (x.wb = {}), id, ok); },
+  // 大厅里（还没开局）远端玩家改自己的名字：和入房时一样整理、查重（大厅不收重名，见 admit），被移出过的名字不能用；房主这边的座位表跟着刷新
+  lobbyRename(seat, raw) {
+    const x = this.seats[seat]; if (!x) return _t(5551, "你不在这个房间的座位上");
+    const name = raw.replace(/\s+/g, ' ').trim().slice(0, 12); if (!name) return _t(4628, "名字不能是空的");
+    if (this.banned && this.banned.has(name)) return _t(4987, "房主把你移出了这个房间");
+    const host = (($('#nm0') || {}).value || '').replace(/\s+/g, ' ').trim();
+    if (name === host || Object.entries(this.seats).some(([k, y]) => +k !== seat && y.name.replace(/\s+/g, ' ') === name)) return _tf(5552, "已经有人叫 {$0} 了，换一个", name);
+    x.name = name; this.renderLobby(); return '';
+  },
   renderLobby() {
     const watch = $('#mpallowwatch'); if (watch) { watch.checked = !!this.watchToken; watch.disabled = true; }
     const n = 1 + Math.max(0, ...Object.keys(this.seats).map(Number));   // 按最大的座位号算：按存档排座时可能只有 3 号位有人，按人数算会把玩家 4 截掉

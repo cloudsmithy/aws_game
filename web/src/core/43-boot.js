@@ -58,7 +58,7 @@ Object.assign(ACTS, {
   uiAction: (el, e, a) => { const f = UI_ACTS[a]; if (f) uiAction(f); else console.error('unknown uiAction', a); },
   backToSetup: () => backToSetup(), toHome: () => { location.href = homeUrl(); }, showReport: () => showReport(), endNow: () => endNow(),
   gallery: () => gallery(), maybeTour: (el, e, a) => maybeTour(a === 'true'), keysHelp: () => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' })),
-  toggleSfx: () => toggleSfx(), renameDialog: () => renameDialog(), toggleBoss: () => toggleBoss(), toggleArchTip: () => toggleArchTip(), toggleAnim: () => toggleAnim(),
+  toggleSfx: () => toggleSfx(), renameDialog: (el, e, a) => renameDialog(a), toggleBoss: () => toggleBoss(), toggleArchTip: () => toggleArchTip(), toggleAnim: () => toggleAnim(),
   quitGame: () => quitGame(), confirmNew: () => confirmNew(), langMenu: el => langMenu(el),
   // 灰按钮：有 data-arg 念它，没有就念 data-why
   toast: (el, e, a) => toast(a ?? el.dataset.why), dlcToast: (el, e, a) => toast((a ?? '') + el.title, 5000),   // data-arg 是前缀（「这局开了：」，跟着翻译串走）
@@ -71,7 +71,7 @@ Object.assign(ACTS, {
   // 战报
   repTab: (el, e, a) => repTab(+a), repKey: (el, e) => repKey(e, el), repOpen: el => { repSt().open = el.open; },
   // 联机
-  'MP.leave': () => MP.leave(), 'MP.proposeEnd': () => MP.proposeEnd(), 'MP.kickDialog': () => MP.kickDialog(), 'MP.kick': (el, e, a) => MP.kick(+a),
+  'MP.leave': () => MP.leave(), 'MP.proposeEnd': () => MP.proposeEnd(), 'MP.kickDialog': () => MP.kickDialog(), 'MP.kick': (el, e, a) => MP.kick(+a), 'MP.lobbyRenameAsk': () => MP.lobbyRenameAsk(),
   'MP.idleTake': () => MP.idleTake(), 'MP.watchDialog': () => MP.watchDialog(), 'MP.reviewJoin': (el, e, a) => MP.reviewJoin(a), 'MP.copyWatchInvite': () => MP.copyWatchInvite(),
   'MP.rejoin': () => { MP.reN = 0; MP.rejoin(); }, mpNetTest: () => mpNetTest(), mpSigSave: () => mpSigSave(), mpTurnSave: (el, e, a) => mpTurnSave(a === 'true' || undefined),
   mpHostGo: el => { if ($('#mppwd').value.length < 4) { $('#mpstat').innerHTML = '<span class=warn>密码至少 4 位</span>'; } else { mpHostName(); MP.host($('#mppwd').value, $('#mpallowwatch').checked); el.disabled = true; } },

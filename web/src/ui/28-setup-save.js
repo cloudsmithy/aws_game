@@ -24,11 +24,13 @@ import { applyBal, hellCfg, isHell, isParty, rollRoundMul } from '../rules/35-mo
 import { __set_AI_PAUSE, __set_aiTimer, aiTimer, isAI } from '../engine/36-ai.js';
 import { MP } from '../net/40-host-sync.js';
 import { mpUI } from '../net/42-setup.js';
-export async function renameDialog() {
+// id：玩家卡上点了谁名字旁边的 ✎，直接改这一位（得是这台设备能改的人）；不带 id 是对局菜单里的「改名字」，这台设备上不止一位时先问改谁
+export async function renameDialog(id) {
   if (!S || S.over || modalBlocks(true)) return;
   const list = (MP.role === 'client' ? [MP.mySeat] : S.players.map(q => q.id).filter(id => !(MP.role === 'host' && MP.isRemote(id)))).map(id => S.players[id]).filter(Boolean);
   if (!list.length) return;
-  const q = list.length === 1 ? list[0] : S.players[await ask({ local: true, cancelable: true, cls: 'pick', title: _t(4622, "改谁的名字？"), buttons: [...list.map(x => ({ label: x.name, value: x.id })), { label: _t(2465, "取消"), value: -1 }] })];
+  const pick = id != null && id !== '' ? list.find(x => x.id === +id) : null;
+  const q = pick || (list.length === 1 ? list[0] : S.players[await ask({ local: true, cancelable: true, cls: 'pick', title: _t(4622, "改谁的名字？"), buttons: [...list.map(x => ({ label: x.name, value: x.id })), { label: _t(2465, "取消"), value: -1 }] })]);
   if (!q) return;
   const res = await modal({ local: true, cancelable: true, title: _tf(4623, "给 {$0} 改名字", q.name), inputs: [{ id: 'nm', type: 'text', label: _t(4624, "新名字（最多 12 个字）"), value: unesc(q.name), af: true }], buttons: [{ label: _t(4625, "改好了"), value: 'ok', cls: 'pri' }, { label: _t(2465, "取消"), value: 'x' }] });
   if (res.v !== 'ok') return;
