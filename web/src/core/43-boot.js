@@ -11,7 +11,7 @@ import { canFocus, mainBtn, viewOpen } from '../ui/10-modal.js';
 import { doRoll, endTurn, jailAct, uiAction } from '../engine/14-turn.js';
 import { capHere, upHere } from '../engine/15-land.js';
 import { refactorDebt } from '../engine/17-health.js';
-import { buyReinvent, incAll, incOne, incRand, reiHand } from '../engine/18-reinvent.js';
+import { buryIncident, buyReinvent, incAll, incOne, incRand, reiHand } from '../engine/18-reinvent.js';
 import { declareBankrupt } from '../engine/20-bankrupt.js';
 import { setRsRate, useRoleSkill, wildDialog } from '../engine/21-skills.js';
 import { speedMenu } from '../engine/22-speed.js';
@@ -42,7 +42,7 @@ import { mpHostName, mpNetDialog, mpNetTest, mpSigSave, mpTurnSave, mpUI } from 
 const UI_ACTS = Object.assign(Object.create(null), {
   manage: () => manage(cur()), trade: () => trade(), edpDialog: () => edpDialog(), activeAction: () => activeAction(), declareBankrupt: () => declareBankrupt(),
   buyReinvent: () => buyReinvent(), reiHand: () => reiHand(), refactorDebt: () => refactorDebt(), useRoleSkill: () => useRoleSkill(), wildDialog: () => wildDialog(), quizChallenge: () => quizChallenge(),
-  quizAll: () => quizAll(), incOne: () => incOne(), incRand: () => incRand(), incAll: () => incAll(), upHere: () => upHere(), capHere: () => capHere(), speedMenu: () => speedMenu(), setRsRate: () => setRsRate(),
+  quizAll: () => quizAll(), incOne: () => incOne(), incRand: () => incRand(), incAll: () => incAll(), buryIncident: () => buryIncident(), upHere: () => upHere(), capHere: () => capHere(), speedMenu: () => speedMenu(), setRsRate: () => setRsRate(),
 });
 Object.assign(ACTS, {
   // 开局页
@@ -58,7 +58,7 @@ Object.assign(ACTS, {
   uiAction: (el, e, a) => { const f = UI_ACTS[a]; if (f) uiAction(f); else console.error('unknown uiAction', a); },
   backToSetup: () => backToSetup(), toHome: () => { location.href = homeUrl(); }, showReport: () => showReport(), endNow: () => endNow(),
   gallery: () => gallery(), maybeTour: (el, e, a) => maybeTour(a === 'true'), keysHelp: () => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' })),
-  toggleSfx: () => toggleSfx(), renameDialog: () => renameDialog(), toggleBoss: () => toggleBoss(), toggleArchTip: () => toggleArchTip(), toggleAnim: () => toggleAnim(),
+  toggleSfx: () => toggleSfx(), renameDialog: (el, e, a) => renameDialog(a), toggleBoss: () => toggleBoss(), toggleArchTip: () => toggleArchTip(), toggleAnim: () => toggleAnim(),
   quitGame: () => quitGame(), confirmNew: () => confirmNew(), langMenu: el => langMenu(el),
   // 灰按钮：有 data-arg 念它，没有就念 data-why
   toast: (el, e, a) => toast(a ?? el.dataset.why), dlcToast: (el, e, a) => toast((a ?? '') + el.title, 5000),   // data-arg 是前缀（「这局开了：」，跟着翻译串走）
@@ -71,7 +71,7 @@ Object.assign(ACTS, {
   // 战报
   repTab: (el, e, a) => repTab(+a), repKey: (el, e) => repKey(e, el), repOpen: el => { repSt().open = el.open; },
   // 联机
-  'MP.leave': () => MP.leave(), 'MP.proposeEnd': () => MP.proposeEnd(), 'MP.kickDialog': () => MP.kickDialog(), 'MP.kick': (el, e, a) => MP.kick(+a),
+  'MP.leave': () => MP.leave(), 'MP.proposeEnd': () => MP.proposeEnd(), 'MP.kickDialog': () => MP.kickDialog(), 'MP.kick': (el, e, a) => MP.kick(+a), 'MP.lobbyRenameAsk': () => MP.lobbyRenameAsk(),
   'MP.idleTake': () => MP.idleTake(), 'MP.watchDialog': () => MP.watchDialog(), 'MP.reviewJoin': (el, e, a) => MP.reviewJoin(a), 'MP.copyWatchInvite': () => MP.copyWatchInvite(),
   'MP.rejoin': () => { MP.reN = 0; MP.rejoin(); }, mpNetTest: () => mpNetTest(), mpSigSave: () => mpSigSave(), mpTurnSave: (el, e, a) => mpTurnSave(a === 'true' || undefined),
   mpHostGo: el => { if ($('#mppwd').value.length < 4) { $('#mpstat').innerHTML = '<span class=warn>密码至少 4 位</span>'; } else { mpHostName(); MP.host($('#mppwd').value, $('#mpallowwatch').checked); el.disabled = true; } },

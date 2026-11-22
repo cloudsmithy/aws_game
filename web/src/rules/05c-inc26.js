@@ -77,13 +77,13 @@ export let INC26 = __rv(() => ([
     run: async p => { await skipOrPay(p, _t(5360, "定时任务时区配错了"), 80, _t(5365, "手动补跑")); } },
   { dlc: 'inc26', n: _t(5366, "唯一懂 Kubernetes 的人离职了"), c: 'ops', e: _t(5367, "集群升级、节点打补丁没人会做：二选一，交 $150 进奖池请外部顾问；或者 EKS 下线 1 轮（不收过路费、不算持有，运行费照交，到你下回合开始恢复）"), im: _t(5368, "EKS 升到了「EKS Auto Mode」（节点、核心插件和打补丁交给亚马逊云科技管）；名下没有 EKS 不受影响"), tip: _t(5369, "EKS 每个 Kubernetes 版本标准支持 14 个月，过期进入延长支持要多收费；Auto Mode 把节点扩缩、打补丁和核心插件都托管了，团队不用人人精通 Kubernetes。关键的运维步骤写进 Runbook，别只在一个人脑子里"), art: 'eks',
     imm: o => !owns(o, IX.eks) ? _t(5370, "没有 EKS") : effActive(IX.eks, 'ssh') ? _t(5371, "EKS 有 Auto Mode") : '',
-    hits: p => live(p, IX.eks), run: async p => {
+    hits: p => live(p, IX.eks), run: async (p, id) => {
       if (!live(p, IX.eks)) { log(_tf(5372, "{$0} 的 EKS 没在收费，不受影响", nm(p))); return 'nopen'; }
       const why = _t(5366, "唯一懂 Kubernetes 的人离职了"), x = Math.round(150 * (S.cardMul || 1));
       const v = await UI.ask({ who: p.id, title: _tf(838, "{$0}：{$1}", p.name, why), html: _tf(5373, "<p>二选一：交 ${$0} 进奖池请外部顾问；或者 EKS 下线 1 轮：不收过路费、不算持有（不凑整组、架构和支柱），运行费照交，到你下回合开始恢复。</p>", x),
         buttons: [{ label: _tf(3112, "交 ${$0}", x), value: 'pay', cls: 'pri', disabled: p.cash < x }, { label: _t(5374, "让 EKS 下线 1 轮"), value: 'down' }] });
       if (v === 'pay') log(_tf(1561, "{$0} 交 ${$1}", nm(p), pay(p, 'pot', 150)));
-      else { forceDown(IX.eks, p.id, 1, why); log(_tf(5375, "{$0} 的 {$1} 下线 1 轮，到 {$2} 下回合开始恢复", nm(p), sqn(IX.eks), nm(p))); }
+      else { forceDown(IX.eks, p.id, 1, 'inc:' + id); log(_tf(5375, "{$0} 的 {$1} 下线 1 轮，到 {$2} 下回合开始恢复", nm(p), sqn(IX.eks), nm(p))); }
     } },
   { dlc: 'inc26', n: _t(5376, "Docker Hub 拉镜像被限流"), c: 'avail', e: _t(5377, "扩容时每个新任务都匿名去 Docker Hub 拉镜像，超了拉取次数上限，新任务起不来：你的 ECS、EKS 变成 Impaired"), im: _t(5378, "持有 ECR（拉取缓存把公共镜像缓存在自己的仓库里）；名下没有 ECS、EKS 不受影响"), tip: _t(5379, "Docker Hub 对匿名和免费账号按 IP 限制拉取次数，NAT 网关后面的一大批节点共用一个出口 IP，很快就用完。用 ECR 拉取缓存规则同步 Docker Hub、ECR Public 上的镜像，节点只从自己的 ECR 拉"), art: 'ecr',
     imm: o => !owns(o, IX.ecs) && !owns(o, IX.eks) ? _t(5380, "没有 ECS、EKS") : active(o, IX.ecr) ? _t(5381, "有 ECR 拉取缓存") : '',
@@ -92,12 +92,14 @@ export let INC26 = __rv(() => ([
       if (!hit.length) { log(_tf(5382, "{$0} 的容器服务没在收费，不受影响", nm(p))); return 'nopen'; }
       impair(hit); log(_tf(3156, "{$0} 的 {$1} 变成 Impaired", nm(p), hit.map(sqn).join(_t(349, "、"))));
     } },
-  // 全场事件：不弹抵消窗（hits 恒为 false），也不给抽卡的人记技术债（返回 'nopen'）；Impaired 和奖励按每个人名下的服务算
+  // 全场事件（all）：engine/17-health.js 的 incident 直接调 run，不弹抵消窗、不能甩锅，抽卡的人在监管沙盒里也照样全场结算；不给抽卡的人记技术债。
+  // Impaired 和奖励按每个人名下的服务算，在监管沙盒里的人（immuneTill）这次不受影响，也不领奖励
   { dlc: 'inc26', n: _t(5383, "黑色星期五大促"), c: 'avail', e: _t(5384, "全场：流量一下子翻了几倍，Auto Scaling 来不及从零开始加机器。所有人名下没有弹性扩展功能的实例型服务变成 Impaired；有弹性扩展的每块从亚马逊云科技领 $50（每人最多领 $200）。全场事件，不能抵消"), im: _t(5385, "按块算：升了弹性扩展（EC2 跨 AZ Auto Scaling、ECS 服务自动扩缩、EKS Karpenter、RDS 只读副本、Aurora Auto Scaling……）的服务扛住了，还多赚一笔"), tip: _t(5386, "可以预期的大促别等指标涨了才扩容：用定时扩缩或预测性扩缩提前加机器，提前压测、确认服务配额够用；新机器起来要几分钟，突发流量先靠队列和限流挡一挡"), art: 'ec2',
-    imm: o => '', hits: p => false, run: async p => {
+    all: true, imm: o => '', hits: p => false, run: async p => {
       const all = S.players.filter(o => o.alive);
       let any = false;
       for (const o of all) {
+        if (o.immuneTill >= S.round) { log(_tf(3196, "🛡️ {$0} 在「监管沙盒」里，免疫「{$1}」", nm(o), _t(5383, "黑色星期五大促"))); continue; }
         const hit = bfHit(o), ok = bfOk(o);
         if (hit.length) { any = true; impair(hit); log(_tf(5387, "{$0} 的 {$1} 被大促流量打挂，变成 Impaired", nm(o), hit.map(sqn).join(_t(349, "、")))); }
         if (ok.length) { any = true; log(_tf(5388, "📈 {$0} 的 {$1} 自动扩容接住了大促流量，领 ${$2}", nm(o), ok.map(sqn).join(_t(349, "、")), credit(o, 50 * Math.min(4, ok.length)))); }

@@ -4,15 +4,15 @@ import { $, BOT, PAWN, SIM, awsImg, esc, usd } from '../core/02-util.js';
 import { OFFLINE_MIN, SQ, capU, lvFull, lvName } from '../rules/03-services.js';
 import { CARDE, CARDN, CATS, COMBOS, INC, REI, comboOpen, roleOf, rsRate, slotOpen, viaOf } from '../rules/04-roles-combos-cards.js';
 import { dlcOn } from '../rules/05-dlc.js';
-import { F, P, S, active, comboMiss, cur, debtOf, hasCombo, logBody, logRow, ownedBy, ownsGroup, wildFits, wildFree, wildOf, wildTargets, winWA } from '../engine/07-state.js';
+import { F, P, S, active, comboMiss, cur, debtOf, hasCombo, lapFx, logBody, logRow, ownedBy, ownsGroup, wildFits, wildFree, wildOf, wildTargets, winWA } from '../engine/07-state.js';
 import { commitsOf, netWorth, opCost, runCost, valBreak, valTip, valuation } from '../engine/08c-costs.js';
-import { canOnline, capInfo, chainTxt, offRounds, spotMine, turnKey, upgradeInfo } from '../engine/09-rent.js';
+import { canOnline, capInfo, chainTxt, downWhy, offRounds, spotMine, turnKey, upgradeInfo } from '../engine/09-rent.js';
 import { mainBtn, sameEl, viewOpen } from './10-modal.js';
 import { capUpTxt, lvUpTxt } from '../engine/11b-rent-info.js';
 import { jailMax, mspFee } from '../engine/13-move.js';
 import { landHere } from '../engine/15-land.js';
-import { refactorCost } from '../engine/17-health.js';
-import { handOf, handOk, handWalked, incSendCost, incSendOk, reiBuyCost } from '../engine/18-reinvent.js';
+import { refactorCost, rfJailTxt, rfJailed } from '../engine/17-health.js';
+import { TRAP_MAX, buryOk, handOf, handOk, handWalked, incSendCost, incSendOk, reiBuyCost, trapsOf } from '../engine/18-reinvent.js';
 import { canSkill, skillLine, skillMulTxt } from '../engine/21-skills.js';
 import { SPEED, SPEED_MAX } from '../engine/22-speed.js';
 import { CHA_COST, CHA_WIN, CH_COST, CH_WIN, canChallenge, canChallengeAll, chFoes, chaWait } from '../engine/25-trade.js';
@@ -105,7 +105,8 @@ export function playerBrief(p) {
   // 按钮包一层：字和按钮挤不下时按钮整组换到下一行，字不再被挤成一个字一行（两个按钮的「出题考对手」那行）
   const row = (t, b = '', cls = '') => `<div class="todo ${cls}"><span>${t}</span>${b ? `<span class="tb">${b}</span>` : ''}</div>`;
   const out = [];
-  if (p.jail !== null) out.push(row(_tf(4187, "在维护窗口里：付 $50 马上出来、照常掷骰子，或者停{$0}轮再出来", jailMax(p) > 1 ? _tf(4186, "满 {$0} ", jailMax(p)) : _t(2874, "一")), '', 'hot'));
+  if (rfJailed(p)) out.push(row(rfJailTxt(), '', 'hot'));
+  else if (p.jail !== null) out.push(row(_tf(4187, "在维护窗口里：付 $50 马上出来、照常掷骰子，或者停{$0}轮再出来", jailMax(p) > 1 ? _tf(4186, "满 {$0} ", jailMax(p)) : _t(2874, "一")), '', 'hot'));
   else if (S.phase === 'roll') out.push(row(S.again ? _t(4188, "掷出了对子，再掷一次") : _t(4189, "先掷骰子"), '', 'hot'));
   const lh = S.phase === 'post' ? landHere(p) : null;
   if (lh != null) {
@@ -131,6 +132,9 @@ export function playerBrief(p) {
     out.push(row(_tf(4212, "花 ${$0} 让对手抽一张 Health 卡（每圈一次）{$1}", one, n >= 2 ? _tf(4211, "；付 ${$0} 让每位对手各抽一张", one * 2) : ''),
       btn(n >= 2 ? _t(4213, "指定一人") : _t(4214, "发给他"), 'incOne', p.cash >= one, tip(_tf(4216, "点了：{$0}花 ${$1} 让他抽一张 Health 卡。", n >= 2 ? _t(4215, "选一位对手，") : '', one)))
       + (n >= 2 ? btn(_t(4217, "随机一人"), 'incRand', p.cash >= one, tip(_tf(4218, "点了：花 ${$0}，随机挑一位对手抽一张。", one))) + btn(_tf(4219, "全场（${$0}）", one * 2), 'incAll', p.cash >= one * 2, tip(_tf(4220, "点了：花 ${$0}，从你的下一位开始，每位对手各抽一张。", one * 2))) : ''))); }
+  if ((S.phase === 'roll' || S.phase === 'post') && buryOk(p)) { const one = incSendCost(p);
+    out.push(row(_tf(5652, "花 ${$0} 埋一张 Health 卡在自己停过的服务上，对手停上去就翻开（和发 Health 卡共用每圈一次；场上 {$1}/{$2} 张）", one, trapsOf(p).length, TRAP_MAX),
+      btn(_t(5653, "埋卡"), 'buryIncident', p.cash >= one, _tf(5654, "什么时候能点：自己的回合里，掷骰子前后都行；和发 Health 卡共用每圈一次（经过 Startup 扶持以后才能再来）。\n点了：花 ${$0} 从 Health 牌堆抽一张扣着，挑一块你这局停过的服务埋下去。对手停在那一格（经过不算）就翻开照常结算；你自己停上去没事。埋在哪、是哪张只有你知道；场上最多 {$1} 张。", one, TRAP_MAX)))); }
   if ((S.phase === 'roll' || S.phase === 'post') && p.chTurn !== turnKey() && chFoes(p).length && (!p.chUsed || chFoes(p).length >= 2)) { const n = chFoes(p).length, all = n >= 2, w = chaWait(p);
     const oneTip = _tf(4222, "什么时候能点：自己的回合里，掷骰子前后都行；每局只能用一次，同一回合和考全场只能发动一个；现金至少 ${$0}{$1}。\n怎么用：选一位对手，按他所在那一格的色组从题库出一题，他在自己的设备上答。答对他拿走你 ${$2}，答错他赔你 ${$3}。不受卡牌倍率影响。", CH_COST, p.cash < CH_COST ? _tf(4221, "，你现在只有 ${$0}", p.cash) : '', CH_COST, CH_WIN);
     const allTip = _tf(4224, "什么时候能点：自己的回合里，至少两位对手；每 3 圈能用一次（按你经过 Startup 扶持的次数算，开局就能用一次）{$0}；同一回合和考一个人只能发动一个；现金至少 ${$1}（每位对手 ${$2}）{$3}。\n怎么用：从你的下一位开始按座位顺序，每位对手各答一道题。答对的拿走你 ${$4}，答错的赔你 ${$5}。不受卡牌倍率影响。", w ? _tf(4223, "，你还要再经过 {$0} 次", w) : '', CHA_COST * n, CHA_COST, p.cash < CHA_COST * n ? _tf(4221, "，你现在只有 ${$0}", p.cash) : '', CHA_COST, CHA_WIN);
@@ -188,10 +192,12 @@ const archProg = p => COMBOS.filter(comboOpen).map(c => {
 const ZH = '[\\u3400-\\u9fff\\u3000-\\u303f\\uff01-\\uff60]', ZH_SP = new RegExp(`(${ZH})((?:</[a-z]+>)*) +((?:<[a-z][^<>]*>)*)(?=${ZH})`, 'g');
 export const zhs = h => String(h).replace(ZH_SP, '$1$2$3');
 // 一块服务现在的特殊状态：head + t 是一句规则（玩家卡图标的提示、点格子面板的状态行都用这一句），按要紧程度排
+// 玩家卡名字旁边的 ✎：这台设备能改的人才有（联机远端只能改自己，观众不能改；房主和同屏能改本机的真人座位，电脑不改）
+const canRename = p => !!S && !S.over && p.alive && (MP.role === 'client' ? !MP.watching && p.id === MP.mySeat : !MP.isRemote(p.id) && !isAI(p.id));
 export function svcState(i) {
   const s = SQ[i], pr = S.props[i], o = pr.owner == null ? null : P(pr.owner), who = o ? o.name : _t(2842, "主人"), out = [];
-  if (pr.ddos != null && P(pr.ddos)) { const a = P(pr.ddos); out.push({ k: 'ddos', head: pr.ddosWhy ? _tf(5393, "因「{$0}」下线", pr.ddosWhy) : _tf(4244, "被 {$0} DDoS", a.name), t: _tf(4245, "不收过路费，运行费照交，也不算持有（不凑整组、架构和支柱），{$0} 再轮到 {$1} 次时恢复", a.name, pr.ddosLeft || 1) }); }
-  // 下线就是地产类桌游里的抵押：规则书第 10 节。拿回的一半记在 offCash（Spot 按出价的一半），上线要还它再加原价 10%（onlineCost）
+  if (pr.ddos != null && P(pr.ddos)) { const a = P(pr.ddos); out.push({ k: 'ddos', head: pr.ddosWhy ? _tf(5393, "因「{$0}」下线", downWhy(pr)) : _tf(4244, "被 {$0} DDoS", a.name), t: _tf(4245, "不收过路费，运行费照交，也不算持有（不凑整组、架构和支柱），{$0} 再轮到 {$1} 次时恢复", a.name, pr.ddosLeft || 1) }); }
+  // 下线就是地产类桌游里的抵押：规则书第 10 节。这次拿回的一半记在 offCash（Spot 按出价的一半），不用还；同一个主人累计拿了多少记在 offDrawn
   if (pr.offline) { const n = pr.offline - 1, st = runCost(i), half = pr.offCash || 0;
     out.push({ k: 'off', head: n > 0 ? _tf(4246, "已下线 {$0} 轮", n) : _t(4247, "刚下线"), t: _tf(4251, "相当于抵押（只有 EC2、RDS、Aurora、Redshift、ECS 能下线），下线时拿回了一半价钱 ${$0}，不用还。下线期间不收过路费，也不算持有（不凑整组、架构和支柱），{$1}；下线 {$2} 轮后自动恢复{$3}，{$4} 落到这一格可以提前免费拉起来；没恢复前别人落上来，付原价 ${$5} 给亚马逊云科技就能买走，{$6} 不再拿钱", half, st ? _tf(4248, "运行费只交存储费 ${$0}/圈", st) : _t(4249, "运行费也不用交"), OFFLINE_MIN, canOnline(i) ? '' : _tf(4250, "（现在第 {$0} 轮）", offRounds(i)), who, s.p, who) }); }
   if (pr.impaired) out.push({ k: 'imp', head: 'Impaired', t: _tf(4252, "暂停收过路费，到 {$0} 下回合开始恢复", who) });
@@ -240,7 +246,7 @@ function plCard(p, mine, offSeats) {
     (offSeats || []).includes(p.id) ? _t(4282, "<span class=\"warn\">掉线</span>") : ''].filter(Boolean);
   const nameH = fold ? `<button type="button" class="pnm plt" data-fk="pl${p.id}" aria-expanded="${!mini}" aria-controls="plb${p.id}"><span class="pla" aria-hidden="true">${mini ? '▸' : '▾'}</span>${p.name}</button>` : `<span class="pnm">${p.name}</span>`;
   const debtT = p.debt.length ? _tf(4284, "欠 {$0}：要先卖服务或拆升级来还，还不上就破产", p.debt.map(d => `${d.to === 'pot' ? _t(3238, "奖池") : typeof d.to === 'number' && P(d.to) ? P(d.to).name : _t(4283, "亚马逊云科技")} $${d.amt}`).join(_t(349, "、"))) : '';
-  const head = `<div class="pacc" ${fold ? `data-act="togglePl" data-arg="${p.id}" title="${mini ? _t(4285, "展开看详情") : _t(4286, "收起")}"` : ''}>${PAWN(p.color)}<div class="pn"><b>${nameH}${p.id === mine ? _t(4287, "<span class=\"pme\">（你）</span>") : ''}${tags.length ? `<span class="ptags">${tags.join(' · ')}</span>` : ''}${isCur ? _t(4288, "<span class=\"now\">当前回合</span>") : ''}</b><small>${r.n}</small></div>`
+  const head = `<div class="pacc" ${fold ? `data-act="togglePl" data-arg="${p.id}" title="${mini ? _t(4285, "展开看详情") : _t(4286, "收起")}"` : ''}>${PAWN(p.color)}<div class="pn"><b>${nameH}${canRename(p) ? _tf(5655, "<button type=\"button\" class=\"pren\" data-act=\"renameDialog\" data-arg=\"{$0}\" title=\"改名字\" aria-label=\"给 {$1} 改名字\">✎</button>", p.id, p.name) : ''}${p.id === mine ? _t(4287, "<span class=\"pme\">（你）</span>") : ''}${tags.length ? `<span class="ptags">${tags.join(' · ')}</span>` : ''}${isCur ? _t(4288, "<span class=\"now\">当前回合</span>") : ''}</b><small>${r.n}</small></div>`
     // 估值在收起的卡上写在现金下面；展开的卡（2 人局一直展开）写在下面「总资产 · 估值 · 运行费」那一行里，头部不重复
     + _tf(4290, "<span class=\"cash\"><span class=\"sr-only\">现金</span>${$0}{$1}{$2}</span></div>", p.cash, debtT ? _tf(4289, "<small class=\"pdebt tipx\" tabindex=\"0\" data-fk=\"db{$0}\" title=\"{$1}\">欠 ${$2}</small>", p.id, debtT, debtOf(p)) : '', mini ? `<small class="nw tipx" tabindex="0" data-fk="nw${p.id}" title="${valTip(p)}">${lb(_t(3714, "估值"))} $${valuation(p)}</small>` : '');
   const led = `<button type="button" class="ledbtn" data-fk="led${p.id}" data-act="showLedger" data-arg="${p.id}" title="${_tf(4294, "看 {$0} 每块服务的收费明细和相关日志", p.name)}"${mini ? _tf(4291, " aria-label=\"{$0} 的明细和日志\"", p.name) : ''}>${mini ? _t(4292, "明细") : _t(4293, "明细和日志")}</button>`;
@@ -256,7 +262,7 @@ function plCard(p, mine, offSeats) {
   const svcs = sg[''].map(svcBtn).join('') + ['off', 'imp', 'ddos', 'spot'].filter(k => sg[k].length).map(k => `<span class="svgrp ${k}"><span class="sgl tipx" tabindex="0" data-fk="sg${p.id}-${k}" title="${SV_GRP[k][1]}">${lb(SV_GRP[k][0])}</span>${sg[k].map(svcBtn).join('')}</span>`).join('');
   // 状态行：只写不是 0 的。要紧的（维护窗口、停几轮）在前，技能能发动时紧跟着写（不能发动的不写，角色那一行有技能名）
   const res = [], kv = [];
-  if (p.jail !== null) res.push(ri(_tf(4299, "在维护窗口 {$0}/{$1} 轮", p.jail, jailMax(p)), _tf(4300, "付 $50 马上出来；或者停满 {$0} 轮自动出来；有 Enterprise Support 卡可以免费出来", jailMax(p)), 'warn', 'jail'));
+  if (p.jail !== null) res.push(ri(_tf(4299, "在维护窗口 {$0}/{$1} 轮", p.jail, jailMax(p)), rfJailed(p) ? rfJailTxt() : _tf(4300, "付 $50 马上出来；或者停满 {$0} 轮自动出来；有 Enterprise Support 卡可以免费出来", jailMax(p)), 'warn', 'jail'));
   if (p.skip) res.push(ri(_tf(4301, "停 {$0} 轮", p.skip), _tf(4302, "下 {$0} 个自己的回合直接跳过", p.skip), 'warn', 'skip'));
   if (r.sk && canSkill(p)) res.push(ri(_tf(4304, "{$0}可以发动", lb(_t(4303, "技能"))), _tf(4305, "技能「{$0}」：{$1}{$2}。总资产 ${$3} 已经低于开局资金的一半 ${$4}，一局一次，轮到自己时点「专属技能」；发动后再战略并购：收购总资产最高的对手的一块服务", r.sk.n, r.sk.d, skillMulTxt(p), netWorth(p), skillLine(p)), 'go', 'sk'));
   // 托管费、渠道维护费也是每圈经过起点时交的：展开的卡分开写，收起的卡合成一个数，拆分在提示里
@@ -282,9 +288,12 @@ function plCard(p, mine, offSeats) {
   if (!mini) { const by = new Map(); ownedBy(p).forEach(i => { const v = S.props[i].via; if (v != null && v !== p.id && P(v)) by.set(v, [...(by.get(v) || []), i]); });
     by.forEach((ix, v) => { const q = P(v), msp = q.role === 'rs_msp' && q.alive;
       res.push(ri(_tf(4329, "{$0} {$1} 块", lb(_tf(4328, "经 {$0} 买", q.name)), ix.length), _tf(4331, "{$0} 是从代理商 {$1} 手里买的：这几块的运行费交给 {$2}（他按拿货价交亚马逊云科技，赚中间的差价）{$3}", ix.map(i => SQ[i].n).join(_t(349, "、")), q.name, q.name, msp ? _tf(4330, "；{$0} 是托管服务商，每块每圈另收 $10 托管费，经过起点时和运行费一起交", q.name) : ''), '', 'via' + v)); }); }
-  // re:Invent 手牌（engine/18-reinvent.js）：大家都看得到几张；是哪几张只在主人自己的提示里写（联机看本机座位，同一台轮流玩看当前回合的人）
-  { const hand = handOf(p), seer = MP.role ? p.id === mine : p.id === S.cur && !isAI(p.id);
+  // re:Invent 手牌（engine/18-reinvent.js）：大家都看得到几张；是哪几张只在主人自己的提示里写（远端看本机座位；房主和不联机时看当前回合的人，房主这台还坐着别的本机座位时也一样，远端座位的手牌房主看不到）
+  { const hand = handOf(p), seer = MP.role === 'client' ? p.id === mine : p.id === mine || (p.id === S.cur && !isAI(p.id) && !MP.isRemote(p.id));
     if (hand.length) res.push(ri(`${lb(_t(5439, "手牌"))} ${hand.length}`, seer && hand.every(id => REI[id]) ? _tf(5440, "没公开的 re:Invent 卡：{$0}。轮到自己时点「手牌」打出、卖掉或弃牌走 1–3 格", hand.map(id => REI[id].n).join(_t(349, "、"))) : _tf(5441, "没公开的 re:Invent 卡 {$0} 张：只有 {$1} 自己知道是什么", hand.length, p.name), '', 'hand')); }
+  // 埋下的 Health 卡（engine/18-reinvent.js 的 S.traps）：大家都看得到埋了几张；埋在哪、是哪张只在主人自己的提示里写，看的人和手牌一样。联机时别人的那几条只有 by
+  { const tr = trapsOf(p), seer = MP.role ? p.id === mine : p.id === S.cur && !isAI(p.id);
+    if (tr.length) res.push(ri(`${lb(_t(5653, "埋卡"))} ${tr.length}`, seer && tr.every(t => SQ[t.sq] && INC[t.id]) ? tr.map(t => _tf(5656, "埋在 {$0}：{$1}", SQ[t.sq].n, INC[t.id].n)).join(_t(408, "；")) : _tf(5657, "埋了 {$0} 张 Health 卡：埋在哪、是哪张只有 {$1} 自己知道", tr.length, p.name), '', 'trap')); }
   const prog = archProg(p), done = prog.filter(x => x.done);
   // 收起的卡：保留卡、承诺折扣、生效的架构、支柱只写个数，说明在提示里
   if (mini) {
@@ -300,7 +309,7 @@ function plCard(p, mine, offSeats) {
   { const by = new Map(); ownedBy(p).filter(i => S.props[i].ddos != null && P(S.props[i].ddos)).forEach(i => { const k = S.props[i].ddos + '|' + (S.props[i].ddosWhy || ''); by.set(k, [...(by.get(k) || []), i]); });
     by.forEach(ix => {
       const pr = S.props[ix[0]], a = P(pr.ddos), names = ix.map(i => SQ[i].n).join(_t(349, "、")), left = Math.max(...ix.map(i => S.props[i].ddosLeft || 1));
-      warns.push(pr.ddosWhy ? _tf(5394, "{$0} 因「{$1}」下线：不收过路费，运行费照交，{$2} 再轮到 {$3} 次时恢复", names, pr.ddosWhy, a.name, left) : _tf(4337, "{$0} 被 {$1} DDoS：不收过路费，运行费照交，{$2} 再轮到 {$3} 次时恢复", names, a.name, a.name, left));
+      warns.push(pr.ddosWhy ? _tf(5394, "{$0} 因「{$1}」下线：不收过路费，运行费照交，{$2} 再轮到 {$3} 次时恢复", names, downWhy(pr), a.name, left) : _tf(4337, "{$0} 被 {$1} DDoS：不收过路费，运行费照交，{$2} 再轮到 {$3} 次时恢复", names, a.name, a.name, left));
     }); }
   // 技能留下的持续效果：挂在玩家卡上，不然只在日志里，几步就被刷走了
   const fx = [], skn = r.sk ? r.sk.n + _t(2670, "：") : '';
@@ -309,6 +318,9 @@ function plCard(p, mine, offSeats) {
   if (p.immuneTill >= S.round) fx.push(_tf(4340, "监管沙盒 · 到第 {$0} 轮", p.immuneTill));
   if (p.aiBoostTill >= S.round) fx.push(_tf(4341, "AI 组 ×2 · 到第 {$0} 轮", p.aiBoostTill));
   if (p.billFree > 0) fx.push(_tf(4342, "推广 Credits：{$0}经过 Startup 扶持运行费全免", p.billFree > 1 ? _tf(1834, "接下来 {$0} 次", p.billFree) : _t(1835, "下次")));
+  lapFx(p, 'rent').forEach(x => fx.push(_tf(5658, "{$0}：{$1} 过路费 ×{$2} · 这一圈", REI[x.c].n, x.ks.map(k => SQ.find(q => q.k === k).n).join(_t(349, "、")), x.m)));
+  lapFx(p, 'az').forEach(x => fx.push(_tf(5659, "{$0}：{$1} 这一圈算单 AZ", REI[x.c].n, x.ks.map(k => SQ.find(q => q.k === k).n).join(_t(349, "、")))));
+  [...new Set((p.runCut || []).map(x => x.c))].forEach(c => fx.push(_tf(5660, "{$0}：下次经过 Startup 扶持运行费打折", REI[c].n)));
   if (p.runLaps > 0) fx.push(_tf(4343, "{$0}运行费{$1} · 还剩 {$2} 圈", skn, p.runMul ? _t(2895, "减半") : _t(2896, "全免"), p.runLaps));
   if (p.subsTurns > 0) fx.push(_tf(4344, "{$0}订阅费 ${$1} · 还剩 {$2} 次", skn, p.subsAmt, p.subsTurns));
   const rows = [];

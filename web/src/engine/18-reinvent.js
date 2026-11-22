@@ -2,16 +2,16 @@ import { _t, _tf } from '../core/01-i18n-runtime.js';
 import { BOT, SIM, rnd, waitAnim } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { IX, N, OWNABLE, SQ, capU, lvFull, lvName } from '../rules/03-services.js';
-import { CARDN, CATS, COMBOS, REI, REI_HAND_MAX, comboOpen } from '../rules/04-roles-combos-cards.js';
+import { CARDN, CATS, COMBOS, INC, REI, REI_HAND_MAX, comboOpen } from '../rules/04-roles-combos-cards.js';
 import { advanceTo } from '../rules/05-dlc.js';
-import { S, cur, hasCombo, log, nm, ownedBy, owns, resetProp, sqn } from './07-state.js';
+import { P, S, cur, hasCombo, log, nm, ownedBy, owns, resetProp, sqn } from './07-state.js';
 import { cardAmt, credit, giveTo, pay, withGain } from './08-money.js';
 import { SP_PLANS, billAt, commitsOf, halfAt, halfSave, netWorth, runAfterRI, spActive } from './08c-costs.js';
 import { capInfo, fullBack, svcLeaves, turnKey, upgradeInfo } from './09-rent.js';
 import { moveSteps } from './13-move.js';
 import { rollDice } from './14-turn.js';
 import { land } from './15-land.js';
-import { drawRei } from './16-deck.js';
+import { drawRei, ensureInc } from './16-deck.js';
 import { aiName, debtCleared, drawIncident, tableOK, voteWho } from './17-health.js';
 import { chFoes, pickPartner } from './25-trade.js';
 import { ST } from './26b-retro.js';
@@ -60,13 +60,58 @@ async function sendIncident(kind) {
 export function incOne() { return sendIncident('one'); }
 export function incRand() { return sendIncident('rand'); }
 export function incAll() { return sendIncident('all'); }
+// ---- 埋 Health 卡 ----
+// 和「花钱让对手抽 Health 卡」同价（incSendCost）、共用每圈一次（p.incLap）：从 Health 牌堆抽一张扣着，埋在自己这局停过的一块服务上（p.stops，经过不算；谁的都行、没人买的也行，
+// 已经埋了卡的格子不能再埋）。每人场上最多 TRAP_MAX 张。对手停在那一格、结算完那一格以后翻开，照抽到 Health 卡结算（免疫、抵消、甩锅都照旧）；自己停上去什么都不发生，卡还埋着。
+// 埋在哪、是哪张只有自己知道：S.traps 只在房主这台是全的，联机推状态时别人的只留 by（net/40c-sync.js 的 stateFor），日志只写花了多少钱。主人出局，他埋的卡收回弃牌堆。
+// 电脑不会埋（全电脑的模拟和以前一模一样）
+export const TRAP_MAX = 2;
+const isSvc = i => SQ[i].t === 'prop' || SQ[i].t === 'util';
+export const trapsOf = p => (S.traps || []).filter(t => t.by === p.id);
+const trapCands = p => (p.stops || []).filter(i => isSvc(i) && !(S.traps || []).some(t => t.sq === i));
+export const buryOk = p => incSendOk(p) && trapsOf(p).length < TRAP_MAX && trapCands(p).length > 0 && (S.inc.length + S.incDisc.length) > 0;
+export function noteStop(p, i) { if (!isSvc(i)) return; const a = p.stops || (p.stops = []); if (!a.includes(i)) a.push(i); }
+export async function buryIncident() {
+  const p = cur(); if (!p || isAI(p.id) || SIM || BOT || S.phase !== 'busy') return;
+  if (!incSendOk(p)) return void UI.toast(p && !incSendReady(p) ? _t(5559, "这一圈已经发过或埋过 Health 卡了：经过 Startup 扶持以后才能再来") : _t(5560, "现在不能埋 Health 卡"));
+  if (trapsOf(p).length >= TRAP_MAX) return void UI.toast(_tf(5561, "场上已经有你埋的 {$0} 张 Health 卡了，最多 {$1} 张", trapsOf(p).length, TRAP_MAX));
+  const cost = incSendCost(p), cands = trapCands(p).sort((a, b) => a - b);
+  if (!cands.length) return void UI.toast(_t(5562, "没有能埋的格子：只能埋在自己这局停过、还没埋卡的服务上"));
+  if (p.cash < cost) return void UI.toast(_tf(2981, "现金不够 ${$0}", cost));
+  // 格子名写在按钮上：别的座位、观众那边的按钮换成「？」（priv.buttons），正文也换掉，看不出在挑哪几格
+  const v = await UI.ask({ who: p.id, cls: 'pick', title: _tf(5563, "花 ${$0} 埋一张 Health 卡：埋在哪一格？（只有你看得到）", cost),
+    html: _tf(5564, "<p>从 Health 牌堆抽一张扣着埋下去，你自己也先不看。对手停在那一格（经过不算），结算完那一格以后翻开，由他照常结算。你自己停上去没事。</p><p class=\"muted\">只能埋在你这局停过的服务上，已经埋了卡的格子不能再埋；场上最多 {$0} 张，和发 Health 卡共用每圈一次。</p>", TRAP_MAX),
+    priv: { title: _tf(5565, "{$0} 在决定埋不埋 Health 卡", p.name), html: _t(5566, "<p>埋在哪一格只有他自己知道。</p>"), buttons: [...cands.map(() => '?'), _t(2465, "取消")] },
+    buttons: [...cands.map(i => ({ label: SQ[i].n, value: i })), { label: _t(2465, "取消"), value: -1 }] });
+  const i = +v; if (!cands.includes(i) || !buryOk(p) || !trapCands(p).includes(i) || p.cash < cost) return;
+  p.incLap = p.laps || 0;
+  await withCardMul(0, async () => { ST(p).spendMisc = (ST(p).spendMisc || 0) + pay(p, 'bank', cost); });
+  ensureInc(1); const id = S.inc.shift();
+  (S.traps = S.traps || []).push({ by: p.id, sq: i, id, round: S.round });
+  const hs = S.histSq; S.histSq = null;   // 不记进哪一格的历史：记进去就知道埋在哪了
+  try { log(_tf(5567, "💣 {$0} 花 ${$1} 埋了一张 Health 卡", nm(p), cost)); } finally { S.histSq = hs; }
+  UI.render();
+}
+// 停在 i 上的 p 踩没踩中对手埋的卡（land 结算完这一格以后调）
+export async function springTrap(p, i) {
+  if (!S.traps || !S.traps.length || !p.alive || S.over) return;
+  const k = S.traps.findIndex(t => t.sq === i && t.by !== p.id); if (k < 0) return;
+  const t = S.traps.splice(k, 1)[0];
+  log(_tf(5568, "💣 {$0} 踩中了 {$1} 埋在 {$2} 的 Health 卡「{$3}」", nm(p), nm(P(t.by)), sqn(i), INC[t.id].n));
+  await drawIncident(p, t.id); UI.render();
+}
+// 主人出局：他埋的卡收回弃牌堆
+export function dropTraps(p) { if (!S.traps || !S.traps.length) return; S.traps.filter(t => t.by === p.id).forEach(t => S.incDisc.push(t.id)); S.traps = S.traps.filter(t => t.by !== p.id); }
+// 结束时没人踩中的：亮出来写进日志（战报里也列）
+export function trapsLeft() { (S.traps || []).forEach(t => log(_tf(5569, "💣 {$0} 在 {$1} 埋的「{$2}」没人踩中", nm(P(t.by)), sqn(t.sq), INC[t.id].n))); }
 // 卡牌效果都在这层里结算：卡牌倍率（盲盒翻倍时外面已经设好）、收支记在「卡牌」名下、联机弹窗归抽卡的人选。抽卡和打出手牌共用
 function asCard(p, fn) { const a0 = MP.actor; MP.actor = p.id; return withCardMul(S.cardMul || cardMulBase(), () => withGain('card', fn)).finally(() => { MP.actor = a0; }); }
 // forced：已经定好是哪一张（User Group 活动三选一选中的）；fixed：效果是外面定的、不能挑（盲盒翻倍）。这两种照旧直接亮卡结算
 export function drawReinvent(p, forced, fixed) { return asCard(p, () => drawReinvent0(p, forced, fixed)); }
 // 只有真人在自己的画面上选：电脑、模拟和挂机测试（SIM、BOT）不弹窗，全电脑的模拟和以前一模一样
 const humanPick = p => !(SIM || BOT || isAI(p.id) || !p.alive);
-// 再掷一次骰子走，这次落地不能买（卡里的「再掷一次」都走这里）。只给真人，所以一定有画面
+// 再掷一次骰子走，这次落地不能买（卡里的「再掷一次」都走这里）。只给真人，所以一定有画面。
+// 点数和 doRoll 一样从 lockDice 定好的 S.diceQ 里取（掷骰子、uiAction 开始时已经定好存档），结算中途刷新不能换一个点数
 async function rollNoBuy(p) { const d = rollDice(p); UI.render(); await waitAnim(UI.FX.dice(d), 1700); await moveSteps(p, d[0] + d[1]); await land(p, { noBuy: 'card' }); }
 // 11-22：只给抽卡的人钱的 re:Invent 卡（领 $X），真人玩家可以四选一：领钱、前进 3 格、后退 3 格、再掷一次骰子走（这次落地不能买）。
 // 电脑玩家、模拟和挂机测试一律领钱、不弹窗（humanPick）。在维护窗口里的人走不了，也直接领钱。
@@ -83,6 +128,8 @@ export async function moneyOrMove(p, card, amt, done) {
 }
 async function drawReinvent0(p, forced, fixed) {
   const id = forced ?? await drawRei();
+  // 牌堆抽完了（卡都在各家手里）：不亮卡，改领一笔小钱（和卖掉一张卡一样 $50）
+  if (id == null) { log(_tf(5570, "🎁 {$0} 想抽 re:Invent 卡，可牌堆抽完了（卡都在各家手里），改领 ${$1}", nm(p), credit(p, 50))); return; }
   // 真人自己抽的（不是保留卡）先只给自己看，四选一；只有选「现在用」才亮给大家、照旧结算
   if (forced == null && !fixed && !REI[id].keep && humanPick(p) && await reiPick(p, id) !== 'now') return;
   await UI.showCard('rei', id, p);

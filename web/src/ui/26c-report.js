@@ -1,9 +1,9 @@
 import { _t, _tf, _tr } from '../core/01-i18n-runtime.js';
 import { BOT, COLORS, PAWN, SIM, awsImg, clean, esc, unesc, usd } from '../core/02-util.js';
 import { SQ } from '../rules/03-services.js';
-import { COMBOS, roleOf } from '../rules/04-roles-combos-cards.js';
+import { COMBOS, INC, roleOf } from '../rules/04-roles-combos-cards.js';
 import { DLC } from '../rules/05-dlc.js';
-import { S, hasCombo, logBody, logTime, ownedBy, winParts, winWA } from '../engine/07-state.js';
+import { P, S, hasCombo, logBody, logTime, ownedBy, winParts, winWA } from '../engine/07-state.js';
 import { netWorth, valBreak, valTip, valuation } from '../engine/08c-costs.js';
 import { pillars } from '../engine/26a-pillars-win.js';
 import { ST, finEdge, repExtra, reportEventIs, reportOutRound, retroOf, retroTxt } from '../engine/26b-retro.js';
@@ -196,6 +196,9 @@ export function reportHtml(w, why) {
     X.hot ? `<li>${_tf(3820, "<span class=\"nk\"><b>最赚钱的格子</b><small>一局收得最多的服务</small></span><i class=\"ld\" aria-hidden=\"true\"></i><span class=\"rt\"><span class=\"wh\"><span class=\"hs\">{$0}<b>{$1}</b><em>· {$2}</em></span></span><span class=\"vv\">${$3}</span></span>", awsImg(SQ[X.hot.i].icon), SQ[X.hot.i].n, X.hot.q.name, X.hot.t)}</li>` : ''].join('');
   const leadSec = leads || extra ? _tf(3821, "<section class=\"sx ld\"><div class=\"sx-h\"><h4>本局之最</h4><span class=\"tag\">{$0} 项</span></div>{$1}{$2}</section>", (leads + extra).split('<li').length - 1, leads ? `<ul class="lead">${leads}</ul>` : '', extra ? `<ul class="lead nw">${extra}</ul>` : '') : '';
   const moments = repTimeline(w, rank, X);
+  // 埋下没人踩中的 Health 卡（engine/18-reinvent.js）：结束以后大家都看得到埋在哪、是哪张
+  const traps = (S.traps || []).filter(t => SQ[t.sq] && INC[t.id] && P(t.by));
+  const trapSec = traps.length ? `<section class="sx trp"><div class="sx-h"><h4>${_t(5650, "没人踩中的 Health 卡")}</h4><span class="tag">${_tf(3850, "{$0} 张", traps.length)}</span></div><ul class="trp-l">${traps.map(t => `<li>${_tf(5651, "{$0} 在 {$1} 埋的「{$2}」没人踩中", P(t.by).name, SQ[t.sq].n, INC[t.id].n)}</li>`).join('')}</ul></section>` : '';
   // 玩家档案：棋子切换条（role=tablist，左右键 / Home / End 切，焦点跟着走），默认第 1 名；点「导出对局记录」后重画时接着看原来那一份（repSt）
   const hov = matchMedia('(hover: hover)').matches, st = repSt();
   const keep = repKeep(st);
@@ -234,7 +237,7 @@ export function reportHtml(w, why) {
       <h2>${finTitleHtml(w, why)}</h2><p class="rp-sub">${finSub(w, why)}</p><p class="rp-facts">${facts.map(x => `<span>${x}</span>`).join('')}</p>
       <ol class="rk" aria-label="${_t(3865, "最终排名")}">${rank.map(row).join('')}</ol>${note}</div>
     ${leadSec || moments ? `<div class="ov${leadSec && moments ? '' : ' one'}">${leadSec}${moments}</div>` : ''}
-    ${dossier}${more}
+    ${trapSec}${dossier}${more}
     <p class="rp-foot">${_t(3866, "点「导出 PDF 战报」存成 PDF（打印窗口里目标选「另存为 PDF」），所有人的档案都在里面；「导出对局记录」存下带完整日志的文字版。")}</p></div>`;
 }
 // 玩家档案切换：一次只露一份。切换时档案开头要是已经滚到吸顶的切换条下面去了，就滚回开头，不用从别人档案的中间读起

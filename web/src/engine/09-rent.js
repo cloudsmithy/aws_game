@@ -1,8 +1,8 @@
 import { LANG, _t, _tf } from '../core/01-i18n-runtime.js';
 import { BAL, CAP_MAX, IX, OFFLINE_MIN, OFFLINE_OK, OWNABLE, SQ, TOKEN, UTILS, capU, effIn, lvFull, lvName, sideCost, upCost } from '../rules/03-services.js';
-import { COMBOS, cAll, rsBuyRate } from '../rules/04-roles-combos-cards.js';
+import { COMBOS, INC, cAll, rsBuyRate } from '../rules/04-roles-combos-cards.js';
 import { dlcRentMul } from '../rules/05-dlc.js';
-import { F, P, S, active, effActive, hasCombo, log, nm, offlineCash, owns, ownsGroup, resetProp, sqn, wildOf } from './07-state.js';
+import { F, P, S, active, effActive, hasCombo, log, nm, offDrawn, offSpent, offlineCash, owns, ownsGroup, resetProp, sqn, wildOf } from './07-state.js';
 import { credit, pay } from './08-money.js';
 import { rsAdj } from './15-land.js';
 import { ST } from './26b-retro.js';
@@ -102,17 +102,19 @@ export function upgradeInfo(p, i, viaLanding = false) {
     }
     if (s.g === 'ai' && !active(p, IX.s3)) fees.push({ to: 'bank', amt: 50, why: _t(2694, "训练数据存储费（你没有 S3）") });
   }
-  if (F.debt() && p.techDebt >= 2) cost += 50;
+  // 技术债攒到 2 个每级 +$50（sur）：这是罚款，不是投入，upPaid 只记前面的升级费，卖回、去掉一级、估值都不算它
+  let sur = F.debt() && p.techDebt >= 2 ? 50 : 0;
   // re:Invent「迁移到 Graviton」记下的一次免费：升 Graviton 这一级不花钱，技术债加价也免
-  if (s.k === 'ec2' && eff === 'cost' && p.gravFree) { cost = 0; off = _t(2695, "用掉「迁移到 Graviton」记下的免费"); }
-  return { ok: true, cost, fees, off, total: cost + fees.reduce((a, f) => a + f.amt, 0), next };
+  if (s.k === 'ec2' && eff === 'cost' && p.gravFree) { cost = 0; sur = 0; off = _t(2695, "用掉「迁移到 Graviton」记下的免费"); }
+  cost += sur;
+  return { ok: true, cost, sur, fees, off, total: cost + fees.reduce((a, f) => a + f.amt, 0), next };
 }
 export function doUpgrade(p, i, viaLanding = false) {
   const u = upgradeInfo(p, i, viaLanding); if (!u.ok || p.cash < u.total) return;
   pay(p, 'bank', u.cost); u.fees.forEach(f => { const a = pay(p, f.to, f.amt); if (f.to !== 'bank') ST(p).viaP = (ST(p).viaP || 0) + a; }); if (S.stats) S.stats.upg++; ST(p).upg++; ST(p).spendUpg = (ST(p).spendUpg || 0) + u.total;
   // 升上 Graviton 就用掉记下的免费。别的免费升级（Well-Architected Review、MAP 补贴等）升上去的不清，卖掉这一级再升还能用
   if (i === IX.ec2 && u.next === 3) p.gravFree = 0;
-  S.props[i].level++; (S.props[i].upPaid = S.props[i].upPaid || [])[S.props[i].level - 1] = u.cost; fxAll({ f: 'block', a: [i, p.color], co: [i, _tf(2696, "升级 <b>{$0}</b>", lvName(i, S.props[i].level)), 'org'] });
+  S.props[i].level++; (S.props[i].upPaid = S.props[i].upPaid || [])[S.props[i].level - 1] = u.cost - u.sur; fxAll({ f: 'block', a: [i, p.color], co: [i, _tf(2696, "升级 <b>{$0}</b>", lvName(i, S.props[i].level)), 'org'] });
   log(_tf(2699, "🔧 {$0} 给 {$1} 升到{$2}（${$3}{$4}{$5}）", nm(p), sqn(i), lvFull(i, S.props[i].level), u.total, u.fees.length ? _t(2697, "，含") + u.fees.map(f => f.why).join(_t(349, "、")) : '', u.off ? _t(2698, "，") + u.off : ''));
 }
 // 某一级升级实际花了多少（老存档、卡牌免费升的没有记录时按标准价算；免费升的记 0）
@@ -126,24 +128,33 @@ export function sellUpgrade(p, i) {
   pr.level--; credit(p, back, 'sell');
 }
 export function takeOffline(p, i) {
-  const pr = S.props[i]; if (!owns(p, i) || pr.offline || !OFFLINE_OK.has(SQ[i].k)) return;
+  const pr = S.props[i]; if (!owns(p, i) || pr.offline || !OFFLINE_OK.has(SQ[i].k) || offSpent(i)) return;
   while (pr.cap > 0) sellCap(p, i);
   while (pr.level > 0) sellUpgrade(p, i);
   const cash = offlineCash(i);
-  pr.offline = 1; pr.offTurn = turnKey(); pr.offCash = cash; pr.offAsked = 0; pr.impaired = false; p.wentOffline = true; credit(p, cash, 'sell');
+  pr.offline = 1; pr.offTurn = turnKey(); pr.offCash = cash; pr.offDrawn = offDrawn(i) + cash; pr.offAsked = 0; pr.impaired = false; p.wentOffline = true; credit(p, cash, 'sell');
   log(_tf(2701, "⏹ {$0} 把 {$1} 下线，先拿回 ${$2} 周转：不收过路费，运行费只剩存储费；下线 {$3} 轮后自动恢复，拿回的钱不用还；自己落到这一格可以提前免费拉起来，这期间别人落上来可以付原价 ${$4} 把它买走", nm(p), sqn(i), cash, OFFLINE_MIN, SQ[i].p));
 }
 // 强制下线（高速部署的 DDoS、Health 卡）：不收过路费、不算持有（active() 认 ddos），运行费照交；by 那位玩家再开始 n 个回合时恢复。
-// why = 原因（卡名），界面写「因「卡名」下线」；null 是 DDoS，界面写「被某某 DDoS」。和主动下线（offline，相当于抵押）是两回事
+// why = 原因的键：'rf' 清技术债，'inc:卡号' 某张 Health 卡（界面写「因「卡名」下线」，用 downWhy 按当前语言翻）；null 是 DDoS，界面写「被某某 DDoS」。
+// 存键不存文字：联机时房主和远端的语言可以不一样，中途切语言也跟着变。和主动下线（offline，相当于抵押）是两回事
 export function forceDown(i, by, n, why = null) { const pr = S.props[i]; pr.ddos = by; pr.ddosLeft = n; pr.ddosWhy = why; }
+// 强制下线的原因，显示用；老存档里存的是当时翻好的文字，照原样显示
+export function downWhy(pr) {
+  const w = pr && pr.ddosWhy; if (!w) return '';
+  if (w === 'rf') return _t(4208, "清技术债");
+  const m = /^inc:(\d+)$/.exec(w); return m ? (INC[+m[1]] ? INC[+m[1]].n : '') : w;
+}
 export function downTick(p) {
   OWNABLE.forEach(i => {
     const pr = S.props[i]; if (pr.ddos !== p.id || --pr.ddosLeft > 0) return;
-    const why = pr.ddosWhy; pr.ddos = null; pr.ddosLeft = 0; pr.ddosWhy = null;
+    const why = downWhy(pr); pr.ddos = null; pr.ddosLeft = 0; pr.ddosWhy = null;
     log(why ? _tf(5294, "{$0} 恢复上线（{$1}）", sqn(i), why) : _tf(3409, "{$0} 扛过了 {$1} 的 DDoS，恢复上线", sqn(i), nm(p)));
   });
 }
-export const turnKey = () => S.round * 10 + S.cur;
+// 这一回合的编号（每回合只能做一次的事记它）：座位号占两位，MAX_PLAYERS 是 12，原来的 round × 10 在第 11、12 个座位会和下一轮撞号。
+// 存档里记着的旧编号读档时换算（ui/28-setup-save.js 的 S.tk）
+export const turnKey = () => S.round * 100 + S.cur;
 export const offRounds = i => Math.max(0, (S.props[i].offline || 1) - 1);   // 已经下线了几轮（下线时是 1，主人每到一个回合开始 +1）
 export const canOnline = i => !!S.props[i].offline && S.props[i].offTurn !== turnKey() && offRounds(i) >= OFFLINE_MIN;
 // 重新上线不要钱：主人自己落到这一格就拉起来，满 OFFLINE_MIN 轮没人动它就在回合开始自动恢复。
@@ -167,15 +178,22 @@ export const stripValue = i => { const pr = S.props[i]; let v = capPaid(i) * Mat
 // 折扣按中文习惯写：0.5 → 5 折，0.45 → 45 折，0.85 → 85 折
 export const zhe = x => { const n = Math.round(x * 100); return LANG === 'en' ? `${100 - n}% off` : LANG === 'ja' ? `${100 - n}%オフ` : _tf(2705, "{$0} 折", n % 10 ? n : n / 10); };   // 英文版写成「20% off」，日文版「20%オフ」
 export const sellZhe = () => zhe(BAL.sell);
-// Trusted Advisor 按实付全额退：买价 + 升级 + 容量，下线的减掉下线时已经拿到的钱。按钮上的数和实际到账共用这一个算法
-export const fullBack = i => { const pr = S.props[i]; return Math.max(0, buyPaid(i) + upPaidSum(i) + capPaidSum(i) - (pr.offline ? pr.offCash || 0 : 0)); };
-export const sellValue = i => { const pr = S.props[i]; return Math.max(0, Math.round((buyPaid(i) + upPaidSum(i) + capPaidSum(i)) * BAL.sell) - (pr.offline ? pr.offCash || 0 : 0)); };
+// Trusted Advisor 按实付全额退：买价 + 升级 + 容量，减掉这位主人下线时已经拿到的钱（已经恢复上线的也扣）。按钮上的数和实际到账共用这一个算法
+export const fullBack = i => Math.max(0, buyPaid(i) + upPaidSum(i) + capPaidSum(i) - offDrawn(i));
+export const sellValue = i => Math.max(0, Math.round((buyPaid(i) + upPaidSum(i) + capPaidSum(i)) * BAL.sell) - offDrawn(i));
 // 服务离开主人（卖回、交易、破产分给债主、被战略并购）：他给这块买的 RI 作废、预付不退（规则书 §15「RI 跟着人走」）；
 // 落到发动 DDoS 的人手里，DDoS 跟着解除（自己打自己说不通，和战略并购一样）。to 是新主人的 id，回到亚马逊云科技传 null
 export function svcLeaves(from, i, to) {
   const pr = S.props[i];
   if (from && from.commits) from.commits = from.commits.filter(c => !(c.type === 'ri' && c.svc === i));
-  if (pr) { pr.ri = null; if (to != null && pr.ddos === to) { pr.ddos = null; pr.ddosLeft = 0; } }
+  if (pr) { pr.ri = null; pr.offDrawn = 0; if (to != null && pr.ddos === to) { pr.ddos = null; pr.ddosLeft = 0; } }   // offDrawn 是原主人下线拿走的钱，新主人没拿过
+}
+// 服务整块换主人（交易、破产分给债主、战略并购、抢 Spot、代理商清仓）：先 svcLeaves，再改主人、断开代理关系。
+// 代理商按进货价拿的库存（pr.paid 是 5 折）给了不是代理商的人，买价改按原价：客户的估值本来就按原价算服务（valBreak），卖回、下线不改的话按 5 折，两边对不上
+export function handOver(from, i, to) {
+  const pr = S.props[i]; svcLeaves(from, i, to.id);
+  if (from.reseller && !to.reseller && !pr.spot) pr.paid = SQ[i].p;
+  pr.owner = to.id; pr.via = null;
 }
 export function sellProp(p, i) {
   if (!owns(p, i)) return;

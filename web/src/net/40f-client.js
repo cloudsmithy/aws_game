@@ -24,7 +24,7 @@ Object.assign(MP, {
     // 房主把我移出了房间：不再自动重连；还在大厅里的，回到能重新填房间号的样子
     if (m.t === 'removed') { MPFX.cancel(); this.kicked = true; this.removed = true; this.gone = true; if (!(S && S.players)) { this.role = null; this.hostConn = null; $('#mpstat').innerHTML = _t(5029, "<span class=\"warn\">房主把你移出了房间</span>"); const jb = $('#mpbox .mpform button'); if (jb) jb.disabled = false; } else info(_t(5030, "你被移出了房间"), this.watching ? _t(5261, "<p>房主已结束你的观战或更新了邀请。请联系房主获取新邀请。</p>") : _t(5031, "<p>房主把你移出了这个房间，你的座位交给电脑接着打。</p>"), true); return; }   // 同一个浏览器的另一个页面用这个名字接手了座位，房主马上会关掉这条连接
     if (m.t === 'pending') { if ($('#mpstat')) $('#mpstat').textContent = String(m.why || _t(5262, "等待房主确认")); return; }
-    if (m.t === 'welcome') { this.watching = m.mode === 'spectator'; MPFX.cancel(); MPFX.lastWalk = 0; if (this.hostConn) this.hostConn._ok = true; clearTimeout(this.rjT); if (this.gone) toast(_t(5032, "重新连上房主了")); this.role = 'client'; this.gone = false; this.kicked = false; this.removed = false; this.mySeat = m.seat; if (!this.watching && typeof m.key === 'string') this.seatKeys(this.room, m.key.slice(0, 64)); try { sessionStorage.setItem('aws-tycoon-lastjoin', JSON.stringify({ room: this.room, name: this.myName, watching: this.watching })); } catch (e) { } $('#mpstat').innerHTML = this.watching ? _tf(5263, "已加入房间 {$0}，你是只读观众，等待房主开始…", esc(this.room)) : _tf(5033, "<span class=\"ok\">已加入房间 {$0}，你是玩家 {$1}。等房主开始游戏…</span>", esc(this.room), m.seat + 1); const sb = $('#startBtn'); if (sb) { sb.disabled = true; sb.textContent = _t(5034, "等房主开始"); } /* hero 和 UG 活动局的开局按钮也要灰掉：平板、矮屏手机首屏只看得到它们，点了会在客户端本地另开一局；「继续上一局」会读这台自己的旧存档 */ document.querySelectorAll('.hero .cta .twin.pri, .ugbar button, #resume button').forEach(b => { b.disabled = true; b.title = _t(5035, "已加入房间，等房主开始"); if (b.classList.contains('twin')) b.textContent = _t(5034, "等房主开始"); }); return; }
+    if (m.t === 'welcome') { this.watching = m.mode === 'spectator'; MPFX.cancel(); MPFX.lastWalk = 0; if (this.hostConn) this.hostConn._ok = true; clearTimeout(this.rjT); if (this.gone) toast(_t(5032, "重新连上房主了")); this.role = 'client'; this.gone = false; this.kicked = false; this.removed = false; this.mySeat = m.seat; if (!this.watching && typeof m.key === 'string') this.seatKeys(this.room, m.key.slice(0, 64)); try { sessionStorage.setItem('aws-tycoon-lastjoin', JSON.stringify({ room: this.room, name: this.myName, watching: this.watching })); } catch (e) { } $('#mpstat').innerHTML = this.watching ? _tf(5263, "已加入房间 {$0}，你是只读观众，等待房主开始…", esc(this.room)) : _tf(5033, "<span class=\"ok\">已加入房间 {$0}，你是玩家 {$1}。等房主开始游戏…</span>", esc(this.room), m.seat + 1) + (S && S.players ? '' : _t(5584, " <button type=\"button\" class=\"sm\" data-act=\"MP.lobbyRenameAsk\">改名字</button>")); const sb = $('#startBtn'); if (sb) { sb.disabled = true; sb.textContent = _t(5034, "等房主开始"); } /* hero 和 UG 活动局的开局按钮也要灰掉：平板、矮屏手机首屏只看得到它们，点了会在客户端本地另开一局；「继续上一局」会读这台自己的旧存档 */ document.querySelectorAll('.hero .cta .twin.pri, .ugbar button, #resume button').forEach(b => { b.disabled = true; b.title = _t(5035, "已加入房间，等房主开始"); if (b.classList.contains('twin')) b.textContent = _t(5034, "等房主开始"); }); return; }
     if (this.role !== 'client') return;
     if (m.t === 'again') {
       MPFX.cancel();
@@ -64,10 +64,17 @@ Object.assign(MP, {
     } else if (m.t === 'wb') { if (wbValid(m.id)) wbMark(m.id, !!m.ok, true); }   // 自己答的题记进自己浏览器里的错题本
     else if (m.t === 'fx' && typeof m.k === 'string') MPFX.push(m);   // 房主那边播的动画：排队照着播（过路费、走棋、飞行、UG 活动、小特效）
     else if (m.t === 'toast' && typeof m.msg === 'string') toast(m.msg.slice(0, 120));   // 房主替远端做的事有了结果（电脑同不同意交易）、远端点的操作没执行：在他自己的设备上提示
+    else if (m.t === 'renamed' && typeof m.name === 'string') { this.myName = m.name.slice(0, 12); try { sessionStorage.setItem('aws-tycoon-lastjoin', JSON.stringify({ room: this.room, name: this.myName, watching: false })); } catch (e) { } toast(_tf(5585, "改好了，现在叫 {$0}", esc(this.myName))); }
     else if (m.t === 'renameFail') info(_t(4626, "没改成"), `<p>${esc(unesc(String(m.why || '')))}</p>`, true);
     else if (m.t === 'modalClose') { this.closedMid = Math.max(this.closedMid || 0, m.id || 0); if (this.peek && this.peek.id <= this.closedMid) this.peek = null; if (this.closeLocal && this.openMid === m.id) { this.closeLocal(); this.closeLocal = null; } }
   },
   // 远端：打开房主发来的弹窗（收到时，或者自己的窗口关掉后补开）
+  // 大厅里（房主还没开局）改自己的名字：发给房主查重、改座位表，回 renamed / renameFail。开局后改名走对局菜单或玩家卡上的 ✎（ui/28-setup-save.js 的 renameDialog）
+  async lobbyRenameAsk() {
+    if (this.role !== 'client' || this.watching || (S && S.players)) return;
+    const r = await modal({ local: true, cancelable: true, title: _t(4124, "改名字"), inputs: [{ id: 'nm', type: 'text', label: _t(4624, "新名字（最多 12 个字）"), value: this.myName || '', af: true }], buttons: [{ label: _t(4625, "改好了"), value: 'ok', cls: 'pri' }, { label: _t(2465, "取消"), value: 'x' }] });
+    if (r.v === 'ok' && !(S && S.players)) this.send(this.hostConn, { t: 'rename', name: String(r.inp.nm || '').slice(0, 12) });
+  },
   showRemote(m) {
     this.peek = null; this.shown = m;
     const k = (m.spec.html || '').match(/class="deal (inc|rei|fis)\b/); if (k) dealSfx(k[1]);

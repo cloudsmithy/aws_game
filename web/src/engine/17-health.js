@@ -55,11 +55,16 @@ function immuneByProp(o, id) {
 // 名下所有服务一起下线一轮（不收过路费、不算持有，运行费照交，到自己下回合开始恢复）。没有免疫，不能付 $50 或用 Enterprise Support 提前出来。
 // 这次进维护窗口不是事件：出来不写复盘、不领复盘标记，也不会再记技术债。已经在维护窗口里的（被事件送进来的）不重进，只让服务下线
 export const RF_JAIL = 'rf';   // 维护窗口的原因（p.jailCat）：清技术债；事件进来的是 CATS 里的类别
+// 清技术债进来的维护窗口：界面上不写「付 $50 出来」「Enterprise Support」，这次只能停够一轮（中间状态行、右栏待办、玩家卡共用这一句）
+export const rfJailed = p => p.jail !== null && p.jailCat === RF_JAIL;
+export const rfJailTxt = () => _t(5557, "在维护窗口里（清技术债）：只能停这一轮，不能付 $50 或用 Enterprise Support 提前出来");
 export function debtCleared(p) {
-  const why = _t(4208, "清技术债"), down = ownedBy(p).filter(i => !S.props[i].offline && S.props[i].ddos == null);
-  down.forEach(i => forceDown(i, p.id, 1, why));
-  if (p.jail === null) void sendToJail(p, RF_JAIL);   // 不带说明文字：sendToJail 不弹窗、不等待，这里照常同步往下走
-  log(_tf(5403, "🧱 {$0} 清完技术债，进维护窗口停一轮{$1}；出来不写复盘、不记技术债", nm(p), down.length ? _tf(5404, "，名下 {$0} 块服务一起下线一轮", down.length) : ''));
+  const down = ownedBy(p).filter(i => !S.props[i].offline && S.props[i].ddos == null), go = p.jail === null;
+  down.forEach(i => forceDown(i, p.id, 1, RF_JAIL));   // 原因存键，显示时 downWhy 翻成「清技术债」
+  if (go) void sendToJail(p, RF_JAIL);   // 不带说明文字：sendToJail 不弹窗、不等待，这里照常同步往下走
+  const svc = down.length ? _tf(5404, "，名下 {$0} 块服务一起下线一轮", down.length) : '';
+  // 已经在维护窗口里（被事件送进来的）不重进：日志不说「进维护窗口」
+  log(go ? _tf(5403, "🧱 {$0} 清完技术债，进维护窗口停一轮{$1}；出来不写复盘、不记技术债", nm(p), svc) : _tf(5558, "🧱 {$0} 清完技术债，本来就在维护窗口里，不再重进{$1}", nm(p), svc));
 }
 // 重构费按梯度：债越多越贵，越往后越贵（欠得越久，利息越高）——手上有 n 个技术债时清 1 个要 $50 × n，第 10 轮起再 +$30
 export const refactorCost = p => 50 * Math.max(1, p.techDebt) + (S.round >= 10 ? 30 : 0);
@@ -112,7 +117,7 @@ async function penalize(p) {
   S.debtExplained = true;
   if (p.techDebt >= 3) {
     // 技术债攒满 3 个必须大重构：交 $300、清掉 3 个，和别的清债一样马上进维护窗口停一轮（以前能多交 $100 不停，现在清债一律要停）
-    p.techDebt -= 3;
+    p.techDebt -= 3; p.refactored = true;   // 大重构也是重构：成本优化支柱的「重构清过技术债」照样算
     log(_tf(5406, "{$0} 技术债到 3 个：大重构，交 ${$1}，清掉 3 个", nm(p), pay(p, 'bank', 300)));
     debtCleared(p);
   }
@@ -157,10 +162,11 @@ async function tryCancel(p, id) {
   log(_tf(3191, "{$0} 拒绝托管", nm(o)));
   return tryCancel(p, id);
 }
-export async function drawIncident(p) { const a0 = MP.actor; MP.actor = p.id; try { return await withCardMul(S.cardMul || cardMulBase(), () => drawIncident0(p)); } finally { MP.actor = a0; } }
-async function drawIncident0(p) {
-  ensureInc(1);
-  const id = S.inc.shift(); S.incDisc.push(id);
+// fixed：已经从牌堆里拿出来的那一张（埋下的 Health 卡被踩中，engine/18-reinvent.js 的 springTrap），不再从牌堆抽
+export async function drawIncident(p, fixed) { const a0 = MP.actor; MP.actor = p.id; try { return await withCardMul(S.cardMul || cardMulBase(), () => drawIncident0(p, fixed)); } finally { MP.actor = a0; } }
+async function drawIncident0(p, fixed) {
+  if (fixed == null) ensureInc(1);
+  const id = fixed ?? S.inc.shift(); S.incDisc.push(id);
   // 有抵消、托管可选的卡先不亮，留给「要抵消吗」那个窗一起亮，少点一次。会甩锅、在沙盒里、免疫的照旧先亮卡
   const defer = !availCard(p, 'BLAME') && !(p.immuneTill >= S.round) && !immuneTo(p, id) && !noHit(p, id) && cancelOpts(p, id).b.length > 0;
   if (defer) { S.lastCard = { kind: 'inc', id, who: p.id }; UI.render(); UI.__set_CARD_DEAL({ id, who: p.id }); }
@@ -179,6 +185,9 @@ function spofTargets(p) {
 }
 export const impair = list => list.forEach(i => { S.props[i].impaired = true; });
 export async function incident(p, id) {
+  // 全场事件（卡上写了 all，比如黑色星期五大促）：谁抽到都是全场结算。不能甩锅（甩给谁都一样），抽卡的人在监管沙盒里也不能让全场一起躲过去；
+  // 在沙盒里的人由 run 自己跳过。不记技术债
+  if (INC[id].all) { await INC[id].run(p, id); return; }
   const bl = availCard(p, 'BLAME'), others0 = S.players.filter(o => o.alive && o.id !== p.id);
   if (bl && others0.length) {
     const auto = isAI(p.id) || (SIM && SIM_AI), t = auto ? others0[rnd(others0.length)] : await UI.ask({ who: p.id, cls: 'pick', title: _tf(3193, "用「根因在上游」把「{$0}」甩给谁？", INC[id].n), buttons: [...others0.map(o => ({ label: o.name, value: o.id })), { label: _t(3194, "不甩，自己扛"), value: 'x' }] });
@@ -187,7 +196,7 @@ export async function incident(p, id) {
   }
   if (p.immuneTill >= S.round) { log(_tf(3196, "🛡️ {$0} 在「监管沙盒」里，免疫「{$1}」", nm(p), INC[id].n)); ST(p).imm++; fxAll({ f: 'shield', a: [p.pos], co: [p.pos, _tf(3197, "<b>免疫</b>「{$0}」", INC[id].n), 'ok'] }); return; }
   const c = INC[id], imm = immuneTo(p, id);
-  if (c.run) { if (imm) { log(_tf(3198, "🛡️ {$0} 免疫「{$1}」：{$2}", nm(p), c.n, imm)); ST(p).imm++; fxAll({ f: 'shield', a: [p.pos], co: [p.pos, _tf(3197, "<b>免疫</b>「{$0}」", INC[id].n), 'ok'] }); return; } if (!noHit(p, id) && await tryCancel(p, id)) return; if ((await c.run(p)) !== 'nopen') await penalize(p); return; }
+  if (c.run) { if (imm) { log(_tf(3198, "🛡️ {$0} 免疫「{$1}」：{$2}", nm(p), c.n, imm)); ST(p).imm++; fxAll({ f: 'shield', a: [p.pos], co: [p.pos, _tf(3197, "<b>免疫</b>「{$0}」", INC[id].n), 'ok'] }); return; } if (!noHit(p, id) && await tryCancel(p, id)) return; if ((await c.run(p, id)) !== 'nopen') await penalize(p); return; }
   if (imm && id !== 4) { log(_tf(3198, "🛡️ {$0} 免疫「{$1}」：{$2}", nm(p), c.n, imm)); ST(p).imm++; fxAll({ f: 'shield', a: [p.pos], co: [p.pos, _tf(3197, "<b>免疫</b>「{$0}」", INC[id].n), 'ok'] }); return; }
   switch (id) {
     case 20: { if (await tryCancel(p, id)) return; const x = p.role === 'media' ? 300 : 150; if (p.role === 'media') log(_t(3199, "短视频平台入口流量大，清洗费 ×2")); await payOrImpair(p, x, [IX.cloudfront, IX.elb, IX.apigw, IX.route53], _t(734, "DDoS 打满了入口")); break; }
@@ -254,10 +263,12 @@ export async function incident(p, id) {
       await skipOrPay(p, _t(702, "凌晨 3 点被告警叫醒"), 80, _t(3236, "请值班同事处理")); return;
     }
     case 13: {
-      const ow = S.props[IX.cloudwatch].owner;
-      if (ow === p.id) { await UI.dealNow(); log(_tf(3237, "CloudWatch 是 {$0} 自己的，免付", nm(p))); return; }
+      const ow0 = S.props[IX.cloudwatch].owner;
+      if (ow0 === p.id) { await UI.dealNow(); log(_tf(3237, "CloudWatch 是 {$0} 自己的，免付", nm(p))); return; }
       if (await tryCancel(p, id)) return;
-      log(_tf(3239, "{$0} 付 ${$1} 给 {$2}", nm(p), pay(p, ow === null ? 'pot' : P(ow), 100), ow === null ? _t(3238, "奖池") : nm(P(ow)))); break;
+      // CloudWatch 下线、被打下线时没在收日志（active 不认）：钱进奖池，不给主人
+      const ow = ow0 !== null && active(P(ow0), IX.cloudwatch) ? P(ow0) : null;
+      log(_tf(3239, "{$0} 付 ${$1} 给 {$2}", nm(p), pay(p, ow || 'pot', 100), ow ? nm(ow) : _t(3238, "奖池"))); break;
     }
     case 14: await UI.dealNow(); if (p.jail === null && p.pos !== IX.go) { await flyTo(p, IX.go, _t(3240, "栈整个回滚，"), { passGo: false, backward: true }); log(_tf(3241, "{$0} 的栈整个回滚，回到起点从头再来，这次不领 Credits、不交运行费", nm(p))); } return;
     case 16: {
@@ -283,7 +294,7 @@ export async function incident(p, id) {
     }
     case 19: {
       const vo = S.props[IX.vpc].owner;
-      if (vo !== null && vo !== p.id && S.props[IX.vpc].level >= 2 && p.cash >= cardAmt(50)) {
+      if (vo !== null && vo !== p.id && active(P(vo), IX.vpc) && S.props[IX.vpc].level >= 2 && p.cash >= cardAmt(50)) {   // 对方的 VPC 下线、被打下线时借不了
         const rent = await UI.ask({ title: _t(3251, "借用 Session Manager？"), html: _tf(3252, "<p>{$0} 的 VPC 已经有私有子网和 Session Manager。付 ${$1} 给对方，就能把实例放进私有子网，躲过这次攻击。</p>", nm(P(vo)), cardAmt(50)), buttons: [{ label: _tf(3253, "付 ${$0} 借用", cardAmt(50)), value: true, cls: 'pri' }, { label: _t(3254, "不借"), value: false }] });
         if (rent) { log(_tf(3255, "{$0} 付 ${$1} 借用 {$2} 的 Session Manager，躲过了 SSH 暴力破解", nm(p), pay(p, P(vo), 50), nm(P(vo)))); return; }
       }

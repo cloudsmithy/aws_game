@@ -1,12 +1,13 @@
 import { _t, _tf } from '../core/01-i18n-runtime.js';
-import { BOT, STALE, esc, rnd, sleep, waitAnim } from '../core/02-util.js';
+import { BOT, COLORS, STALE, esc, rnd, sleep, waitAnim } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { BAL, OFFLINE_MIN, SQ } from '../rules/03-services.js';
-import { CATS, roleOf } from '../rules/04-roles-combos-cards.js';
+import { CATS, ROLES, roleOf } from '../rules/04-roles-combos-cards.js';
 import { dlcOn } from '../rules/05-dlc.js';
 import { askQuestion, pickQuestion, qPoolS } from '../rules/06-qbank.js';
 import { P, S, availCard, cur, log, nm, ownedBy, sqn, winTimed } from './07-state.js';
-import { credit, pay } from './08-money.js';
+import { GAIN0, credit, pay } from './08-money.js';
+import { netWorth } from './08c-costs.js';
 import { bringOnline, canOnline, downTick, offRounds, turnKey } from './09-rent.js';
 import { goReiCards, jailMax, moveSteps, sendToJail } from './13-move.js';
 import { land } from './15-land.js';
@@ -110,12 +111,28 @@ export async function nextTurn() {
   const p = cur(), wa = waWinner();
   if (wa) return gameOver(wa, _t(2930, "六大支柱全部达成"), 'wa');
   if (winTimed() && Date.now() >= S.endAt) return UI.timedOver();
-  if (S.cfg.roundLimit && S.round >= S.cfg.roundLimit && S.cur >= S.players.length - 1 - [...S.players].reverse().findIndex(q => q.alive)) return UI.timedOver(_tf(2931, "打满 {$0} 轮", S.cfg.roundLimit));
+  if (S.cfg.roundLimit && S.round >= S.cfg.roundLimit && S.cur >= S.players.length - 1 - [...S.players].reverse().findIndex(q => q.alive && !(q.joinRound > S.round))) return UI.timedOver(_tf(2931, "打满 {$0} 轮", S.cfg.roundLimit));
   let n = S.cur;
-  do { n = (n + 1) % S.players.length; } while (!P(n).alive);
+  // 中途加入的（joinPlayer）从 joinRound 那一轮才开始走：转回 0 号之前的座位还在这一轮，之后的是下一轮
+  do { n = (n + 1) % S.players.length; } while (!P(n).alive || P(n).joinRound > S.round + (n <= S.cur ? 1 : 0));
   if (n <= S.cur) { S.round++; rollRoundMul(); valSnap(); }
   S.cur = n;
   await startTurn();
+}
+// 一位玩家开局时的全部字段：开局（ui/28-setup-save.js 的 newGame）和联机中途加入（joinPlayer）共用。name 是原文，这里转义
+export const makePlayer = (id, name, r, cash, reseller = false) => ({ id, name: esc(name), color: COLORS[id], role: r.id, cash, startCash: cash, pos: 0, jail: null, jailCat: 'sec', skip: 0, debt: [], techDebt: 0, coe: [], drill: [], cards: [], hand: [], stops: [], alive: true, speed: 0, reseller, rsRate: 0.9 });
+// 联机中途加入（房主同意后由 net/40d-host-msgs.js 的 admit 调）：排在座位最后，站在起点，没有服务和卡牌。
+// 角色从还没人用的客户角色里随机挑（都用过了就随便一个客户角色）；起始资金是还活着的各家总资产的平均数，取整到 $10；
+// 这一轮已经排好了，从下一轮开始走（nextTurn 按 joinRound 跳过）
+export function joinPlayer(name) {
+  const id = S.players.length, alive = S.players.filter(q => q.alive), cust = ROLES.filter(r => !r.rs), used = new Set(S.players.map(q => q.role));
+  const free = cust.filter(r => !used.has(r.id)), pool = free.length ? free : cust, r = pool[rnd(pool.length)];
+  const cash = Math.round(alive.reduce((a, q) => a + netWorth(q), 0) / Math.max(1, alive.length) / 10) * 10;
+  const p = makePlayer(id, name, r, cash); p.joinRound = S.round + 1;
+  S.players.push(p);
+  Object.assign(ST(p), { gain: GAIN0(), dice: { n: 0, pips: 0, dbl: 0 }, low: { cash, r: p.joinRound } });
+  log(_tf(5553, "🔌 {$0} 中途加入，起始资金 ${$1}，从第 {$2} 轮开始", nm(p), cash, p.joinRound));
+  return p;
 }
 async function startTurn() {
   const p = cur();
@@ -139,6 +156,8 @@ async function startTurn() {
 }
 export async function uiAction(fn) {
   if (!S || (S.phase !== 'roll' && S.phase !== 'post') || UI.modalBlocks()) return;
+  // 先把点数定下来存进存档（lockDice）：卡里的「再掷一次骰子」（engine/18-reinvent.js 的 rollNoBuy）也从这里取，结算中途刷新回到这一步前，再来一次掷出的还是同一个数
+  if (!lockDice()) return;
   const prev = S.phase, wasIn = cur().jail !== null; S.uiPrev = prev; S.nextPhase = null; S.phase = 'busy'; UI.render();
   try { await fn(); } catch (e) { UI.reportErr(e); }
   await resolveDebts();

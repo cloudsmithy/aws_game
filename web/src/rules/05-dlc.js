@@ -2,12 +2,12 @@ import { __rv, _t, _tf } from '../core/01-i18n-runtime.js';
 import { SIM, SIM_AI, rnd, waitAnim } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { IX, N, OWNABLE, SQ, isInst, lvFull, lvName } from './03-services.js';
-import { COMBOS, comboOpen, rsBuyRate, rsCustomers, rsRate, slotOpen, viaOf } from './04-roles-combos-cards.js';
+import { COMBOS, comboOpen, rsBuyRate, rsCustomers, rsRate, rsSold, slotOpen, viaOf } from './04-roles-combos-cards.js';
 import { askQuestion, pickQuestion, qPoolS } from './06-qbank.js';
 import { P, S, active, comboMiss, comboOn, effActive, hasCombo, isWild, log, nm, ownedBy, owns, sqn, wildFits, wildOf } from '../engine/07-state.js';
 import { cardAmt, credit, pay } from '../engine/08-money.js';
 import { CO_SVCS, halfSave } from '../engine/08c-costs.js';
-import { baseRent, sellProp, sellValue, upgradeInfo, zhe } from '../engine/09-rent.js';
+import { baseRent, handOver, sellProp, sellValue, upgradeInfo, zhe } from '../engine/09-rent.js';
 import { moveSteps, passStart, passUG } from '../engine/13-move.js';
 import { land } from '../engine/15-land.js';
 import { debtCleared, impair, secActive, skipOrPay } from '../engine/17-health.js';
@@ -123,7 +123,7 @@ export let DLC_REI = __rv(() => ([
       if (!offer.length) { log(_tf(1605, "代理商手上没有积压的服务，{$0} 改领 ${$1}", nm(p), credit(p, 100))); return; }
       const v = await UI.ask({ who: p.id, cls: 'pick', title: _t(1606, "代理商清仓：按原价 7 折买哪一块？"), buttons: [...offer.slice(0, 12).map((o, k) => ({ label: _tf(1607, "{$0} 的 {$1}（${$2}）", o.r.name, SQ[o.i].n, o.x), value: k, disabled: p.cash < o.x })), { label: _t(1599, "不买"), value: 'x', cls: 'pri' }] });
       if (v === 'x') return;
-      const o = offer[+v], pr = S.props[o.i]; await withCardMul(0, async () => pay(p, o.r, o.x)); pr.owner = p.id; pr.paid = o.x; pr.via = null; pr.spot = false; pr.spotPaid = 0;
+      const o = offer[+v], pr = S.props[o.i]; await withCardMul(0, async () => pay(p, o.r, o.x)); handOver(o.r, o.i, p); rsSold(o.r, p); pr.paid = o.x; pr.spot = false; pr.spotPaid = 0;
       log(_tf(1608, "{$0} 按 7 折 ${$1} 从代理商 {$2} 手里买下 {$3}（连同升级）", nm(p), o.x, nm(o.r), sqn(o.i)));
     } },
   { dlc: 'reseller', n: _t(1609, "升级为高级合作伙伴"), e: _t(1610, "代理商：每有一位客户领 $150（没有客户也领 $150）；客户：领 $100"), tip: _t(1611, "合作伙伴等级越高，拿到的折扣、市场资金和技术支持越多"), art: 'wat',

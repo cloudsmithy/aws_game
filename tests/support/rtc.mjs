@@ -46,8 +46,8 @@ export async function connectRTC(host, client, hello) {
   return index;
 }
 
-// re:Invent 牌堆的顺序房主不发（远端收到同样张数的 0，见 net/40c-sync.js 的 stateFor）：两边都只比张数
-export const state = page => page.evaluate(() => JSON.parse(JSON.stringify({ ...S, diceQ: undefined, rei: S.rei && S.rei.map(() => 0) })));
+// re:Invent 牌堆、弃牌堆和 Health 牌堆里是哪几张房主不发（远端收到同样张数的 0，见 net/40c-sync.js 的 stateFor）：两边都只比张数
+export const state = page => page.evaluate(() => JSON.parse(JSON.stringify({ ...S, diceQ: undefined, rei: S.rei && S.rei.map(() => 0), reiDisc: S.reiDisc && S.reiDisc.map(() => 0), inc: S.inc && S.inc.map(() => 0) })));
 export async function sameState(host, clients) {
   const expected = await state(host);
   for (const client of clients) await expect.poll(() => state(client)).toEqual(expected);

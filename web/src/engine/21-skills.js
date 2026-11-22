@@ -5,7 +5,7 @@ import { COMBOS, roleOf, rsBuyRate, rsCustomers, rsRate, slotOpen, viaOf } from 
 import { S, active, comboMiss, combosBrokenBy, cur, log, nm, ownedBy, sqn, wildFits, wildFree, wildTargets } from './07-state.js';
 import { giveTo, pay, withGain } from './08-money.js';
 import { netWorth } from './08c-costs.js';
-import { baseRent, buyPaid, sellValue, shownRent, svcLeaves, trafficMul, upgradeInfo, zhe } from './09-rent.js';
+import { baseRent, handOver, sellValue, shownRent, trafficMul, upgradeInfo, zhe } from './09-rent.js';
 import { debtCleared } from './17-health.js';
 import { evt } from './26b-retro.js';
 import { hx, isHell, isHidden } from '../rules/35-modes.js';
@@ -76,8 +76,9 @@ async function roleSkill0(p) {
     const cand = ownedBy(rich).filter(i => ['prop', 'util'].includes(SQ[i].t) && !S.props[i].offline).sort((a, b) => er(b) - er(a) || baseRent(b, 7) - baseRent(a, 7));
     if (cand.length) {
       const i = cand.length === 1 ? cand[0] : +(await UI.ask({ who: p.id, cls: 'pick', title: _tf(3392, "战略并购：收购 {$0} 的哪一块服务？", rich.name), html: _tf(3393, "<p>{$0} 是全场总资产最高的对手。你按卖回价付钱给 {$1}，这块服务连同升级和容量都归你；现金不够就先欠着，按欠款规则处理。按格子上标的过路费从高到低排（组成架构的按整套联合收费；标了「拆散」的，收过来对手那套架构就散了）。</p>", nm(rich), nm(rich)), buttons: cand.slice(0, 14).map(x => ({ label: _tf(3394, "{$0}（{$1}，收购价 ${$2}）", SQ[x].n, stag(x), sellValue(x)), value: x })) }));
-      const comp = sellValue(i), pr = S.props[i];
-      svcLeaves(rich, i, p.id); pr.paid = buyPaid(i); pr.spot = false; pr.spotPaid = 0; pr.owner = p.id; pr.via = null;
+      // Spot 收过来还是 Spot（出价照旧）：以前直接转成按需，估值一下按原价算，卖回却还按 Spot 出价，等于白拿了转按需要补的差价。想转按需照常在资产管理里补差价
+      const comp = sellValue(i);
+      handOver(rich, i, p);
       pay(p, rich, comp, 'sell');   // 按卖回价自己出钱；现金不够就欠着，按欠款规则处理
       log(_tf(3395, "📈 战略并购：{$0} 按卖回价 ${$1} 收购了 {$2} 的 {$3}", nm(p), comp, nm(rich), sqn(i)));
     }

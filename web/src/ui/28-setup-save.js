@@ -1,12 +1,12 @@
 import { LANG, __rv, _t, _tf } from '../core/01-i18n-runtime.js';
 import { $, BOT, COLORS, DEMO, KEY, MY_REV, PAWN, REV_KEY, SAVE_FAIL, SIM, STALE, __set_MY_REV, __set_SAVE_FAIL, __set_STALE, awsImg, esc, homeUrl, revNow, rnd, shuffle, unesc } from '../core/02-util.js';
 import { BAL, IX, MAX_ROUNDS, OWNABLE } from '../rules/03-services.js';
-import { INC, REI, ROLES, roleOf, rsShort } from '../rules/04-roles-combos-cards.js';
+import { INC, REI, ROLES, roleOf, rsCustomers, rsShort } from '../rules/04-roles-combos-cards.js';
 import { DLC, dlcOn } from '../rules/05-dlc.js';
 import { F, MAX_PLAYERS, S, __set_S, cur, debtOf, isWild, log, nm, resetProp, winParts, winTimed, winWA } from '../engine/07-state.js';
 import { GAIN0 } from '../engine/08-money.js';
 import { PHONE_MQ, TABP_MQ, ask, bgInert, focusBack, info, kbdFocus, modal, modalBlocks, viewOpen } from './10-modal.js';
-import { endTurn } from '../engine/14-turn.js';
+import { endTurn, makePlayer } from '../engine/14-turn.js';
 import { STORM_TXT, roleCash, skillLine, skillMulTxt, startCashOf } from '../engine/21-skills.js';
 import { speedTurnStart } from '../engine/22-speed.js';
 import { ST } from '../engine/26b-retro.js';
@@ -24,11 +24,13 @@ import { applyBal, hellCfg, isHell, isParty, rollRoundMul } from '../rules/35-mo
 import { __set_AI_PAUSE, __set_aiTimer, aiTimer, isAI } from '../engine/36-ai.js';
 import { MP } from '../net/40-host-sync.js';
 import { mpUI } from '../net/42-setup.js';
-export async function renameDialog() {
+// id：玩家卡上点了谁名字旁边的 ✎，直接改这一位（得是这台设备能改的人）；不带 id 是对局菜单里的「改名字」，这台设备上不止一位时先问改谁
+export async function renameDialog(id) {
   if (!S || S.over || modalBlocks(true)) return;
   const list = (MP.role === 'client' ? [MP.mySeat] : S.players.map(q => q.id).filter(id => !(MP.role === 'host' && MP.isRemote(id)))).map(id => S.players[id]).filter(Boolean);
   if (!list.length) return;
-  const q = list.length === 1 ? list[0] : S.players[await ask({ local: true, cancelable: true, cls: 'pick', title: _t(4622, "改谁的名字？"), buttons: [...list.map(x => ({ label: x.name, value: x.id })), { label: _t(2465, "取消"), value: -1 }] })];
+  const pick = id != null && id !== '' ? list.find(x => x.id === +id) : null;
+  const q = pick || (list.length === 1 ? list[0] : S.players[await ask({ local: true, cancelable: true, cls: 'pick', title: _t(4622, "改谁的名字？"), buttons: [...list.map(x => ({ label: x.name, value: x.id })), { label: _t(2465, "取消"), value: -1 }] })]);
   if (!q) return;
   const res = await modal({ local: true, cancelable: true, title: _tf(4623, "给 {$0} 改名字", q.name), inputs: [{ id: 'nm', type: 'text', label: _t(4624, "新名字（最多 12 个字）"), value: unesc(q.name), af: true }], buttons: [{ label: _t(4625, "改好了"), value: 'ok', cls: 'pri' }, { label: _t(2465, "取消"), value: 'x' }] });
   if (res.v !== 'ok') return;
@@ -104,9 +106,9 @@ export function newGame(cfg) {
   const deal = (pool, rs) => pool.shift() || (pool.push(...shuffle(ROLES.filter(r => !r.rs === !rs))), pool.shift());
   if (cfg.anim == null) { try { cfg.anim = localStorage.getItem('amono-anim') || ''; } catch (e) { cfg.anim = ''; } }   // 动画速度沿用上一局的选择
   __set_S({
-    cfg, layoutVer: 2, players: [], props: {}, pot: 0, cur: 0, round: 1, phase: 'roll', doubles: 0, again: false,
+    cfg, layoutVer: 2, tk: 100, players: [], props: {}, pot: 0, cur: 0, round: 1, phase: 'roll', doubles: 0, again: false,   // tk：回合编号 turnKey 的进位（座位号占两位），读档时按它换算老存档
     lastDice: [0, 0], lastSq: null, quarterCount: 0, actionUsed: false, log: [], over: false, winner: null, qSeen: {},   // qSeen：这一局出过的题号，保证一局不出重复题
-    inc: shuffle(Array.from({ length: INC.length - 1 }, (_, k) => k + 1).filter(k => !INC[k].dlc || (cfg.dlc || []).includes(INC[k].dlc))), incDisc: [],
+    inc: shuffle(Array.from({ length: INC.length - 1 }, (_, k) => k + 1).filter(k => !INC[k].dlc || (cfg.dlc || []).includes(INC[k].dlc))), incDisc: [], traps: [],
     rei: shuffle(Array.from({ length: REI.length - 1 }, (_, k) => k + 1).filter(k => !REI[k].dlc || (cfg.dlc || []).includes(REI[k].dlc))), reiDisc: [],
     endAt: (cfg.timed || cfg.win === 'timed') ? Date.now() + cfg.minutes * 60000 : null,
   });
@@ -115,7 +117,7 @@ export function newGame(cfg) {
   OWNABLE.forEach(resetProp);
   cfg.names.forEach((name, k) => {
     const r = isRsSeat(k) ? deal(rsRoles, true) : deal(custRoles, false);
-    S.players.push({ id: k, name: esc(name), color: COLORS[k], role: r.id, cash: roleCash(r, cfg), startCash: roleCash(r, cfg), pos: 0, jail: null, jailCat: 'sec', skip: 0, debt: [], techDebt: 0, coe: [], drill: [], cards: [], hand: [], alive: true, speed: 0, reseller: isRsSeat(k), rsRate: 0.9 });
+    S.players.push(makePlayer(k, name, r, roleCash(r, cfg), isRsSeat(k)));
     if (r.id === 'unicorn' && cfg.mode !== 'hell' && S.props[IX.route53].owner == null) { S.props[IX.route53].owner = k; S.props[IX.route53].paid = 0; }   // 送的，没花钱：卖回、下线、Trusted Advisor 退款都按 $0 算，不按标价
   });
   // 代理商的起始资金 = 所有客户起始资金的总和（代理商只靠架构收过路费、地还会被客户买走，要本钱囤货）；娱乐模式只打 10 轮按估值排名，不加。
@@ -264,6 +266,7 @@ export function playerGallery() {
     <h4>${_tf(4698, "公司角色（{$0} 个）", cs.length)}</h4><div class="rcards">${cs.map(card).join('')}</div>${rs.length ? _tf(4696, "<h4>代理商角色（{$0} 个，开了代理商模式时代理商座位从这里抽）</h4><div class=\"rcards\">{$1}</div>", rs.length, rs.map((r, k) => card(r, k + cs.length)).join('')) : ''}`, buttons: [{ label: _t(2610, "关闭"), value: true, cls: 'pri' }] });
 }
 async function roleDraft() {
+  S.drafting = true;   // 三选一挑角色期间不收中途加入（net/40d-host-msgs.js）：挑完会按角色卡重算所有人的开局资金
   const used = new Set(), pools = { c: shuffle(ROLES.filter(r => !r.rs)), r: shuffle(ROLES.filter(r => r.rs)) };
   for (const p of S.players) {
     const pool = p.reseller ? pools.r : pools.c;
@@ -276,7 +279,7 @@ async function roleDraft() {
     } else if (opts.length > 1) pick = opts[rnd(opts.length)];
     used.add(pick.id); p.role = pick.id;
   }
-  rolesRecalc();
+  rolesRecalc(); S.drafting = undefined;
   log(_tf(4702, "🎴 三选一挑好了角色：{$0}", S.players.map(q => _tf(3245, "{$0}（{$1}）", nm(q), roleOf(q).n)).join(_t(349, "、"))));
   save(); render();
 }
@@ -310,10 +313,22 @@ export async function resumeGame() {
     if (!pr) return;
     if (pr.stopped) { resetProp(+i); return; }   // 老版本的 Stop 状态：退回亚马逊云科技
     pr.offline = pr.offline || 0; pr.offCash = pr.offCash || 0; pr.cap = pr.cap || 0; pr.spotPaid = pr.spotPaid || 0;
+    if (pr.offDrawn == null && pr.offline) pr.offDrawn = pr.offCash;   // 老存档没记累计拿了多少：还下线着的按这次拿的算，已经恢复的查不到了，按没拿过
     if (pr.wild && !isWild(+i)) pr.wild = null;   // 老存档：Config 以前是万能服务，绑过的解开
     delete pr.forced;
   });
-  S.players.forEach(q => { q.cards = q.cards || []; q.hand = q.hand || []; q.coe = q.coe || []; q.drill = q.drill || []; q.debt = q.debt || []; q.speed = q.speed || 0; q.rsRate = q.rsRate || 0.9; if (q.rentBoost && !q.rentBoostTurns) q.rentBoostTurns = 1; q.startCash = q.startCash || startCashOf(q); q.rsCoupon = q.rsCoupon || 0; q.buyCoupon = q.buyCoupon || 0; q.commits = (q.commits || []).filter(c => c.laps > 0); });
+  if (!Array.isArray(S.traps)) S.traps = [];   // 老存档没有埋下的 Health 卡
+  S.players.forEach(q => { q.cards = q.cards || []; q.hand = q.hand || []; q.stops = q.stops || []; q.coe = q.coe || []; q.drill = q.drill || []; q.debt = q.debt || []; q.speed = q.speed || 0; q.rsRate = q.rsRate || 0.9; if (q.rentBoost && !q.rentBoostTurns) q.rentBoostTurns = 1; q.startCash = q.startCash || startCashOf(q); q.rsCoupon = q.rsCoupon || 0; q.buyCoupon = q.buyCoupon || 0; q.commits = (q.commits || []).filter(c => c.laps > 0); });
+  // 咨询合作伙伴的估值按「买过的客户」算（rsSold）：老存档没记，先按现在还经他付费的客户补上
+  S.players.forEach(q => { if (q.reseller && !q.rsEver) q.rsEver = rsCustomers(q).map(c => c.id); });
+  // 回合编号改成 round × 100 + 座位（engine/09-rent.js 的 turnKey）：老存档里记着的按 round × 10 + 座位换算，不然「这回合已经做过」全都对不上
+  if (S.tk !== 100) {
+    const tk = v => v > 0 ? Math.floor(v / 10) * 100 + v % 10 : v;
+    Object.values(S.props).forEach(pr => { if (pr) { pr.offTurn = tk(pr.offTurn); pr.offTurnSeen = tk(pr.offTurnSeen); } });
+    S.players.forEach(q => { q.handWalk = tk(q.handWalk); q.chTurn = tk(q.chTurn); });
+    if (S.landAct) S.landAct.k = tk(S.landAct.k);
+    S.tk = 100;
+  }
   // 战报新指标：老存档没有估值走势，从读档这一刻开始记，mFrom 记下从第几轮起才有（战报据此不显示不全的钱从哪来、手气、最低现金）
   if (!Array.isArray(S.valHist)) { S.mFrom = S.round; S.valHist = []; valSnap(); }
   S.players.forEach(q => { const t = ST(q); t.gain = t.gain || GAIN0(); t.dice = t.dice || { n: 0, pips: 0, dbl: 0 }; t.low = t.low || { cash: q.cash - debtOf(q), r: S.round }; });
@@ -323,8 +338,10 @@ export async function resumeGame() {
   // 只在结算中途才有的状态：卡牌倍率、正在记录的格子。读到了说明是老版本在结算中途存的档，清掉，不然之后卖服务、去掉升级也按卡牌倍率给钱
   delete S.cardMul; S.histSq = null;
   try { const a = localStorage.getItem('amono-anim'); if (a != null) S.cfg.anim = a; } catch (e) { }   // 动画速度跟这台设备最后一次的选择
-  if (S.phase !== 'roll' && S.phase !== 'post') S.phase = 'post';
-  if (S.phase !== 'roll') S.diceQ = null;   // 结算中途存下的档（上一行转成 post）：没用完的点数不留给下一次掷骰子
+  const mid = S.phase !== 'roll' && S.phase !== 'post';   // 结算中途存下的档：转成 post
+  if (mid) S.phase = 'post';
+  // 结算中途存下的档：没用完的点数不留给下一次掷骰子。roll、post 时存的是 lockDice 刚定好、还没用的点数（掷骰子、uiAction 开始时），留着，刷新后再来一次还是这几个数
+  if (mid) S.diceQ = null;
   // 点「退出到开局页」时限时停住了（quitGame 记下剩的时间）：从现在起接着计。用完就删，不然以后意外刷新又会把时间拨回去
   if (S.endAt && S.leftMs != null) S.endAt = Date.now() + S.leftMs;
   delete S.leftMs; delete S.aiPause; delete S.mpOff;   // 后两个是房主推给远端的此刻状态（pushState 里每次重写），存档里留下的旧值不算
