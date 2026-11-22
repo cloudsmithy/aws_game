@@ -28,8 +28,22 @@ function docToc(box) {
   nav.onclick = e => { const b = e.target.closest('[data-h]'); if (!b) return; const h = hs[+b.dataset.h]; box.scrollTo({ top: box.scrollTop + h.getBoundingClientRect().top - box.getBoundingClientRect().top - top(), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); nav.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); };
   // 关窗时 box.innerHTML 被清空、nav 跟着离开页面，可 .box 是所有弹窗共用的，onscroll 还挂着这个 mark：
   // 打开长文档时 box.scrollTop = 0 排下的 scroll 事件，赶上下一帧之前就关窗（按 g 马上 Esc、点「看完整版」马上关）会落到空框上，h3 没了就报错
-  const mark = () => { if (!nav.isConnected) return; const y = box.getBoundingClientRect().top + top() + 4; let k = 0; hs.forEach((h, n) => { if (h.getBoundingClientRect().top <= y) k = n; }); let on; nav.querySelectorAll('button').forEach((b, n) => { if (n === k && !b.classList.contains('on')) on = b; b.classList.toggle('on', n === k); }); if (on && nav.scrollWidth > nav.clientWidth) { const l = on.offsetLeft - 20, r = on.offsetLeft + on.offsetWidth + 20; if (l < nav.scrollLeft) nav.scrollLeft = l; else if (r > nav.scrollLeft + nav.clientWidth) nav.scrollLeft = r - nav.clientWidth; } };
+  // 长表的表头吸在章节栏下面（CSS「弹窗里的表格」那段）：章节栏高度会变（图鉴的搜索框后装上、窗口变窄换行），每次滚动重算
+  const mark = () => { if (!nav.isConnected) return; box.style.setProperty('--doc-top', top() - 8 + 'px'); const y = box.getBoundingClientRect().top + top() + 4; let k = 0; hs.forEach((h, n) => { if (h.getBoundingClientRect().top <= y) k = n; }); let on; nav.querySelectorAll('button').forEach((b, n) => { if (n === k && !b.classList.contains('on')) on = b; b.classList.toggle('on', n === k); }); if (on && nav.scrollWidth > nav.clientWidth) { const l = on.offsetLeft - 20, r = on.offsetLeft + on.offsetWidth + 20; if (l < nav.scrollLeft) nav.scrollLeft = l; else if (r > nav.scrollLeft + nav.clientWidth) nav.scrollLeft = r - nav.clientWidth; } };
   box.onscroll = mark; mark();
+}
+// 弹窗里的表格：整列都是金额、数字（$1640、3/4、+$150、75%，空格和「—」不算）就标 .num，右对齐、等宽数字，表头那格跟着；样式在 CSS「弹窗里的表格」那段。
+// 战报的表自己排好了，不动
+const NUM_CELL = /^[≈~+\-−]?\s*\$?\s*\d[\d,.]*\s*(%|\/\s*\d+)?$/;
+function numCols(box) {
+  for (const t of box.querySelectorAll('.mb table:not(.lgr,.dt)')) {
+    const rows = [...t.rows].filter(r => r.querySelector(':scope>td')), head = t.rows[0]?.querySelector(':scope>td') ? null : t.rows[0];
+    for (let c = 0, n = Math.max(0, ...rows.map(r => r.cells.length)); c < n; c++) {
+      const cells = rows.map(r => r.cells[c]).filter(x => x && x.colSpan === 1), txt = cells.map(x => x.textContent.trim());
+      if (!txt.some(x => NUM_CELL.test(x)) || !txt.every(x => !x || x === '—' || NUM_CELL.test(x))) continue;
+      cells.forEach(x => x.classList.add('num')); head?.cells[c]?.classList.add('num');
+    }
+  }
 }
 // 手机布局（和 #mbar 同一条媒体查询）：页面能上下滚，主按钮固定在屏幕底部
 export const PHONE_MQ = matchMedia('(max-width:900px),(max-height:500px) and (orientation:landscape)');
@@ -120,8 +134,8 @@ export function modal({ title, html = '', inputs = [], buttons = [{ label: _t(27
     // priv.buttons：遮着的时候按钮上的字也换掉（埋 Health 卡的格子名），替掉线的人选时换回真的
     const bIn = b => b.desc ? `<b>${clean(b.label)}</b><small class="bd">${clean(b.desc)}</small>` : clean(b.label), pb = veil && priv.buttons;
     h += `<div class="btns">${buttons.map((b, k) => `<button data-k="${k}" class="${b.cls || ''}${b.desc ? ' opt' : ''}" ${b.disabled ? 'disabled' : ''}>${pb ? clean(pb[k] ?? '') : bIn(b)}</button>`).join('')}</div>`;
-    box.innerHTML = h; m.hidden = false; box.scrollTop = 0; box.dataset.who = mpWho ?? ''; bgInert();
-    box.onscroll = null; if (box.classList.contains('doc')) docToc(box);
+    box.innerHTML = h; m.hidden = false; box.scrollTop = 0; box.dataset.who = mpWho ?? ''; bgInert(); numCols(box);
+    box.onscroll = null; box.style.removeProperty('--doc-top'); if (box.classList.contains('doc')) docToc(box);
     requestAnimationFrame(() => fitArch(box));   // 架构图一行放不下就整体缩小，一眼看全
     // 收起时背后放开（能点格子、能 Tab 到棋盘），焦点留在「展开窗口」上；展开时焦点回到弹窗的主按钮
     const toggleMin = () => {
