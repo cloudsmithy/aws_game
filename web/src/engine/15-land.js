@@ -118,7 +118,7 @@ export async function offerLandingUpgrade(p, i, canJump = false) {
   let html = _t(2985, "<p>落在自己的服务上，可以做一件事：</p>");
   if (u.ok) {
     const next = s.upg[u.next - 1];
-    const base = upCost(i, u.next), why = [...u.fees.map(f => `${f.why} +$${f.amt}`), u.sur ? _t(2986, "技术债攒到 2 个 +$50") : '', u.off].filter(Boolean);
+    const base = upCost(i, u.next), why = [...u.fees.map(f => `${f.why} +$${f.amt}`), u.sur ? _tf(5707, "技术债攒到 2 个 +${$0}", u.sur) : '', u.off].filter(Boolean);
     b.push({ label: _tf(2987, "升到第 {$0} 级「{$1}」${$2}", u.next, next[0], u.total), desc: `${next[3] ? next[3] + _t(2988, "。") : ''}${lvUpTxt(i, u.next)}${u.total !== base ? _tf(2991, "。基础价 ${$0}，这次{$1}", base, why.length ? _tf(2989, "：{$0}", why.join(_t(408, "；"))) : _t(2990, "价格不同")) : ''}`, value: 'up', cls: 'pri', disabled: p.cash < u.total });
   } else if (u.why) html += _tf(2992, "<p class=\"muted\">不能加功能：{$0}</p>", u.why);
   if (c.ok) {

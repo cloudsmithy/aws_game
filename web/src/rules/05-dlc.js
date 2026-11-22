@@ -11,7 +11,7 @@ import { baseRent, handOver, sellProp, sellValue, upgradeInfo, zhe } from '../en
 import { moveSteps, passStart, passUG } from '../engine/13-move.js';
 import { land } from '../engine/15-land.js';
 import { debtCleared, impair, secActive, skipOrPay } from '../engine/17-health.js';
-import { moneyOrMove } from '../engine/18-reinvent.js';
+import { moneyOrMove, notePath } from '../engine/18-reinvent.js';
 import { wildBind } from '../engine/21-skills.js';
 import { ST } from '../engine/26b-retro.js';
 import { isHidden, withCardMul } from './35-modes.js';
@@ -192,7 +192,7 @@ export async function flyTo(p, target, why = '', { passGo = true, backward = fal
   UI.sfx('fly');
   try {
     if (fl) await waitAnim(UI.FX.flyGo(fl, target, why, backward), 1400);
-    p.pos = target; S.lastSq = target;
+    p.pos = target; S.lastSq = target; notePath(p, target);   // 飞到的格也算这一回合走过的（埋 Health 卡能选）
     // 往回飞绕过了起点（「DNS 解析配错了」从第 12、31 格退到第 37 格）：等于退回上一圈，下次往前经过起点不算新的一圈（见 passStart）。
     // 不记这一笔的话，退回去反而离起点更近（从第 12 格要走 36 格，退到第 37 格只要 11 格），还照常领钱，罚卡变成了快进卡
     if (backward && target > from) p.reGo = (p.reGo || 0) + 1;

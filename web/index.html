@@ -2854,8 +2854,8 @@ input[type=number]{text-align:right;font-variant-numeric:tabular-nums}
 .box:is(.pick,.quiz,.opts) .btns>button{position:relative;min-height:42px;padding:8px 14px;line-height:1.4;white-space:normal;transition:background-color .12s,border-color .12s}
 @media (pointer:coarse){.box:is(.pick,.quiz,.opts) .btns>button{min-height:44px}}
 .box:is(.pick,.quiz,.opts) .btns>button:disabled:not(.qopt){border-style:dashed;border-color:var(--control-border);background:var(--surface-muted);color:var(--mut2)}
-.box.pick .btns>button:last-of-type:nth-of-type(n+3):not(.pri),.box.opts .btns>button:last-of-type:not(.opt,.pri){position:sticky;bottom:16px;justify-content:center;text-align:center;margin-top:4px;border-color:var(--line);color:var(--mut);box-shadow:0 0 0 8px var(--surface)}
-.box.pick .btns>button:last-of-type:nth-of-type(n+3):not(.pri):hover,.box.opts .btns>button:last-of-type:not(.opt,.pri):hover{border-color:var(--ink);color:var(--ink)}
+.box.pick .btns>button.decl:last-of-type:nth-of-type(n+3),.box.opts .btns>button.decl:last-of-type{position:sticky;bottom:16px;justify-content:center;text-align:center;margin-top:4px;border-color:var(--line);color:var(--mut);box-shadow:0 0 0 8px var(--surface)}
+.box.pick .btns>button.decl:last-of-type:nth-of-type(n+3):hover,.box.opts .btns>button.decl:last-of-type:hover{border-color:var(--ink);color:var(--ink)}
 @media (hover:hover) and (pointer:fine){
   #modal .box:is(.pick,.quiz,.opts):not(.mpwait) .btns{counter-reset:hk}
   #modal .box:is(.pick,.quiz,.opts):not(.mpwait) .btns>button{counter-increment:hk;padding-left:42px}

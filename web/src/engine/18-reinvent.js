@@ -115,13 +115,14 @@ export async function springTrap(p, i) {
   S.traps = S.traps.filter(t => t.sq !== i);
   if (hit.length > 1) log(_tf(5701, "💣 {$0} 停在 {$1}：这一格埋了 {$2} 张 Health 卡，全部翻开", nm(p), sqn(i), hit.length));
   for (const t of hit) {
-    if (!p.alive || S.over) { S.incDisc.push(t.id); continue; }   // 没轮到结算的放进弃牌堆
+    if (!p.alive || S.over) { S.inc.push(t.id); continue; }   // 没轮到结算的放回牌堆底：弃牌堆是公开的，放进去就知道埋的是哪张
     log(t.by === p.id ? _tf(5688, "💣 {$0} 踩中了自己埋在 {$1} 的 Health 卡「{$2}」", nm(p), sqn(i), INC[t.id].n) : _tf(5568, "💣 {$0} 踩中了 {$1} 埋在 {$2} 的 Health 卡「{$3}」", nm(p), nm(P(t.by)), sqn(i), INC[t.id].n));
     await drawIncident(p, t.id); UI.render();
   }
 }
-// 主人出局：他埋的卡收回弃牌堆
-export function dropTraps(p) { if (!S.traps || !S.traps.length) return; S.traps.filter(t => t.by === p.id).forEach(t => S.incDisc.push(t.id)); S.traps = S.traps.filter(t => t.by !== p.id); }
+// 主人出局：他埋的卡收回牌堆底
+export function dropTraps(p) { if (!S.traps || !S.traps.length) return; S.traps.filter(t => t.by === p.id).forEach(t => S.inc.push(t.id));   // 放回牌堆底（牌堆顺序不发给远端），不进公开的弃牌堆
+  S.traps = S.traps.filter(t => t.by !== p.id); }
 // 结束时没人踩中的：亮出来写进日志（战报里也列）
 export function trapsLeft() { (S.traps || []).forEach(t => log(_tf(5569, "💣 {$0} 在 {$1} 埋的「{$2}」没人踩中", nm(P(t.by)), sqn(t.sq), INC[t.id].n))); }
 // 卡牌效果都在这层里结算：卡牌倍率（盲盒翻倍时外面已经设好）、收支记在「卡牌」名下、联机弹窗归抽卡的人选。抽卡和打出手牌共用

@@ -145,14 +145,15 @@ test('对手停上去：先付过路费，再翻开照常结算；埋的人自�
   expect(hit).toBeLessThan(rent);   // 过路费先结算
 });
 
-test('主人破产：他埋的卡收回弃牌堆', async ({ page }) => {
+test('主人破产：他埋的卡放回牌堆底（不进公开的弃牌堆）', async ({ page }) => {
   await start(page);
   await plant(page, 1, await page.evaluate(() => window.__k + 3), 5);
   await plant(page, 0, await page.evaluate(() => window.__k + 6), 6);
+  await page.evaluate(() => { S.inc = S.inc.filter(x => x !== 5 && x !== 6); S.incDisc = S.incDisc.filter(x => x !== 5 && x !== 6); });   // 埋下去的卡不该同时还在牌堆里
   await run(page, () => { const p = S.players[1]; p.cash = 0; p.debt = [{ to: 0, amt: 500 }]; return resolveDebts(); });
   await btn(page, '宣告破产').click();
   await done(page);
-  expect(await page.evaluate(() => ({ traps: S.traps.map(t => t.by), disc: S.incDisc.includes(5) && !S.incDisc.includes(6) }))).toEqual({ traps: [0], disc: true });
+  expect(await page.evaluate(() => ({ traps: S.traps.map(t => t.by), disc: S.incDisc.includes(5), deck: S.inc.includes(5) && !S.inc.includes(6) }))).toEqual({ traps: [0], disc: false, deck: true });
 });
 
 // 当前回合的 p 这一回合只走过 j，用真的选格子窗把牌堆顶第一张埋在 j 上
@@ -225,7 +226,7 @@ test('埋的人自己停在叠了几张的格上：自己的和别人的全翻�
   ]);
 });
 
-test('翻第一张就破产：剩下的不再结算，收回弃牌堆', async ({ page }) => {
+test('翻第一张就破产：剩下的不再结算，放回牌堆底', async ({ page }) => {
   await start(page);
   await calm(page);
   const j = await page.evaluate(() => { const j = window.__k + 3; S.props[j].owner = 2; S.players[1].pos = j; S.cur = 1; return j; });
@@ -235,16 +236,18 @@ test('翻第一张就破产：剩下的不再结算，收回弃牌堆', async ({
   await plant(page, 2, j, ids[2]);
   await plant(page, 1, j + 3, 9);                            // B 埋在别处的：破产时照常收回
   await plant(page, 0, j + 6, 10);                           // 别人埋在别处的：不动
+  await page.evaluate(() => { S.inc = S.inc.filter(x => x !== 9 && x !== 10); S.incDisc = S.incDisc.filter(x => x !== 9 && x !== 10); });
   // 亮第一张卡的时候让 B 欠一大笔、宣告破产（真的走 resolveDebts → bankrupt）
   await page.evaluate(() => { let n = 0; UI.showCard = async (kind, id, p) => { if (kind === 'inc' && p === S.players[1] && n++ === 0) { p.cash = 0; p.debt = [{ to: 0, amt: 99999 }]; await resolveDebts(); } }; });
   const inc0 = await page.evaluate(() => ST(S.players[1]).inc);
   await run(page, () => land(S.players[1]));
   await btn(page, '宣告破产').click();
   await done(page);
-  const r = await page.evaluate(([ids, j]) => ({ alive: S.players[1].alive, traps: S.traps.map(t => [t.by, t.sq, t.id]), disc: [...ids, 9].map(id => S.incDisc.filter(x => x === id).length), inc: ST(S.players[1]).inc, sq: SQ[j].n, names: ids.map(id => INC[id].n) }), [ids, j]);
+  const r = await page.evaluate(([ids, j]) => ({ alive: S.players[1].alive, traps: S.traps.map(t => [t.by, t.sq, t.id]), disc: [...ids, 9].map(id => S.incDisc.filter(x => x === id).length), deck: [...ids, 9].map(id => S.inc.filter(x => x === id).length), inc: ST(S.players[1]).inc, sq: SQ[j].n, names: ids.map(id => INC[id].n) }), [ids, j]);
   expect(r.alive).toBe(false);
   expect(r.traps).toEqual([[0, j + 6, 10]]);
-  expect(r.disc).toEqual([1, 1, 1, 1]);                      // 三张和他埋在别处的那张都进弃牌堆，各一次
+  expect(r.disc).toEqual([1, 0, 0, 0]);                      // 结算了的第一张照常进弃牌堆
+  expect(r.deck).toEqual([0, 1, 1, 1]);                      // 没翻开的两张和他埋在别处的那张放回牌堆底，各一次（弃牌堆公开，放进去就知道埋的是哪张）
   expect(r.inc).toBe(inc0 + 1);                              // 只结算了第一张
   expect(await hitLines(page, 2)).toEqual([`💣 B 停在 ${r.sq}：这一格埋了 3 张 Health 卡，全部翻开`, `💣 B 踩中了 A 埋在 ${r.sq} 的 Health 卡「${r.names[0]}」`]);
   const all = await logTxt(page);

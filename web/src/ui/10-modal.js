@@ -99,9 +99,13 @@ export function greyWhy(b, box) {
 }
 // cancelable：房主本机自己看的窗口（玩法、图鉴、明细、大图、改名字、新游戏 / 退出 / 现在结算的确认），轮到的远端玩家点了掷骰子或操作时替房主关掉，最后一个按钮必须是关闭 / 取消。
 // hp：远端收到的弹窗里带着，表示房主点了「他回来之前都由我来选」，正在替掉线的那个座位选
+const DECLINE = new Set(['x', -1, 'no', 'skip', 'cancel', null]);
 export function modal({ title, html = '', inputs = [], buttons = [{ label: _t(2716, "确定"), value: true, cls: 'pri' }], cls = '', who, _mp, local = false, noAI = false, aiMin = false, deal = false, hold = 0, cancelable = false, hp = false, view = false, priv = null }) {
   // 推迟亮的卡还没亮出来，中间却要先弹别的窗（选哪一块挂了、借 Session Manager……）：先补一个原来的发牌窗，再弹这个
   if (CARD_DEAL && !local && !deal) { const spec = arguments[0]; return dealNow().then(() => modal(spec)); }
+  // 「算了 / 取消 / 不买」这类放弃的按钮按 value 认出来，加 decl：选项多时它固定在列表底部、颜色淡一些（见 index.html .decl）。
+  // 只按 value 认，不按位置：选对手、选并购目标这些没有放弃项的列表，最后一项是正常选项
+  buttons = buttons.map(b => DECLINE.has(b.value) && !String(b.cls || '').includes('pri') ? { ...b, cls: `${b.cls || ''} decl`.trim() } : b);
   return new Promise(res => {
     // view：查资料的窗口（明细、图鉴、玩法、格子介绍、快捷键）开在单独一层 #vmodal，不占 MODAL_CUR。
     // 流程弹窗照常开在下面的 #modal（电脑照样选、联机照样发给远端），不会把正在看的资料顶掉；再开一个查资料窗只换掉上一个查资料窗

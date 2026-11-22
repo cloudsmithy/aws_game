@@ -64,6 +64,7 @@ export async function jailAct(kind) {
   if (p.jailCat === RF_JAIL) kind = 'stay';   // 清技术债进来的只能停够一轮，不能付钱、用卡提前出来
   S.phase = 'busy'; UI.render();
   try {
+    if (kind === 'pay' && p.cash < BAL.jailFee) { UI.toast(_tf(2981, "现金不够 ${$0}", BAL.jailFee)); S.phase = 'roll'; UI.render(); return; }   // 按钮灰着只挡得住本机：远端、老页面发来的也要挡，不然欠一屁股债
     if (kind === 'pay') { pay(p, 'pot', BAL.jailFee); await leaveJail(p, _tf(5669, "付 ${$0} 开 Support Case", BAL.jailFee)); await resolveDebts(); if (checkOver()) return; if (!cur().alive) return nextTurn(); S.phase = 'roll'; UI.save(); UI.render(); return; }
     if (kind === 'es') { const c = availCard(p, 'ES'); if (c) { c.used = true; await leaveJail(p, _t(2918, "用掉 Enterprise Support")); } S.phase = 'roll'; UI.save(); UI.render(); return; }
     // 停一轮：这回合不走；停够了（传统企业上云要 2 轮）就出来，下回合照常掷骰子

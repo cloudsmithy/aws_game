@@ -5733,5 +5733,8 @@
  "清掉 1 个技术债（${$1} × 手上个数，第 {$2} 轮起 +${$3}），清完进维护窗口停一轮、名下服务下线一轮{$0}": "Clear 1 tech debt (${$1} × the number you hold, +${$3} from round {$2}); afterwards you stay in the maintenance window for one round and your services go offline for one round{$0}",
  "落在这里：停一轮，或者交 ${$1} 照常走；被送进来：下回合停一轮，或者付 ${$0} 马上出来": "Land here: skip one round, or pay ${$1} to move on as usual; get sent here: next turn skip one round, or pay ${$0} to get out right away",
  "停一轮或交 ${$1} · 关进来付 ${$0} 出": "Skip a round or pay ${$1} · sent in: pay ${$0} out",
- "重构清掉 1 个技术债：手上有几个就是 ${$0} × 几个，第 {$1} 轮起再加 ${$2}；不占主动行动，但清完马上进维护窗口停一轮，名下服务一起下线一轮": "Refactor to clear 1 tech debt: ${$0} × the number you hold, +${$2} from round {$1}. It doesn't use your action, but afterwards you go straight into the maintenance window for one round and all your services go offline for one round"
+ "重构清掉 1 个技术债：手上有几个就是 ${$0} × 几个，第 {$1} 轮起再加 ${$2}；不占主动行动，但清完马上进维护窗口停一轮，名下服务一起下线一轮": "Refactor to clear 1 tech debt: ${$0} × the number you hold, +${$2} from round {$1}. It doesn't use your action, but afterwards you go straight into the maintenance window for one round and all your services go offline for one round",
+ "技术债攒到 2 个 +${$0}": "2 tech debt: +${$0}",
+ "被 Health 事件罚到又没防护时欠 1 个：每个让每圈运行费多 ${$0}{$1}；2 个升级每级 +${$2}；3 个要大重构，交 ${$3}（抽 Health 卡时攒满的跟着卡牌倍率涨）；重构清 1 个要 ${$4} × 手上的个数（第 {$5} 轮起 +${$6}）；不管怎么清掉的，都要进维护窗口停一轮、名下服务下线一轮": "You take 1 when a Health event hits you with no protection: each one adds ${$0}{$1} to your running costs per lap; at 2, every upgrade level costs +${$2}; at 3 you must do a major refactor and pay ${$3} (when it happens on a Health card draw, this scales with the card multiplier); refactoring 1 costs ${$4} × the number you hold (+${$6} from round {$5}); however it is cleared, you spend a round in the maintenance window and all your services go offline for a round",
+ "（SaaS 创业公司，别人是 ${$0}）": " (SaaS startup; others pay ${$0})"
 }
