@@ -49,7 +49,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <h1>亚马逊云科技 User Group 云上大亨 · 这一轮改了什么</h1>
   <p>从「破产逻辑是不是有问题」开始，一路改到新角色、两个新开关、地狱模式和全套文档。每条改动后面写了为什么改；平衡数字都是用电脑玩家对打模拟出来的。</p>
   <nav>
-    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#r17">第十七轮</a><a href="#r18">第十八轮</a><a href="#r19">第十九轮</a><a href="#r20">第二十轮</a><a href="#r21">第二十一轮</a><a href="#r22">第二十二轮</a><a href="#todo">待定</a>
+    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#r17">第十七轮</a><a href="#r18">第十八轮</a><a href="#r19">第十九轮</a><a href="#r20">第二十轮</a><a href="#r21">第二十一轮</a><a href="#r22">第二十二轮</a><a href="#r23">第二十三轮</a><a href="#todo">待定</a>
   </nav>
 </header>
 
@@ -943,8 +943,20 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   </ul>
 </section>
 
+<section id="r23">
+  <h2><i>31</i>第二十三轮（11-22）：Impaired 稳稳一整轮、看得见自己埋的卡、修 17 处问题</h2>
+  <ul>
+    <li><span class="tag chg">改</span>Impaired、Health 卡下线、清技术债停机都稳稳持续一整轮：所有人各走一回合后，到主人回合开始才恢复。以前在别人回合里被打中，马上轮到主人就恢复了，等于没罚。</li>
+    <li><span class="tag ui">界面</span>自己埋的 Health 卡看得见：棋盘格子右上角一张扣着的小 Health 卡（几张叠一摞、标张数），玩家卡和格子详情里写出埋在哪、是哪张；别人看不到。</li>
+    <li><span class="tag chg">改</span>技能免运行费时 Savings Plans 承诺额照付；自动修复、监管沙盒、紧急救治清技术债也算「重构清过技术债」；季度财报所有人资产一样时这一轮跳过。</li>
+    <li><span class="tag bug">BUG</span>旧版本停止支持会把下线拿过的那一半再退一次；破产把用过的保留卡、复盘标记交给债主（抬高支柱分）；还没开始走的中途加入玩家会被考全场、选为交易对象；金融合规公司白丢 Spot 卡；紧急救治清强制下线不干净。</li>
+    <li><span class="tag bug">BUG</span>联机：移出正开着私密窗口的玩家会把牌面亮给房主；Spot 秘密出价发到所有远端；远端能反复发「提议结算」顶掉房主的窗口、随时暂停电脑；暂时被拒一次就不再自动重连；输入值不检查范围。</li>
+    <li><span class="tag bug">BUG</span>按住回车或数字键会连着选掉后面几个窗口；「开启受邀观战」没翻译；房主和远端语言不同时答题结果的「你选的」、电脑名字后缀替换失效；导出日志不释放内存。</li>
+  </ul>
+</section>
+
 <section id="todo">
-  <h2><i>31</i>待定 / 已知问题</h2>
+  <h2><i>32</i>待定 / 已知问题</h2>
   <ul>
     <li>代理商在完整局（不限轮数约 16%）和地狱模式 15 轮（约 14%）偏弱，公平是 25%；各模式的数字见规则书第 32 节。</li>
     <li>模拟里的电脑不会刻意凑六大支柱，所以 Well-Architected 的达成率只能当下限看。</li>
