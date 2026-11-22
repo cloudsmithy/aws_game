@@ -131,7 +131,7 @@ export function joinPlayer(name) {
   const p = makePlayer(id, name, r, cash); p.joinRound = S.round + 1;
   S.players.push(p);
   Object.assign(ST(p), { gain: GAIN0(), dice: { n: 0, pips: 0, dbl: 0 }, low: { cash, r: p.joinRound } });
-  log(_tf(5444, "🔌 {$0} 中途加入，起始资金 ${$1}，从第 {$2} 轮开始", nm(p), cash, p.joinRound));
+  log(_tf(5466, "🔌 {$0} 中途加入，起始资金 ${$1}，从第 {$2} 轮开始", nm(p), cash, p.joinRound));
   return p;
 }
 async function startTurn() {

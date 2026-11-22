@@ -79,7 +79,7 @@
 <td>不受影响</td>
 </tr>
 </tbody></table></div>
-<p>&quot;实例型&quot;指 IaaS、PaaS、EKS 这几类，只有它们需要自己做多 AZ。例外：EBS 卷只能在一个 AZ 里，升级了也一样；ECS 服务默认就把任务尽量分散到多个 AZ（Fargate 也是），不算单 AZ。</p>
+<p>&quot;实例型&quot;指 IaaS、PaaS、EKS 这几类，只有它们需要自己做多 AZ。例外：EBS 卷只能在一个 AZ 里，升级了也一样；ECS 服务默认就把任务尽量分散到多个 AZ（Fargate 也是），不算单 AZ；抽到 re:Invent「用了 S3 Express One Zone」的那一圈，你的 S3 也算单 AZ。</p>
 <p>这里的&quot;按用量&quot;指按请求数、存储量、扫描量这类实际用量收费：主人每次收到过路费交 15% 请求费。按存储量或按个数收月费的（S3、EFS、ECR、Route 53、WAF）另有每圈 $5 固定月费；KMS 升到客户托管密钥（第 1 级）后才有，只用亚马逊云科技托管密钥时不收。见第 9 节。</p>
 <hr>
 </section>

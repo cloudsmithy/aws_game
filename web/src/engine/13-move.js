@@ -2,7 +2,7 @@ import { _t, _tf } from '../core/01-i18n-runtime.js';
 import { SIM, sleep, waitAnim } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { BAL, IX, N, SQ } from '../rules/03-services.js';
-import { CATS, roleOf, rsBuyRate, viaOf } from '../rules/04-roles-combos-cards.js';
+import { CATS, REI, roleOf, rsBuyRate, viaOf } from '../rules/04-roles-combos-cards.js';
 import { reGoLog } from '../rules/05-dlc.js';
 import { F, P, S, availCard, cur, hasCombo, log, nm, ownedBy, owns } from './07-state.js';
 import { credit, pay } from './08-money.js';
@@ -114,18 +114,24 @@ async function passLaunch(p) {
   if (p.role === 'garage' && credits && !hx('garage')) g += 50;
   if (hasCombo(p, 'lake')) g += 50;
   credit(p, g, 'salary'); p.laps = (p.laps || 0) + 1;   // 真正走完的圈数（往回绕过起点的不算，见 passStart）：考全场按它算
+  // 「这一圈」的效果（re:Invent 卡挂的 p.lapFx，见 engine/07-state.js）到这里结束
+  if (p.lapFx && p.lapFx.length) { const end = p.lapFx.filter(x => x.lap < p.laps); p.lapFx = p.lapFx.filter(x => x.lap >= p.laps); [...new Set(end.map(x => x.c))].forEach(c => log(_tf(5464, "{$0} 的「{$1}」这一圈结束了", nm(p), REI[c].n))); }
   // 老存档里的 halfRun 是 true，按整单减半算
-  const half = p.halfRun === 'hour' ? 'hour' : p.halfRun ? 'all' : '', full = half ? opCost(p) : 0;
+  const half = p.halfRun === 'hour' ? 'hour' : p.halfRun ? 'all' : '', cut = p.runCut && p.runCut.length ? p.runCut : null, full = half || cut ? opCost(p) : 0;
   // 降价卡管 2 圈，halfLaps 记还剩几圈；老存档没有这个字段，按 1 圈算
   p.halfRunNow = half; if (half) { p.halfLaps = Math.max(0, (p.halfLaps || 1) - 1); if (!p.halfLaps) p.halfRun = false; }
-  let oc = opCost(p); p.halfRunNow = false;
+  const halfOc = cut ? opCost(p) : 0;
+  // 按服务打折的运行费（p.runCut，见 engine/08c-costs.js runCutOf）只管这一次：算完就清掉，和减半卡叠着算
+  p.runCutNow = cut; if (cut) p.runCut = [];
+  let oc = opCost(p); p.halfRunNow = false; p.runCutNow = null;
+  if (cut) log(_tf(5465, "{$0} 用上「{$1}」：这次运行费少交 ${$2}", nm(p), [...new Set(cut.map(x => REI[x.c].n))].join(_t(349, "、")), (half ? halfOc : full) - oc));
   if (half) {
     // 把没减的几笔写出来，免得玩家以为名单里的服务全减了
     const keep = [];
     if (half === 'hour' && ownedBy(p).some(i => S.props[i].spot && coKind(i))) keep.push(_t(2887, "Spot 买的服务"));
     if (half === 'hour' && owns(p, IX.ec2) && coRightsize(IX.ec2) && runCost(IX.ec2) > runCost(IX.ec2, true)) keep.push(_t(2888, "EC2 的公网 IPv4 地址费"));
     if (spActive(p)) keep.push(_t(2889, "Savings Plans 承诺额"));
-    log(_tf(2894, "{$0} {$1}：这次少交 ${$2}{$3}{$4}", nm(p), half === 'hour' ? _tf(2890, "照 Compute Optimizer 的建议降配，{$0} 运行费减半", CO_SVCS) : _t(2891, "的运行费减半"), full - oc, keep.length ? _tf(2892, "，{$0}照付", keep.join(_t(349, "、"))) : '', p.halfLaps ? _t(2893, "；下次经过还减半") : ''));
+    log(_tf(2894, "{$0} {$1}：这次少交 ${$2}{$3}{$4}", nm(p), half === 'hour' ? _tf(2890, "照 Compute Optimizer 的建议降配，{$0} 运行费减半", CO_SVCS) : _t(2891, "的运行费减半"), full - (cut ? halfOc : oc), keep.length ? _tf(2892, "，{$0}照付", keep.join(_t(349, "、"))) : '', p.halfLaps ? _t(2893, "；下次经过还减半") : ''));
   }
   let debt = F.debt() ? debtFee(p) : 0;   // 技能减半/全免也作用在技术债这份上，所以跟着 runMul 一起乘
   if (p.runLaps > 0) { oc = Math.round(oc * p.runMul); debt = Math.round(debt * p.runMul); p.runLaps--; log(_tf(2897, "{$0} 的「{$1}」：这圈运行费{$2}（还剩 {$3} 圈）", nm(p), roleOf(p).sk.n, p.runMul ? _t(2895, "减半") : _t(2896, "全免"), p.runLaps)); }

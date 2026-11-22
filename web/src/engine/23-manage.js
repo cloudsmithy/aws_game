@@ -27,7 +27,7 @@ export async function manage(p, debtMode = false) {
       if (s.t === 'prop' && pr.cap > 0) acts.push(_tf(3509, "<button class=\"sm\" data-v=\"uncap:{$0}\" data-bw=\"0.2\">减 1 个{$1} +${$2}</button>", i, capU(s.k), capBack(i)));
       if (s.upg && pr.level > 0 && !pr.cap) acts.push(_tf(3510, "<button class=\"sm\" data-v=\"sell:{$0}\" data-bw=\"0.2\">去掉一级 +${$1}</button>", i, Math.round(upPaidOf(i, pr.level) / 2)));
       // 下线的钱同一个主人只拿一次（offDrawn）：拿过了按钮灰掉，原因写在提示里
-      if (OFFLINE_OK.has(s.k) && !pr.offline && !isParty() && offSpent(i)) acts.push(`<button class="sm" disabled title="${_t(5458, "这块服务在你手里已经下线拿过一次钱了")}">${_tf(3513, "下线 +${$0}", 0)}</button>`);
+      if (OFFLINE_OK.has(s.k) && !pr.offline && !isParty() && offSpent(i)) acts.push(`<button class="sm" disabled title="${_t(5473, "这块服务在你手里已经下线拿过一次钱了")}">${_tf(3513, "下线 +${$0}", 0)}</button>`);
       else if (OFFLINE_OK.has(s.k) && !pr.offline && !isParty()) acts.push(`<button class="sm" data-v="off:${i}" data-bw="0.2" title="${_tf(3512, "{$0}不收过路费，运行费只剩存储费；下线 {$1} 轮后自动恢复，拿回的钱不用还，自己落到这一格可以提前免费拉起来；期间别人落上来可以付原价 ${$2} 把它买走", pr.level || pr.cap ? _t(3511, "会先自动去掉升级和容量（各退一半）；") : '', OFFLINE_MIN, s.p)}">${_tf(3513, "下线 +${$0}", offlineCash(i) + stripValue(i))}</button>`);
       if (pr.offline) acts.push(_tf(3515, "<span class=\"muted\" style=\"font-size:12px\">下线第 {$0} 轮，满 {$1} 轮自动恢复；落到这一格可以免费提前拉起来</span>", offRounds(i), OFFLINE_MIN));
       acts.push(`<button class="sm danger-lite" data-v="sell2:${i}" data-bw="0.1" title="${_tf(3518, "买价{$0}的实付按 {$1}拿回{$2}；以后不用再交它的运行费，这块回到亚马逊云科技，谁落上来都能买", pr.level || pr.cap ? _t(3516, "、升级和容量") : '', sellZhe(), offDrawn(i) ? _t(3517, "（扣掉下线时已经拿走的 $") + offDrawn(i) + _t(3210, "）") : '')}">${_tf(3519, "卖回亚马逊云科技 +${$0}", sellValue(i))}</button>`);

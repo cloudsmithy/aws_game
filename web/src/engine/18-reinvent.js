@@ -85,7 +85,7 @@ export async function moneyOrMove(p, card, amt, done) {
 async function drawReinvent0(p, forced, fixed) {
   const id = forced ?? await drawRei();
   // 牌堆抽完了（卡都在各家手里）：不亮卡，改领一笔小钱（和卖掉一张卡一样 $50）
-  if (id == null) { log(_tf(5457, "🎁 {$0} 想抽 re:Invent 卡，可牌堆抽完了（卡都在各家手里），改领 ${$1}", nm(p), credit(p, 50))); return; }
+  if (id == null) { log(_tf(5472, "🎁 {$0} 想抽 re:Invent 卡，可牌堆抽完了（卡都在各家手里），改领 ${$1}", nm(p), credit(p, 50))); return; }
   // 真人自己抽的（不是保留卡）先只给自己看，四选一；只有选「现在用」才亮给大家、照旧结算
   if (forced == null && !fixed && !REI[id].keep && humanPick(p) && await reiPick(p, id) !== 'now') return;
   await UI.showCard('rei', id, p);

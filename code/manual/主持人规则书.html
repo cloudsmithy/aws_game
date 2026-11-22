@@ -13,7 +13,7 @@
 <h1>主持人规则书</h1>
 <p>玩家扮演在亚马逊云科技上创业的公司：买服务、做高可用、扛住 Health 事件、控制账单、把服务组成有效架构。每个服务按自己的真实特性算钱和升级：实例要自己做多 AZ，Lambda 这类 Serverless 没人用就不花钱，Bedrock 按 token 收费。玩法灵感来自经典的地产类桌游。</p>
 <nav class="links"><a href="index.html">← 全部手册</a><a href="https://github.com/cloudsmithy/aws_game/blob/master/docs/%E6%89%8B%E5%86%8C/2-%E4%B8%BB%E6%8C%81%E4%BA%BA/%E4%B8%BB%E6%8C%81%E4%BA%BA%E8%A7%84%E5%88%99%E4%B9%A6.pdf">原版 PDF（GitHub）</a></nav>
-<nav class="toc"><a href="#s1">1. 配件</a><a href="#s2">2. 开局与难度档</a><a href="#s3">3. 回合流程</a><a href="#s4">4. 棋盘（48 格）</a><a href="#s5">5. 服务类型</a><a href="#s6">6. 购买与过路费</a><a href="#s7">7. 升级</a><a href="#s12">8. 每个服务的特性和升级</a><a href="#s23">9. 运行费与请求费</a><a href="#s24">10. 下线与卖回亚马逊云科技</a><a href="#s25">11. 维护窗口与复盘</a><a href="#s26">12. 技术债（标准局起）</a><a href="#s27">13. 主动行动（完整局，每回合 1 个）</a><a href="#s28">14. 按需购买与 Spot 购买</a><a href="#s29">15. 交易、Savings Plans / RI 与托管</a><a href="#s30">16. 平衡机制（标准局起）</a><a href="#s31">17. 奖池和亚马逊云科技</a><a href="#s32">18. 保留卡与标记</a><a href="#s33">19. Impaired 状态</a><a href="#s34">20. Health 事件卡（机会卡，30 张 + 玩法 DLC 9 张 + 代理商 3 张 + 扩展包 10 张）</a><a href="#s36">21. re:Invent 卡（命运卡，38 张 + 玩法 DLC 9 张 + 代理商 6 张）</a><a href="#s37">22. 角色卡</a><a href="#s38">23. 有效架构</a><a href="#s39">24. 胜利条件</a><a href="#s40">25. 边玩边答题</a><a href="#s41">26. 术语速查</a><a href="#s42">27. 联机与网页版功能</a><a href="#s44">28. 高可用归类与和现实不一样的地方</a><a href="#s47">29. DLC 扩展包与开关</a><a href="#s56">30. 地狱模式</a><a href="#s57">31. 各模式数字对照</a><a href="#s58">32. 平衡数据（电脑玩家对打模拟）</a><a href="#s59">附录：题库与答案（边玩边答题）</a><a href="#s73">附录：认证题库 DLC（原创练习题，按官方考试指南的考点出）</a></nav>
+<nav class="toc"><a href="#s1">1. 配件</a><a href="#s2">2. 开局与难度档</a><a href="#s3">3. 回合流程</a><a href="#s4">4. 棋盘（48 格）</a><a href="#s5">5. 服务类型</a><a href="#s6">6. 购买与过路费</a><a href="#s7">7. 升级</a><a href="#s12">8. 每个服务的特性和升级</a><a href="#s23">9. 运行费与请求费</a><a href="#s24">10. 下线与卖回亚马逊云科技</a><a href="#s25">11. 维护窗口与复盘</a><a href="#s26">12. 技术债（标准局起）</a><a href="#s27">13. 主动行动（完整局，每回合 1 个）</a><a href="#s28">14. 按需购买与 Spot 购买</a><a href="#s29">15. 交易、Savings Plans / RI 与托管</a><a href="#s30">16. 平衡机制（标准局起）</a><a href="#s31">17. 奖池和亚马逊云科技</a><a href="#s32">18. 保留卡与标记</a><a href="#s33">19. Impaired 状态</a><a href="#s34">20. Health 事件卡（机会卡，30 张 + 玩法 DLC 9 张 + 代理商 3 张 + 扩展包 10 张）</a><a href="#s36">21. re:Invent 卡（命运卡，50 张 + 玩法 DLC 9 张 + 代理商 6 张）</a><a href="#s37">22. 角色卡</a><a href="#s38">23. 有效架构</a><a href="#s39">24. 胜利条件</a><a href="#s40">25. 边玩边答题</a><a href="#s41">26. 术语速查</a><a href="#s42">27. 联机与网页版功能</a><a href="#s44">28. 高可用归类与和现实不一样的地方</a><a href="#s47">29. DLC 扩展包与开关</a><a href="#s56">30. 地狱模式</a><a href="#s57">31. 各模式数字对照</a><a href="#s58">32. 平衡数据（电脑玩家对打模拟）</a><a href="#s59">附录：题库与答案（边玩边答题）</a><a href="#s73">附录：认证题库 DLC（原创练习题，按官方考试指南的考点出）</a></nav>
 </header>
 <section>
 <p>这份规则书给主持人用，包含全部规则、每张卡的效果、每个服务的升级和题库答案。玩家上手看「玩法手册」就够了。</p>
@@ -62,7 +62,7 @@
 </tr>
 <tr>
 <td>re:Invent 卡</td>
-<td>38（4 个玩法 DLC 另有 9 张，代理商模式另有 6 张）</td>
+<td>50（4 个玩法 DLC 另有 9 张，代理商模式另有 6 张）</td>
 </tr>
 <tr>
 <td>角色卡</td>
@@ -534,7 +534,7 @@
 <td>不受影响</td>
 </tr>
 </tbody></table></div>
-<p>&quot;实例型&quot;指 IaaS、PaaS、EKS 这几类，只有它们需要自己做多 AZ。例外：EBS 卷只能在一个 AZ 里，升级了也一样；ECS 服务默认就把任务尽量分散到多个 AZ（Fargate 也是），不算单 AZ。</p>
+<p>&quot;实例型&quot;指 IaaS、PaaS、EKS 这几类，只有它们需要自己做多 AZ。例外：EBS 卷只能在一个 AZ 里，升级了也一样；ECS 服务默认就把任务尽量分散到多个 AZ（Fargate 也是），不算单 AZ；抽到 re:Invent「用了 S3 Express One Zone」的那一圈，你的 S3 也算单 AZ。</p>
 <p>这里的&quot;按用量&quot;指按请求数、存储量、扫描量这类实际用量收费：主人每次收到过路费交 15% 请求费。按存储量或按个数收月费的（S3、EFS、ECR、Route 53、WAF）另有每圈 $5 固定月费；KMS 升到客户托管密钥（第 1 级）后才有，只用亚马逊云科技托管密钥时不收。见第 9 节。</p>
 <hr>
 </section>
@@ -589,7 +589,7 @@
 </li>
 <li><p>Impaired 状态的服务不收过路费。新账户保护期（标准局、完整局和学习模式的前 2 轮；入门局、娱乐模式、地狱模式没有）每次过路费最多 $50。</p>
 </li>
-<li><p><strong>不买就是不买</strong>：落地的人不买（或买不起），这块服务留在亚马逊云科技，别人不能竞价抢走，等下一个落上来的人再决定。Spot 只在自己落地购买时用（见上一条）；已经是 Spot 的服务，别人落上来可以猜一个价来抢，比主人的出价多出原价的 10% 就抢走，抢走时不付这次的过路费。</p>
+<li><p><strong>不买就是不买</strong>：落地的人不买（或买不起），这块服务留在亚马逊云科技，别人不能竞价抢走，等下一个落上来的人再决定。Spot 只在自己落地购买时用（见上一条）；已经是 Spot 的服务，别人落上来可以猜一个价来抢，比主人的出价多出原价的 10% 就抢走，抢走时不付这次的过路费；主人手上有保留卡「Spot 中断通知」的，这次自动用掉保住，抢的人出价不扣钱、照常付过路费。</p>
 </li>
 <li><p><strong>花钱抽 re:Invent 卡</strong>：自己回合里，掷骰子之前或之后都可以花总资产的 4%（取整到 $10，最低 $50）抽一张 re:Invent 卡，每回合一次；在维护窗口里不能抽。越有钱抽卡越贵。掷骰子前抽到移动卡就照着走、结算落点，之后照常掷骰子。</p>
 </li>
@@ -2448,12 +2448,13 @@
 <section>
 <h2 id="s32">18. 保留卡与标记</h2>
 <ul>
-<li>保留卡抽到后放在面前，用掉后翻面留着，不回牌堆。共 6 种：<ul>
+<li>保留卡抽到后放在面前，用掉后翻面留着，不回牌堆。共 7 种：<ul>
 <li><strong>Enterprise Support</strong>：免费离开维护窗口，或抵消一张任意 Health 事件卡。</li>
 <li><strong>Spot 容量</strong>：下次 Spot 购买时自动用掉，最低出价降到原价的 10%。</li>
 <li><strong>Cost Explorer</strong>：踩到账单格（忘关的 EC2、NAT Gateway 账单）时用掉免交一次，或抵消一张「月底账单爆了」。</li>
 <li><strong>MAP 迁移加速</strong>：下次买 IaaS、PaaS 或容器服务时用掉，打 7 折。</li>
 <li><strong>Workshop 动手实验</strong>：下一次答题答错了，算你答对（落地答题、被对手出题考、抽查都算）。</li>
+<li><strong>Spot 中断通知</strong>：下次你的 Spot 服务被别人出价抢走（对方的出价已经压过你）时自动用掉，这次保住，对方出价不扣钱、照常付过路费。</li>
 <li><strong>根因在上游</strong>：下次抽到 Health 事件时，可以把它甩给另一位玩家承受（他对这张卡免疫的话就作废）；选了不甩就留着下次用。甩过去的是 #6「Root 密钥被推到了 GitHub」时，进维护窗口的是他，你这回合掷出的对子照样再掷一次。</li>
 </ul>
 </li>
@@ -2939,7 +2940,7 @@
 <hr>
 </section>
 <section>
-<h2 id="s36">21. re:Invent 卡（命运卡，38 张 + 玩法 DLC 9 张 + 代理商 6 张）</h2>
+<h2 id="s36">21. re:Invent 卡（命运卡，50 张 + 玩法 DLC 9 张 + 代理商 6 张）</h2>
 <ul>
 <li>落在 re:Invent 格时抽一张，照卡上执行。大多是好事：拿钱、免费升级、移动到有利的位置。</li>
 <li>标着&quot;保留卡&quot;的放在自己面前，到需要时再用；用掉后翻面留着，不回牌堆。</li>
@@ -2950,6 +2951,7 @@
 保留卡抽到照旧直接放到面前（不进手牌）。盲盒格的翻倍卡、User Group 活动三选一选中的卡已经定了怎么用，照旧马上执行。网页版里电脑玩家一律马上用。</li>
 <li><strong>打出手牌</strong>：在自己的回合里、能花钱抽 re:Invent 卡的时候（掷骰子前后都行，在维护窗口里不行），可以对手牌里的任意一张：① <strong>打出</strong>：亮给大家，按这时的局面照卡上执行，再放进弃牌堆；② <strong>卖掉</strong>：放进弃牌堆，领 $50（按这时的卡牌倍率）；③ <strong>弃牌走 1–3 格</strong>：放进弃牌堆，自己选往前走 1、2 或 3 格，落点照常结算（能买、付过路费都照常），<strong>每回合只能走一次</strong>。抽到时用不上的卡（比如没有能升级的服务、没地方可飞，只能「改领 $X」）就是留着这时候用的。
 破产时手牌不给债主，直接放进弃牌堆；联机时被房主移出房间、座位交给电脑的，手牌也放进弃牌堆（日志只写张数）。网页联机版里别人的设备收不到你手牌的卡号，弃牌堆里是哪几张也收不到（只知道有几张），同一台设备轮流玩时请自觉别偷看。</li>
+<li><strong>「这一圈」和「下次经过 Startup 扶持」</strong>：卡上写「这一圈」的（#55、#57），从抽到起管到你下次经过 Startup 扶持为止，过了起点就失效（往回绕过起点不算）；写「下次经过 Startup 扶持时运行费……」的（#56、#58、#60），只管下一次，和减半卡、RI、Savings Plans 叠着算（先扣 RI，再减半，再打这个折）。网页里玩家卡上会挂着这些效果。</li>
 <li>牌堆抽完重新洗牌时，标准局起触发&quot;旧版本停止支持&quot;（第 16 节）。</li>
 <li>牌堆和弃牌堆都空了（卡都在各家手牌里，人多时会碰到）：抽 re:Invent 卡的改领 $50；User Group 活动选抽 3 张的有几张选几张，一张都没有改领 $100。</li>
 </ul>
@@ -3279,6 +3281,78 @@
 <td>DMS Schema Conversion 用生成式 AI 转换存储过程</td>
 <td>你的 DMS 免费升一级（已经升满的领 $100）；没有 DMS 的领 $50</td>
 <td>DMS Schema Conversion 把 Oracle、SQL Server 的表结构和存储过程转换成 PostgreSQL、MySQL 能用的；规则转不了的代码可以交给生成式 AI 辅助转换，转完要人复核</td>
+</tr>
+<tr>
+<td>54</td>
+<td>用 Kiro 做规格驱动重构</td>
+<td>清掉 1 个技术债（清债要停机：进维护窗口停一轮，名下服务一起下线一轮）；没有技术债就领 $100（这笔可换移动）</td>
+<td>Kiro 先把需求写成规格和任务清单，再按任务生成代码和测试；重构遗留代码时有测试兜底，不容易引入回归</td>
+</tr>
+<tr>
+<td>55</td>
+<td>上了 Lambda SnapStart</td>
+<td>这一圈（到你下次经过 Startup 扶持为止）你的 Lambda 过路费 +30%；没有 Lambda 就领 $50</td>
+<td>SnapStart 在函数初始化完以后给执行环境打快照，冷启动时直接从快照恢复，Java 这类启动慢的函数冷启动从几秒降到亚秒级</td>
+</tr>
+<tr>
+<td>56</td>
+<td>换上 Graviton4 实例</td>
+<td>下次经过 Startup 扶持时，你的 EC2、RDS 运行费减半；两块都没有就领 $50</td>
+<td>Graviton4 同样的性能价格更低：应用和镜像编成 arm64 就能换，RDS 这类托管数据库直接改实例类型</td>
+</tr>
+<tr>
+<td>57</td>
+<td>用了 S3 Express One Zone</td>
+<td>这一圈你的 SageMaker AI、Bedrock 过路费 ×1.5；代价：这一圈你的 S3 算单 AZ（「一个 AZ 断电了」会打中它）。SageMaker AI、Bedrock 都没有就领 $50</td>
+<td>S3 Express One Zone 是单 AZ 的高性能存储桶（目录桶），和计算放在同一个 AZ，训练数据读取延迟降到个位数毫秒；代价是数据只存在一个 AZ 里</td>
+</tr>
+<tr>
+<td>58</td>
+<td>Aurora Serverless v2 缩到 0</td>
+<td>下次经过 Startup 扶持时，你的 Aurora 只交存储那部分运行费（和下线时一样，$5）；没有 Aurora 就领 $50</td>
+<td>Aurora Serverless v2 可以把最小容量设成 0：一段时间没有连接就自动暂停，暂停期间只收存储费，来了连接再自动恢复</td>
+</tr>
+<tr>
+<td>59</td>
+<td>CloudWatch Application Signals 画出调用链</td>
+<td>你名下一块 Impaired 的服务立刻恢复（有几块就恢复过路费最高的那块），再领 1 个可用性类复盘标记；没有 Impaired 的也领标记</td>
+<td>Application Signals 自动发现服务之间的调用关系，画出服务地图，按延迟、错误率一眼看出是哪个下游拖慢了整条链路</td>
+</tr>
+<tr>
+<td>60</td>
+<td>在 Organizations 里共享 Savings Plans</td>
+<td>你和下一位玩家下次经过 Startup 扶持时，运行费都打 75 折</td>
+<td>同一个组织里的账户默认共享 Savings Plans 和 RI 的折扣：一个账户用不完的承诺额，自动抵扣别的账户的用量</td>
+</tr>
+<tr>
+<td>61</td>
+<td>你在 re:Post 的回答被采纳</td>
+<td>每位其他玩家付你 $20</td>
+<td>你帮别人解决了跨账户 IAM 角色的问题：目标账户角色的信任策略里写对 Principal，调用方再有 sts:AssumeRole 权限；回答被提问的人标成 Accepted</td>
+</tr>
+<tr>
+<td>62</td>
+<td>和对手合办 User Group 技术分享</td>
+<td>选一名对手，你们俩各从亚马逊云科技领 $100</td>
+<td>两家一起讲迁移踩坑的经验，台下的客户两边都想聊；各地 User Group 都欢迎会员报名上台分享</td>
+</tr>
+<tr>
+<td>63</td>
+<td>考过 Machine Learning Engineer – Associate</td>
+<td>抽一道 AI 题：答对领 $150，答错领 $30</td>
+<td>Machine Learning Engineer – Associate 考的是在 SageMaker AI 上准备数据、训练、部署和监控模型；认证有效期 3 年</td>
+</tr>
+<tr>
+<td>64</td>
+<td>Activate 给了额外 Credits</td>
+<td>【可换移动】现金低于 $500 领 $300，否则领 $100</td>
+<td>早期创业公司现金流紧，Activate 按融资阶段追加 Credits，具体以官网为准</td>
+</tr>
+<tr>
+<td>65</td>
+<td>收到 Spot 中断前 2 分钟通知（保留卡）</td>
+<td>下次你的 Spot 服务要被别人出价抢走时自动用掉，这次保住；对方照常付过路费</td>
+<td>用 EventBridge 规则接住 Spot 实例的两分钟中断通知，及时把任务切到别的实例上；Auto Scaling 的容量再平衡还能更早换掉有风险的实例</td>
 </tr>
 </tbody></table></div>
 <hr>

@@ -12,6 +12,7 @@ import * as m9 from './ui/03b-lang-menu.js';
 import * as m10 from './rules/04-roles-combos-cards.js';
 import * as m11 from './rules/05-dlc.js';
 import * as m72 from './rules/05c-inc26.js';
+import * as m73 from './rules/05d-rei26.js';
 import * as m12 from './rules/06-qbank.js';
 import * as m13 from './rules/06b-register.js';
 import * as m14 from './engine/07-state.js';
@@ -76,7 +77,7 @@ import * as m71 from './core/43-boot.js';
 // 开发时（npm run dev）的兼容层：拆成模块以前顶层名字都是全局的，测试（page.evaluate）和控制台调试直接用 S、MP、newGame……
 // 这里把每个模块导出的名字挂到 window 上：读的是模块里的实时值，有 __set_X 的变量赋值时走 setter；浏览器自带、不能改的属性跳过。
 // 构建出来的单文件是普通 <script>，名字本来就是全局的，不经过这里。游戏代码自己不依赖这一层。
-for (const ns of [m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m72, m12, m13, m14, m15, m16, m17, m18, m19, m20, m21, m22, m23, m24, m25, m26, m27, m28, m29, m30, m31, m32, m33, m34, m35, m36, m37, m38, m39, m40, m41, m42, m43, m44, m45, m46, m47, m48, m49, m50, m51, m52, m53, m54, m55, m56, m57, m58, m59, m60, m61, m62, m63, m64, m65, m66, m67, m68, m69, m70, m71]) for (const k of Object.keys(ns)) {
+for (const ns of [m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m72, m73, m12, m13, m14, m15, m16, m17, m18, m19, m20, m21, m22, m23, m24, m25, m26, m27, m28, m29, m30, m31, m32, m33, m34, m35, m36, m37, m38, m39, m40, m41, m42, m43, m44, m45, m46, m47, m48, m49, m50, m51, m52, m53, m54, m55, m56, m57, m58, m59, m60, m61, m62, m63, m64, m65, m66, m67, m68, m69, m70, m71]) for (const k of Object.keys(ns)) {
   if (k.startsWith('__set_')) continue;
   const d = Object.getOwnPropertyDescriptor(window, k); if (d && !d.configurable) continue;
   const set = ns['__set_' + k];

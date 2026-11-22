@@ -4,7 +4,7 @@ import { $, BOT, PAWN, SIM, awsImg, esc, usd } from '../core/02-util.js';
 import { OFFLINE_MIN, SQ, capU, lvFull, lvName } from '../rules/03-services.js';
 import { CARDE, CARDN, CATS, COMBOS, INC, REI, comboOpen, roleOf, rsRate, slotOpen, viaOf } from '../rules/04-roles-combos-cards.js';
 import { dlcOn } from '../rules/05-dlc.js';
-import { F, P, S, active, comboMiss, cur, debtOf, hasCombo, logBody, logRow, ownedBy, ownsGroup, wildFits, wildFree, wildOf, wildTargets, winWA } from '../engine/07-state.js';
+import { F, P, S, active, comboMiss, cur, debtOf, hasCombo, lapFx, logBody, logRow, ownedBy, ownsGroup, wildFits, wildFree, wildOf, wildTargets, winWA } from '../engine/07-state.js';
 import { commitsOf, netWorth, opCost, runCost, valBreak, valTip, valuation } from '../engine/08c-costs.js';
 import { canOnline, capInfo, chainTxt, downWhy, offRounds, spotMine, turnKey, upgradeInfo } from '../engine/09-rent.js';
 import { mainBtn, sameEl, viewOpen } from './10-modal.js';
@@ -310,6 +310,9 @@ function plCard(p, mine, offSeats) {
   if (p.immuneTill >= S.round) fx.push(_tf(4340, "监管沙盒 · 到第 {$0} 轮", p.immuneTill));
   if (p.aiBoostTill >= S.round) fx.push(_tf(4341, "AI 组 ×2 · 到第 {$0} 轮", p.aiBoostTill));
   if (p.billFree > 0) fx.push(_tf(4342, "推广 Credits：{$0}经过 Startup 扶持运行费全免", p.billFree > 1 ? _tf(1834, "接下来 {$0} 次", p.billFree) : _t(1835, "下次")));
+  lapFx(p, 'rent').forEach(x => fx.push(_tf(5548, "{$0}：{$1} 过路费 ×{$2} · 这一圈", REI[x.c].n, x.ks.map(k => SQ.find(q => q.k === k).n).join(_t(349, "、")), x.m)));
+  lapFx(p, 'az').forEach(x => fx.push(_tf(5549, "{$0}：{$1} 这一圈算单 AZ", REI[x.c].n, x.ks.map(k => SQ.find(q => q.k === k).n).join(_t(349, "、")))));
+  [...new Set((p.runCut || []).map(x => x.c))].forEach(c => fx.push(_tf(5550, "{$0}：下次经过 Startup 扶持运行费打折", REI[c].n)));
   if (p.runLaps > 0) fx.push(_tf(4343, "{$0}运行费{$1} · 还剩 {$2} 圈", skn, p.runMul ? _t(2895, "减半") : _t(2896, "全免"), p.runLaps));
   if (p.subsTurns > 0) fx.push(_tf(4344, "{$0}订阅费 ${$1} · 还剩 {$2} 次", skn, p.subsAmt, p.subsTurns));
   const rows = [];

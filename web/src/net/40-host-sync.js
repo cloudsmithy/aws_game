@@ -58,22 +58,22 @@ export const MP = {
     if (Object.keys(this.pendingJoins).length >= 4) return this.reject(conn, _t(5245, "待确认请求已满，请稍后再试"));
     const id = this.newKey(), x = { conn, m, seat, previous, join, game: S };
     this.pendingJoins[id] = x; conn._pending = id;
-    this.send(conn, { t: 'pending', why: join ? _t(5445, "游戏已经开始，等房主同意你中途加入。") : _t(5246, "没有该座位的钥匙，等待房主确认身份。请联系房主确认入座请求。") });
+    this.send(conn, { t: 'pending', why: join ? _t(5474, "游戏已经开始，等房主同意你中途加入。") : _t(5246, "没有该座位的钥匙，等待房主确认身份。请联系房主确认入座请求。") });
     x.timer = setTimeout(() => { if (this.pendingJoins[id] === x) { delete this.pendingJoins[id]; this.reject(conn, _t(5247, "入座确认超时，请重试")); this.refreshMembers(); } }, 60000);
     this.refreshMembers();
     // 中途加入直接弹窗问房主（查资料那一层，不打断对局里的弹窗）；房主正开着别的查资料窗就不顶掉，留在成员栏的「确认入座」按钮上
-    if (join) { if ($('#vmodal').hidden) this.reviewJoin(id); else toast(_tf(5446, "{$0} 想中途加入，点「确认入座」处理", m.name)); }
+    if (join) { if ($('#vmodal').hidden) this.reviewJoin(id); else toast(_tf(5475, "{$0} 想中途加入，点「确认入座」处理", m.name)); }
   },
   async reviewJoin(id) {
     const x = this.pendingJoins[id]; if (this.role !== 'host' || !x) return;
     const ok = await ask(x.join
-      ? { local: true, view: true, cancelable: true, title: _t(5447, "中途加入"), html: _tf(5448, "<p>{$0} 想中途加入，同意吗？</p><p class=\"muted\">同意后排在最后一位，从下一轮开始走：站在起点，没有服务和卡牌，起始资金是还在场各家总资产的平均数。</p>", esc(x.m.name)), buttons: [{ label: _t(3188, "同意"), value: true, cls: 'pri' }, { label: _t(3189, "拒绝"), value: false }] }
+      ? { local: true, view: true, cancelable: true, title: _t(5476, "中途加入"), html: _tf(5477, "<p>{$0} 想中途加入，同意吗？</p><p class=\"muted\">同意后排在最后一位，从下一轮开始走：站在起点，没有服务和卡牌，起始资金是还在场各家总资产的平均数。</p>", esc(x.m.name)), buttons: [{ label: _t(3188, "同意"), value: true, cls: 'pri' }, { label: _t(3189, "拒绝"), value: false }] }
       : { local: true, view: true, cancelable: true, title: _t(5248, "确认玩家身份"), html: _tf(5249, "<p>{$0} 请求接管玩家 {$1}，但没有原座位钥匙。请通过语音或其他已知渠道确认是本人；仅名字相同不能证明身份。</p>", esc(x.m.name), x.seat + 1), buttons: [{ label: _t(5250, "已确认本人，允许入座"), value: true, cls: 'pri' }, { label: _t(3189, "拒绝"), value: false }] });
     if (this.pendingJoins[id] !== x) return;
     clearTimeout(x.timer); delete this.pendingJoins[id]; delete x.conn._pending;
     // 中途加入不看座位号有没有变：同意时 admit 重新查一遍局有没有结束、座位满没满，排到那时的最后一位
     const moved = !x.join && ((this.seats[x.seat] || null) !== x.previous || (x.previous && x.previous.online));
-    if (!ok || this.role !== 'host' || !x.conn.open || x.conn._closed || S !== x.game || moved) this.reject(x.conn, x.join && !ok ? _t(5449, "房主没有同意你中途加入") : _t(5251, "入座未获批准或座位已变化，请重试"));
+    if (!ok || this.role !== 'host' || !x.conn.open || x.conn._closed || S !== x.game || moved) this.reject(x.conn, x.join && !ok ? _t(5478, "房主没有同意你中途加入") : _t(5251, "入座未获批准或座位已变化，请重试"));
     else this.admit(x.conn, x.m, x);
     this.refreshMembers();
   },};
