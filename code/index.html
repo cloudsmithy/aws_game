@@ -280,6 +280,14 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:var(--surface-soft
 .qbox{border-left:3px solid var(--green);background:var(--surface-muted);padding:8px 12px;margin:0 0 12px}
 .qbox.bad{border-color:var(--red);background:var(--danger-bg)}
 .qbox p{margin:4px 0}
+/* 答题结果和题目同一页（issue #32）：选项还是原来的按钮，只是不能点；不要灰掉，正确的标绿、选错的标红，别的照常 */
+.box.qdone .qbox{margin:12px 0 0}
+.box.qdone .btns button.qopt:disabled{cursor:default;color:var(--ink);background:var(--surface);border-color:var(--line)}
+.box.qdone .btns button.qopt.ok:disabled{border-color:var(--green);background:var(--surface-muted);font-weight:700}
+.box.qdone .btns button.qopt.bad:disabled{border-color:var(--red);background:var(--danger-bg)}
+.box.qdone .btns button.qopt em{margin-left:auto;padding-left:10px;font-style:normal;font-size:12px;font-weight:700}
+.box.qdone .btns button.qopt.ok em{color:var(--green)}.box.qdone .btns button.qopt.bad em{color:var(--red)}
+.box.qdone .btns button.pri{justify-content:center;margin-top:6px}
 .inps label{display:flex;align-items:center;gap:8px;margin:7px 0}
 .inps label.cb{cursor:pointer}
 .inps input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue)}
@@ -3221,7 +3229,7 @@ const LANG_KEY = 'aws-tycoon-lang';   // 记住上次选的语言：根目录 in
 // 有哪些语言：每种语言用它自己的写法（不翻译）。中文版在 code/index.html，别的语言在 code/<代码>/index.html（tools/i18n.mjs build <代码> 按 i18n/<代码>.json 生成）。
 // 以后加语言：这里加一行，再出一份 i18n/<代码>.json
 let LANGS = __rv(() => ([{ code: 'zh', name: _t(341, "简体中文") }, { code: 'en', name: 'English' }, { code: 'ja', name: _t(342, "日本語") }]), v => { LANGS = v; }, () => LANGS);
-let GAME_VERSION = __rv(() => ({ major: 1, round: 21, name: _t(5661, "第二十一轮"), title: _t(5662, "中途加入、埋 Health 卡、12 张新卡、修 27 处问题"), commits: 169, changes: 515, since: '2026-10-20', build: '6c166e7', time: '2026-11-22 07:30' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
+let GAME_VERSION = __rv(() => ({ major: 1, round: 21, name: _t(5661, "第二十一轮"), title: _t(5662, "中途加入、埋 Health 卡、12 张新卡、修 27 处问题"), commits: 169, changes: 516, since: '2026-10-20', build: '6c166e7', time: '2026-11-22 07:30' }), v => { GAME_VERSION = v; }, () => GAME_VERSION);
 let SQ = __rv(() => (LAYOUT.map(k => SVC[k] ? { t: 'prop', k, icon: k, ...SVC[k] } : UTIL[k] ? { t: 'util', k, icon: k, ...UTIL[k] } : { k, ...SPECIAL[k] })), v => { SQ = v; }, () => SQ);
 const IX = {}; SQ.forEach((s, i) => { if (!(s.k in IX)) IX[s.k] = i; });
 const GRP = g => SQ.map((s, i) => s.g === g ? i : -1).filter(i => i >= 0);
@@ -4214,7 +4222,8 @@ function pickQuestion(g) {
 async function askQuestion(q, id, why, { local = false, skip = true, again = false, skipLabel = _t(2444, "不答了，按原价算"), inline = false } = {}) {
   const opts = shuffle(q.o.map((t, k) => ({ t, ok: k === 0 })));
   // 按钮的值是第几个选项（结果里要标出选的是哪个）；qok 给电脑认对错，联机时不会发给远端
-  const k = await UI.ask({ local, cls: 'quiz', title: qLabel(id), html: `${why ? `<p class="muted">${why}</p>` : ''}${again ? _t(2445, "<p class=\"wbtag\">错题本里的题，再练一次</p>") : ''}<p class="q">${q.q}</p>`, buttons: [...opts.map((o, n) => ({ label: o.t, value: n, qok: o.ok })), ...(skip ? [{ label: skipLabel, value: 'skip', cls: 'skipq' }] : [])] });
+  const head = `${why ? `<p class="muted">${why}</p>` : ''}${again ? _t(2445, "<p class=\"wbtag\">错题本里的题，再练一次</p>") : ''}<p class="q">${q.q}</p>`;
+  const k = await UI.ask({ local, cls: 'quiz', title: qLabel(id), html: head, buttons: [...opts.map((o, n) => ({ label: o.t, value: n, qok: o.ok })), ...(skip ? [{ label: skipLabel, value: 'skip', cls: 'skipq' }] : [])] });
   if (k === 'skip') return k;
   let ok = !!(opts[k] && opts[k].ok); const w = wbMark(id, ok, local), mine = !ok && opts[k] ? opts[k].t : '';
   // 联机局里别人也看得到这个结果、电脑答题时看屏幕的也不是答题人：「你选的」改写答题人的名字。单机热座答题人就坐在屏幕前，照旧写「你」
@@ -4226,8 +4235,11 @@ async function askQuestion(q, id, why, { local = false, skip = true, again = fal
   const wsc = !ok && !local && qp && availCard(qp, 'WS'); if (wsc) { wsc.used = true; ok = true; log(_tf(2452, "🧪 {$0} 答错了，用掉「{$1}」：这题算答对", nm(qp), CARDN.WS)); }
   const okT = wsc ? _t(2453, "答错了，Workshop 卡算你答对") : ok ? _t(2454, "答对了") : _t(2455, "答错了");
   if (inline) return { ok, html: `<div class="qbox ${ok ? 'ok' : 'bad'}" data-desc><p>${_tf(2458, "<b>{$0}</b>：正确答案是 <b>{$1}</b>{$2}", okT, esc(q.o[0]), mine ? _tf(2457, "，{$0}选的是「{$1}」", named ? nm(qp) + ' ' : _t(2456, "你"), esc(mine)) : '')}</p>${tail}</div>` };
-  // 结果窗沿用题目窗的版式：题干照写，选项改成不能点的行；读屏念的是这几行（data-desc），不再把题干念一遍
-  await UI.ask({ local, cls: 'quiz', title: okT, html: `<p class="qs">${q.q}</p><ul class="qres" data-desc>${opts.map((o, n) => `<li class="${o.ok ? 'ok' : n === k ? 'bad' : ''}">${esc(o.t)}${o.ok ? _t(2459, "<em>正确答案</em>") : n === k ? _tf(2460, "<em>{$0}选的</em>", named ? qp.name + ' ' : _t(2456, "你")) : ''}</li>`).join('')}</ul>${tail}`, buttons: [{ label: _t(2461, "继续"), value: 1, cls: 'pri' }] });
+  // 结果和题目在同一页（issue #32）：标题、说明、题干原样不动，选项还是那几个按钮、顺序和位置不变，只是不能点了，
+  // 正确的标绿、选错的标红；对错和解析接在题干下面，最后一个按钮「继续」。读屏念对错那一块（data-desc），不再把题干念一遍
+  const who = named ? qp.name + ' ' : _t(2456, "你");
+  await UI.ask({ local, cls: 'quiz qdone', title: qLabel(id), html: `${head}<div class="qbox ${ok ? 'ok' : 'bad'}" data-desc><p><b>${okT}</b>${mine ? _tf(5663, "：{$0}选的是「{$1}」", who, esc(mine)) : ''}</p>${tail}</div>`,
+    buttons: [...opts.map((o, n) => ({ label: `${o.t}${o.ok ? _t(2459, "<em>正确答案</em>") : n === k ? _tf(2460, "<em>{$0}选的</em>", who) : ''}`, value: 'q' + n, disabled: true, cls: o.ok ? 'qopt ok' : n === k ? 'qopt bad' : 'qopt' })), { label: _t(2461, "继续"), value: 1, cls: 'pri' }] });
   return ok;
 }
 // 刷题模式：不玩棋盘，只刷一套题，最后按考点给正确率

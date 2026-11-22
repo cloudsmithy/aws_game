@@ -5688,5 +5688,6 @@
  "埋在 {$0}：{$1}": "Buried on {$0}: {$1}",
  "埋了 {$0} 张 Health 卡：埋在哪、是哪张只有 {$1} 自己知道": "{$0} buried Health card(s): only {$1} knows where and which",
  "第二十一轮": "Round 21",
- "中途加入、埋 Health 卡、12 张新卡、修 27 处问题": "Mid-game join, buried Health cards, 12 new cards, 27 fixes"
+ "中途加入、埋 Health 卡、12 张新卡、修 27 处问题": "Mid-game join, buried Health cards, 12 new cards, 27 fixes",
+ "：{$0}选的是「{$1}」": ": {$0} picked “{$1}”"
 }
