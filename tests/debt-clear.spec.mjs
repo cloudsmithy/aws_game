@@ -26,12 +26,12 @@ test('花钱重构：清掉 1 个技术债，进维护窗口，名下服务全�
   expect(r).toEqual({ ok: true, debt: 1, jail: 0, pos: true, cat: 'rf', down: [0, 0, 0], act: false, rent: 0 });
 });
 
-test('维护窗口：清技术债进来的只能停一轮（付 $50 也不行），出来不写复盘、不加技术债；服务到自己下回合开始恢复', async ({ page }) => {
+test('维护窗口：清技术债进来的只能停一轮（付钱也不行），出来不写复盘、不加技术债；服务到自己下回合开始恢复', async ({ page }) => {
   await start(page);
   await page.evaluate(() => { const p = S.players[0]; p.techDebt = 1; payRefactor(p); });
   // 别人的回合开始，服务不恢复
   expect(await page.evaluate(() => { downTick(S.players[1]); return S.props[IX.ec2].ddos; })).toBe(0);
-  // 轮到自己：回合开始服务恢复；在维护窗口里付 $50 被当成停一轮
+  // 轮到自己：回合开始服务恢复；在维护窗口里付钱被当成停一轮
   const r = await page.evaluate(async () => {
     const p = S.players[0]; downTick(p); const back = active(p, IX.ec2);
     S.cur = 0; S.phase = 'roll'; S.turnStartAt = 0; const cash = p.cash, coe = p.coe.length;
@@ -39,6 +39,21 @@ test('维护窗口：清技术债进来的只能停一轮（付 $50 也不行）
     return { back, jail: p.jail, cash: p.cash - cash, coe: p.coe.length - coe, debt: p.techDebt };
   });
   expect(r).toEqual({ back: true, jail: null, cash: 0, coe: 0, debt: 0 });
+});
+
+test('事件送进维护窗口：付 $500（BAL.jailFee）马上出来，钱进奖池；现金不够按钮灰掉', async ({ page }) => {
+  await start(page);
+  await page.evaluate(() => { const p = S.players[0]; p.jail = 0; p.jailCat = 'sec'; p.pos = IX.jail; p.cash = 499; UI.render(); });
+  await expect(page.locator('[data-act="toast"][data-arg="现金不够 $500"]').first()).toHaveText('付 $500 出来，照常走');
+  await page.evaluate(() => { S.players[0].cash = 3000; UI.render(); });
+  await expect(page.locator('[data-act="jailAct"][data-arg="pay"]').first()).toHaveText('付 $500 出来，照常走');
+  const r = await page.evaluate(async () => {
+    const p = S.players[0], cash = p.cash, pot = S.pot; S.turnStartAt = 0;
+    UI.modal = async () => ({ v: false, inp: {} });   // 跳过写复盘
+    await jailAct('pay');
+    return { fee: BAL.jailFee, cash: cash - p.cash, pot: S.pot - pot, jail: p.jail };
+  });
+  expect(r).toEqual({ fee: 500, cash: 500, pot: 500, jail: null });
 });
 
 test('攒满 3 个技术债：大重构交 $300、清掉 3 个，同样进维护窗口、服务下线', async ({ page }) => {

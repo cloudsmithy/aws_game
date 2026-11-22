@@ -1,6 +1,6 @@
 import { _t, _tf, _tr } from '../core/01-i18n-runtime.js';
 import { $, SIM_AI, shuffle } from '../core/02-util.js';
-import { N, OWNABLE, SQ } from '../rules/03-services.js';
+import { BAL, N, OWNABLE, SQ } from '../rules/03-services.js';
 import { DLC } from '../rules/05-dlc.js';
 import { MAX_PLAYERS, S, cur, logBody, ownedBy } from '../engine/07-state.js';
 import { netWorth, valBreak, valuation } from '../engine/08c-costs.js';
@@ -71,7 +71,7 @@ async function simGame(n, diff) {
       // 像真人一样：停在自己的服务上、钱够就升级；act=ai 时走游戏里电脑的同一份代码
       if (SIM_AI) aiBuild(p); else { const i = landHere(p); if (i != null) { const u = upgradeInfo(p, i, true); if (u.ok && p.cash - u.total >= simReserve * 2) { doUpgrade(p, i, true); S.landAct.used = true; } } }
       if (sent()) S.phase = 'post';
-      else if (p.jail !== null) { if (SIM_AI) { await aiRoleSkill(p); await resolveDebts(); } if (p.alive && cur() === p) await jailAct(p.cash > 600 ? 'pay' : 'stay'); }
+      else if (p.jail !== null) { if (SIM_AI) { await aiRoleSkill(p); await resolveDebts(); } if (p.alive && cur() === p) await jailAct(p.cash - BAL.jailFee >= 550 ? 'pay' : 'stay'); }
       else { if (SIM_AI) { S.phase = 'busy'; S.uiPrev = 'roll'; S.nextPhase = null; await aiRoleSkill(p); await aiSpeed(p); if (sent()) S.nextPhase = 'post'; await resolveDebts(); S.phase = S.nextPhase || 'roll'; S.nextPhase = null; } if (S.phase === 'roll' && cur() === p && p.alive) await doRoll(); }
     }
     else if (S.phase === 'post') { if (SIM_AI) aiBuild(cur()); await endTurn(); }

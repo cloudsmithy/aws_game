@@ -1,7 +1,7 @@
 import { AWSI } from '../data/icons.js';
 import { LANG, __rv, _t, _tf, _tr } from '../core/01-i18n-runtime.js';
 import { $, BOT, PAWN, SIM, awsImg, esc, usd } from '../core/02-util.js';
-import { OFFLINE_MIN, SQ, capU, lvFull, lvName } from '../rules/03-services.js';
+import { BAL, OFFLINE_MIN, SQ, capU, lvFull, lvName } from '../rules/03-services.js';
 import { CARDE, CARDN, CATS, COMBOS, INC, REI, comboOpen, roleOf, rsRate, slotOpen, viaOf } from '../rules/04-roles-combos-cards.js';
 import { dlcOn } from '../rules/05-dlc.js';
 import { F, P, S, active, comboMiss, cur, debtOf, hasCombo, lapFx, logBody, logRow, ownedBy, ownsGroup, wildFits, wildFree, wildOf, wildTargets, winWA } from '../engine/07-state.js';
@@ -12,7 +12,7 @@ import { capUpTxt, lvUpTxt } from '../engine/11b-rent-info.js';
 import { jailMax, mspFee } from '../engine/13-move.js';
 import { landHere } from '../engine/15-land.js';
 import { refactorCost, rfJailTxt, rfJailed } from '../engine/17-health.js';
-import { TRAP_MAX, buryOk, handOf, handOk, handWalked, incSendCost, incSendOk, reiBuyCost, reiLeft, trapsOf } from '../engine/18-reinvent.js';
+import { BURY_PICK, buryOk, handOf, handOk, handWalked, incSendCost, incSendOk, reiBuyCost, reiLeft, trapsOf } from '../engine/18-reinvent.js';
 import { canSkill, skillLine, skillMulTxt } from '../engine/21-skills.js';
 import { SPEED, SPEED_MAX } from '../engine/22-speed.js';
 import { CHA_COST, CHA_WIN, CH_COST, CH_WIN, canChallenge, canChallengeAll, chFoes, chaWait } from '../engine/25-trade.js';
@@ -106,7 +106,7 @@ export function playerBrief(p) {
   const row = (t, b = '', cls = '') => `<div class="todo ${cls}"><span>${t}</span>${b ? `<span class="tb">${b}</span>` : ''}</div>`;
   const out = [];
   if (rfJailed(p)) out.push(row(rfJailTxt(), '', 'hot'));
-  else if (p.jail !== null) out.push(row(_tf(4187, "在维护窗口里：付 $50 马上出来、照常掷骰子，或者停{$0}轮再出来", jailMax(p) > 1 ? _tf(4186, "满 {$0} ", jailMax(p)) : _t(2874, "一")), '', 'hot'));
+  else if (p.jail !== null) out.push(row(_tf(5681, "在维护窗口里：付 ${$1} 马上出来、照常掷骰子，或者停{$0}轮再出来", jailMax(p) > 1 ? _tf(4186, "满 {$0} ", jailMax(p)) : _t(2874, "一"), BAL.jailFee), '', 'hot'));
   else if (S.phase === 'roll') out.push(row(S.again ? _t(4188, "掷出了对子，再掷一次") : _t(4189, "先掷骰子"), '', 'hot'));
   const lh = S.phase === 'post' ? landHere(p) : null;
   if (lh != null) {
@@ -133,8 +133,8 @@ export function playerBrief(p) {
       btn(n >= 2 ? _t(4213, "指定一人") : _t(4214, "发给他"), 'incOne', p.cash >= one, tip(_tf(4216, "点了：{$0}花 ${$1} 让他抽一张 Health 卡。", n >= 2 ? _t(4215, "选一位对手，") : '', one)))
       + (n >= 2 ? btn(_t(4217, "随机一人"), 'incRand', p.cash >= one, tip(_tf(4218, "点了：花 ${$0}，随机挑一位对手抽一张。", one))) + btn(_tf(4219, "全场（${$0}）", one * 2), 'incAll', p.cash >= one * 2, tip(_tf(4220, "点了：花 ${$0}，从你的下一位开始，每位对手各抽一张。", one * 2))) : ''))); }
   if ((S.phase === 'roll' || S.phase === 'post') && buryOk(p)) { const one = incSendCost(p);
-    out.push(row(_tf(-1, "花 ${$0} 埋一张 Health 卡在自己停过的服务上，对手停上去就翻开（每回合一次；你埋了 {$1}/{$2} 张）", one, trapsOf(p).length, TRAP_MAX),
-      btn(_t(5653, "埋卡"), 'buryIncident', p.cash >= one, _tf(-1, "什么时候能点：自己的回合里，掷骰子前后都行，每回合一次。\n点了：花 ${$0} 从 Health 牌堆顶翻 3 张挑一张扣着，挑一块你这局停过的服务埋下去。对手停在那一格（经过不算）就翻开照常结算；你自己停上去没事。埋在哪、是哪张只有你知道；场上最多 {$1} 张。", one, TRAP_MAX)))); }
+    out.push(row(_tf(5689, "花 ${$0} 埋一张 Health 卡在自己停过的服务上，谁停上去就翻开（自己也算；每回合一次{$1}）", one, trapsOf(p).length ? _tf(5683, "；你已经埋了 {$0} 张", trapsOf(p).length) : ''),
+      btn(_t(5653, "埋卡"), 'buryIncident', p.cash >= one, _tf(5690, "什么时候能点：自己的回合里，掷骰子前后都行，每回合一次。\n点了：花 ${$0} 从 Health 牌堆顶翻 {$1} 张挑一张扣着，挑一块你这局停过的服务埋下去。谁停在那一格（经过不算）就翻开照常结算，你自己停上去也一样。埋在哪、是哪张只有你知道；场上埋几张不限。", one, BURY_PICK)))); }
   if ((S.phase === 'roll' || S.phase === 'post') && p.chTurn !== turnKey() && chFoes(p).length && (!p.chUsed || chFoes(p).length >= 2)) { const n = chFoes(p).length, all = n >= 2, w = chaWait(p);
     const oneTip = _tf(4222, "什么时候能点：自己的回合里，掷骰子前后都行；每局只能用一次，同一回合和考全场只能发动一个；现金至少 ${$0}{$1}。\n怎么用：选一位对手，按他所在那一格的色组从题库出一题，他在自己的设备上答。答对他拿走你 ${$2}，答错他赔你 ${$3}。不受卡牌倍率影响。", CH_COST, p.cash < CH_COST ? _tf(4221, "，你现在只有 ${$0}", p.cash) : '', CH_COST, CH_WIN);
     const allTip = _tf(4224, "什么时候能点：自己的回合里，至少两位对手；每 3 圈能用一次（按你经过 Startup 扶持的次数算，开局就能用一次）{$0}；同一回合和考一个人只能发动一个；现金至少 ${$1}（每位对手 ${$2}）{$3}。\n怎么用：从你的下一位开始按座位顺序，每位对手各答一道题。答对的拿走你 ${$4}，答错的赔你 ${$5}。不受卡牌倍率影响。", w ? _tf(4223, "，你还要再经过 {$0} 次", w) : '', CHA_COST * n, CHA_COST, p.cash < CHA_COST * n ? _tf(4221, "，你现在只有 ${$0}", p.cash) : '', CHA_COST, CHA_WIN);
@@ -262,7 +262,7 @@ function plCard(p, mine, offSeats) {
   const svcs = sg[''].map(svcBtn).join('') + ['off', 'imp', 'ddos', 'spot'].filter(k => sg[k].length).map(k => `<span class="svgrp ${k}"><span class="sgl tipx" tabindex="0" data-fk="sg${p.id}-${k}" title="${SV_GRP[k][1]}">${lb(SV_GRP[k][0])}</span>${sg[k].map(svcBtn).join('')}</span>`).join('');
   // 状态行：只写不是 0 的。要紧的（维护窗口、停几轮）在前，技能能发动时紧跟着写（不能发动的不写，角色那一行有技能名）
   const res = [], kv = [];
-  if (p.jail !== null) res.push(ri(_tf(4299, "在维护窗口 {$0}/{$1} 轮", p.jail, jailMax(p)), rfJailed(p) ? rfJailTxt() : _tf(4300, "付 $50 马上出来；或者停满 {$0} 轮自动出来；有 Enterprise Support 卡可以免费出来", jailMax(p)), 'warn', 'jail'));
+  if (p.jail !== null) res.push(ri(_tf(4299, "在维护窗口 {$0}/{$1} 轮", p.jail, jailMax(p)), rfJailed(p) ? rfJailTxt() : _tf(5685, "付 ${$1} 马上出来；或者停满 {$0} 轮自动出来；有 Enterprise Support 卡可以免费出来", jailMax(p), BAL.jailFee), 'warn', 'jail'));
   if (p.skip) res.push(ri(_tf(4301, "停 {$0} 轮", p.skip), _tf(4302, "下 {$0} 个自己的回合直接跳过", p.skip), 'warn', 'skip'));
   if (r.sk && canSkill(p)) res.push(ri(_tf(4304, "{$0}可以发动", lb(_t(4303, "技能"))), _tf(4305, "技能「{$0}」：{$1}{$2}。总资产 ${$3} 已经低于开局资金的一半 ${$4}，一局一次，轮到自己时点「专属技能」；发动后再战略并购：收购总资产最高的对手的一块服务", r.sk.n, r.sk.d, skillMulTxt(p), netWorth(p), skillLine(p)), 'go', 'sk'));
   // 托管费、渠道维护费也是每圈经过起点时交的：展开的卡分开写，收起的卡合成一个数，拆分在提示里

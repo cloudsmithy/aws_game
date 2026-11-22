@@ -64,28 +64,26 @@ export function incRand() { return sendIncident('rand'); }
 export function incAll() { return sendIncident('all'); }
 // ---- 埋 Health 卡 ----
 // 和「花钱让对手抽 Health 卡」同价（incSendCost），但不共用每圈一次：每个回合能埋一张（p.buryTurn 记 turnKey）。从 Health 牌堆顶翻几张挑一张扣着，埋在自己这局停过的一块服务上（p.stops，经过不算；谁的都行、没人买的也行，
-// 已经埋了卡的格子不能再埋）。每人场上最多 TRAP_MAX 张。对手停在那一格、结算完那一格以后翻开，照抽到 Health 卡结算（免疫、抵消、甩锅都照旧）；自己停上去什么都不发生，卡还埋着。
+// 已经埋了卡的格子不能再埋）。场上埋几张不限，一格只埋一张。谁停在那一格（埋的人自己也算）、结算完那一格以后翻开，照抽到 Health 卡结算（免疫、抵消、甩锅都照旧）。
 // 埋在哪、是哪张只有自己知道：S.traps 只在房主这台是全的，联机推状态时别人的只留 by（net/40c-sync.js 的 stateFor），日志只写花了多少钱。主人出局，他埋的卡收回弃牌堆。
 // 电脑不会埋（全电脑的模拟和以前一模一样）
-export const TRAP_MAX = 2;
 const isSvc = i => SQ[i].t === 'prop' || SQ[i].t === 'util';
 export const trapsOf = p => (S.traps || []).filter(t => t.by === p.id);
 const trapCands = p => (p.stops || []).filter(i => isSvc(i) && !(S.traps || []).some(t => t.sq === i));
 const buryReady = p => p.buryTurn !== turnKey();
-export const buryOk = p => !!p && p.alive && p.jail === null && buryReady(p) && chFoes(p).length > 0 && trapsOf(p).length < TRAP_MAX && trapCands(p).length > 0 && (S.inc.length + S.incDisc.length) > 0;
+export const buryOk = p => !!p && p.alive && p.jail === null && buryReady(p) && chFoes(p).length > 0 && trapCands(p).length > 0 && (S.inc.length + S.incDisc.length) > 0;
 export function noteStop(p, i) { if (!isSvc(i)) return; const a = p.stops || (p.stops = []); if (!a.includes(i)) a.push(i); }
-const BURY_PICK = 3;   // 埋卡时从牌堆顶翻几张给埋的人挑
+export const BURY_PICK = 3;   // 埋卡时从牌堆顶翻几张给埋的人挑
 export async function buryIncident() {
   const p = cur(); if (!p || isAI(p.id) || SIM || BOT || S.phase !== 'busy') return;
   if (!p.alive || p.jail !== null || !chFoes(p).length) return void UI.toast(_t(5560, "现在不能埋 Health 卡"));
-  if (!buryReady(p)) return void UI.toast(_t(-1, "这回合已经埋过一张了，下回合再来"));
-  if (trapsOf(p).length >= TRAP_MAX) return void UI.toast(_tf(5561, "场上已经有你埋的 {$0} 张 Health 卡了，最多 {$1} 张", trapsOf(p).length, TRAP_MAX));
+  if (!buryReady(p)) return void UI.toast(_t(5672, "这回合已经埋过一张了，下回合再来"));
   const cost = incSendCost(p), cands = trapCands(p).sort((a, b) => a - b);
   if (!cands.length) return void UI.toast(_t(5562, "没有能埋的格子：只能埋在自己这局停过、还没埋卡的服务上"));
   if (p.cash < cost) return void UI.toast(_tf(2981, "现金不够 ${$0}", cost));
   // 格子名写在按钮上：别的座位、观众那边的按钮换成「？」（priv.buttons），正文也换掉，看不出在挑哪几格
   const v = await UI.ask({ who: p.id, cls: 'pick', title: _tf(5563, "花 ${$0} 埋一张 Health 卡：埋在哪一格？（只有你看得到）", cost),
-    html: _tf(5564, "<p>从 Health 牌堆抽一张扣着埋下去，别人看不到埋在哪、是哪张（你自己在玩家卡上看得到）。对手停在那一格（经过不算），结算完那一格以后翻开，由他照常结算。你自己停上去没事。</p><p class=\"muted\">只能埋在你这局停过的服务上，已经埋了卡的格子不能再埋；每人同时最多 {$0} 张，每个回合能埋一张。</p>", TRAP_MAX),
+    html: _tf(5687, "<p>挑好格子后从 Health 牌堆顶翻 {$0} 张，你挑一张扣着埋下去，别人看不到埋在哪、是哪张（你自己在玩家卡上看得到）。谁停在那一格（经过不算），结算完那一格以后翻开，由他照常结算；你自己停上去也一样会翻开。</p><p class=\"muted\">只能埋在你这局停过的服务上，已经埋了卡的格子不能再埋；每个回合能埋一张，场上埋几张不限。</p>", BURY_PICK),
     priv: { title: _tf(5565, "{$0} 在决定埋不埋 Health 卡", p.name), html: _t(5566, "<p>埋在哪一格只有他自己知道。</p>"), buttons: [...cands.map(() => '?'), _t(2465, "取消")] },
     buttons: [...cands.map(i => ({ label: SQ[i].n, value: i })), { label: _t(2465, "取消"), value: -1 }] });
   const i = +v; if (!cands.includes(i) || !buryOk(p) || !trapCands(p).includes(i) || p.cash < cost) return;
@@ -108,9 +106,9 @@ export async function buryIncident() {
 // 停在 i 上的 p 踩没踩中对手埋的卡（land 结算完这一格以后调）
 export async function springTrap(p, i) {
   if (!S.traps || !S.traps.length || !p.alive || S.over) return;
-  const k = S.traps.findIndex(t => t.sq === i && t.by !== p.id); if (k < 0) return;
+  const k = S.traps.findIndex(t => t.sq === i); if (k < 0) return;   // 埋的人自己停上去也翻开
   const t = S.traps.splice(k, 1)[0];
-  log(_tf(5568, "💣 {$0} 踩中了 {$1} 埋在 {$2} 的 Health 卡「{$3}」", nm(p), nm(P(t.by)), sqn(i), INC[t.id].n));
+  log(t.by === p.id ? _tf(5688, "💣 {$0} 踩中了自己埋在 {$1} 的 Health 卡「{$2}」", nm(p), sqn(i), INC[t.id].n) : _tf(5568, "💣 {$0} 踩中了 {$1} 埋在 {$2} 的 Health 卡「{$3}」", nm(p), nm(P(t.by)), sqn(i), INC[t.id].n));
   await drawIncident(p, t.id); UI.render();
 }
 // 主人出局：他埋的卡收回弃牌堆
