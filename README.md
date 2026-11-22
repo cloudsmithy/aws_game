@@ -2,7 +2,7 @@
 
 [![Cloudflare Pages](https://img.shields.io/github/check-runs/cloudsmithy/aws_game/master?nameFilter=Cloudflare%20Pages&label=Cloudflare%20Pages&logo=cloudflare&logoColor=white)](https://github.com/cloudsmithy/aws_game/commits/master)
 
-**官网（直接开玩）：<https://aws-game.usergroup.cn/>** · 备用：[GitHub Pages](https://cloudsmithy.github.io/aws_game/) · [English](https://aws-game.usergroup.cn/en/) · [日本語](https://aws-game.usergroup.cn/ja/) · [手册网页版](https://aws-game.usergroup.cn/manual/)
+**官网（直接开玩）：<https://aws-game.usergroup.cn/>** · 备用：[GitHub Pages](https://cloudsmithy.github.io/aws_game/) · [English](https://aws-game.usergroup.cn/en/) · [日本語](https://aws-game.usergroup.cn/ja/) · [手册网页版](https://aws-game.usergroup.cn/manual/) · [架构讲解](https://aws-game.usergroup.cn/learn/arch/index.html) · [服务知识点](https://aws-game.usergroup.cn/learn/svc/index.html)（游戏开局页「学习资料」和对局菜单里都能点过去）
 
 作者：亚马逊云科技 User Group · 云上大亨开发小组。规则有疑问、游戏有 bug，都可以在这里反馈给我们：https://github.com/cloudsmithy/aws_game/issues
 

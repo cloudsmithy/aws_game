@@ -20,7 +20,7 @@ import { activeAction } from '../engine/24-actions.js';
 import { edpDialog, quizAll, quizChallenge, trade, tradeFor } from '../engine/25-trade.js';
 import { repKey, repSt, repTab } from '../ui/26c-report.js';
 import { showReport } from '../ui/26f-over-screens.js';
-import { showManual } from '../ui/26e-manual.js';
+import { learnLinksHtml, showManual } from '../ui/26e-manual.js';
 import { fmtTime } from '../ui/27c-center.js';
 import { jumpPl, render, togglePl, toggleRole } from '../ui/27d-side.js';
 import { closeSqPop, gallery, showSquare, showSquareFull, themeControl } from '../ui/27e-square-gallery.js';
@@ -97,6 +97,7 @@ function renderHero() {
     <div class="diag"><div class="gt">${_tf(5136, "{$0}一局里你会搭出来的架构 · 高可用入口 + 经典三层 Web", awsImg('region'))}</div><div class="flow">${flow}</div>
       <div class="cats">${cats}</div></div>
     <div class="cta"><button class="pri twin" data-act="startFromSetup" title="${_t(5137, "按下面表单当前的设置直接开局")}">${_t(5138, "开始游戏")}</button><button class="ondark" data-act="scrollToSetup">${_t(5139, "自定义设置")}</button><button class="ondark twin" data-act="showManual">${_t(5140, "先看玩法")}</button><button class="ondark" data-act="playerGallery" title="${_t(5141, "所有角色卡：起始资金、能力、弱点、专属技能")}">${_t(4694, "玩家图鉴")}</button></div>
+    <div class="learn-links"><span>${_t(5691, "学习资料")}</span>${learnLinksHtml('ondark')}</div>
     <div class="credit"><div class="cr-h">${_t(5142, "<span class=\"cr-k\">关于</span>")}<button type="button" class="cr-letter" data-act="showLetter"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m3 5.5 7 5.5 7-5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>${_t(5143, "作者寄语")}</button></div><div class="cr-h cr-repo">${_t(5144, "<span class=\"cr-k\">项目地址</span><a href=\"https://github.com/cloudsmithy/aws_game\" target=\"_blank\" rel=\"noopener noreferrer\">github.com/cloudsmithy/aws_game")}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3h7v7M13 3 4 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div><div class="cr-h cr-fb">${_t(5145, "<span class=\"cr-k\">反馈</span><span>规则有疑问、游戏有 bug，都可以在这里反馈给我们：<a class=\"cr-url\" href=\"https://github.com/cloudsmithy/aws_game/issues\" target=\"_blank\" rel=\"noopener noreferrer\">github.com/cloudsmithy/aws_game/issues")}<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3h7v7M13 3 4 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></span></div><div class="cr-disc" role="note"><div class="cr-h">${_t(5146, "<span class=\"cr-k\">免责声明</span>")}<div class="cr-ps"><p>${DISC_GENAI.replace(_tr(4542, "^免责声明：", ""), '')}</p><p>${_tf(5147, "备注：{$0}{$1}", DISC_PRICE, DISC_PLAY)}</p></div></div></div></div>`;
 }
 renderHero();

@@ -608,6 +608,9 @@ th{color:var(--mut);font-weight:700;font-size:12px;background:var(--surface-soft
 /* 开局页底部吸住的按钮栏露出来时，hero 里和它同名的两个按钮先藏起来，同一屏不出现两组一样的按钮 */
 .hero.dup .cta .twin{display:none}
 .hero .cta button.ondark:hover{background:rgba(255,255,255,.08);border-color:#fff;color:#fff}
+.hero .learn-links{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:14px 0 0;font-size:14px;color:rgba(255,255,255,.72)}
+.hero .learn-links a{color:#fff;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(255,255,255,.45)}
+.hero .learn-links a:hover{text-decoration-color:#fff}
 .dlctabs{display:flex;flex-wrap:wrap;margin:4px 0 12px;border-bottom:1px solid var(--line)}
 .dlctabs [role=tab]{appearance:none;display:inline-flex;align-items:center;gap:6px;min-height:40px;margin-bottom:-1px;padding:0 14px;border:0;border-bottom:2px solid transparent;border-radius:0;background:none;font:inherit;font-size:14px;font-weight:600;color:var(--mut);cursor:pointer}
 .dlctabs [role=tab]:hover{color:var(--ink)}
@@ -1899,6 +1902,10 @@ table.mpnet tr.bad td.st{color:var(--red)}
 .gmenu>summary:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .gm{position:absolute;right:0;top:calc(100% + 4px);z-index:6;min-width:160px;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,28,36,.18);padding:4px}
 .gm button{white-space:nowrap;justify-content:flex-start;border:0;width:100%;min-height:34px;padding:0 12px;color:var(--ink);background:transparent;border-radius:0}
+.gm .gm-learn{display:flex;flex-direction:column;border-bottom:1px solid var(--line)}
+.gm .gm-learn a{display:flex;align-items:center;min-height:34px;padding:0 12px;color:var(--ink);text-decoration:none;white-space:nowrap}
+.gm .gm-learn a::after{content:"↗";margin-left:auto;padding-left:10px;color:var(--mut)}
+.gm .gm-learn a:hover,.gm .gm-learn a:focus-visible{background:var(--surface-muted)}
 .gm button:hover:not(:disabled){background:var(--surface-muted);color:var(--ink)}
 .gm button.danger-lite{color:var(--red);border-top:1px solid var(--line2);margin-top:4px}
 .gm button.danger-lite:hover:not(:disabled){background:var(--danger-bg);color:var(--red)}
