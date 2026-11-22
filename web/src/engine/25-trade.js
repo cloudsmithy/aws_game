@@ -3,11 +3,12 @@ import { unesc } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { GRP, SQ } from '../rules/03-services.js';
 import { CARDN, CATS } from '../rules/04-roles-combos-cards.js';
+import { dlcOn } from '../rules/05-dlc.js';
 import { askQuestion, pickQuestion, qPoolS } from '../rules/06-qbank.js';
 import { F, P, S, cur, log, nm, ownedBy, ownsGroup, sqn } from './07-state.js';
 import { pay } from './08-money.js';
 import { RI_OK, RI_PLANS, SP_PLANS, commitsOf, riActive, runAfterRI, runCost, spActive, spScope } from './08c-costs.js';
-import { buyPaid, turnKey } from './09-rent.js';
+import { buyPaid, svcLeaves, turnKey } from './09-rent.js';
 import { uiAction } from './14-turn.js';
 import { aiName } from './17-health.js';
 import { ST } from './26b-retro.js';
@@ -100,7 +101,7 @@ export async function trade(pre) {
   if (isAI(b.id)) { const msg = unesc(`${aiName(b)} ${ok ? _t(3593, "同意了这笔交易") : _t(3594, "觉得不划算，拒绝了")}`); if (MP.isRemote(a.id) && MP.seats[a.id].online) MP.send(MP.seats[a.id].conn, { t: 'toast', msg }); else UI.toast(msg); }
   if (!ok) { log(_tf(3595, "{$0} 拒绝了 {$1} 的交易", nm(b), nm(a))); return; }
   const move = (from, to, X) => {
-    X.props.forEach(i => { S.props[i].owner = to.id; S.props[i].via = null; });
+    X.props.forEach(i => { svcLeaves(from, i, to.id); S.props[i].owner = to.id; S.props[i].via = null; });
     if (X.cash) pay(from, to, X.cash);
     ['cards', 'coe', 'drill'].forEach(key => { [...X[key]].sort((m, n) => n - m).forEach(k => to[key].push(from[key].splice(k, 1)[0])); });
   };
@@ -125,6 +126,7 @@ function edpOpts(p) {
 export const edpWhy = p => { const { r, sp, riCand } = edpOpts(p); return riCand.length || (!sp && spScope(r, 1)) ? '' : sp ? _tf(3597, "已经签了 Savings Plans（还剩 {$0} 圈），手上也没有还能买 RI 的服务", sp.laps) : _t(3598, "手上没有要交运行费的计算类、数据库类服务（已经买了 RI 的不算），签不了 Savings Plans 也买不了 RI"); };
 export async function edpDialog() {
   const p = cur();
+  if (!(F.full() || dlcOn('finops'))) return;   // 和按钮（ui/27c-center.js）同一个条件：联机远端发来的 'sp' 也直接调这里
   if (p.role === 'indie') return;   // 按钮对独立开发者已经藏了，这里再拦一次：电脑玩家和联机的 'sp' 动作都直接调这个函数
   const { r, sp, riCand } = edpOpts(p);
   const spAmt = n => Math.round(spScope(r, n) * (1 - SP_PLANS[n]));
@@ -148,7 +150,7 @@ export async function edpDialog() {
   const n = await UI.ask({ title: _tf(3623, "{$0} 的 RI 买几年？", SQ[i].n), html: _tf(3624, "<p>这块现在每圈运行费 ${$0}，1 圈算 1 年。</p>", rc), buttons: [1, 3].map((k, m) => { const c = Math.round(rc * k * (1 - RI_PLANS[k])); return { label: _tf(3625, "{$0} 年（{$1} 圈），预付 ${$2}（省 {$3}%）", k, k, c, Math.round(RI_PLANS[k] * 100)), value: k, cls: m ? '' : 'pri', disabled: p.cash < c }; }).concat([{ label: _t(2465, "取消"), value: 0 }]) });
   if (!n) return;
   const cost = Math.round(rc * n * (1 - RI_PLANS[n])); if (p.cash < cost) return;
-  ST(p).spendMisc = (ST(p).spendMisc || 0) + pay(p, 'bank', cost); p.commits.push({ type: 'ri', svc: i, laps: n, amt: rc }); p.usedCommit = true;
+  ST(p).spendMisc = (ST(p).spendMisc || 0) + pay(p, 'bank', cost); p.commits.push({ type: 'ri', svc: i, laps: n, amt: rc, mark: 1 }); S.props[i].ri = p.id; p.usedCommit = true;
   log(_tf(3626, "📄 {$0} 预付 ${$1} 给 {$2} 买了 {$3} 年（{$4} 圈）RI：每圈 ${$5} 的运行费全免", nm(p), cost, sqn(i), n, n, rc));
 }
 

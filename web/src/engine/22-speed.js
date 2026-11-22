@@ -23,7 +23,10 @@ export function speedLose(p, n, why) {
   const x = Math.min(n, p.speed); p.speed -= x;
   log(_tf(3407, "🐢 {$0} {$1}，部署点数 −{$2}（剩 {$3}）", nm(p), why, x, p.speed));
 }
-export function speedSpend(p, n, what) { p.speed -= n; log(_tf(3408, "⚡ {$0} 花 {$1} 点部署点数：{$2}（剩 {$3}）", nm(p), n, what, p.speed)); }
+// 一圈之内只能用一次技能（所有技能合计，主动的、掷骰子和被打中时自动问的都算）：用的时候记下这是第几圈，
+// 经过起点（p.laps 加一）以后才能再用。c 留着是为了调用的地方看得出问的是哪个技能
+export const spdReady = (p, c) => (p.spdLap ?? -1) < (p.laps || 0);
+export function speedSpend(p, n, what) { p.spdLap = p.laps || 0; p.speed -= n; log(_tf(3408, "⚡ {$0} 花 {$1} 点部署点数：{$2}（剩 {$3}）", nm(p), n, what, p.speed)); }
 // 没做高可用被打成 Impaired 的可用性事件，可以用 4 点「故障转移」扛住
 export const haIncident = id => INC[id] && INC[id].c === 'avail' && /Impaired/.test(INC[id].e);
 export function speedTurnStart(p) {
@@ -37,10 +40,12 @@ export async function speedRoll(p, d) {
   // 机器人回归（BOT）照样开窗，好随机测到灰度发布、回滚重发
   if (!BOT && isAI(p.id)) return { d, adj: 0 };
   for (;;) {
-    if (p.speed < 1) return { d, adj: 0 };
+    const r1 = spdReady(p, 1), r2 = p.speed >= 2 && spdReady(p, 2);
+    if (p.speed < 1 || (!r1 && !r2)) return { d, adj: 0 };
     const n = d[0] + d[1], at = k => SQ[(p.pos + k + N) % N].n;
-    const b = [{ label: _tf(3410, "照走 {$0} 步（{$1}）", n, at(n)), value: 'go', cls: 'pri', botW: 3 }, { label: _tf(3411, "灰度发布：少走 1 步（{$0}，1 点）", at(n - 1)), value: 'm' }, { label: _tf(3412, "灰度发布：多走 1 步（{$0}，1 点）", at(n + 1)), value: 'p' }];
-    if (p.speed >= 2) b.push({ label: _t(3413, "回滚重发：重掷（2 点）"), value: 'r' });
+    const b = [{ label: _tf(3410, "照走 {$0} 步（{$1}）", n, at(n)), value: 'go', cls: 'pri', botW: 3 }];
+    if (r1) b.push({ label: _tf(3411, "灰度发布：少走 1 步（{$0}，1 点）", at(n - 1)), value: 'm' }, { label: _tf(3412, "灰度发布：多走 1 步（{$0}，1 点）", at(n + 1)), value: 'p' });   // 灰度发布这一圈用过了就不给
+    if (r2) b.push({ label: _t(3413, "回滚重发：重掷（2 点）"), value: 'r' });
     const v = await UI.ask({ who: p.id, title: _tf(3414, "{$0} 掷出 {$1}：部署点数 {$2}/{$3}", p.name, n, p.speed, SPEED_MAX), html: _t(3415, "<p>可以花点数调整这一步。对子只看骰子本身，多走少走不影响。</p>"), buttons: b });
     if (v === 'go') return { d, adj: 0 };
     if (v === 'm' || v === 'p') { speedSpend(p, 1, _tf(3418, "灰度发布，{$0}走 1 步", v === 'm' ? _t(3416, "少") : _t(3417, "多"))); return { d, adj: v === 'm' ? -1 : 1 }; }
@@ -75,7 +80,7 @@ async function ddos(p, light) {
   S.attackUsed = true; p.lastDdos = o.id; speedSpend(p, c, _tf(3437, "对 {$0} 的 {$1} 发起 DDoS", nm(o), sqn(i))); fxAll({ s: 'fail', f: 'arcs', a: [[p.pos, i], '#ff3b30'] });
   const imm = ddosShield(o);
   if (imm) { fxAll({ f: 'shield', a: [i] }); fxAll({ f: 'shock', a: [i], d: 350 }); fxAll({ co: [i, _tf(3438, "<b>打不动</b><small>{$0}</small>", imm), 'ok'] }); log(_tf(3439, "🛡️ {$0} 有 {$1}，DDoS 流量在边缘就被吸收了，{$2} 照常运行", nm(o), imm, sqn(i))); return; }
-  if (o.speed >= 7) {
+  if (o.speed >= 7 && spdReady(o, 7)) {
     const ok = await UI.ask({ who: o.id, title: _tf(3440, "{$0} 的 {$1} 被 DDoS 了", o.name, SQ[i].n), html: _tf(3443, "<p>不处理的话，这块服务{$0}。可以花 7 点部署点数蓝绿部署，把流量切到新环境。</p>", light ? _t(3441, "变成 Impaired，到你下回合开始恢复") : _tf(3442, "下线 2 回合（到 {$0} 第 2 个回合开始恢复）", nm(p))), buttons: [{ label: _t(3444, "花 7 点蓝绿部署抵消"), value: true, cls: 'pri' }, { label: _t(3445, "扛着"), value: false }] });
     if (ok) { speedSpend(o, 7, _tf(3446, "蓝绿部署，{$0} 扛住了 DDoS", sqn(i))); return; }
   }
@@ -127,7 +132,7 @@ export let SPEED = __rv(() => ([
 ]), v => { SPEED = v; }, () => SPEED);
 export async function speedMenu() {
   const p = cur(), ph = S.uiPrev;
-  const why = s => s.react ? s.react : p.speed < s.c ? _tf(3501, "还差 {$0} 点", s.c - p.speed) : s.ok(p, ph);
+  const why = s => !spdReady(p, s.c) ? _t(5271, "这一圈已经用过技能了，经过起点后再用") : s.react ? s.react : p.speed < s.c ? _tf(3501, "还差 {$0} 点", s.c - p.speed) : s.ok(p, ph);
   const tile = s => { const w = why(s), can = !w, atk = [5, 6, 12].includes(s.c);
     const left = s.c === 3 && can ? _tf(3502, "<span class=\"skw\">这局还能抽 {$0} 次</span>", 2 - (p.spd3n || 0)) : '';
     return `<button class="sk ${can ? 'on' : ''} ${s.react ? 'react' : ''} ${atk ? 'atk' : ''}" ${can ? `data-v="${s.c}" data-bw="1"` : 'disabled'} title="${s.d}"><span class="skc">${s.c}</span><b>${s.n}</b><span class="skd">${s.d}</span>${w ? `<span class="skw">${w}</span>` : left}</button>`; };
@@ -140,12 +145,13 @@ export async function speedMenu() {
 // 电脑玩家怎么花点数：攒满 12 点就 DDoS 最赚钱的那块；不然有 3 点先免费抽卡（每局 2 次）；服务坏了先修，偶尔免费升级
 export async function aiSpeed(p) {
   if (!dlcOn('speed') || p.jail !== null || !p.alive) return;
-  const use = async c => { const s = SPEED.find(x => x.c === c); if (p.speed >= c && !s.ok(p, 'roll')) await s.run(p, 'roll'); };
-  if (p.speed >= 12 && ddosTargets(p).some(x => !ddosShield(x.o))) return use(12);
+  const can = c => p.speed >= c && spdReady(p, c);
+  const use = async c => { const s = SPEED.find(x => x.c === c); if (can(c) && !s.ok(p, 'roll')) await s.run(p, 'roll'); };
+  if (can(12) && ddosTargets(p).some(x => !ddosShield(x.o))) return use(12);
   // 3 点抽卡最划算（每局限 2 次）：有就先用掉。原来电脑从来不用它，真人对着电脑每 3 回合白抽一张
-  if (p.speed >= 3 && !SPEED.find(x => x.c === 3).ok(p, 'roll')) return use(3);
-  if (p.speed >= 6 && p.speed < 10 && Math.random() < 0.15 && ddosTargets(p, true).some(x => !ddosShield(x.o))) return use(6);
-  if (p.speed >= 9 && (ownedBy(p).filter(i => S.props[i].impaired).length >= 2 || p.techDebt >= 2)) return use(9);
-  if (p.speed >= 8 && freeUps(p).length && Math.random() < 0.3) return use(8);
+  if (can(3) && !SPEED.find(x => x.c === 3).ok(p, 'roll')) return use(3);
+  if (can(6) && p.speed < 10 && Math.random() < 0.15 && ddosTargets(p, true).some(x => !ddosShield(x.o))) return use(6);
+  if (can(9) && (ownedBy(p).filter(i => S.props[i].impaired).length >= 2 || p.techDebt >= 2)) return use(9);
+  if (can(8) && freeUps(p).length && Math.random() < 0.3) return use(8);
 }
 

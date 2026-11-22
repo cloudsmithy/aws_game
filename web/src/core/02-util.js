@@ -13,6 +13,8 @@ export let MY_REV = -1, STALE = false;
 export let SAVE_FAIL = false;
 export const revNow = () => { try { return +localStorage.getItem(REV_KEY) || 0; } catch (e) { return 0; } };
 export const $ = s => document.querySelector(s);
+// 回开局页的网址：只留自建信令服务器的参数（?peerhost= 等），房主再建房间、玩家再加入还连同一个服务器；别的参数（?bot、?demo、?ug…）都去掉
+export const homeUrl = () => { const q = new URLSearchParams(location.search), keep = new URLSearchParams(); ['peerhost', 'peerport', 'peerpath'].forEach(k => { if (q.get(k)) keep.set(k, q.get(k)); }); return location.pathname + (String(keep) ? '?' + keep : ''); };
 // 后台标签页里 setTimeout / setInterval 会被节流到 1s（藏 5 分钟后更狠），而对局的节奏全靠定时器，
 // 房主一切走整桌就跟着卡。用一个专用 Worker 的定时器当钟：Worker 里的定时器不受页面隐藏的节流影响。
 // Worker 建不起来（file:// 打开、策略禁止 blob）就退回普通 setTimeout，行为不变。

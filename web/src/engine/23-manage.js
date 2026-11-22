@@ -5,7 +5,7 @@ import { UI } from '../core/02b-ui-port.js';
 import { IX, OFFLINE_MIN, OFFLINE_OK, SQ, capU, lvName } from '../rules/03-services.js';
 import { F, S, debtOf, offlineCash, ownedBy, owns, ownsGroup } from './07-state.js';
 import { CO_SVCS, opCost, runCost } from './08c-costs.js';
-import { addCap, bringOnline, capCost, capInfo, doUpgrade, offRounds, sellCap, sellProp, sellUpgrade, sellValue, sellZhe, stripValue, takeOffline, upPaidOf, upgradeInfo } from './09-rent.js';
+import { addCap, bringOnline, capBack, capInfo, doUpgrade, offRounds, sellCap, sellProp, sellUpgrade, sellValue, sellZhe, stripValue, takeOffline, upPaidOf, upgradeInfo } from './09-rent.js';
 import { lvUpTxt } from './11b-rent-info.js';
 import { convertSpot, landHere, spotConvCost } from './15-land.js';
 import { payRefactor, refactorCost } from './17-health.js';
@@ -24,7 +24,7 @@ export async function manage(p, debtMode = false) {
       }
       if (s.t === 'prop' && !debtMode && ownsGroup(p, s.g)) { const c = capInfo(p, i); if (c.ok) acts.push(_tf(3507, "<button class=\"sm\" data-v=\"cap:{$0}\" data-bw=\"0.4\" {$1}>加 1 个{$2} ${$3}</button>", i, p.cash < c.cost ? 'disabled' : '', capU(s.k), c.cost)); }
       if (pr.spot && !debtMode) { const c = spotConvCost(i); acts.push(_tf(3508, "<button class=\"sm pri\" data-v=\"conv:{$0}\" data-bw=\"0.4\" {$1}>补 ${$2} 转成按需</button>", i, p.cash < c ? 'disabled' : '', c)); }
-      if (s.t === 'prop' && pr.cap > 0) acts.push(_tf(3509, "<button class=\"sm\" data-v=\"uncap:{$0}\" data-bw=\"0.2\">减 1 个{$1} +${$2}</button>", i, capU(s.k), Math.round(capCost(i) / 2)));
+      if (s.t === 'prop' && pr.cap > 0) acts.push(_tf(3509, "<button class=\"sm\" data-v=\"uncap:{$0}\" data-bw=\"0.2\">减 1 个{$1} +${$2}</button>", i, capU(s.k), capBack(i)));
       if (s.upg && pr.level > 0 && !pr.cap) acts.push(_tf(3510, "<button class=\"sm\" data-v=\"sell:{$0}\" data-bw=\"0.2\">去掉一级 +${$1}</button>", i, Math.round(upPaidOf(i, pr.level) / 2)));
       if (OFFLINE_OK.has(s.k) && !pr.offline && !isParty()) acts.push(`<button class="sm" data-v="off:${i}" data-bw="0.2" title="${_tf(3512, "{$0}不收过路费，运行费只剩存储费；下线 {$1} 轮后自动恢复，拿回的钱不用还，自己落到这一格可以提前免费拉起来；期间别人落上来可以付原价 ${$2} 把它买走", pr.level || pr.cap ? _t(3511, "会先自动去掉升级和容量（各退一半）；") : '', OFFLINE_MIN, s.p)}">${_tf(3513, "下线 +${$0}", offlineCash(i) + stripValue(i))}</button>`);
       if (pr.offline) acts.push(_tf(3515, "<span class=\"muted\" style=\"font-size:12px\">下线第 {$0} 轮，满 {$1} 轮自动恢复；落到这一格可以免费提前拉起来</span>", offRounds(i), OFFLINE_MIN));

@@ -3,11 +3,12 @@ import { rnd } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { IX, N, OWNABLE, SQ, capU, lvFull, lvName } from '../rules/03-services.js';
 import { CARDN, CATS, COMBOS, REI, comboOpen } from '../rules/04-roles-combos-cards.js';
+import { advanceTo } from '../rules/05-dlc.js';
 import { S, cur, hasCombo, log, nm, ownedBy, owns, resetProp, sqn } from './07-state.js';
 import { cardAmt, credit, giveTo, pay, withGain } from './08-money.js';
 import { SP_PLANS, billAt, commitsOf, halfAt, halfSave, netWorth, runAfterRI, spActive } from './08c-costs.js';
-import { capInfo, fullBack, upgradeInfo } from './09-rent.js';
-import { moveSteps, moveTo } from './13-move.js';
+import { capInfo, fullBack, svcLeaves, upgradeInfo } from './09-rent.js';
+import { moveSteps } from './13-move.js';
 import { land } from './15-land.js';
 import { drawRei } from './16-deck.js';
 import { aiName, drawIncident, tableOK, voteWho } from './17-health.js';
@@ -81,7 +82,7 @@ async function drawReinvent0(p, forced) {
       const save = before - billAt(p, 0, h);
       if (save <= 0) { p.commits.pop(); p.usedCommit = uc; log(_tf(3279, "{$0} {$1}，签了{$2}，所以没签，改领 ${$3}", nm(p), p.runLaps > 0 && !p.runMul ? _t(3274, "下一圈运行费本来就全免") : h ? _t(3275, "手上的减半卡让下一圈用量不到承诺额") : _t(3276, "能抵扣的运行费太少"), save < 0 ? _tf(3277, "反而多交 ${$0}", -save) : _t(3278, "也省不下钱"), credit(p, 50))); break; }
       log(_tf(3280, "{$0} 签了 1 圈（1 年）Savings Plans：每圈承诺 ${$1}，抵扣原价 ${$2} 的运行费；按现在的用量，下次经过 Startup 扶持少交 ${$3}（之后新买的按原价，卖掉了承诺额照付）", nm(p), amt, b, save)); break; }
-    case 5: await moveTo(p, IX.bedrock); await land(p, { discount: 0.8 }); break;
+    case 5: await advanceTo(p, IX.bedrock); await land(p, { discount: 0.8 }); break;
     case 6: { const fans = await voteWho(others, _tf(3281, "{$0} 的 Keynote 精彩吗？", p.name), _tf(3282, "<p>{$0} 用 30 秒介绍了自己的公司和架构。觉得精彩就付 ${$1}。</p>", nm(p), cardAmt(50)), _tf(3283, "精彩，付 ${$0}", cardAmt(50)), _t(3284, "一般"), 0.7); fans.forEach(o => pay(o, p, 50)); log(fans.length ? _tf(3285, "{$0} 觉得精彩，各付 {$1} ${$2}", fans.map(nm).join(_t(349, "、")), nm(p), cardAmt(50)) : _tf(3286, "没人觉得精彩，{$0} 没收到钱", nm(p))); break; }
     case 7:
       if (p.techDebt > 0) { p.techDebt--; p.refactored = true; log(_tf(3287, "{$0} 考过认证，按最佳实践重构，清掉 1 个技术债", nm(p))); } else log(_tf(1645, "{$0} 没有技术债，领 ${$1}", nm(p), credit(p, 100)));
@@ -91,7 +92,7 @@ async function drawReinvent0(p, forced) {
       const v = own.length ? await UI.ask({ title: _t(778, "Trusted Advisor 找到闲置资源"), html: _tf(3288, "<p>可以选一块服务按实付全额卖回亚马逊云科技（买价、升级、容量都退，不打折）；不卖就领 ${$0}。</p>", cardAmt(50)), buttons: [...own.map(i => ({ label: _tf(3289, "卖 {$0} 拿 ${$1}", SQ[i].n, fullBack(i)), value: i, botW: 0.3 })), { label: _tf(3290, "不卖，领 ${$0}", cardAmt(50)), value: 'x', cls: 'pri' }] }) : 'x';
       if (v === 'x') { log(_tf(1640, "{$0} 领 ${$1}", nm(p), credit(p, 50))); break; }
       const i = +v, full = fullBack(i);
-      resetProp(i); p.released = (p.released || 0) + 1; giveTo(p.id, full, 'sell');
+      svcLeaves(p, i, null); resetProp(i); p.released = (p.released || 0) + 1; giveTo(p.id, full, 'sell');
       log(_tf(3291, "💱 {$0} 按 Trusted Advisor 的建议，把闲置的 {$1} 按实付全额 ${$2} 卖回亚马逊云科技", nm(p), sqn(i), full));
       break;
     }
@@ -110,7 +111,8 @@ async function drawReinvent0(p, forced) {
       const cs = ownedBy(p).filter(i => capInfo(p, i).ok);
       if (!cs.length) { log(_tf(3298, "{$0} 没有能加容量的服务，改领 ${$1}", nm(p), credit(p, 100))); break; }
       const i = cs.length === 1 ? cs[0] : +(await UI.ask({ title: _t(3299, "Hackathon 拿了奖：免费给哪块加 1 份容量？"), buttons: cs.map(x => ({ label: _tf(3300, "{$0}（现在 {$1} 个{$2}）", SQ[x].n, S.props[x].cap || 0, capU(SQ[x].k)), value: x })) }));
-      S.props[i].cap = (S.props[i].cap || 0) + 1; log(_tf(3301, "➕ {$0} 用 Hackathon 奖品给 {$1} 免费加了 1 个{$2}（这是容量，不是升级：每个让过路费 +25%，现在 {$3} 个；级别还是{$4}）", nm(p), sqn(i), capU(SQ[i].k), S.props[i].cap, lvFull(i, S.props[i].level)));
+      { const pr = S.props[i]; pr.capFree = Math.min(pr.capFree || 0, pr.cap || 0) + 1; pr.cap = (pr.cap || 0) + 1; }   // 免费的容量记下来：卖回、拆掉、估值都不算钱（规则书 §7.2）
+      log(_tf(3301, "➕ {$0} 用 Hackathon 奖品给 {$1} 免费加了 1 个{$2}（这是容量，不是升级：每个让过路费 +25%，现在 {$3} 个；级别还是{$4}）", nm(p), sqn(i), capU(SQ[i].k), S.props[i].cap, lvFull(i, S.props[i].level)));
       break;
     }
     case 15: { const d = 1 + rnd(6); log(_tf(3302, "{$0} 掷出 {$1}，前进 {$2} 格", nm(p), d, d)); await moveSteps(p, d); await land(p); break; }
@@ -128,7 +130,7 @@ async function drawReinvent0(p, forced) {
       }
       break;
     }
-    case 17: { const t = saTarget(p); if (t === null) { log(_tf(3312, "{$0} 没有可以飞的地方，改领 ${$1}", nm(p), credit(p, 100))); break; } log(_tf(3313, "{$0} 飞向 {$1}", nm(p), sqn(t))); await moveTo(p, t); await land(p); break; }
+    case 17: { const t = saTarget(p); if (t === null) { log(_tf(3312, "{$0} 没有可以飞的地方，改领 ${$1}", nm(p), credit(p, 100))); break; } log(_tf(3313, "{$0} 飞向 {$1}", nm(p), sqn(t))); await advanceTo(p, t); await land(p); break; }
     case 19: {
       const cat = await UI.ask({ title: _t(3314, "入选亚马逊云科技 Community Builders：领哪一类复盘标记？"), html: _t(866, "<p>复盘标记以后可以抵消一张同类的 Health 事件卡。</p>"), buttons: Object.entries(CATS).map(([k, n]) => ({ label: n, value: k })) });
       p.coe.push({ cat, used: false, text: _t(3315, "Community Builders 分享的经验") }); log(_tf(3316, "📝 {$0} 入选 Community Builders，领到 1 个{$1}类复盘标记", nm(p), CATS[cat]));
@@ -138,7 +140,7 @@ async function drawReinvent0(p, forced) {
       const dist = i => (i - p.pos + N) % N || N;
       const t = OWNABLE.filter(i => S.props[i].owner === null && !isHidden(i)).sort((a, b) => dist(a) - dist(b))[0];
       if (t === undefined) { log(_tf(3317, "{$0} 没有可以去的地方，改领 ${$1}", nm(p), credit(p, 100))); break; }
-      await moveTo(p, t); await land(p, { discount: 0.8 });
+      await advanceTo(p, t); await land(p, { discount: 0.8 });
       // 不买（或者买不起）也不白跑：领卡上写的钱（按这次的卡牌倍率）
       if (p.alive && S.props[t].owner !== p.id) log(_tf(3318, "{$0} 没买 {$1}，领 ${$2}", nm(p), sqn(t), credit(p, 100)));
       break;

@@ -8,7 +8,7 @@ import { qPoolS } from '../rules/06-qbank.js';
 import { F, P, S, active, availCard, cur, hasCombo, log, nm, ownedBy, owns, ownsGroup, singleAZ, sqn } from './07-state.js';
 import { credit, pay, withGain } from './08-money.js';
 import { SPOT_OK, netWorth, reqRate } from './08c-costs.js';
-import { addCap, baseRent, bringOnline, buyPaid, capCost, capInfo, doUpgrade, jointRent, roleDisc, tokUnit, turnKey, upPaidSum, upgradeInfo, zhe } from './09-rent.js';
+import { addCap, baseRent, bringOnline, buyPaid, capInfo, capPaidSum, doUpgrade, jointRent, roleDisc, tokUnit, turnKey, upPaidSum, upgradeInfo, zhe } from './09-rent.js';
 import { capUpTxt, lvUpTxt } from './11b-rent-info.js';
 import { quiz } from './12-quiz.js';
 import { goReiCards, sendToJail } from './13-move.js';
@@ -207,7 +207,8 @@ async function buyFromReseller(p, i) {
   if (!dlcOn('reseller') || !r.reseller || p.reseller || pr.via != null || pr.offline || pr.ddos != null || !['prop', 'util'].includes(s.t)) return false;
   if (BAL.rsKeepCombo && jointRent(i, 7)) return false;
   if (BAL.rsKeepGroup && (ownsGroup(r, s.g) || pr.level > 0)) return false;   // 整组和升过级的也是代理商在用的，不卖
-  const extra = upPaidSum(i) + (pr.cap || 0) * capCost(i), base = Math.round(s.p * rsRate(r) * (p.rsCoupon || 1)), x = base + extra, cost = buyPaid(i);
+  const extra = upPaidSum(i) + capPaidSum(i),   // 升级、容量都按代理商实付的算（Hackathon 免费送的容量和卡牌免费升的级一样不算钱）
+    base = Math.round(s.p * rsRate(r) * (p.rsCoupon || 1)), x = base + extra, cost = buyPaid(i);
   // 答题照样折上折：答对在转售价上再打 8 折（独立开发者开了边玩边答题 7 折、没开 9 折），少收的是代理商让的利
   const qd = p.role === 'indie' ? (S.cfg.learn ? 0.7 : 0.9) : 0.8, canQ = S.cfg.learn || p.role === 'indie';
   let tried = false, ok = false, v, qres = '';

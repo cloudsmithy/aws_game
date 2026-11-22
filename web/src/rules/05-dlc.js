@@ -8,7 +8,7 @@ import { P, S, active, comboMiss, comboOn, effActive, hasCombo, isWild, log, nm,
 import { cardAmt, credit, pay } from '../engine/08-money.js';
 import { CO_SVCS, halfSave } from '../engine/08c-costs.js';
 import { baseRent, sellProp, sellValue, upgradeInfo, zhe } from '../engine/09-rent.js';
-import { moveSteps, moveTo, passStart, passUG } from '../engine/13-move.js';
+import { moveSteps, passStart, passUG } from '../engine/13-move.js';
 import { land } from '../engine/15-land.js';
 import { impair, secActive, skipOrPay } from '../engine/17-health.js';
 import { wildBind } from '../engine/21-skills.js';
@@ -37,24 +37,32 @@ export function dlcRentMul(i) {
 }
 export const dlcRunMul = () => dlcOn('finops') ? 1.5 : 1;
 export const fisCost = x => Math.round(x.cost * (dlcOn('sec') ? 0.8 : 1));
+// hits：这张卡对这个人会不会真的有动静（不写 = 会）。返回 false 的，incident 不弹「要抵消吗」、发牌也不推迟到抵消窗，直接走 run（run 自己记一笔「不受影响」、返回 'nopen'）
+const rsVia = p => ownedBy(p).filter(i => S.props[i].via != null && P(S.props[i].via).alive);
+const auditN = p => p.reseller ? S.players.reduce((a, q) => a + (q.id === p.id ? 0 : viaOf(p, q).length), 0) : ownedBy(p).filter(i => S.props[i].via != null).length;
+const idleInst = p => ownedBy(p).filter(i => isInst(i) && !S.props[i].level && !S.props[i].offline);   // 下线的已经不跑了，不收钱
+const topMr = p => ownedBy(p).filter(i => effActive(i, 'mr') && SQ[i].upg[S.props[i].level - 1] && SQ[i].upg[S.props[i].level - 1][2] === 'mr');
+// 「前进到某一格」：已经站在那一格上（技能抽卡、经过起点送的卡）就往前绕一整圈，经过起点、UG 照常结算；moveTo 走 0 步会原地再结算一次落点
+export const advanceTo = (p, t) => moveSteps(p, ((t - p.pos + N) % N) || N);
+const hijackTo = p => S.players.filter(q => q.alive && q.id !== p.id && q.jail === null);
 // 只给 DLC 的卡挂 run：Health 卡 run 返回 'nopen' 表示这次不算罚；imm 返回免疫原因
 export let DLC_INC = __rv(() => ([
   { dlc: 'reseller', n: _t(1508, "代理商涨价"), c: 'cost', e: _t(1509, "所有代理商的转售价上调一档（最多到原价）；你从代理商手里买的服务，每块补交 $20 差价给对应的代理商"), im: _t(1510, "你自己就是代理商"), tip: _t(1511, "经代理商采购的价格写在合同里，续约时可能调价；多比几家、签长期合同能锁住价格"), art: 'billing',
-    imm: o => o.reseller ? _t(1510, "你自己就是代理商") : '', run: async p => {
+    imm: o => o.reseller ? _t(1510, "你自己就是代理商") : '', hits: p => rsVia(p).length > 0, run: async p => {
       const steps = [0.45, 0.5, 0.55, 0.6, 0.7, 0.8, 0.9, 1];
       S.players.filter(r => r.alive && r.reseller).forEach(r => { const cur0 = rsRate(r), nx = steps.find(x => x > cur0 + 1e-9) || 1; r.rsRate = nx; log(_tf(1513, "{$0} 的转售价涨到 {$1}", nm(r), nx === 1 ? _t(1512, "原价") : zhe(nx))); });
-      const mine = ownedBy(p).filter(i => S.props[i].via != null && P(S.props[i].via).alive);
+      const mine = rsVia(p);
       if (!mine.length) { log(_tf(1514, "{$0} 没有从代理商手里买的服务，不用补差价", nm(p))); return 'nopen'; }
       mine.forEach(i => pay(p, P(S.props[i].via), 20)); log(_tf(1515, "{$0} 为 {$1} 块从代理商手里买的服务补交差价 ${$2}", nm(p), mine.length, cardAmt(20) * mine.length));
     } },
   { dlc: 'reseller', n: _t(1516, "渠道合规审计"), c: 'cost', e: _t(1517, "代理商：客户从你手里买的服务每块交 $40；客户：你从代理商手里买的服务每块交 $20；都交进奖池。跟代理商没有往来的不受影响"), im: _t(708, "无"), tip: _t(1518, "代理商可以用 Billing Conductor 按客户分组出账，每一笔转售都对得上，审计时说得清"), art: 'cloudtrail',
-    imm: o => '', run: async p => {
-      const n = p.reseller ? S.players.reduce((a, q) => a + (q.id === p.id ? 0 : viaOf(p, q).length), 0) : ownedBy(p).filter(i => S.props[i].via != null).length;
+    imm: o => '', hits: p => auditN(p) > 0, run: async p => {
+      const n = auditN(p);
       if (!n) { log(_tf(1519, "{$0} 跟代理商没有往来，不受影响", nm(p))); return 'nopen'; }
       const x = (p.reseller ? 40 : 20) * n; log(_tf(1520, "{$0} 为 {$1} 块从代理商手里买的服务交审计费 ${$2}", nm(p), n, pay(p, 'pot', x)));
     } },
   { dlc: 'reseller', n: _t(1521, "代理合同到期没续"), c: 'ops', e: _t(1522, "客户：你从代理商手里买的服务都改成直接向亚马逊云科技付费；代理商：从你手里买得最多的那位客户和你断开代理关系"), im: _t(708, "无"), tip: _t(1523, "代理合同到期前要提前续签，不然账单会直接回到亚马逊云科技"), art: 'billing',
-    run: async p => {
+    hits: p => p.reseller ? rsCustomers(p).length > 0 : ownedBy(p).some(i => S.props[i].via != null), run: async p => {
       if (p.reseller) {
         const cs = rsCustomers(p).sort((a, b) => viaOf(p, b).length - viaOf(p, a).length);
         if (!cs.length) { log(_tf(1524, "{$0} 还没有客户", nm(p))); return 'nopen'; }
@@ -77,20 +85,20 @@ export let DLC_INC = __rv(() => ([
   { dlc: 'sec', n: _t(1555, "接口被恶意刷爆"), c: 'sec', e: _t(1556, "交 $100 进奖池"), im: _t(1557, "WAF 升了限速规则，或 API Gateway 升了使用计划限流"), tip: _t(1558, "WAF 限速规则按来源 IP（也可以按请求头等）统计请求数，超了就拦；API Gateway 使用计划按 API 密钥限流"), art: 'waf',
     // 刷接口要靠限速规则按 IP 拦，WAF 只开托管规则挡不住
     imm: o => active(o, IX.waf) && effActive(IX.waf, 'ddos') ? _t(1559, "WAF 有限速规则") : owns(o, IX.apigw) && S.props[IX.apigw].level >= 1 ? _t(1560, "API Gateway 有限流") : '', run: async p => { log(_tf(1561, "{$0} 交 ${$1}", nm(p), pay(p, 'pot', 100))); } },
-  { dlc: 'finops', n: _t(1562, "测试环境忘了删"), c: 'cost', e: _t(1563, "你名下每块没升级的实例型服务交 $30 进奖池"), im: _t(1564, "用过 Cost Explorer 卡（开了成本异常检测）"), tip: _t(1565, "给测试资源打标签，用 Budgets 和成本异常检测发现没人管的资源；Savings Plans 只是承诺用量换折扣，忘了删的实例照样计费"), art: 'budgets',
+  { dlc: 'finops', n: _t(1562, "测试环境忘了删"), c: 'cost', e: _t(1563, "你名下每块没升级的实例型服务交 $30 进奖池"), im: _t(5269, "用过 Cost Explorer 卡（开了成本异常检测），或者 EventBridge 升了「定时启停 EC2」"), tip: _t(1565, "给测试资源打标签，用 Budgets 和成本异常检测发现没人管的资源；Savings Plans 只是承诺用量换折扣，忘了删的实例照样计费"), art: 'budgets',
     // Savings Plans 按承诺额给折扣，不会发现也不会关掉没人管的资源，不算免疫；只认开了成本异常检测（用过 CE 卡），和「跨区流量费暴涨」一样
-    imm: o => o.cards.some(x => x.id === 'CE' && x.used) ? _t(1566, "开了成本异常检测") : active(o, IX.eventbridge) && S.props[IX.eventbridge].level >= 1 ? _t(1567, "EventBridge 定时把测试环境关了") : '', run: async p => { const hit = ownedBy(p).filter(i => isInst(i) && !S.props[i].level); if (!hit.length) { log(_tf(1568, "{$0} 没有闲置的实例", nm(p))); return 'nopen'; } log(_tf(1569, "{$0} 为 {$1} 交 ${$2}", nm(p), hit.map(sqn).join(_t(349, "、")), pay(p, 'pot', 30 * hit.length))); } },
+    imm: o => o.cards.some(x => x.id === 'CE' && x.used) ? _t(1566, "开了成本异常检测") : active(o, IX.eventbridge) && S.props[IX.eventbridge].level >= 1 ? _t(1567, "EventBridge 定时把测试环境关了") : '', hits: p => idleInst(p).length > 0, run: async p => { const hit = idleInst(p); if (!hit.length) { log(_tf(1568, "{$0} 没有闲置的实例", nm(p))); return 'nopen'; } log(_tf(1569, "{$0} 为 {$1} 交 ${$2}", nm(p), hit.map(sqn).join(_t(349, "、")), pay(p, 'pot', 30 * hit.length))); } },
   { dlc: 'finops', n: _t(1570, "跨区流量费暴涨"), c: 'cost', e: _t(1571, "你名下每块有多区域功能的服务交 $40 进奖池"), im: _t(1572, "用过 Cost Explorer 卡（开了成本异常检测，流量费一涨就收到提醒）"), tip: _t(1573, "跨 Region 复制、跨 AZ 访问都按 GB 收费；VPC 终端节点省的是 NAT 网关的处理费，跨 Region 的流量照样收，规划架构时要算进去"), art: 'billing',
-    imm: o => o.cards.some(x => x.id === 'CE' && x.used) ? _t(1566, "开了成本异常检测") : '', run: async p => { const hit = ownedBy(p).filter(i => effActive(i, 'mr')); if (!hit.length) { log(_tf(1574, "{$0} 没有多区域服务", nm(p))); return 'nopen'; } log(_tf(1561, "{$0} 交 ${$1}", nm(p), pay(p, 'pot', 40 * hit.length))); } },
+    imm: o => o.cards.some(x => x.id === 'CE' && x.used) ? _t(1566, "开了成本异常检测") : '', hits: p => ownedBy(p).some(i => effActive(i, 'mr')), run: async p => { const hit = ownedBy(p).filter(i => effActive(i, 'mr')); if (!hit.length) { log(_tf(1574, "{$0} 没有多区域服务", nm(p))); return 'nopen'; } log(_tf(1561, "{$0} 交 ${$1}", nm(p), pay(p, 'pot', 40 * hit.length))); } },
   { dlc: 'global', n: _t(1575, "海外用户访问太慢"), c: 'avail', e: _t(1576, "用户流失：交 $100 进奖池"), im: _t(1577, "持有 CloudFront"), tip: _t(1578, "CloudFront 把内容缓存到全球边缘节点，Global Accelerator 走亚马逊云科技骨干网"), art: 'cloudfront',
     imm: o => active(o, IX.cloudfront) ? _t(1579, "有 CloudFront") : '', run: async p => { log(_tf(1561, "{$0} 交 ${$1}", nm(p), pay(p, 'pot', 100))); } },
   { dlc: 'global', n: _t(1580, "当地要求数据本地存储"), c: 'ops', e: _t(1581, "你名下最高一级是「多区域」的服务，各降一级重新规划（不退钱）"), im: _t(1582, "持有 KMS，且没升到「多区域密钥」"), tip: _t(1583, "出海前先确认当地的数据合规要求，再决定数据放哪个 Region；单区域密钥加密的数据只能在本 Region 解密，多区域密钥会把密钥材料复制到别的 Region"), art: 'region',
     // 官方说用单区域密钥能守住数据驻留，多区域密钥会把密钥材料复制出本 Region、让驻留合规更复杂：升到第 3 级就不再免疫，会和别的多区域功能一起去掉一级，降回第 2 级以后再抽到又免疫
-    imm: o => active(o, IX.kms) && !effActive(IX.kms, 'mr') ? _t(1584, "KMS 只用单区域密钥") : '', run: async p => { const hit = ownedBy(p).filter(i => effActive(i, 'mr')); const h2 = hit.filter(i => SQ[i].upg[S.props[i].level - 1] && SQ[i].upg[S.props[i].level - 1][2] === 'mr'); if (!h2.length) { log(_tf(1585, "{$0} 没受影响", nm(p))); return 'nopen'; } h2.forEach(i => { S.props[i].level--; if (S.props[i].upPaid) S.props[i].upPaid.length = S.props[i].level; }); log(_tf(1586, "{$0} 去掉了多区域那一级", h2.map(sqn).join(_t(349, "、")))); } },
+    imm: o => active(o, IX.kms) && !effActive(IX.kms, 'mr') ? _t(1584, "KMS 只用单区域密钥") : '', hits: p => topMr(p).length > 0, run: async p => { const h2 = topMr(p); if (!h2.length) { log(_tf(1585, "{$0} 没受影响", nm(p))); return 'nopen'; } h2.forEach(i => { S.props[i].level--; if (S.props[i].upPaid) S.props[i].upPaid.length = S.props[i].level; }); log(_tf(1586, "{$0} 去掉了多区域那一级", h2.map(sqn).join(_t(349, "、")))); } },
 ]), v => { DLC_INC = v; }, () => DLC_INC);
 export let DLC_REI = __rv(() => ([
   { dlc: 'reseller', n: _t(1587, "Startup 拿到代理商折扣"), e: _t(1588, "保留到下一次买服务：从代理商手里买再打 8 折；场上没有代理商的话，下一次按需购买打 9 折"), tip: _t(1589, "很多代理商给初创公司额外折扣和 Credits，换长期合作"), art: 'activate',
-    run: async p => { if (S.players.some(r => r.alive && r.reseller && r.id !== p.id)) { p.rsCoupon = 0.8; log(_tf(1590, "{$0} 拿到代理商折扣：下一次从代理商手里买服务再打 8 折", nm(p))); } else { p.buyCoupon = 0.9; log(_tf(1591, "{$0} 拿到购买折扣：下一次按需买服务打 9 折", nm(p))); } } },
+    run: async p => { if (!p.reseller && S.players.some(r => r.alive && r.reseller && r.id !== p.id)) { p.rsCoupon = 0.8; log(_tf(1590, "{$0} 拿到代理商折扣：下一次从代理商手里买服务再打 8 折", nm(p))); } else { p.buyCoupon = 0.9; log(_tf(1591, "{$0} 拿到购买折扣：下一次按需买服务打 9 折", nm(p))); } } },
   { dlc: 'reseller', n: _t(1592, "代理商批量拿地"), e: _t(1593, "代理商：可以按进货价买下任意一块没人买的服务（钱不够就不买）；客户：领 $100"), tip: _t(1594, "代理商批量采购拿到更低的进货价，再转售给客户"), art: 'billing',
     run: async p => {
       if (!p.reseller) { log(_tf(1595, "{$0} 是客户，领 ${$1}", nm(p), credit(p, 100))); return; }
@@ -131,7 +139,7 @@ export let DLC_REI = __rv(() => ([
   { dlc: 'genai', n: _t(1622, "Bedrock 上了新模型"), e: _t(1623, "你的 Bedrock 还没用上 Nova Pro 的，免费换下一档模型；已经用上或没有 Bedrock 的，领 $100"), tip: _t(1624, "Bedrock 上的模型会持续更新，换模型只要改模型 ID"), art: 'bedrock',
     run: async p => { const pr = S.props[IX.bedrock], mine = owns(p, IX.bedrock); if (mine && pr.level < 2 && upgradeInfo(p, IX.bedrock, true).ok) { pr.level++; (pr.upPaid = pr.upPaid || [])[pr.level - 1] = 0; log(_tf(1625, "🔧 {$0} 免费给 {$1} 换上「{$2}」", nm(p), sqn(IX.bedrock), lvName(IX.bedrock, pr.level))); } else log(_tf(1628, "{$0} {$1}，领 ${$2}", nm(p), mine && pr.level >= 2 ? _tf(1626, "的 {$0} 已经用上 Nova Pro", sqn(IX.bedrock)) : _t(1627, "没有能换模型的 Bedrock"), credit(p, 100))); } },
   { dlc: 'genai', n: _t(1629, "拿到生成式 AI 创新中心支持"), e: _t(1630, "从亚马逊云科技领 $100；你名下每块 AI 组的服务（Bedrock、SageMaker AI 等），再领 $50"), tip: _t(1631, "亚马逊云科技生成式 AI 创新中心会派专家帮客户做 GenAI 落地"), art: 'activate', run: async p => { const ai = ownedBy(p).filter(i => SQ[i].g === 'ai' && active(p, i)); log(_tf(1633, "{$0} {$1}领 ${$2}", nm(p), ai.length ? _tf(1632, "有 {$0}，", ai.map(sqn).join(_t(349, "、"))) : '', credit(p, 100 + 50 * ai.length))); } },
-  { dlc: 'genai', n: _t(1634, "AI Agent 上线"), e: _t(1635, "前进到 Lambda；没人买可以打 8 折买"), tip: _t(1636, "Agent 常把 Lambda 函数当工具，让模型调用你的业务接口；Bedrock AgentCore Gateway 能把现有的 API 和 Lambda 函数转成 Agent 可调用的 MCP 工具"), art: 'lambda', run: async p => { await moveTo(p, IX.lambda); await land(p, { discount: 0.8 }); } },
+  { dlc: 'genai', n: _t(1634, "AI Agent 上线"), e: _t(1635, "前进到 Lambda；没人买可以打 8 折买"), tip: _t(1636, "Agent 常把 Lambda 函数当工具，让模型调用你的业务接口；Bedrock AgentCore Gateway 能把现有的 API 和 Lambda 函数转成 Agent 可调用的 MCP 工具"), art: 'lambda', run: async p => { await advanceTo(p, IX.lambda); await land(p, { discount: 0.8 }); } },
   { dlc: 'sec', n: _t(1637, "通过了安全合规审计"), e: _t(1638, "持有 2 块以上安全组服务领 $150，否则领 $50"), tip: _t(1639, "Artifact 里可以下载亚马逊云科技的合规报告"), art: 'securityhub', run: async p => { log(_tf(1640, "{$0} 领 ${$1}", nm(p), credit(p, secActive(p, 'sec') >= 2 ? 150 : 50))); } },
   { dlc: 'sec', n: _t(1641, "Security Hub CSPM 全绿"), e: _t(1642, "清掉 1 个技术债；没有技术债就领 $80"), tip: _t(1643, "Security Hub CSPM 按安全标准持续检查配置"), art: 'securityhub', run: async p => { if (p.techDebt > 0) { p.techDebt--; p.refactored = true; log(_tf(1644, "{$0} 清掉 1 个技术债", nm(p))); } else log(_tf(1645, "{$0} 没有技术债，领 ${$1}", nm(p), credit(p, 80))); } },
   { dlc: 'finops', n: _t(1646, "成本异常检测发现一笔浪费"), e: _t(1647, "从亚马逊云科技领 $50；你名下每块实例型服务（IaaS、PaaS、容器），再领 $25（最多再领 $150）"), tip: _t(1648, "成本异常检测免费，用机器学习发现异常支出"), art: 'costexplorer', run: async p => { const n = Math.min(6, ownedBy(p).filter(i => isInst(i) && active(p, i)).length); log(_tf(1633, "{$0} {$1}领 ${$2}", nm(p), n ? _tf(1649, "有 {$0} 块实例型服务，", n) : '', credit(p, 50 + 25 * n))); } },
@@ -140,7 +148,7 @@ export let DLC_REI = __rv(() => ([
     run: async p => { const s = p.halfRun ? 0 : halfSave(p, 'hour'); if (!s) { log(_tf(1655, "{$0} {$1}，改领 ${$2}", nm(p), p.halfRun ? _t(1653, "已经有一张运行费减半还没用上") : _t(1654, "按现在的用量，降配也省不下钱"), credit(p, 50))); return; }
       p.halfRun = 'hour'; p.halfLaps = 1; log(_tf(1656, "{$0} 下次经过 Startup 扶持时，{$1} 运行费减半：按现在的用量大约少交 ${$2}", nm(p), CO_SVCS, s)); } },
   { dlc: 'global', n: _t(1657, "新 Region 开服"), e: _t(1658, "你有多区域功能的服务每块领 $60；一块都没有就领 $50"), tip: _t(1659, "2019 年 3 月 20 日以后上线的 Region 默认是关着的（选择加入区域），要先在账户里启用，才能在里面建资源"), art: 'region', run: async p => { const n = ownedBy(p).filter(i => effActive(i, 'mr')).length; log(_tf(1633, "{$0} {$1}领 ${$2}", nm(p), n ? _tf(1660, "有 {$0} 块多区域服务，", n) : '', credit(p, n ? 60 * n : 50))); } },
-  { dlc: 'global', n: _t(1661, "入选海外市场加速计划"), e: _t(1662, "前进到 CloudFront；没人买可以打 8 折买"), tip: _t(1663, "CloudFront 的价格等级（Price Class）可以只用一部分地区的边缘站点来省钱，被排除地区的用户访问会变慢；出海前先看目标市场在不在里面"), art: 'cloudfront', run: async p => { await moveTo(p, IX.cloudfront); await land(p, { discount: 0.8 }); } },
+  { dlc: 'global', n: _t(1661, "入选海外市场加速计划"), e: _t(1662, "前进到 CloudFront；没人买可以打 8 折买"), tip: _t(1663, "CloudFront 的价格等级（Price Class）可以只用一部分地区的边缘站点来省钱，被排除地区的用户访问会变慢；出海前先看目标市场在不在里面"), art: 'cloudfront', run: async p => { await advanceTo(p, IX.cloudfront); await land(p, { discount: 0.8 }); } },
 ]), v => { DLC_REI = v; }, () => DLC_REI);
 export let DLC_QUIZ = __rv(() => ({
   genai: [
@@ -172,9 +180,10 @@ export let DLC_QUIZ = __rv(() => ({
 }), v => { DLC_QUIZ = v; }, () => DLC_QUIZ);
 
 // ---------- 飞行：不按骰子走，直接飞到某一格 ----------
-export async function flyTo(p, target, why = '', { passGo = true, backward = false } = {}) {
+// lap：目标就是脚下这一格时往前绕一整圈（「走 Global Accelerator 快线」名下只有脚下这一块），不然原地不动又结算一次落点
+export async function flyTo(p, target, why = '', { passGo = true, backward = false, lap = false } = {}) {
   if (p.jail !== null) { log(_tf(1759, "{$0} 在维护窗口里，不移动", nm(p))); return; }
-  const from = p.pos, fwd = (target - from + N) % N;
+  const from = p.pos, fwd = ((target - from + N) % N) || (lap && !backward ? N : 0);
   const fl = !SIM && UI.FX.flyStart(p), mt0 = UI.MOVE_TO;
   if (!SIM) fxCast('fs', { p: p.id, from, to: target, why: String(why), back: !!backward });   // 联机：远端照着飞（见 MPFX）；本机能不能播由远端自己判断
   if (fl) { S.moving = p.id; UI.__set_MOVE_TO(target); UI.render(); }
@@ -211,7 +220,7 @@ export let MOVE_INC = __rv(() => ([
   { n: _t(1772, "发布出问题，回滚"), c: 'ops', e: _t(1773, "掷一颗骰子，后退相应格数，结算落点"), im: _t(712, "无（不算罚）"), tip: _t(1774, "用 CodeDeploy 蓝绿或金丝雀部署，出问题自动回滚"), art: 'codedeploy',
     run: async p => { const d = 1 + rnd(6); log(_tf(1775, "{$0} 掷出 {$1}，后退 {$2} 格", nm(p), d, d)); await moveSteps(p, -d); await land(p); return 'nopen'; } },
   { n: _t(1776, "流量被劫持到别人那里"), c: 'sec', e: _t(1777, "和随机一位不在维护窗口里的玩家交换位置（双方都不结算落点）"), im: _t(1778, "持有 Shield Advanced 或 CloudFront"), tip: _t(1779, "给 Route 53 公有托管区开 DNSSEC 签名，开了验证的解析器能识别被篡改的应答；入口放在 CloudFront 后面，源站地址不直接暴露"), art: 'shield',
-    imm: o => active(o, IX.shield) ? _t(1780, "有 Shield Advanced") : active(o, IX.cloudfront) ? _t(1579, "有 CloudFront") : '', run: async p => { const os = S.players.filter(q => q.alive && q.id !== p.id && q.jail === null); if (!os.length || p.jail !== null) return 'nopen'; const q = os[rnd(os.length)]; const a = p.pos; await flyTo(p, q.pos, _t(1781, "流量被劫持，"), { passGo: false }); q.pos = a; UI.render(); log(_tf(1782, "{$0} 被换到 {$1}", nm(q), sqn(a))); } },
+    imm: o => active(o, IX.shield) ? _t(1780, "有 Shield Advanced") : active(o, IX.cloudfront) ? _t(1579, "有 CloudFront") : '', hits: p => p.jail === null && hijackTo(p).length > 0, run: async p => { const os = hijackTo(p); if (!os.length || p.jail !== null) return 'nopen'; const q = os[rnd(os.length)]; const a = p.pos; await flyTo(p, q.pos, _t(1781, "流量被劫持，"), { passGo: false }); q.pos = a; UI.render(); log(_tf(1782, "{$0} 被换到 {$1}", nm(q), sqn(a))); } },
   { n: _t(1783, "主 Region 出问题，紧急切到灾备"), c: 'avail', e: _t(1784, "飞到棋盘正对面那一格，先交 $80 切换费进奖池，再结算落点（经过起点、User Group 活动照常领钱）"), im: _t(1785, "Route 53 升了健康检查：自动故障转移，照样飞过去，不交切换费（都不算罚）"), tip: _t(1786, "灾备切换要提前演练；可以用 Route 53 故障转移路由或 Application Recovery Controller 做切换"), art: 'region',
     run: async p => { if (p.jail !== null) { log(_tf(1759, "{$0} 在维护窗口里，不移动", nm(p))); return 'nopen'; } await flyTo(p, (p.pos + Math.floor(N / 2)) % N, _t(1787, "切到灾备 Region，"));
       if (active(p, IX.route53) && S.props[IX.route53].level >= 1) log(_tf(1788, "{$0} 的 Route 53 健康检查自动故障转移，不交切换费", nm(p))); else log(_tf(1789, "{$0} 交 ${$1} 切换费", nm(p), pay(p, 'pot', 80)));
@@ -225,7 +234,7 @@ export let MOVE_REI = __rv(() => ([
   { n: _t(1800, "跨 Region 业务扩张"), e: _t(1801, "飞到棋盘正对面那一格，结算落点，经过起点、User Group 活动照常领钱"), tip: _t(1802, "跨 Region 扩张先想清楚数据怎么跟过去：S3 跨区域复制要求源桶和目标桶都开版本控制，DynamoDB 全局表、Aurora 全球数据库能让多个 Region 就近读写"), art: 'region',
     run: async p => { await flyTo(p, (p.pos + Math.floor(N / 2)) % N, _t(1803, "跨 Region 扩张，")); await land(p); } },
   { n: _t(1804, "走 Global Accelerator 快线"), e: _t(1805, "前进到下一块你自己的服务（经过起点、User Group 活动照常领钱）；你还没有服务就前进 6 格"), tip: _t(1806, "Global Accelerator 给应用两个固定的任播 IP，用户就近接入亚马逊云科技骨干网"), art: 'datatransfer',
-    run: async p => { const mine = ownedBy(p); if (!mine.length) { await moveSteps(p, 6); await land(p); return; } let k = (p.pos + 1) % N; while (!mine.includes(k)) k = (k + 1) % N; await flyTo(p, k, _t(1807, "走快线，")); await land(p); } },
+    run: async p => { const mine = ownedBy(p); if (!mine.length) { await moveSteps(p, 6); await land(p); return; } let k = (p.pos + 1) % N; while (!mine.includes(k)) k = (k + 1) % N; await flyTo(p, k, _t(1807, "走快线，"), { lap: true }); await land(p); } },
 ]), v => { MOVE_REI = v; }, () => MOVE_REI);
 // 11-07 新加：万能服务改绑、免费出题。在 DLC 卡后面才挂上去（见下面 DLC_REI.forEach），已有卡的编号都不变，存档里的牌堆照旧对得上
 export let NEW_REI = __rv(() => ([
@@ -260,7 +269,7 @@ export let NEW_REI = __rv(() => ([
     run: async p => { p.billFree = (p.billFree || 0) + 1; log(_tf(1836, "💳 {$0} 领到亚马逊云科技推广 Credits：{$1}经过 Startup 扶持时，运行费用 Credits 抵掉", nm(p), p.billFree > 1 ? _tf(1834, "接下来 {$0} 次", p.billFree) : _t(1835, "下次"))); } },
   // 11-08：AgentCore、SageMaker AI 的故事
   { n: _t(1837, "Bedrock AgentCore 正式发布"), e: _t(1838, "前进到 AgentCore；没人买的话可以打 8 折买，有主正常付过路费"), tip: _t(1839, "AgentCore 在 2025 年 10 月正式发布：Runtime、Memory、Gateway、Identity、Observability 这些组件可以单独用，也可以组合着用，具体以官网为准"), art: 'agentcore',
-    run: async p => { await moveTo(p, IX.agentcore); await land(p, { discount: 0.8 }); } },
+    run: async p => { await advanceTo(p, IX.agentcore); await land(p, { discount: 0.8 }); } },
   { n: _t(1840, "用 AgentCore Gateway 把老接口接成 MCP 工具"), e: _t(1841, "你的 AgentCore 免费升一级（已经升满的领 $100）；没有 AgentCore 的领 $50"), tip: _t(1842, "AgentCore Gateway 能把现有的 REST API（OpenAPI 描述）和 Lambda 函数接成 MCP 工具，智能体不用改业务代码就能调用"), art: 'agentcore',
     run: async p => { const i = IX.agentcore; if (!owns(p, i)) { log(_tf(1843, "{$0} 没有 AgentCore，领 ${$1}", nm(p), credit(p, 50))); return; } if (upgradeInfo(p, i, true).ok) { const pr = S.props[i]; pr.level++; (pr.upPaid = pr.upPaid || [])[pr.level - 1] = 0; log(_tf(1844, "🔧 {$0} 免费给 {$1} 升到{$2}", nm(p), sqn(i), lvFull(i, pr.level))); } else log(_tf(1845, "{$0} 的 {$1} 升不了了，领 ${$2}", nm(p), sqn(i), credit(p, 100))); } },
   { n: _t(1846, "SageMaker Unified Studio 打通数据和 AI"), e: _t(1847, "你名下分析组、AI 组的服务，每块领 $30（最多领 $180）"), tip: _t(1848, "SageMaker Unified Studio 把数据目录、SQL 查询、Spark 作业、模型开发和 Bedrock 应用放进同一个工作台，数据和 AI 团队在一处协作"), art: 'sagemaker',

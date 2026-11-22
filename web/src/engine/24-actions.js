@@ -2,7 +2,7 @@ import { _t, _tf } from '../core/01-i18n-runtime.js';
 import { UI } from '../core/02b-ui-port.js';
 import { GRP, SQ, lvName } from '../rules/03-services.js';
 import { CATS, INC } from '../rules/04-roles-combos-cards.js';
-import { S, cur, log, nm, ownedBy, sqn } from './07-state.js';
+import { F, S, cur, log, nm, ownedBy, sqn } from './07-state.js';
 import { pay } from './08-money.js';
 import { upPaidOf, upgradeInfo } from './09-rent.js';
 import { ensureInc } from './16-deck.js';
@@ -21,7 +21,7 @@ function migrations(p) {
 // 改了这几项的价格，这里要跟着改
 export const actionWhy = p => S.actionUsed ? _t(3543, "本回合已经行动过了") : p.cash < 50 ? _t(3544, "现金不够 $50") : '';
 export async function activeAction() {
-  if (S.actionUsed) return;
+  if (!F.actions() || S.actionUsed) return;   // 和按钮（ui/27c-center.js）同一个条件：联机远端发来的 'action' 也直接调这里
   const p = cur(), mg = migrations(p);
   const v = await UI.ask({
     title: _t(3545, "主动行动（每回合 1 个）"),

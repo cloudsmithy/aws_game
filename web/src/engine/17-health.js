@@ -11,7 +11,7 @@ import { baseRent } from './09-rent.js';
 import { moveSteps, sendToJail } from './13-move.js';
 import { land } from './15-land.js';
 import { ensureInc } from './16-deck.js';
-import { haIncident, speedLose, speedSpend } from './22-speed.js';
+import { haIncident, spdReady, speedLose, speedSpend } from './22-speed.js';
 import { ST } from './26b-retro.js';
 import { cardMulBase, hx, withCardMul } from '../rules/35-modes.js';
 import { isAI } from './36-ai.js';
@@ -28,6 +28,8 @@ function cveProtected(p, i) {
 const effWhy = (o, eff) => { const e = ownedBy(o).find(i => effActive(i, eff)); return e !== undefined ? _tf(3121, "{$0} 有「{$1}」", SQ[e].n, SQ[e].upg.find(u => effIn(u[2], eff))[0]) : ''; };
 // 返回免疫的原因（空字符串 = 不免疫）
 // 一张 Health 卡对某人免不免疫：带 run 的卡看自己的 imm；其余走 immuneByProp
+// 带 run 的卡对这个人有没有动静：卡上写了 hits 且返回 false 的，不弹抵消窗、不推迟发牌（run 自己记「不受影响」）
+const noHit = (o, id) => { const c = INC[id]; return !!(c.run && c.hits && !c.hits(o)); };
 function immuneTo(o, id) { const c = INC[id]; if (!c.run) return immuneByProp(o, id); return c.imm ? c.imm(o) : ''; }
 function immuneByProp(o, id) {
   if (INC[id].n === _t(686, "有人手动改了生产配置") && active(o, IX.config) && S.props[IX.config].level >= 2) return _t(3122, "Config 发现配置漂移，自动修正改回来了");
@@ -87,7 +89,7 @@ export async function voteWho(voters, title, html, yesL, noL, pYes = 0.6) {
 export async function vote(...a) { return (await voteWho(...a)).length; }
 // 二选一：交钱，或者让一块服务变成 Impaired
 async function payOrImpair(p, amt, cands, why) {
-  const c = cands.filter(i => owns(p, i) && !S.props[i].impaired).sort((a, b) => baseRent(b, 7) - baseRent(a, 7))[0];
+  const c = cands.filter(i => active(p, i) && !S.props[i].impaired).sort((a, b) => baseRent(b, 7) - baseRent(a, 7))[0];
   const x = Math.round(amt * (S && S.cardMul ? S.cardMul : 1));
   if (c == null) { pay(p, 'pot', amt); log(_tf(1561, "{$0} 交 ${$1}", nm(p), x)); return; }
   const v = await UI.ask({ who: p.id, title: _tf(838, "{$0}：{$1}", p.name, why), html: _tf(3154, "<p>二选一：交 ${$0} 进奖池；或者让 {$1} 变成 Impaired（暂停收过路费，到你下回合开始自动恢复）。</p>", x, sqn(c)), buttons: [{ label: _tf(3112, "交 ${$0}", x), value: 'pay', cls: 'pri', disabled: p.cash < x }, { label: _tf(3155, "让 {$0} 变成 Impaired", SQ[c].n), value: 'imp' }] });
@@ -121,8 +123,8 @@ function cancelOpts(p, id) {
   if (dr) b.push({ label: _tf(3171, "用演练标记抵消（{$0}类）", CATS[c.c]), value: 'drill' });
   const hosts = S.players.filter(o => o.alive && o.id !== p.id && immuneTo(o, id)), fine = cardAmt({ 3: 100, 10: 100, 20: p.role === 'media' ? 300 : 150 }[id] || 0);
   hosts.forEach(o => b.push({ label: _tf(3172, "请 {$0} 托管", o.name), value: 'h' + o.id }));
-  if (dlcOn('speed') && haIncident(id) && p.speed >= 4) b.push({ label: _t(3173, "花 4 点部署点数：故障转移扛住"), value: 'sp4' });
-  if (dlcOn('speed') && p.speed >= 7) b.push({ label: _t(3174, "花 7 点部署点数：蓝绿部署抵消"), value: 'sp7' });
+  if (dlcOn('speed') && haIncident(id) && p.speed >= 4 && spdReady(p, 4)) b.push({ label: _t(3173, "花 4 点部署点数：故障转移扛住"), value: 'sp4' });
+  if (dlcOn('speed') && p.speed >= 7 && spdReady(p, 7)) b.push({ label: _t(3174, "花 7 点部署点数：蓝绿部署抵消"), value: 'sp7' });
   return { c, b, es, ce, coe, dr, hosts, fine };
 }
 async function tryCancel(p, id) {
@@ -153,7 +155,7 @@ async function drawIncident0(p) {
   ensureInc(1);
   const id = S.inc.shift(); S.incDisc.push(id);
   // 有抵消、托管可选的卡先不亮，留给「要抵消吗」那个窗一起亮，少点一次。会甩锅、在沙盒里、免疫的照旧先亮卡
-  const defer = !availCard(p, 'BLAME') && !(p.immuneTill >= S.round) && !immuneTo(p, id) && cancelOpts(p, id).b.length > 0;
+  const defer = !availCard(p, 'BLAME') && !(p.immuneTill >= S.round) && !immuneTo(p, id) && !noHit(p, id) && cancelOpts(p, id).b.length > 0;
   if (defer) { S.lastCard = { kind: 'inc', id, who: p.id }; UI.render(); UI.__set_CARD_DEAL({ id, who: p.id }); }
   else await UI.showCard('inc', id, p);
   log(_tf(3192, "⚠️ {$0} 抽到 Health 事件 #{$1}「{$2}」", nm(p), id, INC[id].n)); ST(p).inc++;
@@ -178,7 +180,7 @@ export async function incident(p, id) {
   }
   if (p.immuneTill >= S.round) { log(_tf(3196, "🛡️ {$0} 在「监管沙盒」里，免疫「{$1}」", nm(p), INC[id].n)); ST(p).imm++; fxAll({ f: 'shield', a: [p.pos], co: [p.pos, _tf(3197, "<b>免疫</b>「{$0}」", INC[id].n), 'ok'] }); return; }
   const c = INC[id], imm = immuneTo(p, id);
-  if (c.run) { if (imm) { log(_tf(3198, "🛡️ {$0} 免疫「{$1}」：{$2}", nm(p), c.n, imm)); ST(p).imm++; fxAll({ f: 'shield', a: [p.pos], co: [p.pos, _tf(3197, "<b>免疫</b>「{$0}」", INC[id].n), 'ok'] }); return; } if (await tryCancel(p, id)) return; if ((await c.run(p)) !== 'nopen') await penalize(p); return; }
+  if (c.run) { if (imm) { log(_tf(3198, "🛡️ {$0} 免疫「{$1}」：{$2}", nm(p), c.n, imm)); ST(p).imm++; fxAll({ f: 'shield', a: [p.pos], co: [p.pos, _tf(3197, "<b>免疫</b>「{$0}」", INC[id].n), 'ok'] }); return; } if (!noHit(p, id) && await tryCancel(p, id)) return; if ((await c.run(p)) !== 'nopen') await penalize(p); return; }
   if (imm && id !== 4) { log(_tf(3198, "🛡️ {$0} 免疫「{$1}」：{$2}", nm(p), c.n, imm)); ST(p).imm++; fxAll({ f: 'shield', a: [p.pos], co: [p.pos, _tf(3197, "<b>免疫</b>「{$0}」", INC[id].n), 'ok'] }); return; }
   switch (id) {
     case 20: { if (await tryCancel(p, id)) return; const x = p.role === 'media' ? 300 : 150; if (p.role === 'media') log(_t(3199, "短视频平台入口流量大，清洗费 ×2")); await payOrImpair(p, x, [IX.cloudfront, IX.elb, IX.apigw, IX.route53], _t(734, "DDoS 打满了入口")); break; }

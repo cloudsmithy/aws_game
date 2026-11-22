@@ -1,5 +1,5 @@
 import { _t, _tf } from '../core/01-i18n-runtime.js';
-import { $, esc, unesc } from '../core/02-util.js';
+import { $, esc, homeUrl, unesc } from '../core/02-util.js';
 import { S, __set_S, cur, log, nm } from '../engine/07-state.js';
 import { MODAL_CUR, VIEW_CUR, ask } from '../ui/10-modal.js';
 import { render } from '../ui/27d-side.js';
@@ -86,7 +86,7 @@ Object.assign(MP, {
     renderNames(); this.renderLobby(); scrollTo(0, 0);
   },
   // 远端：离开房间；提议现在结算（房主确认）
-  leave() { ask({ local: true, cancelable: true, title: _t(4967, "离开房间？"), html: this.watching ? '<p>离开观战不会影响玩家和对局；邀请有效时可以再次加入。</p>' : _t(4968, "<p>房主会把你的座位标成掉线，可以替你操作。你用同一个房间号和局里的名字还能加回来。</p>"), buttons: [{ label: _t(4969, "离开"), value: true, cls: 'pri' }, { label: _t(2465, "取消"), value: false }] }).then(v => { if (!v) return; this.kicked = true; try { this.hostConn && this.hostConn.close(); } catch (e) { } location.href = location.pathname; }); },
+  leave() { ask({ local: true, cancelable: true, title: _t(4967, "离开房间？"), html: this.watching ? _t(5252, "<p>离开观战不会影响玩家和对局；邀请有效时可以再次加入。</p>") : _t(4968, "<p>房主会把你的座位标成掉线，可以替你操作。你用同一个房间号和局里的名字还能加回来。</p>"), buttons: [{ label: _t(4969, "离开"), value: true, cls: 'pri' }, { label: _t(2465, "取消"), value: false }] }).then(v => { if (!v) return; this.kicked = true; try { this.hostConn && this.hostConn.close(); } catch (e) { } location.href = homeUrl(); }); },
   proposeEnd() { if (!S || S.over) return; this.send(this.hostConn, { t: 'endask' }); toast(_t(4970, "已经请房主现在结算")); },
   idleTake() { const x = S && this.seats[S.cur]; if (!x || !this.isRemote(S.cur)) return; x.idleTake = S.turnStartAt; log(_tf(4971, "{$0} 半天没动，房主替他操作这一回合", nm(cur()))); this.send(x.conn, { t: 'toast', msg: _t(4972, "你半天没动，房主替你操作了这一回合") }); render(); },
   broadcast(msg) { this.recipients().forEach(x => this.send(x.conn, msg)); },

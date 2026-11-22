@@ -47,6 +47,12 @@ export function chainWith(p, c) {
 }
 export const chainTxt = (p, c) => chainWith(p, c).map(x => _tf(2680, "和「{$0}」共用 {$1}", x.c.n, x.sh.map(m => SQ[m].n).join(_t(349, "、")))).join(_t(408, "；"));
 export const capCost = i => sideCost(i) / 2;
+// 花钱加的容量有几个：Hackathon 奖品免费加的记在 pr.capFree，卖回、拆掉、估值都不算钱（和卡牌免费升级一样不退钱）。
+// 老存档没有 capFree，全部按花钱加的算
+const capPaid = i => { const pr = S.props[i], c = pr.cap || 0; return c - Math.min(c, pr.capFree || 0); };
+export const capPaidSum = i => capPaid(i) * capCost(i);
+// 减 1 个容量退多少：先减花钱加的（退一半），只剩免费的就不退
+export const capBack = i => capPaid(i) > 0 ? Math.round(capCost(i) / 2) : 0;
 export function capInfo(p, i) {
   const s = SQ[i], pr = S.props[i];
   if (s.t !== 'prop' || pr.owner !== p.id || pr.spot) return { ok: false };
@@ -56,12 +62,14 @@ export function capInfo(p, i) {
 }
 export function addCap(p, i) {
   const u = capInfo(p, i); if (!u.ok || p.cash < u.cost) return;
-  pay(p, 'bank', u.cost); ST(p).spendUpg = (ST(p).spendUpg || 0) + u.cost; S.props[i].cap = (S.props[i].cap || 0) + 1;
+  const pr = S.props[i]; if (pr.capFree) pr.capFree = Math.min(pr.capFree, pr.cap || 0);   // 别处把容量清零时没清 capFree，先对齐，免得新加的被当成免费的
+  pay(p, 'bank', u.cost); ST(p).spendUpg = (ST(p).spendUpg || 0) + u.cost; pr.cap = (pr.cap || 0) + 1;
   log(_tf(2683, "➕ {$0} 给 {$1} 加了 1 个{$2}（共 {$3} 个，${$4}）", nm(p), sqn(i), capU(SQ[i].k), S.props[i].cap, u.cost));
 }
 export function sellCap(p, i) {
   const pr = S.props[i]; if (!owns(p, i) || !pr.cap) return;
-  const back = Math.round(capCost(i) / 2);
+  const back = capBack(i);
+  if (!back) { pr.capFree = Math.min(pr.capFree || 0, pr.cap) - 1; pr.cap--; return void log(_tf(5230, "➖ {$0} 给 {$1} 减了 1 个{$2}（Hackathon 免费加的，不退钱）", nm(p), sqn(i), capU(SQ[i].k))); }
   pr.cap--; credit(p, back, 'sell');
   log(_tf(2684, "➖ {$0} 给 {$1} 减了 1 个{$2}，拿回 ${$3}", nm(p), sqn(i), capU(SQ[i].k), back));
 }
@@ -145,17 +153,24 @@ export const spotTxt = i => spotMine(i) ? _tf(2703, "Spot 出价 ${$0}", S.props
 export const buyPaid = i => { const pr = S.props[i]; return pr.spot ? pr.spotPaid : (pr.paid ?? SQ[i].p); };
 // 只拆升级和容量（服务留着）：各退实付的一半
 // 和 takeOffline 一样一份一份、一级一级退，每次各自取整，显示的数和实际到账一致
-export const stripValue = i => { const pr = S.props[i]; let v = (pr.cap || 0) * Math.round(capCost(i) / 2); for (let l = 1; l <= pr.level; l++) v += Math.round(upPaidOf(i, l) / 2); return v; };
+export const stripValue = i => { const pr = S.props[i]; let v = capPaid(i) * Math.round(capCost(i) / 2); for (let l = 1; l <= pr.level; l++) v += Math.round(upPaidOf(i, l) / 2); return v; };
 // 折扣按中文习惯写：0.5 → 5 折，0.45 → 45 折，0.85 → 85 折
 export const zhe = x => { const n = Math.round(x * 100); return LANG === 'en' ? `${100 - n}% off` : LANG === 'ja' ? `${100 - n}%オフ` : _tf(2705, "{$0} 折", n % 10 ? n : n / 10); };   // 英文版写成「20% off」，日文版「20%オフ」
 export const sellZhe = () => zhe(BAL.sell);
 // Trusted Advisor 按实付全额退：买价 + 升级 + 容量，下线的减掉下线时已经拿到的钱。按钮上的数和实际到账共用这一个算法
-export const fullBack = i => { const pr = S.props[i]; return Math.max(0, buyPaid(i) + upPaidSum(i) + (pr.cap || 0) * capCost(i) - (pr.offline ? pr.offCash || 0 : 0)); };
-export const sellValue = i => { const pr = S.props[i]; return Math.max(0, Math.round((buyPaid(i) + upPaidSum(i) + (pr.cap || 0) * capCost(i)) * BAL.sell) - (pr.offline ? pr.offCash || 0 : 0)); };
+export const fullBack = i => { const pr = S.props[i]; return Math.max(0, buyPaid(i) + upPaidSum(i) + capPaidSum(i) - (pr.offline ? pr.offCash || 0 : 0)); };
+export const sellValue = i => { const pr = S.props[i]; return Math.max(0, Math.round((buyPaid(i) + upPaidSum(i) + capPaidSum(i)) * BAL.sell) - (pr.offline ? pr.offCash || 0 : 0)); };
+// 服务离开主人（卖回、交易、破产分给债主、被战略并购）：他给这块买的 RI 作废、预付不退（规则书 §15「RI 跟着人走」）；
+// 落到发动 DDoS 的人手里，DDoS 跟着解除（自己打自己说不通，和战略并购一样）。to 是新主人的 id，回到亚马逊云科技传 null
+export function svcLeaves(from, i, to) {
+  const pr = S.props[i];
+  if (from && from.commits) from.commits = from.commits.filter(c => !(c.type === 'ri' && c.svc === i));
+  if (pr) { pr.ri = null; if (to != null && pr.ddos === to) { pr.ddos = null; pr.ddosLeft = 0; } }
+}
 export function sellProp(p, i) {
   if (!owns(p, i)) return;
   const v = sellValue(i), lv = S.props[i].level;
-  resetProp(i); p.released = (p.released || 0) + 1; credit(p, v, 'sell');
+  svcLeaves(p, i, null); resetProp(i); p.released = (p.released || 0) + 1; credit(p, v, 'sell');
   log(_tf(2707, "💱 {$0} 把 {$1}{$2}卖回亚马逊云科技，按实付 {$3} 折拿回 ${$4}；以后不用再交它的运行费，这块谁落上来都能买", nm(p), sqn(i), lv ? _tf(2706, "（含「{$0}」）", lvName(i, lv)) : ' ', Math.round(BAL.sell * 10), v));
 }
 const SAAS_SLS = new Set(['lambda', 'apigw', 'dynamodb']);   // SaaS 创业公司打折的还是原来那几块（Serverless 不再是色组）

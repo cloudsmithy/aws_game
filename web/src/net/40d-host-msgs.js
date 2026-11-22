@@ -46,18 +46,18 @@ Object.assign(MP, {
   },
   async admit(conn, m, approval) {
     if (this.role !== 'host' || !conn.open || conn._closed || conn._admitted || conn._pending) return;
-    if (m.name != null && typeof m.name !== 'string') return this.reject(conn, '名字必须是文字');
+    if (m.name != null && typeof m.name !== 'string') return this.reject(conn, _t(5253, "名字必须是文字"));
     const name = (m.name || '').replace(/\s+/g, ' ').trim().slice(0, 12) || _t(3861, "玩家");
     if (m.mode === 'spectator') {
-      if (!this.watchToken || m.invite !== this.watchToken) return this.reject(conn, '观战邀请无效或已关闭');
-      if (Object.keys(this.viewers).length >= this.watchLimit) return this.reject(conn, '观战人数已满');
+      if (!this.watchToken || m.invite !== this.watchToken) return this.reject(conn, _t(5254, "观战邀请无效或已关闭"));
+      if (Object.keys(this.viewers).length >= this.watchLimit) return this.reject(conn, _t(5255, "观战人数已满"));
       const id = this.newKey(); conn._viewer = id; conn._admitted = true;
       this.viewers[id] = { name, conn, online: true, delta: m.delta === 1, walk: m.walk === 1 };
       this.send(conn, { t: 'welcome', mode: 'spectator', seat: null, room: this.room });
       this.pushState(true, this.viewers[id]); if (this.cur) this.send(conn, this.cur.msg);
       this.refreshMembers(); return;
     }
-    if (m.mode != null && m.mode !== 'player') return this.reject(conn, '不支持的入房身份');
+    if (m.mode != null && m.mode !== 'player') return this.reject(conn, _t(5256, "不支持的入房身份"));
     if (m.auth !== this.auth) { this.reject(conn, _t(4986, "密码不对")); return; }
     if (this.banned && this.banned.has(name.replace(/\s+/g, ' ').trim())) { this.reject(conn, _t(4987, "房主把你移出了这个房间")); return; }
     // 名字定位座位，钥匙或房主确认鉴权后再认回。
@@ -67,7 +67,7 @@ Object.assign(MP, {
     if (seat != null) {
       const x = this.seats[seat], proven = x.key && Array.isArray(m.keys) && m.keys.slice(0, 8).includes(x.key);
       if (!proven && !(approval && approval.seat === seat && approval.previous === x)) {
-        if (x.online) return this.reject(conn, '该玩家仍在线；请使用原浏览器，或等其离线后由房主确认身份');
+        if (x.online) return this.reject(conn, _t(5257, "该玩家仍在线；请使用原浏览器，或等其离线后由房主确认身份"));
         return this.requestSeat(conn, { ...m, name }, seat, x);
       }
       const old = x.conn; if (old) { old._seat = null; old._closed = true; this.send(old, { t: 'kicked' }); try { old.close({ flush: true }); } catch (e) { } setTimeout(() => { try { old.close(); } catch (e) { } }, 5000); }
@@ -129,7 +129,7 @@ Object.assign(MP, {
     Object.entries(this.seats).forEach(([k, x]) => { const el = $('#nm' + k), ai = $('#ai' + k); if (el) { el.value = x.name; el.readOnly = true; el.title = x.online ? _t(4996, "联机玩家") : _t(4997, "联机玩家（已断开）"); } if (ai) { ai.checked = false; ai.disabled = true; ai.title = _t(4998, "联机玩家，不能交给电脑"); } });   // 「电脑」灰掉只是给房主看的，开局时 startFromSetup 照样把联机座位算成真人
     const list = [_tf(5000, "<li><b>玩家 1</b>：{$0}（你，房主，本机）</li>", esc((($('#nm0') || {}).value || '').trim() || _t(4999, "玩家 1")))].concat([1, 2, 3].map(k => this.seats[k] ? _tf(5001, "<li><b>玩家 {$0}</b>：{$1}{$2} <button type=\"button\" class=\"sm\" data-act=\"MP.kick\" data-arg=\"{$3}\" title=\"把他移出房间，这个名字不能再进\">移出</button></li>", k + 1, esc(this.seats[k].name), this.seats[k].online ? '' : _t(4962, "（已断开）"), k) : _tf(5002, "<li class=\"muted\">玩家 {$0}：空位（不来人就在本机轮流玩）</li>", k + 1)));
     const watchers = Object.values(this.viewers);
-    const invitation = this.watchToken ? `<div class="mpwatch"><p><b>受邀观战已开启</b> · 最多 ${this.watchLimit} 位观众，不占玩家座位</p><p>观战邀请码：<code data-watch-code style="overflow-wrap:anywhere;user-select:all">${esc(this.watchToken)}</code> <button type="button" class="sm" data-act="MP.copyWatchInvite">复制观战邀请</button></p><p class="muted">将房间号和观战邀请码发给解说，选择「加入房间 → 受邀观战」，现在就能进来等待开赛。</p><p>已到场观众（${watchers.length}/${this.watchLimit}）：${watchers.length ? watchers.map(x => esc(x.name)).join('、') : '暂无'}</p></div>` : '';
+    const invitation = this.watchToken ? _tf(5258, "<div class=\"mpwatch\"><p><b>受邀观战已开启</b> · 最多 {$0} 位观众，不占玩家座位</p><p>观战邀请码：<code data-watch-code style=\"overflow-wrap:anywhere;user-select:all\">{$1}</code> <button type=\"button\" class=\"sm\" data-act=\"MP.copyWatchInvite\">复制观战邀请</button></p><p class=\"muted\">将房间号和观战邀请码发给解说，选择「加入房间 → 受邀观战」，现在就能进来等待开赛。</p><p>已到场观众（{$2}/{$0}）：{$3}</p></div>", this.watchLimit, esc(this.watchToken), watchers.length, watchers.length ? watchers.map(x => esc(x.name)).join(_t(349, "、")) : _t(5259, "暂无")) : '';
     $('#mpstat').innerHTML = _tf(5003, "<div class=\"mproom\">房间号 <b>{$0}</b><span class=\"muted\">把房间号和密码发给朋友，他们在自己的设备上打开这个页面，点「加入房间」</span></div><ul class=\"mpseats\">{$1}</ul>", this.room, list.slice(0, Math.max(npVal(), n)).join('')) + `<div data-mp-members>${this.viewerUI()}</div>${invitation}`;
   },
   // 对方没正常关页面就没了（锁屏、断网、浏览器被系统杀掉）：数据通道不会自己关，PeerJS 只认 ICE 的 failed，Chrome 上 ICE 一直停在 disconnected。

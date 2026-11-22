@@ -2,12 +2,12 @@ import { __rv, _t, _tf } from '../core/01-i18n-runtime.js';
 import { BAL, IX, OFFLINE_FEE, SQ } from '../rules/03-services.js';
 import { COMBOS, rsCustomers } from '../rules/04-roles-combos-cards.js';
 import { dlcRunMul } from '../rules/05-dlc.js';
-import { F, P, S, active, debtOf, effActive, hasCombo, ownedBy } from './07-state.js';
-import { buyPaid, capCost, upPaidSum } from './09-rent.js';
+import { F, P, S, active, debtOf, effActive, hasCombo, ownedBy, owns } from './07-state.js';
+import { buyPaid, capPaidSum, upPaidSum } from './09-rent.js';
 import { fmtMul } from '../rules/35-modes.js';
 export function valBreak(p) {
   let svc = 0, inv = 0;
-  ownedBy(p).forEach(i => { const pr = S.props[i]; svc += (p.reseller ? buyPaid(i) : pr.spot ? pr.spotPaid : SQ[i].p) - (pr.offline ? pr.offCash || 0 : 0); inv += upPaidSum(i) + (pr.cap || 0) * capCost(i); });
+  ownedBy(p).forEach(i => { const pr = S.props[i]; svc += (p.reseller ? buyPaid(i) : pr.spot ? pr.spotPaid : SQ[i].p) - (pr.offline ? pr.offCash || 0 : 0); inv += upPaidSum(i) + capPaidSum(i); });
   const cash = p.cash - debtOf(p), arch = COMBOS.filter(c => hasCombo(p, c.id)).length * 200 + (p.role === 'rs_cons' && S.players ? rsCustomers(p).length * 100 : 0), debt = p.techDebt * 100, coe = p.coe.filter(t => !t.used).length * 50;
   const net = Math.round(cash + svc + inv);
   return { cash: Math.round(cash), svc: Math.round(svc), inv: Math.round(inv), arch, debt, coe, net, val: Math.round(net + inv + arch - debt + coe) };
@@ -54,7 +54,10 @@ export const RI_OK = new Set(['ec2', 'rds', 'aurora', 'elasticache', 'redshift',
 // 1 圈 = 1 年。Compute / SageMaker AI Savings Plans 有 1 年和 3 年期；Database Savings Plans 只有 1 年期
 export const SP_PLANS = { 1: 0.25, 3: 0.45 }, RI_PLANS = { 1: 0.35, 3: 0.55 };
 const SP_DB = new Set(['rds', 'aurora', 'elasticache', 'opensearch']);
-export const commitsOf = p => (p.commits || []).filter(c => c.laps > 0);
+// RI 跟着人走：服务不在他手上了（卖回、交易、破产分走、被并购、下线时被别人买走）RI 就作废。
+// 新买的 RI 在格子上记 pr.ri = 买的人；格子被 resetProp 重置或换过主人就对不上，再买回来也不会复活。老存档的 RI 没有 mark，只看还持不持有
+const riValid = (p, c) => owns(p, c.svc) && (!c.mark || S.props[c.svc].ri === p.id);
+export const commitsOf = p => (p.commits || []).filter(c => c.laps > 0 && (c.type !== 'ri' || riValid(p, c)));
 export const spActive = p => commitsOf(p).find(c => c.type === 'sp');
 export const riActive = (p, i) => commitsOf(p).find(c => c.type === 'ri' && c.svc === i);
 // Compute Optimizer 真正给降配建议的只有 EC2 实例、EBS 卷、Lambda 内存、RDS / Aurora 实例、跑在 Fargate 上的 ECS 服务；

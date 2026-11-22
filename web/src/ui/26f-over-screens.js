@@ -1,5 +1,5 @@
 import { _t, _tf } from '../core/01-i18n-runtime.js';
-import { BOT, PAWN, SIM, awsImg, usd } from '../core/02-util.js';
+import { BOT, PAWN, SIM, awsImg, homeUrl, usd } from '../core/02-util.js';
 import { COMBOS, roleOf } from '../rules/04-roles-combos-cards.js';
 import { P, S, active, hasCombo, ownedBy, winWA } from '../engine/07-state.js';
 import { valTip, valuation } from '../engine/08c-costs.js';
@@ -23,7 +23,7 @@ export async function overScreens(w, why) {
 export async function showReport() {
   if (!S || !S.over) return;
   const w = S.winner != null ? P(S.winner) : null, why = S.overWhy || '';
-  for (;;) { const v = await ask({ local: true, cls: 'wide rep', title: _t(3900, "战报"), html: reportHtml(w, why), buttons: [{ label: _t(3901, "<span>导出 PDF<span class=\"xl\"> 战报</span></span>"), value: 'pdf', botW: 0 }, { label: _t(3902, "<span>导出<span class=\"xl\">对局</span>记录</span>"), value: 'x', botW: 0 }, { label: MP.role === 'client' ? _t(3903, "回开局页") : _t(3904, "再来一局"), value: 'n', botW: 0 }, { label: _t(2478, "知道了"), value: true, cls: 'pri' }] }); if (v === 'n') { if (MP.role === 'client') location.href = location.pathname; else againGo(); return; }
+  for (;;) { const v = await ask({ local: true, cls: 'wide rep', title: _t(3900, "战报"), html: reportHtml(w, why), buttons: [{ label: _t(3901, "<span>导出 PDF<span class=\"xl\"> 战报</span></span>"), value: 'pdf', botW: 0 }, { label: _t(3902, "<span>导出<span class=\"xl\">对局</span>记录</span>"), value: 'x', botW: 0 }, { label: MP.role === 'client' ? _t(3903, "回开局页") : _t(3904, "再来一局"), value: 'n', botW: 0 }, { label: _t(2478, "知道了"), value: true, cls: 'pri' }] }); if (v === 'n') { if (MP.role === 'client') location.href = homeUrl(); else againGo(); return; }
     // 点按钮弹窗就关了：重画一遍战报（接着原来的位置），排好版再打印
     if (v === 'pdf') { setTimeout(printReport, 200); continue; }
     if (v !== 'x') break; downloadLog(w, why); }

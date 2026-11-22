@@ -103,6 +103,7 @@ export function aiBuild(p, res = 250) {
 export let aiTimer = 0;
 // 电脑在玩的时候可以暂停（电脑在房主那台跑，只有房主那边有这个按钮：电脑的回合和电脑答弹窗都会停在原地，点「继续」接着跑）
 export let AI_PAUSE = false;
+export const __set_AI_PAUSE = v => (AI_PAUSE = v);   // 开新局时清掉（联机「再来一局」不刷新页面，上一局的暂停会带过去）
 // 现在是不是暂停着：房主和单机看本机的开关，远端看房主推过来的 S.aiPause（pushState 每次按 AI_PAUSE 重写）
 export function aiPaused() { return MP.role === 'client' ? !!(S && S.aiPause) : AI_PAUSE; }
 // 收起弹窗看棋盘时底栏、中间的「暂停」也点得到：点哪个都刷新弹窗里的提示和「暂停 / 继续」，不然两边对不上

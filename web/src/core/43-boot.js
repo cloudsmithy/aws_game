@@ -1,5 +1,5 @@
 import { LANG, __setLangHook, _t, _tf, _tr } from './01-i18n-runtime.js';
-import { $, ACTS, BOT, DEMO, KEY, MY_REV, REV_KEY, SIM, awsImg, esc } from './02-util.js';
+import { $, ACTS, BOT, DEMO, KEY, MY_REV, REV_KEY, SIM, awsImg, esc, homeUrl } from './02-util.js';
 import { DISC_GENAI, DISC_PLAY, DISC_PRICE, GROUPS, IX, N, SQ } from '../rules/03-services.js';
 import { langBtn, langMenu } from '../ui/03b-lang-menu.js';
 import { COMBOS, INC, QUIZ, REI } from '../rules/04-roles-combos-cards.js';
@@ -55,7 +55,7 @@ Object.assign(ACTS, {
   // 对局：主按钮、更多操作、菜单
   doRoll: () => doRoll(), endTurn: () => endTurn(), jailAct: (el, e, a) => jailAct(a), toggleAiPause: () => toggleAiPause(), 'MP.aipause': () => MP.send(MP.hostConn, { t: 'aipause' }),
   uiAction: (el, e, a) => { const f = UI_ACTS[a]; if (f) uiAction(f); else console.error('unknown uiAction', a); },
-  backToSetup: () => backToSetup(), toHome: () => { location.href = location.pathname; }, showReport: () => showReport(), endNow: () => endNow(),
+  backToSetup: () => backToSetup(), toHome: () => { location.href = homeUrl(); }, showReport: () => showReport(), endNow: () => endNow(),
   gallery: () => gallery(), maybeTour: (el, e, a) => maybeTour(a === 'true'), keysHelp: () => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' })),
   toggleSfx: () => toggleSfx(), renameDialog: () => renameDialog(), toggleBoss: () => toggleBoss(), toggleArchTip: () => toggleArchTip(), toggleAnim: () => toggleAnim(),
   quitGame: () => quitGame(), confirmNew: () => confirmNew(), langMenu: el => langMenu(el),
@@ -146,10 +146,10 @@ function studyTiles(on) {
   learn.disabled = $('#winRounds').disabled = $('#rounds').disabled = on;
 }
 function renderDlcTiles() {
-  const box = $('#dlcTiles'), keep = new Map([...box.querySelectorAll('input')].map(x => [x.value, [x.checked, x.disabled]])), cat = box.dataset.cat;
+  const box = $('#dlcTiles'), keep = new Map([...box.querySelectorAll('input')].map(x => [x.value, [x.checked, x.disabled, x.parentElement.classList.contains('lock')]])), cat = box.dataset.cat;
   $('#dlcTiles').innerHTML = Object.entries(DLC).map(([k, d]) => `<label class="tile ck ${d.quiz ? 'qdlc' : ''}" data-cat="${dlcCat(k, d)}"><input type="checkbox" value="${k}"><b>${awsImg(d.icon)}${d.n}</b><span>${d.d}</span></label>`).join('');
 $('#dlcTabs').innerHTML = DLC_TABS.map(([c, t], k) => `<button type="button" role="tab" id="dlct-${c}" data-cat="${c}" aria-controls="dlcTiles" aria-selected="${!k}" tabindex="${k ? -1 : 0}">${t}<span class="dlcn" hidden></span></button>`).join('');
-  box.querySelectorAll('input').forEach(x => { const k = keep.get(x.value); if (k) { x.checked = k[0]; x.disabled = k[1]; } });
+  box.querySelectorAll('input').forEach(x => { const k = keep.get(x.value); if (k) { x.checked = k[0]; x.disabled = k[1]; x.parentElement.classList.toggle('lock', k[2]); } });   // 地狱模式锁住的格子（hellTiles 加的 lock）切换语言重画后照样显示锁
   if (cat) dlcTab(cat); if (typeof dlcCounts === 'function') dlcCounts();
 }
 function dlcTab(c, focus) {
