@@ -22,7 +22,7 @@ function harness(game = true) {
     render: () => effects.push('render'), toggleAiPause: () => effects.push('pause'), toast: () => {},
     applyRename: (...a) => effects.push(['rename', ...a]), applyCheat: (...a) => effects.push(['cheat', ...a]), reportCheat: (...a) => effects.push(['report', ...a]),
     cur: () => ctx.S.players[ctx.S.cur], doRoll: () => effects.push('roll'), endTurn: () => effects.push('end'),
-    uiAction: fn => fn(), isAI: () => false, wbValid: () => false,
+    uiAction: fn => fn(), isAI: k => !!(ctx.S && ctx.S.cfg && ctx.S.cfg.ai[k]), wbValid: () => false,
     localStorage: { getItem: () => null }, ask: async () => false
   });
   vm.runInContext(source + '; globalThis.mp = MP;', ctx);
@@ -64,7 +64,10 @@ test('独立邀请不能作为玩家密码；未鉴权连接与残留座位号�
   const h = harness(); const live = h.player(); h.mp.setWatching(true);
   const attacker = h.conn(); await h.mp.onHostMsg(attacker, { t: 'hello', name: '小李', auth: h.mp.watchToken }); assert.equal(attacker.messages[0].t, 'reject');
   for (const c of [h.conn(), Object.assign(h.conn(), { _seat: 1 }), Object.assign(h.conn(), { _seat: '__proto__' })]) for (const t of ['aipause', 'resync', 'ans']) h.mp.onHostMsg(c, { t, id: 1, k: 0 });
-  assert.deepEqual(h.effects, []); h.mp.onHostMsg(live, { t: 'aipause' }); assert.deepEqual(h.effects, ['pause']);
+  assert.deepEqual(h.effects, []);
+  // 暂停电脑只在电脑的回合里收（不然谁都能在别人回合里随手暂停整桌）
+  h.mp.onHostMsg(live, { t: 'aipause' }); assert.deepEqual(h.effects, []);
+  h.ctx.S.cfg.ai[0] = true; h.ctx.S.cur = 0; h.mp.onHostMsg(live, { t: 'aipause' }); assert.deepEqual(h.effects, ['pause']);
 });
 
 test('人数上限、观众离开、移出和邀请轮换均不改变对局或玩家座位', async () => {
