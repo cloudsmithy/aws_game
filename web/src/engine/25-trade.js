@@ -8,7 +8,7 @@ import { askQuestion, pickQuestion, qPoolS } from '../rules/06-qbank.js';
 import { F, P, S, cur, inPlay, log, nm, ownedBy, ownsGroup, sqn } from './07-state.js';
 import { pay } from './08-money.js';
 import { RI_OK, RI_PLANS, SP_PLANS, commitsOf, riActive, runAfterRI, runCost, spActive, spScope } from './08c-costs.js';
-import { buyPaid, handOver, turnKey } from './09-rent.js';
+import { buyPaid, capPaidSum, handOver, sellValue, turnKey, upPaidSum } from './09-rent.js';
 import { uiAction } from './14-turn.js';
 import { aiName } from './17-health.js';
 import { ST } from './26b-retro.js';
@@ -113,8 +113,10 @@ export async function trade(pre) {
 function aiTradeOk(a, b, A, B) {
   const card = X => (X.cards.length + X.coe.length + X.drill.length) * 80;
   const completes = (to, i, gets) => GRP(SQ[i].g).every(k => k === i || S.props[k].owner === to.id || gets.includes(k));
-  const give = B.cash + card(B) + B.props.reduce((t, i) => t + buyPaid(i) * (completes(a, i, B.props) || ownsGroup(b, SQ[i].g) ? 3 : 1), 0);
-  const get = A.cash + card(A) + A.props.reduce((t, i) => t + buyPaid(i) * (completes(b, i, A.props) ? 1.5 : 1), 0);
+  // 一块服务值多少：买价（技能、Marketplace 联合销售白拿的 buyPaid 是 0，按原价算；Spot 按出价）加上升级、容量实付，至少是卖回价
+  const worth = i => { const pr = S.props[i]; return Math.max(sellValue(i), (pr.spot && pr.spotPaid ? pr.spotPaid : Math.max(buyPaid(i), SQ[i].p)) + upPaidSum(i) + capPaidSum(i)); };
+  const give = B.cash + card(B) + B.props.reduce((t, i) => t + worth(i) * (completes(a, i, B.props) || ownsGroup(b, SQ[i].g) ? 3 : 1), 0);
+  const get = A.cash + card(A) + A.props.reduce((t, i) => t + worth(i) * (completes(b, i, A.props) ? 1.5 : 1), 0);
   return get >= give * 1.2 && b.cash - B.cash + A.cash >= 250;
 }
 // Savings Plans / RI：跟亚马逊云科技承诺用量换折扣，期限按圈算（运行费每圈交一次）

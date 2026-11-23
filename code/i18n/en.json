@@ -4850,7 +4850,7 @@
  "re:/写复盘/": "re:/Write a postmortem/",
  "变更没有经过评审和自动化测试": "The change did not go through review or automated testing",
  "re:/同意|讲一个/": "re:/agree|tell one/",
- "re:/抽了(两|三|\\d+) ?张/": "re:/drew (two|three|\\d+) /",
+ "re:/抽了 ?(两|三|\\d+) ?张/": "re:/drew (two|three|\\d+) /",
  "re:/^交 \\$\\d+ .*继续走$/": "re:/^Pay \\$\\d+ .*keep moving$/",
  "停一轮": "Skip a round",
  "让 ": "Make ",

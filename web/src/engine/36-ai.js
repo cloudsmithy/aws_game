@@ -2,7 +2,7 @@ import { __rv, _t, _tr } from '../core/01-i18n-runtime.js';
 import { BOT, SIM, rnd } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { BAL, SQ } from '../rules/03-services.js';
-import { dlcOn, dlcRentMul } from '../rules/05-dlc.js';
+import { dlcRentMul } from '../rules/05-dlc.js';
 import { F, S, availCard, cur } from './07-state.js';
 import { doUpgrade, trafficMul, upgradeInfo } from './09-rent.js';
 import { rentAt } from './11b-rent-info.js';
@@ -10,7 +10,7 @@ import { doRoll, endTurn, jailAct, nextTurn } from './14-turn.js';
 import { landHere } from './15-land.js';
 import { payRefactor, refactorCost } from './17-health.js';
 import { resolveDebts } from './20-bankrupt.js';
-import { aiRoleSkill, canSkill } from './21-skills.js';
+import { aiRoleSkill } from './21-skills.js';
 import { aiSpeed } from './22-speed.js';
 import { checkOver } from './26a-pillars-win.js';
 import { MP } from '../net/40-host-sync.js';
@@ -51,6 +51,10 @@ export function aiDecide(view, inputs, buttons, who) {
   // 答题：按钮带 qok（对 / 错），value 是选项下标
   if (view.quiz && en.some(b => b.qok === true) && en.some(b => b.qok === false)) { const right = en.find(b => b.qok === true), wrong = en.filter(b => b.qok === false); return go(Math.random() < (SIM ? (S.acc ? S.acc[p.id] : BAL.aiQuiz ?? 1) : 0.6) || !wrong.length ? right : wrong[rnd(wrong.length)]); }
   let b;
+  // 别人下线的服务（按钮 value 'take' / 'no'）：付原价拉起来归自己，付完还剩安全线才拉，不然不管它。原来没有这条，落到最后点了高亮的「付 $X 拉起来归我」，钱花光也照付
+  if ((b = en.find(x => x.value === 'no')) && buttons.some(x => x.value === 'take')) { const t = en.find(x => x.value === 'take'); return go(t && p.cash - money(t.l) >= RES ? t : b); }
+  // 借用 Session Manager（按钮 value true / false）：付完还剩安全线才借，不然不借，照常结算这张卡
+  if (title === _t(3251, "借用 Session Manager？") && (b = en.find(x => x.value === false))) { const t = en.find(x => x.value === true); return go(t && p.cash - money(t.l) >= RES ? t : b); }
   // 买地窗、代理商窗里有「答题争取」：按最大的 7 折算还买得起（留够安全线）就先答，答错照原价买，没有损失。
   // 原来电脑从不答：独立开发者的答题折扣、边玩边答题的 8 折一次都没拿过，学习、地狱模式的模拟数字也都是按原价买测的
   const lowest = Math.min(...buttons.map(x => String(x.label)).filter(l => _tr(4804, "^(按需购买|用 MAP 卡|从 .+手里买下) \\$", "").test(l)).map(money));
@@ -74,11 +78,14 @@ export function aiDecide(view, inputs, buttons, who) {
   // 高速部署：掷完骰子照走；被 DDoS 有点数就抵消
   if (_tr(4756, "部署点数", "").test(title) && pick(l => l.startsWith(_t(4820, "照走")))) return go(pick(l => l.startsWith(_t(4820, "照走"))));
   if (_tr(4821, "被 DDoS 了", "").test(title)) return go(en[0]);
-  if (_tr(4822, "要抵消", "").test(title)) return go(pick(l => _tr(4823, "Enterprise Support|复盘|演练|故障转移", "").test(l)) || pick(l => l.startsWith(_t(4753, "不抵消"))) || en[en.length - 1]);
+  // 要不要抵消 Health 卡：按按钮 value 认，先用免费的卡和标记，再花部署点数（4 点故障转移比 7 点蓝绿部署便宜，先用 4 点）；请人托管要另外出钱，不用。
+  // 原来按按钮字认，「用 Cost Explorer 抵消」「花 7 点部署点数：蓝绿部署抵消」都没认出来，电脑从来不用
+  if (_tr(4822, "要抵消", "").test(title)) { const c = ['es', 'ce', 'coe', 'drill', 'sp4', 'sp7'].map(v => en.find(x => x.value === v)).find(Boolean); return go(c || en.find(x => x.value === 'no') || en[en.length - 1]); }
   if (_tr(4824, "写复盘", "").test(title)) { const t = view.inputs.t; if (t) { const l = AI_COE[p.jailCat] || [_t(4825, "变更没有经过评审和自动化测试")]; set.t = l[(p.coe || []).length % l.length]; } return go(en[0]); }
   if (_tr(4826, "同意|讲一个", "").test(title)) return go(en[0]);
-  if (/User Group/.test(title)) return go(S.pot >= 150 ? en[0] : en[en.length - 1]);
-  if (_tr(4827, "抽了(两|三|\\d+) ?张", "").test(title)) return go(en[rnd(en.length)]);
+  // 停在 User Group 活动二选一（按钮 value 是 'pot' / 'rei'）：奖池够大抽奖，不然抽 3 张 re:Invent 卡。按 value 认，标题里带 User Group 的三选一窗（「抽了 N 张」）走下面随机挑
+  { const pot = en.find(x => x.value === 'pot'), rei = en.find(x => x.value === 'rei'); if (pot && rei) return go(S.pot >= 150 ? pot : rei); }
+  if (_tr(4827, "抽了 ?(两|三|\\d+) ?张", "").test(title)) return go(en[rnd(en.length)]);
   if ((b = pick(l => _tr(4828, "^交 \\$\\d+ .*继续走$", "").test(l)))) return go(p.cash - money(b.l) >= RES + 150 ? b : pick(l => l.startsWith(_t(4829, "停一轮"))) || b);
   if ((b = pick(l => l.startsWith(_t(4830, "让 ")) && l.endsWith('Impaired')))) { const pb = pick(l => _tr(4831, "^交 \\$\\d+$", "").test(l)); return go(pb && p.cash - money(pb.l) >= RES + 100 ? pb : b); }
   // 交钱还是让服务强制下线（Health 卡）：按钮 value 是 'down'，和 Impaired 那条一样，钱够留底就交
@@ -103,6 +110,16 @@ export function aiBuild(p, res = 250) {
   if (n && !SIM) { UI.save(); UI.render(); clearTimeout(aiTimer); aiTimer = 0; }   // render() 会顺手再排一次 aiKick；调用方（aiKick 的回调）接着往下走，不能留第二个定时器，不然会跨过换人，把下一位电脑的掷骰子挡掉
 }
 // 轮到电脑：掷骰子 / 在维护窗口里选怎么出来
+// 在维护窗口里怎么出来：有免费的卡先用卡，付完还剩安全线 + $300 才花钱出来，不然停一轮（游戏里的电脑和模拟共用）
+export const aiJailKind = p => availCard(p, 'ES') ? 'es' : p.cash - BAL.jailFee >= RES + 300 ? 'pay' : 'stay';
+// 电脑掷骰子前：代理商定转售价、绑万能服务、发动技能、花部署点数，再结算欠款（游戏里的 aiKick 和模拟共用）。
+// sent()：这一步里被送进了维护窗口，这回合到此为止。返回 true：局结束了，或者电脑破产、已经换到下一位，调用方别再掷骰子
+export async function aiPreRoll(p, sent) {
+  S.phase = 'busy'; S.uiPrev = 'roll'; S.nextPhase = null;
+  try { if (p.reseller && !p.rsSet) { p.rsSet = true; p.rsRate = 0.9; } await aiRoleSkill(p); if (p.jail === null) await aiSpeed(p); if (sent()) S.nextPhase = 'post'; } catch (e) { if (SIM) throw e; UI.reportErr(e); }
+  await resolveDebts(); if (checkOver()) return true; if (!cur().alive) { await nextTurn(); return true; }
+  S.phase = S.nextPhase || 'roll'; S.nextPhase = null; return false;
+}
 export let aiTimer = 0;
 // 电脑在玩的时候可以暂停（电脑在房主那台跑，只有房主那边有这个按钮：电脑的回合和电脑答弹窗都会停在原地，点「继续」接着跑）
 export let AI_PAUSE = false;
@@ -125,15 +142,12 @@ export function aiKick() {
     const sent = () => !wasIn && p.jail !== null;
     aiBuild(p);   // 掷骰子前先看看要不要升级（在维护窗口里、有欠款时不升）
     if (sent()) { S.phase = 'post'; UI.save(); UI.render(); return; }   // post 时 aiKick 自己去 endTurn
-    const jailK = () => jailAct(availCard(p, 'ES') ? 'es' : p.cash - BAL.jailFee >= RES + 300 ? 'pay' : 'stay');   // 有免费的卡先用卡，付完还剩安全线 + $300 才花钱出来
-    if (p.jail !== null && !canSkill(p)) return jailK();
-    if (p.jail === null && !dlcOn('speed') && !canSkill(p) && !(p.reseller && !p.rsSet)) return doRoll();
+    // 掷骰子前的事（代理商定价、绑万能服务、发动技能、花部署点数、结算欠款）每回合都做一遍，和模拟（dev/30-sim.js）走同一份 aiPreRoll。
+    // 原来没技能可发动时直接掷骰子，绑万能服务（aiRoleSkill 里的 aiWild）几乎从来轮不到
     (async () => {
-      S.phase = 'busy'; S.uiPrev = 'roll'; S.nextPhase = null;
-      try { if (p.reseller && !p.rsSet) { p.rsSet = true; p.rsRate = 0.9; } await aiRoleSkill(p); if (p.jail === null) await aiSpeed(p); if (sent()) S.nextPhase = 'post'; } catch (e) { UI.reportErr(e); }
-      await resolveDebts(); if (checkOver()) return; if (!cur().alive) return nextTurn();
-      S.phase = S.nextPhase || 'roll'; S.nextPhase = null; UI.save(); UI.render();
-      if (S.phase === 'roll' && cur() === p) { S.turnStartAt = 0; if (p.jail !== null) jailK(); else doRoll(); }
+      if (await aiPreRoll(p, sent)) return;
+      UI.save(); UI.render();
+      if (S.phase === 'roll' && cur() === p) { S.turnStartAt = 0; if (p.jail !== null) jailAct(aiJailKind(p)); else doRoll(); }
     })();
     // 停一下让人看清：掷骰子前 0.5 秒（刚换到它，看得出轮到谁了）；结算完 0.7 秒（落在哪、买了什么，格子上的气泡交棒后还会再留一会儿）
   }, S && S.phase === 'post' ? 700 : 500);
