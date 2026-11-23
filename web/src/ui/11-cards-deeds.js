@@ -46,6 +46,16 @@ export function seesPrivate(p) {
   const loc = MP.role === 'host' ? S.players.filter(q => q.alive && !isAI(q.id) && !MP.isRemote(q.id)) : [];
   return (loc.length === 1 && loc[0].id === p.id) || (p.id === S.cur && !isAI(p.id) && !MP.isRemote(p.id));
 }
+// 「我埋的卡」：p 埋在场上、还没被踩中的 Health 卡一览（只有 p 自己看得到，seesPrivate）。按格子顺序列：格子、卡名、效果、第几轮埋的，
+// 每行一个「看格子」打开那一格的详情。玩家卡上的「你埋的卡」那一行和右栏埋卡那一条都能点开
+export async function trapList(id) {
+  const p = S && S.players && S.players[+id]; if (!p || !seesPrivate(p)) return;
+  const ts = (S.traps || []).filter(t => t.by === p.id && SQ[t.sq] && INC[t.id]).sort((a, b) => a.sq - b.sq || a.round - b.round);
+  const rows = ts.map(t => `<tr><td><button type="button" class="sm lnk" data-act="showSquare" data-arg="${t.sq}">${SQ[t.sq].n}</button></td><td><b>${INC[t.id].n}</b><div class="muted">${INC[t.id].e || ''}</div></td><td>${_tf(3896, "第 {$0} 轮", t.round)}</td></tr>`).join('');
+  await ask({ local: true, cancelable: true, view: true, cls: 'wide', title: _tf(5737, "{$0} 埋下的 Health 卡（{$1} 张）", p.name, ts.length),
+    html: ts.length ? `<p class="muted">${_t(5738, "只有你自己看得到。谁停在这些格子上（路过不算）就翻开照常结算，你自己停上去也一样；同一格埋了几张就全部翻开。")}</p><table><tr><th>${_t(5739, "格子")}</th><th>${_t(5740, "卡")}</th><th>${_t(5741, "埋下")}</th></tr>${rows}</table>` : `<p>${_t(5742, "你现在没有埋着的 Health 卡。")}</p>`,
+    buttons: [{ label: _t(2610, "关闭"), value: true, cls: 'pri' }] });
+}
 // 这台设备看得到的、埋在 i 格上的 Health 卡（埋的人自己看）：棋盘角标、格子详情用
 const myTrapsAt = i => (S.traps || []).filter(t => t.sq === i && INC[t.id] && seesPrivate(P(t.by)));
 const trapNames = ts => ts.map(t => INC[t.id].n).join(_t(349, "、"));

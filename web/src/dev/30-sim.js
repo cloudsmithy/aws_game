@@ -7,14 +7,11 @@ import { netWorth, valBreak, valuation } from '../engine/08c-costs.js';
 import { doUpgrade, upgradeInfo } from '../engine/09-rent.js';
 import { doRoll, endTurn, jailAct } from '../engine/14-turn.js';
 import { landHere } from '../engine/15-land.js';
-import { resolveDebts } from '../engine/20-bankrupt.js';
-import { aiRoleSkill } from '../engine/21-skills.js';
-import { aiSpeed } from '../engine/22-speed.js';
 import { pillarScore } from '../engine/26a-pillars-win.js';
 import { ST } from '../engine/26b-retro.js';
 import { enterGame, newGame } from '../ui/28-setup-save.js';
 import { hellCfg } from '../rules/35-modes.js';
-import { aiBuild } from '../engine/36-ai.js';
+import { aiBuild, aiJailKind, aiPreRoll } from '../engine/36-ai.js';
 // ================= 经济模拟（?sim=N&players=4&diff=std） =================
 
 const SIMOUT = { games: [] };
@@ -71,8 +68,10 @@ async function simGame(n, diff) {
       // 像真人一样：停在自己的服务上、钱够就升级；act=ai 时走游戏里电脑的同一份代码
       if (SIM_AI) aiBuild(p); else { const i = landHere(p); if (i != null) { const u = upgradeInfo(p, i, true); if (u.ok && p.cash - u.total >= simReserve * 2) { doUpgrade(p, i, true); S.landAct.used = true; } } }
       if (sent()) S.phase = 'post';
-      else if (p.jail !== null) { if (SIM_AI) { await aiRoleSkill(p); await resolveDebts(); } if (p.alive && cur() === p) await jailAct(p.cash - BAL.jailFee >= 550 ? 'pay' : 'stay'); }
-      else { if (SIM_AI) { S.phase = 'busy'; S.uiPrev = 'roll'; S.nextPhase = null; await aiRoleSkill(p); await aiSpeed(p); if (sent()) S.nextPhase = 'post'; await resolveDebts(); S.phase = S.nextPhase || 'roll'; S.nextPhase = null; } if (S.phase === 'roll' && cur() === p && p.alive) await doRoll(); }
+      // act=ai：掷骰子前的事、维护窗口怎么出来都走游戏里电脑的同一份代码（aiPreRoll / aiJailKind）；电脑掷骰子前破产了已经换人，这一步到此为止
+      else if (SIM_AI) { if (!(await aiPreRoll(p, sent)) && S.phase === 'roll' && cur() === p && p.alive) await (p.jail !== null ? jailAct(aiJailKind(p)) : doRoll()); }
+      else if (p.jail !== null) await jailAct(p.cash - BAL.jailFee >= 550 ? 'pay' : 'stay');
+      else await doRoll();
     }
     else if (S.phase === 'post') { if (SIM_AI) aiBuild(cur()); await endTurn(); }
   }

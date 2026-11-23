@@ -354,7 +354,7 @@ function plCard(p, mine, offSeats) {
   // 展开的卡：总资产 · 估值 · 运行费在服务图标上面，紧挨着头部的现金
   return zhs(`<div class="grp pl ${isCur ? 'cur' : ''} ${mini ? 'mini' : ''} ${p.id === mine ? 'me' : ''}">${head}<div class="gb" id="plb${p.id}">
       ${kv.length ? `<div class="res pkv">${kv.join(' ')}</div>` : ''}<div class="svcs">${svcs || _t(4366, "<span class=\"none\">还没有服务</span>")}</div>
-      ${mini ? '' : resH}${warns.map(t => `<div class="pwarn">${t}</div>`).join('')}${trSeen ? `<div class="pline ptrap">${_tf(5734, "你埋的卡：{$0}", trSeen)}</div>` : ''}${fx.length ? `<div class="fxrow">${fx.map(t => `<span class="fxchip">${t}</span>`).join('')}</div>` : ''}${mini ? resH : rows.join('')}
+      ${mini ? '' : resH}${warns.map(t => `<div class="pwarn">${t}</div>`).join('')}${trSeen ? `<div class="pline ptrap">${_tf(5734, "你埋的卡：{$0}", trSeen)} <button type="button" class="sm lnk" data-act="trapList" data-arg="${p.id}">${_t(5744, "查看全部")}</button></div>` : ''}${fx.length ? `<div class="fxrow">${fx.map(t => `<span class="fxchip">${t}</span>`).join('')}</div>` : ''}${mini ? resH : rows.join('')}
     </div></div>`);
 }
 function renderSide(keep = sideScroll()) {

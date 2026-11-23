@@ -72,7 +72,8 @@ function check() {
     const dead = table[l].map((v, i) => v != null && !ids.has(i) ? i : null).filter(i => i != null);
     console.log(`[${l}] 没翻译 ${miss.length}，${l}.json 里查不到、沿用表里旧译文的 ${stale.length}，占位符对不上 ${hole.length}，源码里已经不用的编号 ${dead.length}`);
     for (const [name, list] of [['没翻译', miss], ['沿用旧译文', stale], ['占位符对不上', hole]]) list.slice(0, 20).forEach(s => console.log(`  ${name}：${s}`));
-    if (miss.length || hole.length) problems.push(`[${l}] 没翻译 ${miss.length}、占位符对不上 ${hole.length}`);
+    const unbuilt = stale.filter(x => x.includes('翻译表没重新生成')).length;   // 对照表里有了、表还是旧的：打包出来照旧显示中文，算错
+    if (miss.length || hole.length || unbuilt) problems.push(`[${l}] 没翻译 ${miss.length}、占位符对不上 ${hole.length}、翻译表没重新生成 ${unbuilt}（跑 node web/tools/i18n.mjs build）`);
   }
   if (problems.length) { console.error(problems.join('\n')); process.exitCode = 1; } else console.log('多语言检查通过');
 }
@@ -105,6 +106,7 @@ function merge(l, file) {
   for (const [k, v] of Object.entries(add)) if (typeof v === 'string' && v.trim()) { J[k] = v; n++; }
   writeFileSync(join(JSONS, `${l}.json`), JSON.stringify(J, null, 1));
   console.log(`并进 ${l}.json ${n} 条`);
+  build();   // 并完马上重新生成翻译表：以前要再手动跑 build，忘了的话页面里新字照旧显示中文（第二十三轮的版本标题、「我埋的卡」就是这样漏的）
 }
 
 const [cmd, a, b] = process.argv.slice(2);
