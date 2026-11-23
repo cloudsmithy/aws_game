@@ -8,6 +8,7 @@ import { QBANK, practice } from '../rules/06-qbank.js';
 import { S, cur } from '../engine/07-state.js';
 import { showLedger } from '../ui/08b-ledger.js';
 import { canFocus, mainBtn, viewOpen } from '../ui/10-modal.js';
+import { trapList } from '../ui/11-cards-deeds.js';
 import { doRoll, endTurn, jailAct, uiAction } from '../engine/14-turn.js';
 import { capHere, upHere } from '../engine/15-land.js';
 import { refactorDebt } from '../engine/17-health.js';
@@ -57,7 +58,7 @@ Object.assign(ACTS, {
   uiAction: (el, e, a) => { const f = UI_ACTS[a]; if (f) uiAction(f); else console.error('unknown uiAction', a); },
   backToSetup: () => backToSetup(), toHome: () => { location.href = homeUrl(); }, showReport: () => showReport(), endNow: () => endNow(),
   gallery: () => gallery(), maybeTour: (el, e, a) => maybeTour(a === 'true'), keysHelp: () => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' })),
-  toggleSfx: () => toggleSfx(), renameDialog: (el, e, a) => { e.stopPropagation(); renameDialog(a); },   // 玩家卡上的 ✎ 在可折叠的那一行里：不顺带收起 / 展开 toggleBoss: () => toggleBoss(), toggleArchTip: () => toggleArchTip(), toggleAnim: () => toggleAnim(),
+  toggleSfx: () => toggleSfx(), renameDialog: (el, e, a) => { e.stopPropagation(); renameDialog(a); }, trapList: (el, e, a) => { e.stopPropagation(); trapList(a); },   // 玩家卡上的 ✎ 在可折叠的那一行里：不顺带收起 / 展开 toggleBoss: () => toggleBoss(), toggleArchTip: () => toggleArchTip(), toggleAnim: () => toggleAnim(),
   quitGame: () => quitGame(), confirmNew: () => confirmNew(), langMenu: el => langMenu(el),
   // 灰按钮：有 data-arg 念它，没有就念 data-why
   toast: (el, e, a) => toast(a ?? el.dataset.why), dlcToast: (el, e, a) => toast((a ?? '') + el.title, 5000),   // data-arg 是前缀（「这局开了：」，跟着翻译串走）

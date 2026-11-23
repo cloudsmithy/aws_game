@@ -5763,5 +5763,13 @@
  "你在这里埋了：{$0}": "You buried here: {$0}",
  "你埋的卡：{$0}": "Your buried cards: {$0}",
  "第二十三轮": "Round 23",
- "Impaired 稳稳一整轮、看得见自己埋的卡、修 17 处问题": "Impaired lasts a full round, see your own buried cards, 17 fixes"
+ "Impaired 稳稳一整轮、看得见自己埋的卡、修 17 处问题": "Impaired lasts a full round, see your own buried cards, 17 fixes",
+ "{$0} 埋下的 Health 卡（{$1} 张）": "Health cards buried by {$0} ({$1})",
+ "只有你自己看得到。谁停在这些格子上（路过不算）就翻开照常结算，你自己停上去也一样；同一格埋了几张就全部翻开。": "Only you can see this. Whoever stops on these squares (passing doesn't count) reveals the card and resolves it as usual, you included; if several are buried on one square, all of them are revealed.",
+ "格子": "Square",
+ "卡": "Card",
+ "埋下": "Buried",
+ "你现在没有埋着的 Health 卡。": "You have no buried Health cards right now.",
+ "我埋的卡（{$0}）": "My buried cards ({$0})",
+ "查看全部": "View all"
 }
