@@ -10,7 +10,7 @@ import { baseRent, forceDown, shownRent, upgradeInfo } from './09-rent.js';
 import { moveSteps } from './13-move.js';
 import { rollDice } from './14-turn.js';
 import { land } from './15-land.js';
-import { debtCleared, drawIncident } from './17-health.js';
+import { debtCleared, drawIncident, impair } from './17-health.js';
 import { drawReinvent } from './18-reinvent.js';
 import { evt } from './26b-retro.js';
 import { isAI } from './36-ai.js';
@@ -69,21 +69,21 @@ const ddosTag = (x, light) => {
   try { pr.impaired = true; loss = Math.max(0, ...js.map((m, k) => r0[k] - shownRent(m).r)); } finally { pr.impaired = false; }
   return _tf(3430, "≈${$0} 联合收费，打完同套其他格{$1}", sr.r, loss ? _tf(3427, "少收 ≈${$0}", loss) : sr.cap ? _t(3428, "照收") : _t(3429, "照收，这一环有备用顶上"));
 };
-// DDoS：light 是 6 点版（Impaired 到对手下回合开始），否则是 12 点版（下线 2 回合）
+// DDoS：light 是 6 点版（Impaired 停一整轮，见 engine/07-state.js fullRound），否则是 12 点版（下线 2 回合）
 // 按格子上标的过路费排；同一套架构几块一样高时，单块过路费高的排前面
 async function ddos(p, light) {
   const c = light ? 6 : 12, list = ddosTargets(p, light).sort((a, b) => !!ddosShield(a.o) - !!ddosShield(b.o) || shownRent(b.i).r - shownRent(a.i).r || baseRent(b.i, 7) - baseRent(a.i, 7));
-  const v = await UI.ask({ who: p.id, cls: 'pick', title: _tf(3431, "DDoS（{$0} 点）：打哪一块？", c), html: _tf(3434, "<p>{$0}。按格子上标的过路费从高到低排（组成架构的按整套联合收费）；对手有 Shield Advanced 或 CloudFront 的打不动，点数照扣。</p>", light ? _t(3432, "打成 Impaired，到对手下回合开始恢复") : _t(3433, "直接打下线 2 回合（到你第 2 个回合开始恢复）")), buttons: [...list.slice(0, 12).map(x => ({ label: _tf(3436, "{$0} 的 {$1}（{$2}）{$3}", x.o.name, SQ[x.i].n, ddosTag(x, light), ddosShield(x.o) ? _tf(3435, "· 有 {$0} 打不动", ddosShield(x.o)) : ''), value: x.i })), { label: _t(3005, "算了"), value: 'x' }] });
+  const v = await UI.ask({ who: p.id, cls: 'pick', title: _tf(3431, "DDoS（{$0} 点）：打哪一块？", c), html: _tf(3434, "<p>{$0}。按格子上标的过路费从高到低排（组成架构的按整套联合收费）；对手有 Shield Advanced 或 CloudFront 的打不动，点数照扣。</p>", light ? _t(5718, "打成 Impaired，停一整轮（所有人各走一回合后，到对手回合开始恢复）") : _t(3433, "直接打下线 2 回合（到你第 2 个回合开始恢复）")), buttons: [...list.slice(0, 12).map(x => ({ label: _tf(3436, "{$0} 的 {$1}（{$2}）{$3}", x.o.name, SQ[x.i].n, ddosTag(x, light), ddosShield(x.o) ? _tf(3435, "· 有 {$0} 打不动", ddosShield(x.o)) : ''), value: x.i })), { label: _t(3005, "算了"), value: 'x' }] });
   if (v === 'x') return;
   const i = +v, o = P(S.props[i].owner);
   S.attackUsed = true; p.lastDdos = o.id; speedSpend(p, c, _tf(3437, "对 {$0} 的 {$1} 发起 DDoS", nm(o), sqn(i))); fxAll({ s: 'fail', f: 'arcs', a: [[p.pos, i], '#ff3b30'] });
   const imm = ddosShield(o);
   if (imm) { fxAll({ f: 'shield', a: [i] }); fxAll({ f: 'shock', a: [i], d: 350 }); fxAll({ co: [i, _tf(3438, "<b>打不动</b><small>{$0}</small>", imm), 'ok'] }); log(_tf(3439, "🛡️ {$0} 有 {$1}，DDoS 流量在边缘就被吸收了，{$2} 照常运行", nm(o), imm, sqn(i))); return; }
   if (o.speed >= 7 && spdReady(o, 7)) {
-    const ok = await UI.ask({ who: o.id, title: _tf(3440, "{$0} 的 {$1} 被 DDoS 了", o.name, SQ[i].n), html: _tf(3443, "<p>不处理的话，这块服务{$0}。可以花 7 点部署点数蓝绿部署，把流量切到新环境。</p>", light ? _t(3441, "变成 Impaired，到你下回合开始恢复") : _tf(3442, "下线 2 回合（到 {$0} 第 2 个回合开始恢复）", nm(p))), buttons: [{ label: _t(3444, "花 7 点蓝绿部署抵消"), value: true, cls: 'pri' }, { label: _t(3445, "扛着"), value: false }] });
+    const ok = await UI.ask({ who: o.id, title: _tf(3440, "{$0} 的 {$1} 被 DDoS 了", o.name, SQ[i].n), html: _tf(3443, "<p>不处理的话，这块服务{$0}。可以花 7 点部署点数蓝绿部署，把流量切到新环境。</p>", light ? _t(5719, "变成 Impaired，停一整轮（所有人各走一回合后，到你回合开始恢复）") : _tf(3442, "下线 2 回合（到 {$0} 第 2 个回合开始恢复）", nm(p))), buttons: [{ label: _t(3444, "花 7 点蓝绿部署抵消"), value: true, cls: 'pri' }, { label: _t(3445, "扛着"), value: false }] });
     if (ok) { speedSpend(o, 7, _tf(3446, "蓝绿部署，{$0} 扛住了 DDoS", sqn(i))); return; }
   }
-  if (light) { S.props[i].impaired = true; fxAll({ co: [i, _tf(3447, "<b>{$0}</b> 被 DDoS 打成 Impaired", SQ[i].n), 'warn'] }); log(_tf(3448, "💥 {$0} 的 {$1} 被 DDoS 打成 Impaired，到 {$2} 下回合开始恢复", nm(o), sqn(i), nm(o))); return; }
+  if (light) { impair([i]); fxAll({ co: [i, _tf(3447, "<b>{$0}</b> 被 DDoS 打成 Impaired", SQ[i].n), 'warn'] }); log(_tf(5720, "💥 {$0} 的 {$1} 被 DDoS 打成 Impaired，停一整轮：所有人各走一回合后，到 {$2} 回合开始恢复", nm(o), sqn(i), nm(o))); return; }
   forceDown(i, p.id, 2); evt(_tf(3449, "{$0} DDoS 了 {$1} 的 {$2}", p.name, o.name, SQ[i].n), 500); fxAll({ co: [i, _tf(3450, "<b>{$0} 的 {$1} 下线 2 回合</b><small>不收过路费，运行费照交</small>", o.name, SQ[i].n), 'warn'] });
   log(_tf(3451, "💥 {$0} 的 {$1} 被 DDoS 打到下线：不收过路费、不算持有，到 {$2} 第 2 个回合开始恢复", nm(o), sqn(i), nm(p)));
 }
@@ -99,7 +99,7 @@ export let SPEED = __rv(() => ([
     if (v === 'x') return; const o = P(v);
     S.attackUsed = true; speedSpend(p, 5, _tf(3469, "对 {$0} 混沌注入，逼他抽一张 Health 事件卡", nm(o))); await drawIncident(o);
   } },
-  { c: 6, n: _t(3470, "DDoS（轻）"), d: _t(3471, "让一位对手的一块服务变成 Impaired，到对手下回合开始恢复。对手有 Shield Advanced 或 CloudFront 免疫，也可以花 7 点蓝绿部署抵消；每回合最多攻击一次，不能连着两次打同一个人"), ok: p => S.attackUsed ? _t(3467, "这回合已经攻击过了") : ddosTargets(p, true).length ? '' : _t(3472, "没有能打的服务（不能连着两次打同一个人）"), run: p => ddos(p, true) },
+  { c: 6, n: _t(3470, "DDoS（轻）"), d: _t(5721, "让一位对手的一块服务变成 Impaired，停一整轮（所有人各走一回合后，到对手回合开始恢复）。对手有 Shield Advanced 或 CloudFront 免疫，也可以花 7 点蓝绿部署抵消；每回合最多攻击一次，不能连着两次打同一个人"), ok: p => S.attackUsed ? _t(3467, "这回合已经攻击过了") : ddosTargets(p, true).length ? '' : _t(3472, "没有能打的服务（不能连着两次打同一个人）"), run: p => ddos(p, true) },
   { c: 7, n: _t(3473, "蓝绿部署"), d: _t(3474, "抵消一张打到自己的 Health 事件卡，或者一次 DDoS"), react: _t(3475, "被打中时自动问") },
   { c: 8, n: _t(3476, "流水线自动化"), d: _t(3477, "选一块能升级的服务免费升一级（不用落在那块服务上）"), ok: p => freeUps(p).length ? '' : _t(3478, "没有能升级的服务"), run: async p => {
     const ups = freeUps(p);

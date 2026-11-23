@@ -6,7 +6,7 @@ import { CATS, REI, roleOf, rsBuyRate, viaOf } from '../rules/04-roles-combos-ca
 import { reGoLog } from '../rules/05-dlc.js';
 import { F, P, S, availCard, cur, hasCombo, log, nm, ownedBy, owns } from './07-state.js';
 import { credit, pay } from './08-money.js';
-import { CO_SVCS, coKind, coRightsize, debtFee, opCost, runCost, spActive, svcRunDue } from './08c-costs.js';
+import { CO_SVCS, coKind, coRightsize, debtFee, opCost, runCost, runMulDue, spActive, spKeep, svcRunDue } from './08c-costs.js';
 import { drawReinvent, notePath } from './18-reinvent.js';
 import { quarterly } from './19-balance.js';
 import { speedLose } from './22-speed.js';
@@ -134,9 +134,10 @@ async function passLaunch(p) {
     log(_tf(2894, "{$0} {$1}：这次少交 ${$2}{$3}{$4}", nm(p), half === 'hour' ? _tf(2890, "照 Compute Optimizer 的建议降配，{$0} 运行费减半", CO_SVCS) : _t(2891, "的运行费减半"), full - (cut ? halfOc : oc), keep.length ? _tf(2892, "，{$0}照付", keep.join(_t(349, "、"))) : '', p.halfLaps ? _t(2893, "；下次经过还减半") : ''));
   }
   let debt = F.debt() ? debtFee(p) : 0;   // 技能减半/全免也作用在技术债这份上，所以跟着 runMul 一起乘
-  if (p.runLaps > 0) { oc = Math.round(oc * p.runMul); debt = Math.round(debt * p.runMul); p.runLaps--; log(_tf(2897, "{$0} 的「{$1}」：这圈运行费{$2}（还剩 {$3} 圈）", nm(p), roleOf(p).sk.n, p.runMul ? _t(2895, "减半") : _t(2896, "全免"), p.runLaps)); }
+  // 技能的减半、全免只打承诺额以外的部分（runMulDue），Savings Plans 承诺额照付，和下面的 Credits、减半卡一致
+  if (p.runLaps > 0) { const keep = spKeep(p, oc); oc = runMulDue(p, oc); debt = Math.round(debt * p.runMul); p.runLaps--; log(_tf(5712, "{$0} 的「{$1}」：这圈运行费{$2}{$3}（还剩 {$4} 圈）", nm(p), roleOf(p).sk.n, p.runMul ? _t(2895, "减半") : _t(2896, "全免"), keep ? _tf(2898, "（Savings Plans 承诺额 ${$0} 照付）", keep) : '', p.runLaps)); }
   // 「领到亚马逊云科技推广 Credits」：这一圈的运行费拿 Credits 抵掉，技术债加价一起免，Savings Plans 承诺额照付。技能已经免了这一圈的，Credits 留到下一圈，不白用
-  else if (p.billFree > 0 && oc > 0) { const sp = spActive(p), keep = sp ? Math.min(oc, sp.amt) : 0, saved = oc - keep; p.billFree--; oc = keep; debt = 0; log(_tf(2900, "💳 {$0} 用亚马逊云科技推广 Credits 抵掉这一圈的运行费，少交 ${$1}{$2}{$3}", nm(p), saved, keep ? _tf(2898, "（Savings Plans 承诺额 ${$0} 照付）", keep) : '', p.billFree ? _tf(2899, "；还记着 {$0} 圈", p.billFree) : '')); }
+  else if (p.billFree > 0 && oc > 0) { const keep = spKeep(p, oc), saved = oc - keep; p.billFree--; oc = keep; debt = 0; log(_tf(2900, "💳 {$0} 用亚马逊云科技推广 Credits 抵掉这一圈的运行费，少交 ${$1}{$2}{$3}", nm(p), saved, keep ? _tf(2898, "（Savings Plans 承诺额 ${$0} 照付）", keep) : '', p.billFree ? _tf(2899, "；还记着 {$0} 圈", p.billFree) : '')); }
   { const t = ST(p); t.runTot += oc; t.salary += g; ownedBy(p).forEach(i => { const c = runCost(i); if (c) t.runBy[i] = (t.runBy[i] || 0) + c; }); }
   if (oc) payRun(p, oc, debt, half); payMspFee(p); if (p.role === 'rs_dist' && p.alive) { pay(p, 'bank', 50); log(_tf(2901, "{$0} 交 $50 渠道维护费", nm(p))); } if (S.stats) { S.stats.run += oc; S.stats.salary += g; }
   if (p.commits && p.commits.length) {

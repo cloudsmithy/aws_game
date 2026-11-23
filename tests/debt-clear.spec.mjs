@@ -26,14 +26,14 @@ test('花钱重构：清掉 1 个技术债，进维护窗口，名下服务全�
   expect(r).toEqual({ ok: true, debt: 1, jail: 0, pos: true, cat: 'rf', down: [0, 0, 0], act: false, rent: 0 });
 });
 
-test('维护窗口：清技术债进来的只能停一轮（付钱也不行），出来不写复盘、不加技术债；服务到自己下回合开始恢复', async ({ page }) => {
+test('维护窗口：清技术债进来的只能停一轮（付钱也不行），出来不写复盘、不加技术债；服务停满一整轮，到自己回合开始恢复', async ({ page }) => {
   await start(page);
   await page.evaluate(() => { const p = S.players[0]; p.techDebt = 1; payRefactor(p); });
   // 别人的回合开始，服务不恢复
   expect(await page.evaluate(() => { downTick(S.players[1]); return S.props[IX.ec2].ddos; })).toBe(0);
   // 轮到自己：回合开始服务恢复；在维护窗口里付钱被当成停一轮
   const r = await page.evaluate(async () => {
-    const p = S.players[0]; downTick(p); const back = active(p, IX.ec2);
+    const p = S.players[0]; S.turnNo = (S.turnNo || 0) + S.players.length; downTick(p); const back = active(p, IX.ec2);   // 所有人各走一回合（一整轮）后才恢复
     S.cur = 0; S.phase = 'roll'; S.turnStartAt = 0; const cash = p.cash, coe = p.coe.length;
     await jailAct('pay');
     return { back, jail: p.jail, cash: p.cash - cash, coe: p.coe.length - coe, debt: p.techDebt };

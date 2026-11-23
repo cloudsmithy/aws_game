@@ -33,8 +33,11 @@ Object.assign(MP, {
       log(_tf(4957, "🚪 房主把 {$0} 移出了房间，他的座位交给电脑接着打", nm(S.players[k])));
       // 他没公开的手牌不留给电脑（电脑不会打手牌，房主这台也不该看到是哪几张）：放回弃牌堆，日志只写张数
       const nh = discardHand(S.players[k]); if (nh) log(_tf(5577, "{$0} 手上 {$1} 张没公开的 re:Invent 卡放回了弃牌堆", nm(S.players[k]), nh));
-      // 正等着他选的那个弹窗：这一次放开给房主选，之后的弹窗电脑自己选
-      const tk = this.cur && this.cur.who === k && this.cur.box && this.cur.box.querySelector('[data-mptake]'); if (tk && tk.onclick) tk.onclick();
+      // 正等着他选的那个弹窗：这一次放开给房主选，之后的弹窗电脑自己选。
+      // 只给他看的窗（re:Invent 抽卡、手牌、埋卡，priv）不能揭开给房主看，也别让电脑把卡收进手牌：直接按放弃的那一项结掉
+      const c = this.cur && this.cur.who === k ? this.cur : null;
+      if (c && c.declK != null) c.onAnswer({ k: c.declK }, {});
+      else { const tk = c && c.box && c.box.querySelector('[data-mptake]'); if (tk && tk.onclick) tk.onclick(); }
       render(); this.pushState(true); aiKick();
     } else {
       const el = $('#nm' + k), ai = $('#ai' + k); if (el) { el.readOnly = false; el.value = ''; el.title = ''; } if (ai) { ai.disabled = false; ai.title = ''; }

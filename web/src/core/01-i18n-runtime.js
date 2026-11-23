@@ -10,6 +10,11 @@ export let LANG = __LANG;   // 从 rules/03-services.js 挪来：__setLang 要�
 export function _t(i, zh) { if (__LANG === 'zh') return zh; const v = __I18N[__LANG] && __I18N[__LANG][i]; return v == null ? zh : v; }
 export function _tf(i, zh, ...a) { return _t(i, zh).replace(/\{\$(\d+)\}/g, (_, k) => String(a[+k])); }
 export function _tr(i, src, fl) { const v = __LANG !== 'zh' && __I18N[__LANG] && __I18N[__LANG][i], m = v && v.match(/^re:\/([\s\S]*)\/([a-z]*)$/); return m ? new RegExp(m[1], m[2]) : new RegExp(src, fl); }
+// _trAny：每种语言的写法都试一遍。联机时名字、正文是房主那台按房主的语言写的，远端按自己的语言认不出来（房主英文、远端中文时「Computer 2」不含「电脑」）
+export function _trAny(i, src, fl) {
+  const rs = __I18N_LANGS.map(l => { const v = l === 'zh' ? null : __I18N[l] && __I18N[l][i], m = v && v.match(/^re:\/([\s\S]*)\/([a-z]*)$/); return m ? new RegExp(m[1], m[2]) : v ? new RegExp(v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), fl) : l === 'zh' ? new RegExp(src, fl) : null; }).filter(Boolean);
+  return s => rs.some(r => r.test(s));
+}
 // 启动时建好的数据：记下「怎么算出来的」，切换语言时重新算，把新字并进原来的对象（引用不变，别处拿着的照样能用）
 // 切换语言后重画开局页等：启动代码（core/43-boot.js）注册进来，这个文件不直接引用后面文件的函数
 let __onLang = null;

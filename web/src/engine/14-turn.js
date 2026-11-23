@@ -5,7 +5,7 @@ import { BAL, OFFLINE_MIN, SQ } from '../rules/03-services.js';
 import { CATS, ROLES, roleOf } from '../rules/04-roles-combos-cards.js';
 import { dlcOn } from '../rules/05-dlc.js';
 import { askQuestion, pickQuestion, qPoolS } from '../rules/06-qbank.js';
-import { P, S, availCard, cur, inPlay, log, nm, ownedBy, sqn, winTimed } from './07-state.js';
+import { P, S, availCard, cur, fullRound, inPlay, log, nm, ownedBy, sqn, turnNo, winTimed } from './07-state.js';
 import { GAIN0, credit, pay } from './08-money.js';
 import { netWorth } from './08c-costs.js';
 import { bringOnline, canOnline, downTick, offRounds, turnKey } from './09-rent.js';
@@ -139,12 +139,13 @@ export function joinPlayer(name) {
 async function startTurn() {
   const p = cur();
   S.diceQ = null;   // 上一位没走到 afterAction 就结束（三连对子进维护窗口等）时剩下的点数不留给下一位
+  S.turnNo = turnNo() + 1;   // 第几个回合（Impaired、强制下线按它算满没满一整轮，engine/07-state.js fullRound）；老存档没有，从 0 接着数
   S.actionUsed = false; S.doubles = 0; S.again = false; S.lastCard = null; S.reiBought = false; S.aucFx = null;
   downTick(p);   // 强制下线到期恢复（DDoS、Health 卡），不管开没开高速部署
   if (dlcOn('speed')) speedTurnStart(p);
   if (p.rentBoost && --p.rentBoostTurns <= 0) { p.rentBoost = 0; log(_tf(2932, "{$0} 的「{$1}」结束了", nm(p), roleOf(p).sk.n)); }
   if (p.subsTurns > 0) { p.subsTurns--; S.players.filter(o => inPlay(o) && o.id !== p.id).forEach(o => pay(o, p, p.subsAmt, 'card')); log(_tf(2933, "{$0} 的「{$1}」：每位对手付订阅费 ${$2}（还剩 {$3} 次）", nm(p), roleOf(p).sk.n, p.subsAmt, p.subsTurns)); await resolveDebts(); if (checkOver()) return; }
-  ownedBy(p).forEach(i => { if (S.props[i].impaired) { S.props[i].impaired = false; log(_tf(2934, "{$0} 恢复正常", sqn(i))); } });
+  ownedBy(p).forEach(i => { const pr = S.props[i]; if (pr.impaired && fullRound(pr.impAt)) { pr.impaired = false; pr.impAt = null; log(_tf(2934, "{$0} 恢复正常", sqn(i))); } });   // 不满一整轮的留到下一次
   for (const i of ownedBy(p)) {
     const pr = S.props[i]; if (!pr.offline || pr.offTurn === turnKey()) continue;
     if (pr.offTurnSeen !== turnKey()) { pr.offline++; pr.offTurnSeen = turnKey(); }

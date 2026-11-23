@@ -6,7 +6,7 @@ import { dlcRentMul } from '../rules/05-dlc.js';
 import { P, S, hasCombo, isWild } from '../engine/07-state.js';
 import { runCost } from '../engine/08c-costs.js';
 import { baseRent, downWhy, shownRent, tokUnit, trafficMul } from '../engine/09-rent.js';
-import { lvBadge } from './11-cards-deeds.js';
+import { lvBadge, trapBadge } from './11-cards-deeds.js';
 import { jailMax } from '../engine/13-move.js';
 import { showSquare } from './27e-square-gallery.js';
 import { isHidden } from '../rules/35-modes.js';
@@ -82,7 +82,7 @@ export function cellHtml(i) {
   const ht = haTag(i);
   const bill = s.t === 'prop' ? `<span class="bill ha-${ht ? ht.k : ''}" title="${ht ? ht.t + _t(2670, "：") + ht.d : ''}">${s.bill === 'token' ? _t(357, "按 token") : TYPE_N[s.type]}</span>` : s.t === 'util' ? _t(3953, "<span class=\"bill\">按用量</span>") : '';
   const houses = owner && (pr.level || pr.cap) ? `<span class="lvh" style="--oc:${owner.color}" title="${[pr.level ? _tf(2773, "第 {$0} 级", pr.level) : '', pr.cap ? _tf(3954, "加了 {$0} 个{$1}", pr.cap, capU(s.k)) : ''].filter(Boolean).join(_t(2698, "，"))}">${'<i></i>'.repeat(pr.level)}${pr.cap ? `<b class="capn">+${pr.cap}</b>` : ''}</span>` : '';   // 照宣传片：格子上几级就几块玩家颜色的小方块
-  return `<div class="art">${awsImg(s.icon)}${tokH}</div><div class="txt"><span class="nm">${s.n.replace(/([a-z])([A-Z])/g, '$1<wbr>$2')}</span>${price}${rentH}${dlcH}${lv}${bill}</div>${houses}`;
+  return `<div class="art">${awsImg(s.icon)}${tokH}</div><div class="txt"><span class="nm">${s.n.replace(/([a-z])([A-Z])/g, '$1<wbr>$2')}</span>${price}${rentH}${dlcH}${lv}${bill}</div>${houses}${trapBadge(i)}`;   // trapBadge：自己埋在这格的 Health 卡，只有埋的人看得到
 }
 // 手机上格子太小看不清：棋盘下面放一张「当前所在格」，点开看详情
 export function hereHtml(p) {

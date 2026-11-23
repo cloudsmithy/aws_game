@@ -12,7 +12,8 @@ import { render, svcState, zhs } from './27d-side.js';
 import { sfx } from './32-sfx.js';
 import { FX } from './33-fx3d.js';
 import { fmtMul } from '../rules/35-modes.js';
-import { viewerP } from '../engine/36-ai.js';
+import { isAI, viewerP } from '../engine/36-ai.js';
+import { MP } from '../net/40-host-sync.js';
 // ================= 卡牌与地契 =================
 export const lvBadge = (l, i) => {
   if (!l) return '';
@@ -37,6 +38,24 @@ export function cardHtml(kind, id) {
   return pcardHtml('rei', `re:Invent${c.keep ? _t(2746, " · 保留卡") : ''} · #${id}`, c.art, c.n, cardMulTxt(c.e.replace(_tr(2747, "^保留：", ""), '')) + (c.keep ? _t(2748, "<br><span class=\"muted\">保留卡，用掉后翻面留在面前。</span>") : '') + cardMulNote(), '', c.tip);
 }
 const cardBack = kind => `<div class="face back ${kind}" style="--cc:${CARD_COL[kind]}">${awsImg(kind === 'rei' ? 'reinvent' : 'health')}<span>${kind === 'inc' ? _t(291, "Health 事件") : kind === 'fis' ? _t(2749, "FIS 故障注入") : 're:Invent'}</span></div>`;
+// 只给主人看的东西（re:Invent 手牌、埋下的 Health 卡）这台设备能不能看：远端只看自己的座位（观众谁的都看不到）；
+// 房主和同屏：这台只有一位真人时看他的，另外当前回合的本机真人也看得到（远端座位、电脑的房主看不到）。玩家卡、棋盘、格子详情共用这一条
+export function seesPrivate(p) {
+  if (!p || !S || !S.players) return false;
+  if (MP.role === 'client') return !MP.watching && p.id === MP.mySeat;
+  const loc = MP.role === 'host' ? S.players.filter(q => q.alive && !isAI(q.id) && !MP.isRemote(q.id)) : [];
+  return (loc.length === 1 && loc[0].id === p.id) || (p.id === S.cur && !isAI(p.id) && !MP.isRemote(p.id));
+}
+// 这台设备看得到的、埋在 i 格上的 Health 卡（埋的人自己看）：棋盘角标、格子详情用
+const myTrapsAt = i => (S.traps || []).filter(t => t.sq === i && INC[t.id] && seesPrivate(P(t.by)));
+const trapNames = ts => ts.map(t => INC[t.id].n).join(_t(349, "、"));
+// 棋盘格右上角：一张扣着的小 Health 卡（卡背和发牌时一样），叠埋几张画成一摞、写张数；悬停写是哪几张
+export function trapBadge(i) {
+  const ts = myTrapsAt(i); if (!ts.length) return '';
+  const t = _tf(5732, "你埋的：{$0}", trapNames(ts));
+  return `<span class="trapb${ts.length > 1 ? ' many' : ''}" role="img" aria-label="${t}" title="${t}"><i class="tcb">${awsImg('health')}</i>${ts.length > 1 ? `<b>${ts.length}</b>` : ''}</span>`;
+}
+export const trapLine = i => { const ts = myTrapsAt(i); return ts.length ? _tf(5733, "你在这里埋了：{$0}", trapNames(ts)) : ''; };
 // 发牌动画的起点：从牌堆的位置飞到窗口中间（偏移限制在 ±260px，窗口外的部分会被裁掉）
 const dealFrom = kind => { const d = document.querySelector(kind === 'rei' ? '#center .stack.rei' : '#center .stack.inc'); if (!d) return ''; const r = d.getBoundingClientRect(), c = v => Math.max(-260, Math.min(260, Math.round(v))); return `--fx:${c(r.left + r.width / 2 - innerWidth / 2)}px;--fy:${c(r.top + r.height / 2 - innerHeight / 2)}px`; };
 export const dealHtml = (kind, front) => `<div class="deal ${kind}${FX.ok() ? ' fx' : ''}" style="${dealFrom(kind)}"><div class="glow"></div><div class="mv"><div class="c3">${cardBack(kind)}<div class="face front">${front}</div></div></div></div>`;

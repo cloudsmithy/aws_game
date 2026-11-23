@@ -159,7 +159,9 @@ async function offerBuy(p, i, opts = {}) {
     const qd = p.role === 'indie' ? (S.cfg.learn ? 0.7 : 0.9) : 0.8, canQ = S.cfg.learn || p.role === 'indie', qm = quizOk ? qd : 1;
     const base = Math.round(s.p * rd * (opts.discount || 1) * (p.buyCoupon || 1) * qm);
     // Spot 最低出价比例：按钮和下面的说明共用这一个数（游戏工作室非地狱局、手上有 Spot 卡都是 10%）；放在循环里，凑钱回来再算一次
-    const spotR = p.role === 'fin' ? 0.4 : availCard(p, 'SPOT') || (p.role === 'game' && !hx('game')) ? 0.1 : 0.2;
+    // 金融合规固定 40%，Spot 卡对他不起作用（交易、破产分来的也一样），spotCard 记成空，出价时也就不会白白用掉
+    const spotCard = p.role !== 'fin' && availCard(p, 'SPOT');
+    const spotR = p.role === 'fin' ? 0.4 : spotCard || (p.role === 'game' && !hx('game')) ? 0.1 : 0.2;
     const b = [{ label: quizOk ? _tf(3012, "答对 {$0} 按需购买 ${$1}", zhe(qd), base) : _tf(3013, "按需购买 ${$0}", base), value: { k: quizOk ? 'q' : 'buy', price: base }, cls: 'pri', disabled: p.cash < base }];
     if (canQ && !quizTried) b.push({ label: _tf(3014, "答题争取 {$0}（和其他折扣叠加）", zhe(qd)), value: { k: 'quiz' } });
     if (!opts.discount) {
@@ -183,7 +185,7 @@ async function offerBuy(p, i, opts = {}) {
       if (r.v !== 'ok') continue;
       const bid = Math.max(v.min, Math.min(r.inp.bid || v.min, s.p, p.cash));
       // 出到全价就是按需购买，Spot 卡没派上用场，留着（和上面的购买券一样）
-      if (bid < s.p && availCard(p, 'SPOT')) availCard(p, 'SPOT').used = true;
+      if (bid < s.p && spotCard) spotCard.used = true;
       v.price = bid;
       if (bid >= s.p) v.k = 'buy';
     }

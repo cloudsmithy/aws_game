@@ -12,7 +12,9 @@ export const MP = {
   viewers: {}, pendingJoins: {}, watching: false, watchToken: '', watchLimit: 4,
   // 观众与座位完全分开；邀请是独立随机凭证，不包含玩家房间密码或座位钥匙。
   recipients() { return [...Object.values(this.seats), ...Object.values(this.viewers)]; },
-  reject(conn, why) { conn._closed = true; this.send(conn, { t: 'reject', why }); setTimeout(() => conn.close(), 300); },
+  // final：再试也没用的拒绝（密码不对、被移出、这局结束了、房主不同意）。别的（房主还没发现他掉线、待确认的满了、确认超时……）带 retry，
+  // 局里掉线重连的远端收到后过一会儿接着自动重连（net/40f-client.js），不当成被踢。老页面不认 retry，照旧显示「加入失败」
+  reject(conn, why, final = false) { conn._closed = true; this.send(conn, { t: 'reject', why, ...(final ? {} : { retry: 1 }) }); setTimeout(() => conn.close(), 300); },
   viewerUI() {
     if (this.role !== 'host') return '';
     return `<button type="button" class="sm" data-act="MP.watchDialog">${_tf(5231, "受邀观战（{$0}/{$1}）", Object.keys(this.viewers).length, this.watchLimit)}</button>` + Object.entries(this.pendingJoins).map(([id, x]) => `<button type="button" class="sm" data-act="MP.reviewJoin" data-arg="${id}">${_tf(5232, "确认入座：{$0}", esc(x.m.name))}</button>`).join('');
@@ -73,7 +75,7 @@ export const MP = {
     clearTimeout(x.timer); delete this.pendingJoins[id]; delete x.conn._pending;
     // 中途加入不看座位号有没有变：同意时 admit 重新查一遍局有没有结束、座位满没满，排到那时的最后一位
     const moved = !x.join && ((this.seats[x.seat] || null) !== x.previous || (x.previous && x.previous.online));
-    if (!ok || this.role !== 'host' || !x.conn.open || x.conn._closed || S !== x.game || moved) this.reject(x.conn, x.join && !ok ? _t(5576, "房主没有同意你中途加入") : _t(5251, "入座未获批准或座位已变化，请重试"));
+    if (!ok || this.role !== 'host' || !x.conn.open || x.conn._closed || S !== x.game || moved) this.reject(x.conn, x.join && !ok ? _t(5576, "房主没有同意你中途加入") : _t(5251, "入座未获批准或座位已变化，请重试"), !ok);
     else this.admit(x.conn, x.m, x);
     this.refreshMembers();
   },};

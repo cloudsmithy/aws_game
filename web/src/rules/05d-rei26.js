@@ -25,7 +25,7 @@ const r26Names = ks => ks.map(k => SQ[IX[k]].n).join(_t(349, "、"));
 export let REI26 = __rv(() => ([
   { n: _t(5592, "用 Kiro 做规格驱动重构"), e: _t(5593, "清掉 1 个技术债（清债要停机：进维护窗口停一轮，名下服务一起下线一轮）；没有技术债就领 $100"), tip: _t(5594, "Kiro 先把需求写成规格和任务清单，再按任务生成代码和测试；重构遗留代码时有测试兜底，不容易引入回归"), art: 'codecatalyst',
     run: async (p, others, card) => {
-      if (p.techDebt > 0) { p.techDebt--; p.refactored = true; log(_tf(5595, "{$0} 用 Kiro 先写规格和测试再重构，清掉 1 个技术债", nm(p))); debtCleared(p); return; }
+      if (p.techDebt > 0) { p.techDebt--; log(_tf(5595, "{$0} 用 Kiro 先写规格和测试再重构，清掉 1 个技术债", nm(p))); debtCleared(p); return; }
       await moneyOrMove(p, card, 100, got => log(_tf(1645, "{$0} 没有技术债，领 ${$1}", nm(p), got)));
     } },
   { n: _t(5596, "上了 Lambda SnapStart"), e: _t(5597, "这一圈（到你下次经过 Startup 扶持为止）你的 Lambda 过路费 +30%；没有 Lambda 就领 $50"), tip: _t(5598, "SnapStart 在函数初始化完以后给执行环境打快照，冷启动时直接从快照恢复，Java 这类启动慢的函数冷启动从几秒降到亚秒级"), art: 'lambda',

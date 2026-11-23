@@ -14,11 +14,20 @@ import { aiPaused, isAI } from '../engine/36-ai.js';
 import { MP } from './40-host-sync.js';
 import { MPFX } from './41-replay.js';
 import { mpUI } from './42-setup.js';
+// 房主发来的弹窗里标着 data-you-seat 的地方（答题结果的「X 选的」「X 的错题本」）：是自己的座位就换成 data-you 里「你」的写法
+function youView(h, seat) {
+  if (typeof h !== 'string' || !h.includes('data-you-seat')) return h;
+  const t = document.createElement('template'); t.innerHTML = h;
+  t.content.querySelectorAll(`[data-you-seat="${seat}"]`).forEach(el => { el.textContent = el.dataset.you; });
+  return t.innerHTML;
+}
 Object.assign(MP, {
   onClientMsg(m) {
     if (typeof m === 'string') { try { m = JSON.parse(m); } catch (e) { return; } }   // 新版房主发的状态是 JSON 字符串（序列化一次发给所有人）
     if (!m || typeof m !== 'object') return;
     // 被拒后能改了名字再点加入。hostConn 清掉：房主 300ms 后关连接，那次 close 不能再写成「连接断开了」，把「密码不对」盖掉
+    // 局里掉线重连时被拒、但房主标了 retry（他还没发现旧连接断了、待确认的满了、确认超时）：不算被踢，过一会儿接着自动重连
+    if (m.t === 'reject' && m.retry && this.role === 'client' && this.gone && S && S.players && !S.over) { this.hostConn = null; toast(_tf(5715, "重连被拒：{$0}。过一会儿自动再试", String(m.why || ''))); this.retryLater(); return; }
     if (m.t === 'reject') { const inGame = this.role === 'client' && S && S.players; this.role = inGame ? 'client' : null; if (inGame) { this.gone = true; this.kicked = true; MPFX.cancel(); render(); info(_t(5260, "加入失败"), `<p>${esc(String(m.why || ''))}</p>`, true); } this.hostConn = null; $('#mpstat').innerHTML = _tf(5028, "<span class=\"warn\">加入失败：{$0}</span>", esc(String(m.why || ''))); const jb = $('#mpbox .mpform button'); if (jb) jb.disabled = false; return; }
     if (m.t === 'kicked') { MPFX.cancel(); this.kicked = true; return; }
     // 房主把我移出了房间：不再自动重连；还在大厅里的，回到能重新填房间号的样子
@@ -83,9 +92,10 @@ Object.assign(MP, {
     // 要我选的弹窗来了、新手引导还开着：引导盖在弹窗上面（z-index 30 对 10），先收掉
     const sk = m.who === this.mySeat && $('#tour [data-x=skip]'); if (sk) sk.click();
     let html = typeof m.spec.html === 'string' ? m.spec.html.replace(/class="deal (inc|rei|fis)( fx)?"/g, (s, kd) => `class="deal ${kd}${FX.ok() ? ' fx' : ''}"`) : m.spec.html;
-    // 自己答的题：结果窗里写「你选的」「错题本」，不写自己的名字（房主那份是按第三人称写给大家看的）
-    if (m.who === this.mySeat && /\bquiz\b/.test(m.spec.cls || '') && S && S.players[this.mySeat]) { const me = S.players[this.mySeat].name; html = String(html || '').split(_tf(5038, "{$0} 选的", me)).join(_t(5039, "你选的")).split(_tf(2446, " {$0} 的错题本", me)).join(_t(2447, "错题本")).split(_tf(5040, "{$0} 的错题本", me)).join(_t(2447, "错题本")); }
-    modal({ ...m.spec, html, who: m.who, _mp: { id: m.id, interactive: !this.watching && m.who === this.mySeat } }); this.openMid = m.id; if (k) setTimeout(() => FX.dealIn(), 0);
+    // 自己答的题：结果窗里写「你选的」「错题本」，不写自己的名字（房主那份是按第三人称写给大家看的，标了 data-you 的地方换掉，见 rules/06-qbank.js）
+    const mine = m.who === this.mySeat && !this.watching, yv = h => mine ? youView(h, this.mySeat) : h;
+    html = yv(html); const bs = m.spec.buttons ? { buttons: m.spec.buttons.map(b => ({ ...b, label: yv(b.label) })) } : {};
+    modal({ ...m.spec, html, ...bs, who: m.who, _mp: { id: m.id, interactive: !this.watching && m.who === this.mySeat } }); this.openMid = m.id; if (k) setTimeout(() => FX.dealIn(), 0);
   },
   // 自己的窗口关掉了：刚才没顶上来的只读窗还开着就补上；又开了别的窗口（手册切完整版）就接着等它也关掉
   showPeek() {

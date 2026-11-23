@@ -2,15 +2,17 @@ import { _t, _tf } from '../core/01-i18n-runtime.js';
 import { rnd } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { EOL_VER, SQ } from '../rules/03-services.js';
-import { S, log, nm, ownedBy, resetProp, sqn } from './07-state.js';
+import { S, log, nm, offlineCash, ownedBy, resetProp, sqn } from './07-state.js';
 import { credit, pay } from './08-money.js';
 import { netWorth } from './08c-costs.js';
+import { svcLeaves } from './09-rent.js';
 // ================= 平衡机制 =================
 export async function quarterly() {
   const alive = S.players.filter(q => q.alive);
   if (alive.length < 2) return;
   const nw = alive.map(q => ({ q, v: netWorth(q) }));
   const min = Math.min(...nw.map(x => x.v)), max = Math.max(...nw.map(x => x.v));
+  if (min === max) { log(_t(5713, "📊 财报：大家总资产一样，没有最低也没有最高，这次不融资也不审查")); return; }   // 全员并列时最低就是最高，每人 +$150 −$100 白送 $50
   nw.filter(x => x.v === min).forEach(x => credit(x.q, 150, 'other'));
   nw.filter(x => x.v === max).forEach(x => pay(x.q, 'pot', 100));
   const q = Math.floor(S.quarterCount / 3);
@@ -24,7 +26,9 @@ export async function eol() {
   for (const r of rolls.filter(r => r.d === min)) {
     const c = ownedBy(r.q).filter(i => EOL_VER[SQ[i].k] && S.props[i].level === 0 && !S.props[i].cap && !S.props[i].offline).sort((a, b) => SQ[a].p - SQ[b].p);   // 只看带版本的服务（EOL_VER）
     // Lambda 叫弃用、Bedrock 叫 EOL，不都叫「标准支持结束」，统一写「支持结束日期」；「Kubernetes 版本」这种英文开头的前面留空格
-    if (c.length) { const i = c[0], v = EOL_VER[SQ[i].k], back = Math.round((S.props[i].spot ? S.props[i].spotPaid : (S.props[i].paid ?? SQ[i].p)) / 2); resetProp(i); credit(r.q, back, 'sell'); lines.push(_tf(3331, "{$0} 的 {$1} 还在用旧的{$2}{$3}，到了支持结束日期没来得及升级，先退回亚马逊云科技，拿 ${$4}", nm(r.q), sqn(i), /^[A-Za-z]/.test(v) ? ' ' : '', v, back)); }
+    // 退回的是买价的一半，和下线同一笔：这位主人下线时已经拿过的要扣掉（offlineCash），不然先下线、恢复、再被收走，一半拿两次。
+    // 收走前和卖回一样先 svcLeaves：他给这块买的 RI 作废
+    if (c.length) { const i = c[0], v = EOL_VER[SQ[i].k], back = offlineCash(i); svcLeaves(r.q, i, null); resetProp(i); credit(r.q, back, 'sell'); lines.push(_tf(3331, "{$0} 的 {$1} 还在用旧的{$2}{$3}，到了支持结束日期没来得及升级，先退回亚马逊云科技，拿 ${$4}", nm(r.q), sqn(i), /^[A-Za-z]/.test(v) ? ' ' : '', v, back)); }
     else lines.push(_tf(3332, "{$0} 手上没有会版本到期的空服务，不受影响", nm(r.q)));
   }
   lines.forEach(l => log('📉 ' + l));

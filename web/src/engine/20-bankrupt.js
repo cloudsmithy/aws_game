@@ -3,7 +3,7 @@ import { UI } from '../core/02b-ui-port.js';
 import { BAL, OFFLINE_OK, OWNABLE, SQ } from '../rules/03-services.js';
 import { P, S, comboOn, cur, debtOf, log, nm, offDrawn, offSpent, ownedBy, resetProp, sqn } from './07-state.js';
 import { giveTo } from './08-money.js';
-import { buyPaid, fullBack, handOver, sellCap, sellProp, sellUpgrade, sellValue, sellZhe, stripValue, svcLeaves, takeOffline } from './09-rent.js';
+import { buyPaid, clearDown, fullBack, handOver, sellCap, sellProp, sellUpgrade, sellValue, sellZhe, stripValue, svcLeaves, takeOffline } from './09-rent.js';
 import { discardHand } from './16-deck.js';
 import { dropTraps } from './18-reinvent.js';
 import { manage } from './23-manage.js';
@@ -89,7 +89,7 @@ export async function declareBankrupt() {
   await bankrupt(p);
 }
 // 破产：按欠款比例分资产。每个债主（欠亚马逊云科技、奖池的合成一份）按欠款占比分到对应价值的服务，
-// 服务按价值从高到低一块块分给「还差得最多」的那一份；亚马逊云科技那份的服务退回重新出售；保留卡和标记给欠得最多的玩家
+// 服务按价值从高到低一块块分给「还差得最多」的那一份；亚马逊云科技那份的服务退回重新出售；没用过的保留卡和标记给欠得最多的玩家
 async function bankrupt(p) {
   p.outRound = S.round;   // 战报靠这个认出局轮次，不要再去匹配文案
   sfxAll('fail'); evt(_tf(3360, "{$0} 账户被暂停（破产）", p.name), 99999, 'out');
@@ -98,7 +98,7 @@ async function bankrupt(p) {
   const ids = Object.keys(owed).map(Number).filter(k => owed[k] > 0).sort((a, b) => owed[b] - owed[a]);
   const total = ids.reduce((a, k) => a + owed[k], 0) + bankOwed;
   const props = ownedBy(p);
-  OWNABLE.forEach(i => { if (S.props[i].ddos === p.id) S.props[i].ddos = null; if (S.props[i].via === p.id) S.props[i].via = null; });
+  OWNABLE.forEach(i => { if (S.props[i].ddos === p.id) clearDown(i); if (S.props[i].via === p.id) S.props[i].via = null; });
   p.alive = false; p.debt = []; p.jail = null; p.skip = 0;
   // 没公开的 re:Invent 手牌不给债主（别人本来就不知道是什么），放进弃牌堆
   discardHand(p);
@@ -119,7 +119,8 @@ async function bankrupt(p) {
   if (p.cash > 0) { let left = p.cash; keys.forEach((k, n) => { const x = n === keys.length - 1 ? left : Math.floor(p.cash * share(k)); left -= x; got[k] += x; if (k !== 'bank') giveTo(k, x, 'other'); }); p.cash = 0; }
   [...props].sort((a, b) => val(b) - val(a)).forEach(i => { const k = keys.reduce((best, x) => (share(x) * assets - got[x]) > (share(best) * assets - got[best]) ? x : best, keys[0]); got[k] += val(i); gotProps[k].push(i); });
   keys.forEach(k => gotProps[k].forEach(i => { if (k === 'bank') { svcLeaves(p, i, null); resetProp(i); } else { handOver(p, i, P(k)); S.props[i].impaired = false; } }));
-  const top = P(ids[0]); top.cards.push(...p.cards); top.coe.push(...p.coe); top.drill.push(...p.drill); p.cards = []; p.coe = []; p.drill = [];
+  // 只给没用过的：用过的卡、标记只是记录（成本异常检测开过、写过复盘），跟着债主走会白送他支柱分和 CE 免疫
+  const top = P(ids[0]), fresh = a => a.filter(x => !x.used); top.cards.push(...fresh(p.cards)); top.coe.push(...fresh(p.coe)); top.drill.push(...fresh(p.drill)); p.cards = []; p.coe = []; p.drill = [];
   log(_tf(3366, "💀 {$0} 账户被暂停，资产按欠款比例分：{$1}", nm(p), keys.map(k => _tf(3365, "{$0} {$1}（欠款占 {$2}%）", k === 'bank' ? _t(3362, "亚马逊云科技收回") : nm(P(k)) + _t(3363, " 拿到"), gotProps[k].length ? gotProps[k].map(sqn).join(_t(349, "、")) : _t(3364, "（没分到服务）"), Math.round(share(k) * 100))).join(_t(408, "；"))));
   UI.render();
 }

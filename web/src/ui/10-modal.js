@@ -3,6 +3,7 @@ import { $, BOT, SIM, SIM_AI, actKey, clean, esc } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { P, S, log, nm } from '../engine/07-state.js';
 import { showCard } from './11-cards-deeds.js';
+import { aiName } from '../engine/17-health.js';
 import { fitArch } from './27b-arch-notes.js';
 import { render } from './27d-side.js';
 import { placeSqPop } from './27e-square-gallery.js';
@@ -99,6 +100,8 @@ export function greyWhy(b, box) {
 }
 // cancelable：房主本机自己看的窗口（玩法、图鉴、明细、大图、改名字、新游戏 / 退出 / 现在结算的确认），轮到的远端玩家点了掷骰子或操作时替房主关掉，最后一个按钮必须是关闭 / 取消。
 // hp：远端收到的弹窗里带着，表示房主点了「他回来之前都由我来选」，正在替掉线的那个座位选
+// 数字框的值夹在 min / max 里（不是数按 min 算，没有 min 按 0）：远端发来的输入值走这里，和本机输入框能填的范围一致
+const clampIn = (el, val) => { const n = parseInt(val, 10), lo = el.min !== '' ? +el.min : -Infinity, hi = el.max !== '' ? +el.max : Infinity; return Math.min(hi, Math.max(lo, Number.isFinite(n) ? n : lo === -Infinity ? 0 : lo)); };
 const DECLINE = new Set(['x', -1, 'no', 'skip', 'cancel', null]);
 export function modal({ title, html = '', inputs = [], buttons = [{ label: _t(2716, "确定"), value: true, cls: 'pri' }], cls = '', who, _mp, local = false, noAI = false, aiMin = false, deal = false, hold = 0, cancelable = false, hp = false, view = false, priv = null }) {
   // 推迟亮的卡还没亮出来，中间却要先弹别的窗（选哪一块挂了、借 Session Manager……）：先补一个原来的发牌窗，再弹这个
@@ -110,7 +113,8 @@ export function modal({ title, html = '', inputs = [], buttons = [{ label: _t(27
     // view：查资料的窗口（明细、图鉴、玩法、格子介绍、快捷键）开在单独一层 #vmodal，不占 MODAL_CUR。
     // 流程弹窗照常开在下面的 #modal（电脑照样选、联机照样发给远端），不会把正在看的资料顶掉；再开一个查资料窗只换掉上一个查资料窗
     const back = view ? (VIEW_CUR ? VIEW_CUR.back : kbdFocus()) : MODAL_CUR ? MODAL_CUR.back : kbdFocus();   // 一个弹窗直接换成下一个时，沿用最早打开前的焦点
-    if (view) { if (VIEW_CUR) VIEW_CUR.cancel(); } else if (MODAL_CUR) MODAL_CUR.kill();
+    // 被顶掉的是房主本机能取消的窗（改名字、确认框、远端的结算提议……）：按取消结掉，等它的人收到答复；流程弹窗照旧只停掉（它的 Promise 由流程自己收尾）
+    if (view) { if (VIEW_CUR) VIEW_CUR.cancel(); } else if (MODAL_CUR) { if (MODAL_CUR.local && MODAL_CUR.cancelable) MODAL_CUR.cancel(); else MODAL_CUR.kill(); }
     // 联机：房主这边轮到远端玩家选时只显示、不能点；远端只有轮到自己时能点
     const mpWho = who ?? MP.actor ?? (S && S.players ? S.cur : null);
     const clientView = MP.role === 'client' && !!_mp;
@@ -162,7 +166,7 @@ export function modal({ title, html = '', inputs = [], buttons = [{ label: _t(27
     { const d = box.querySelector('.mb [data-desc]') || box.querySelector('.mb .q') || box.querySelector('.mb'); if (d && d.textContent.trim() && d.textContent.length < 400) { d.id = 'mdesc'; box.setAttribute('aria-describedby', 'mdesc'); } else box.removeAttribute('aria-describedby'); }
     if (!interactive) {
       box.classList.add('mpwait');
-      const nmw = S && S.players && S.players[mpWho] ? S.players[mpWho].name : _t(2720, "对方"), nmAI = _tr(2721, "电脑", "").test(nmw) ? nmw : nmw + _t(2722, "（电脑）");
+      const nmw = S && S.players && S.players[mpWho] ? S.players[mpWho].name : _t(2720, "对方"), nmAI = S && S.players && S.players[mpWho] ? aiName(S.players[mpWho]) : nmw;   // aiName：名字里写着「电脑」（哪种语言都算）就不再加后缀
       // 远端看房主那台上轮流玩的座位（不是房主、也不在 mpSeats 里）：他们没有自己的设备，别写「在自己的设备上」
       const where = clientView && S && mpWho > 0 && !(S.mpSeats || []).includes(mpWho) ? _t(2723, "在房主那台设备上") : _t(2724, "在自己的设备上");
       // 远端看电脑在选也写「X（电脑） 在选…」，不写「等 X 在自己的设备上选择」；电脑在房主那台跑，暂停按钮只放在房主那边，房主暂停后远端这里跟着写「已暂停」（S.aiPause 随状态推过来，lockUI 里刷新）
@@ -213,7 +217,8 @@ export function modal({ title, html = '', inputs = [], buttons = [{ label: _t(27
       else done(ans.v);
     };
     if (MP.role === 'host' && !BOT && !local) MP.openModal({ title, html, inputs, buttons, cls, noAI, aiMin, hold, priv }, mpWho, box, (ans, inp) => {
-      Object.entries(inp || {}).forEach(([id, val]) => { const el = box.querySelector('#in_' + CSS.escape(id)); if (el) { if (el.type === 'checkbox') el.checked = !!val; else el.value = String(val).slice(0, 200); } });
+      // 远端填的值只写进本来能填的框（mpwait 之前就灰着的勾选框，比如有升级的服务，不认）；数字按框上的 min / max 夹住，和本机输入框一样
+      Object.entries(inp || {}).forEach(([id, val]) => { const el = box.querySelector('#in_' + CSS.escape(id)); if (!el || (el._d0 ?? el.disabled)) return; if (el.type === 'checkbox') el.checked = !!val; else if (el.type === 'number') el.value = String(clampIn(el, val)); else el.value = String(val).slice(0, 200); });
       if ('v' in ans) { const el = [...box.querySelectorAll('[data-v]')].find(e => e.dataset.v === String(ans.v)); if (!el || (el._d0 ?? el.disabled)) return; }   // 认的是加 mpwait 之前的状态：mpwait 把房主这边的按钮全灰了，不能拿来判断远端点得对不对
       pick(ans);
     });

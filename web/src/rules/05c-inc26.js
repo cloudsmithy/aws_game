@@ -15,7 +15,7 @@ async function payOrImp(p, amt, cands, why) {
   const c = cands.filter(i => live(p, i)).sort((a, b) => baseRent(b, 7) - baseRent(a, 7))[0];
   const x = Math.round(amt * (S && S.cardMul ? S.cardMul : 1));
   if (c == null) { log(_tf(1561, "{$0} 交 ${$1}", nm(p), pay(p, 'pot', amt))); return; }
-  const v = await UI.ask({ who: p.id, title: _tf(838, "{$0}：{$1}", p.name, why), html: _tf(3154, "<p>二选一：交 ${$0} 进奖池；或者让 {$1} 变成 Impaired（暂停收过路费，到你下回合开始自动恢复）。</p>", x, sqn(c)), buttons: [{ label: _tf(3112, "交 ${$0}", x), value: 'pay', cls: 'pri', disabled: p.cash < x }, { label: _tf(3155, "让 {$0} 变成 Impaired", SQ[c].n), value: 'imp' }] });
+  const v = await UI.ask({ who: p.id, title: _tf(838, "{$0}：{$1}", p.name, why), html: _tf(5717, "<p>二选一：交 ${$0} 进奖池；或者让 {$1} 变成 Impaired（暂停收过路费一整轮：所有人各走一回合后，到你回合开始自动恢复）。</p>", x, sqn(c)), buttons: [{ label: _tf(3112, "交 ${$0}", x), value: 'pay', cls: 'pri', disabled: p.cash < x }, { label: _tf(3155, "让 {$0} 变成 Impaired", SQ[c].n), value: 'imp' }] });
   if (v === 'pay') log(_tf(1561, "{$0} 交 ${$1}", nm(p), pay(p, 'pot', amt))); else { impair([c]); log(_tf(3156, "{$0} 的 {$1} 变成 Impaired", nm(p), sqn(c))); }
 }
 // H2：VPC 开了私有子网（第 1 级）、还没到 Session Manager（第 2 级，私有子网里配好了终端节点）时，名下的实例型服务出网都走 NAT 网关
@@ -32,7 +32,7 @@ const ctrHit = p => [IX.ecs, IX.eks].filter(i => live(p, i));
 const bfHit = o => ownedBy(o).filter(i => SQ[i].t === 'prop' && isInst(i) && live(o, i) && !effActive(i, 'scale'));
 const bfOk = o => ownedBy(o).filter(i => SQ[i].t === 'prop' && isInst(i) && live(o, i) && effActive(i, 'scale'));
 export let INC26 = __rv(() => ([
-  { dlc: 'inc26', n: _t(5314, "Lambda 并发被打满"), c: 'avail', e: _t(5315, "一个批处理任务把账户的 Lambda 并发全占了，你别的函数都收到 429 限流：二选一，交 $60 进奖池；或者让你的 Lambda 变成 Impaired（暂停收过路费，到你下回合开始自动恢复）"), im: _t(5316, "Lambda 升了「预置并发」（关键函数有预先分好的执行环境，别的函数抢不走）；或者持有 SQS（批处理从队列取消息，事件源映射设了最大并发）；名下没有 Lambda 不受影响"), tip: _t(5317, "同一个 Region 里账户下所有函数共用一个并发池（默认 1000），一个函数打满，别的函数都会被限流。给批处理函数设预留并发封顶，给关键函数配预留或预置并发保底；SQS 触发时用事件源映射的最大并发控制同时跑几个"), art: 'lambda',
+  { dlc: 'inc26', n: _t(5314, "Lambda 并发被打满"), c: 'avail', e: _t(5724, "一个批处理任务把账户的 Lambda 并发全占了，你别的函数都收到 429 限流：二选一，交 $60 进奖池；或者让你的 Lambda 变成 Impaired（暂停收过路费一整轮：所有人各走一回合后，到你回合开始自动恢复）"), im: _t(5316, "Lambda 升了「预置并发」（关键函数有预先分好的执行环境，别的函数抢不走）；或者持有 SQS（批处理从队列取消息，事件源映射设了最大并发）；名下没有 Lambda 不受影响"), tip: _t(5317, "同一个 Region 里账户下所有函数共用一个并发池（默认 1000），一个函数打满，别的函数都会被限流。给批处理函数设预留并发封顶，给关键函数配预留或预置并发保底；SQS 触发时用事件源映射的最大并发控制同时跑几个"), art: 'lambda',
     imm: o => !owns(o, IX.lambda) ? _t(5318, "没有 Lambda") : S.props[IX.lambda].level >= 2 ? _t(5319, "Lambda 有预置并发") : active(o, IX.sqs) ? _t(5320, "有 SQS，批处理按最大并发慢慢消费") : '',
     hits: p => live(p, IX.lambda), run: async p => {
       if (!live(p, IX.lambda)) { log(_tf(5321, "{$0} 的 Lambda 没在收费，不受影响", nm(p))); return 'nopen'; }
@@ -75,15 +75,15 @@ export let INC26 = __rv(() => ([
   { dlc: 'inc26', n: _t(5360, "定时任务时区配错了"), c: 'ops', e: _t(5361, "cron 表达式按 UTC 算，本该北京时间凌晨 2 点跑的对账任务，上午 10 点才跑：停一轮补数据，或者交 $80 进奖池手动补跑、继续走"), im: _t(5362, "EventBridge 升了「定时启停 EC2」（用 EventBridge Scheduler，每个计划都写明了时区 Asia/Shanghai）"), tip: _t(5363, "EventBridge 规则里的 cron 只按 UTC 算；EventBridge Scheduler 可以给每个计划指定时区，夏令时也自动处理，不指定时默认还是 UTC"), art: 'eventbridge',
     imm: o => active(o, IX.eventbridge) && S.props[IX.eventbridge].level >= 1 ? _t(5364, "EventBridge Scheduler 写明了时区") : '',
     run: async p => { await skipOrPay(p, _t(5360, "定时任务时区配错了"), 80, _t(5365, "手动补跑")); } },
-  { dlc: 'inc26', n: _t(5366, "唯一懂 Kubernetes 的人离职了"), c: 'ops', e: _t(5367, "集群升级、节点打补丁没人会做：二选一，交 $150 进奖池请外部顾问；或者 EKS 下线 1 轮（不收过路费、不算持有，运行费照交，到你下回合开始恢复）"), im: _t(5368, "EKS 升到了「EKS Auto Mode」（节点、核心插件和打补丁交给亚马逊云科技管）；名下没有 EKS 不受影响"), tip: _t(5369, "EKS 每个 Kubernetes 版本标准支持 14 个月，过期进入延长支持要多收费；Auto Mode 把节点扩缩、打补丁和核心插件都托管了，团队不用人人精通 Kubernetes。关键的运维步骤写进 Runbook，别只在一个人脑子里"), art: 'eks',
+  { dlc: 'inc26', n: _t(5366, "唯一懂 Kubernetes 的人离职了"), c: 'ops', e: _t(5725, "集群升级、节点打补丁没人会做：二选一，交 $150 进奖池请外部顾问；或者 EKS 下线 1 轮（不收过路费、不算持有，运行费照交，停一整轮：所有人各走一回合后，到你回合开始恢复）"), im: _t(5368, "EKS 升到了「EKS Auto Mode」（节点、核心插件和打补丁交给亚马逊云科技管）；名下没有 EKS 不受影响"), tip: _t(5369, "EKS 每个 Kubernetes 版本标准支持 14 个月，过期进入延长支持要多收费；Auto Mode 把节点扩缩、打补丁和核心插件都托管了，团队不用人人精通 Kubernetes。关键的运维步骤写进 Runbook，别只在一个人脑子里"), art: 'eks',
     imm: o => !owns(o, IX.eks) ? _t(5370, "没有 EKS") : effActive(IX.eks, 'ssh') ? _t(5371, "EKS 有 Auto Mode") : '',
     hits: p => live(p, IX.eks), run: async (p, id) => {
       if (!live(p, IX.eks)) { log(_tf(5372, "{$0} 的 EKS 没在收费，不受影响", nm(p))); return 'nopen'; }
       const why = _t(5366, "唯一懂 Kubernetes 的人离职了"), x = Math.round(150 * (S.cardMul || 1));
-      const v = await UI.ask({ who: p.id, title: _tf(838, "{$0}：{$1}", p.name, why), html: _tf(5373, "<p>二选一：交 ${$0} 进奖池请外部顾问；或者 EKS 下线 1 轮：不收过路费、不算持有（不凑整组、架构和支柱），运行费照交，到你下回合开始恢复。</p>", x),
+      const v = await UI.ask({ who: p.id, title: _tf(838, "{$0}：{$1}", p.name, why), html: _tf(5726, "<p>二选一：交 ${$0} 进奖池请外部顾问；或者 EKS 下线 1 轮：不收过路费、不算持有（不凑整组、架构和支柱），运行费照交，停一整轮：所有人各走一回合后，到你回合开始恢复。</p>", x),
         buttons: [{ label: _tf(3112, "交 ${$0}", x), value: 'pay', cls: 'pri', disabled: p.cash < x }, { label: _t(5374, "让 EKS 下线 1 轮"), value: 'down' }] });
       if (v === 'pay') log(_tf(1561, "{$0} 交 ${$1}", nm(p), pay(p, 'pot', 150)));
-      else { forceDown(IX.eks, p.id, 1, 'inc:' + id); log(_tf(5375, "{$0} 的 {$1} 下线 1 轮，到 {$2} 下回合开始恢复", nm(p), sqn(IX.eks), nm(p))); }
+      else { forceDown(IX.eks, p.id, 1, 'inc:' + id); log(_tf(5727, "{$0} 的 {$1} 下线一整轮：所有人各走一回合后，到 {$2} 回合开始恢复", nm(p), sqn(IX.eks), nm(p))); }
     } },
   { dlc: 'inc26', n: _t(5376, "Docker Hub 拉镜像被限流"), c: 'avail', e: _t(5377, "扩容时每个新任务都匿名去 Docker Hub 拉镜像，超了拉取次数上限，新任务起不来：你的 ECS、EKS 变成 Impaired"), im: _t(5378, "持有 ECR（拉取缓存把公共镜像缓存在自己的仓库里）；名下没有 ECS、EKS 不受影响"), tip: _t(5379, "Docker Hub 对匿名和免费账号按 IP 限制拉取次数，NAT 网关后面的一大批节点共用一个出口 IP，很快就用完。用 ECR 拉取缓存规则同步 Docker Hub、ECR Public 上的镜像，节点只从自己的 ECR 拉"), art: 'ecr',
     imm: o => !owns(o, IX.ecs) && !owns(o, IX.eks) ? _t(5380, "没有 ECS、EKS") : active(o, IX.ecr) ? _t(5381, "有 ECR 拉取缓存") : '',

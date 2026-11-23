@@ -1,10 +1,10 @@
-import { _t, _tf, _tr } from '../core/01-i18n-runtime.js';
+import { _t, _tf, _trAny } from '../core/01-i18n-runtime.js';
 import { SIM, SIM_AI, rnd } from '../core/02-util.js';
 import { UI } from '../core/02b-ui-port.js';
 import { BAL, GRP, IX, N, SQ, effIn, grpN, isInst } from '../rules/03-services.js';
 import { CATS, COMBOS, INC } from '../rules/04-roles-combos-cards.js';
 import { dlcOn, flyTo } from '../rules/05-dlc.js';
-import { F, P, S, active, availCard, cur, effActive, hasCombo, inPlay, log, nm, ownedBy, owns, singleAZ, sqn } from './07-state.js';
+import { F, P, S, active, availCard, cur, effActive, hasCombo, inPlay, log, nm, ownedBy, owns, singleAZ, sqn, turnNo } from './07-state.js';
 import { cardAmt, credit, pay, withGain } from './08-money.js';
 import { baseRent, forceDown } from './09-rent.js';
 import { moveSteps, sendToJail } from './13-move.js';
@@ -52,13 +52,16 @@ function immuneByProp(o, id) {
   }
 }
 // 11-22：技术债不管怎么清掉的（花钱重构、卡牌、角色技能、自动修复、攒满 3 个的大重构），清掉的那一刻马上进维护窗口停一轮，
-// 名下所有服务一起下线一轮（不收过路费、不算持有，运行费照交，到自己下回合开始恢复）。没有免疫，不能付钱或用 Enterprise Support 提前出来。
+// 名下所有服务一起下线一轮（不收过路费、不算持有，运行费照交，停一整轮，到自己回合开始恢复，见 engine/07-state.js fullRound）。没有免疫，不能付钱或用 Enterprise Support 提前出来。
 // 这次进维护窗口不是事件：出来不写复盘、不领复盘标记，也不会再记技术债。已经在维护窗口里的（被事件送进来的）不重进，只让服务下线
 export const RF_JAIL = 'rf';   // 维护窗口的原因（p.jailCat）：清技术债；事件进来的是 CATS 里的类别
 // 清技术债进来的维护窗口：界面上不写「付钱出来」「Enterprise Support」，这次只能停够一轮（中间状态行、右栏待办、玩家卡共用这一句）
 export const rfJailed = p => p.jail !== null && p.jailCat === RF_JAIL;
 export const rfJailTxt = () => _t(5671, "在维护窗口里（清技术债）：只能停这一轮，不能付钱或用 Enterprise Support 提前出来");
+// 所有清技术债的路都走这里（重构、大重构、Kiro、认证、Security Hub、自动修复、监管沙盒、紧急救治）：
+// 成本优化支柱的「重构清过技术债」在这里记，免得哪条路忘了记
 export function debtCleared(p) {
+  p.refactored = true;
   const down = ownedBy(p).filter(i => !S.props[i].offline && S.props[i].ddos == null), go = p.jail === null;
   down.forEach(i => forceDown(i, p.id, 1, RF_JAIL));   // 原因存键，显示时 downWhy 翻成「清技术债」
   if (go) void sendToJail(p, RF_JAIL);   // 不带说明文字：sendToJail 不弹窗、不等待，这里照常同步往下走
@@ -68,7 +71,7 @@ export function debtCleared(p) {
 }
 // 重构费按梯度：债越多越贵，越往后越贵（欠得越久，利息越高）——手上有 n 个技术债时清 1 个要 $50 × n，第 10 轮起再 +$30
 export const refactorCost = p => BAL.refactorUnit * Math.max(1, p.techDebt) + (S.round >= BAL.refactorLateRound ? BAL.refactorLate : 0);
-export function payRefactor(p) { const c = refactorCost(p); if (!p.techDebt || p.cash < c) return false; pay(p, 'bank', c); p.techDebt--; p.refactored = true; sfxAll('buy'); log(_tf(3142, "🛠 {$0} 花 ${$1} 重构，清掉 1 个技术债（还剩 {$2} 个）", nm(p), c, p.techDebt)); debtCleared(p); return true; }
+export function payRefactor(p) { const c = refactorCost(p); if (!p.techDebt || p.cash < c) return false; pay(p, 'bank', c); p.techDebt--; sfxAll('buy'); log(_tf(3142, "🛠 {$0} 花 ${$1} 重构，清掉 1 个技术债（还剩 {$2} 个）", nm(p), c, p.techDebt)); debtCleared(p); return true; }
 export function refactorDebt() {
   const p = cur(); payRefactor(p);
 }
@@ -82,7 +85,8 @@ export async function skipOrPay(p, what, cost = 80, how = _t(3143, "立刻处理
 // 社交卡（投票、接龙、分享会……）一台设备轮流玩时不再一人一个弹窗：桌长在一个窗里填完。要两位以上真人表态、而且都在这台设备上才合并
 // （联机时有人在远端，照旧发到各自的设备上）；电脑的结果先算好，在窗里只读列出来。模拟（SIM）照旧逐人走，平衡数据不变
 export const tableOK = list => !SIM && list.filter(o => !isAI(o.id)).length > 1 && !(MP.role === 'host' && list.some(o => MP.isRemote(o.id)));
-export const aiName = o => _tr(2721, "电脑", "").test(o.name) ? o.name : o.name + _t(2722, "（电脑）");
+// 名字里已经写着「电脑」（哪种语言都算，_trAny）就不再加后缀：联机时默认名字「电脑 2」是房主那台的语言起的
+export const aiName = o => _trAny(2721, "电脑", "")(o.name) ? o.name : o.name + _t(2722, "（电脑）");
 // 现场投票，返回投了「是」的人：真人自己点（合并时桌长在一个窗里勾）；电脑按 pYes 的概率投「是」
 export async function voteWho(voters, title, html, yesL, noL, pYes = 0.6) {
   const bot = o => isAI(o.id) || (SIM && SIM_AI);
@@ -106,7 +110,7 @@ async function payOrImpair(p, amt, cands, why) {
   const c = cands.filter(i => active(p, i) && !S.props[i].impaired).sort((a, b) => baseRent(b, 7) - baseRent(a, 7))[0];
   const x = Math.round(amt * (S && S.cardMul ? S.cardMul : 1));
   if (c == null) { pay(p, 'pot', amt); log(_tf(1561, "{$0} 交 ${$1}", nm(p), x)); return; }
-  const v = await UI.ask({ who: p.id, title: _tf(838, "{$0}：{$1}", p.name, why), html: _tf(3154, "<p>二选一：交 ${$0} 进奖池；或者让 {$1} 变成 Impaired（暂停收过路费，到你下回合开始自动恢复）。</p>", x, sqn(c)), buttons: [{ label: _tf(3112, "交 ${$0}", x), value: 'pay', cls: 'pri', disabled: p.cash < x }, { label: _tf(3155, "让 {$0} 变成 Impaired", SQ[c].n), value: 'imp' }] });
+  const v = await UI.ask({ who: p.id, title: _tf(838, "{$0}：{$1}", p.name, why), html: _tf(5717, "<p>二选一：交 ${$0} 进奖池；或者让 {$1} 变成 Impaired（暂停收过路费一整轮：所有人各走一回合后，到你回合开始自动恢复）。</p>", x, sqn(c)), buttons: [{ label: _tf(3112, "交 ${$0}", x), value: 'pay', cls: 'pri', disabled: p.cash < x }, { label: _tf(3155, "让 {$0} 变成 Impaired", SQ[c].n), value: 'imp' }] });
   if (v === 'pay') { pay(p, 'pot', amt); log(_tf(1561, "{$0} 交 ${$1}", nm(p), x)); } else { impair([c]); log(_tf(3156, "{$0} 的 {$1} 变成 Impaired", nm(p), sqn(c))); }
 }
 async function penalize(p) {
@@ -117,7 +121,7 @@ async function penalize(p) {
   S.debtExplained = true;
   if (p.techDebt >= 3) {
     // 技术债攒满 3 个必须大重构：交 $300、清掉 3 个，和别的清债一样马上进维护窗口停一轮（以前能多交 $100 不停，现在清债一律要停）
-    p.techDebt -= 3; p.refactored = true;   // 大重构也是重构：成本优化支柱的「重构清过技术债」照样算
+    p.techDebt -= 3;   // 大重构也是重构：成本优化支柱的「重构清过技术债」照样算（debtCleared 里记）
     log(_tf(5406, "{$0} 技术债到 3 个：大重构，交 ${$1}，清掉 3 个", nm(p), pay(p, 'bank', BAL.bigRefactor)));
     debtCleared(p);
   }
@@ -183,7 +187,8 @@ function spofTargets(p) {
   const elbAsg = i => i === IX.ec2 && active(p, IX.elb) && S.props[IX.elb].level >= 3;   // ELB 第 3 级：坏实例自动换掉
   return top.every(i => singleAZ(i) && !effActive(i, 'spof') && !elbAsg(i)) ? top : null;
 }
-export const impair = list => list.forEach(i => { S.props[i].impaired = true; });
+// 变成 Impaired 都走这里：记下是第几个回合打中的（impAt），至少停一整轮才恢复（engine/07-state.js fullRound）
+export const impair = list => list.forEach(i => { S.props[i].impaired = true; S.props[i].impAt = turnNo(); });
 export async function incident(p, id) {
   // 全场事件（卡上写了 all，比如黑色星期五大促）：谁抽到都是全场结算。不能甩锅（甩给谁都一样），抽卡的人在监管沙盒里也不能让全场一起躲过去；
   // 在沙盒里的人由 run 自己跳过。不记技术债
@@ -254,7 +259,7 @@ export async function incident(p, id) {
       else { if (!owns(p, IX.ec2)) { await UI.dealNow(); log(_tf(3224, "{$0} 没有 EC2，不受影响", nm(p))); return; } if (effActive(IX.ec2, 'scale')) { await UI.dealNow(); log(_tf(3225, "🛡️ {$0} 的 EC2 有 Auto Scaling，自动换了一台新实例，不受影响", nm(p))); return; } if (active(p, IX.elb) && S.props[IX.elb].level >= 3) { await UI.dealNow(); log(_tf(3226, "🛡️ {$0} 的 ELB 健康检查发现了要退役的实例，Auto Scaling 换了一台新的，不受影响", nm(p))); return; } if (active(p, IX.eventbridge) && S.props[IX.eventbridge].level >= 2) { await UI.dealNow(); log(_tf(3227, "🛡️ {$0} 的 EventBridge 订阅了 Health 事件，退役通知一来就提前停机再启动、换了硬件，不受影响", nm(p))); return; } i = IX.ec2; }
       if (await tryCancel(p, id)) return;
       const fee = id === 11 ? Math.round(SQ[i].p * 0.1) : 50;
-      S.props[i].impaired = true; const paid = pay(p, 'pot', fee);
+      impair([i]); const paid = pay(p, 'pot', fee);
       log(_tf(3230, "{$0} 的 {$1} 挂了，变成 Impaired，交 ${$2} {$3}", nm(p), sqn(i), paid, id === 11 ? _t(3228, "紧急恢复") : _t(3229, "重新启动到新的硬件上"))); break;
     }
     case 12: {
@@ -303,7 +308,7 @@ export async function incident(p, id) {
       if (active(p, IX.guardduty)) { log(_tf(3256, "{$0} 的 GuardDuty 发现 22 端口在被暴力破解，及时收紧了安全组：交 ${$1}，实例没被攻破", nm(p), pay(p, 'pot', 50))); return; }
       const paid = pay(p, 'pot', 100);
       const t = exposedInst(p).sort((a, b) => SQ[b].p - SQ[a].p)[0];
-      if (t !== undefined) S.props[t].impaired = true;
+      if (t !== undefined) impair([t]);
       log(_tf(1533, "{$0} 交 ${$1}{$2}", nm(p), paid, t !== undefined ? _t(2698, "，") + sqn(t) + _t(3248, " 变成 Impaired") : '')); break;
     }
     case 21: {
