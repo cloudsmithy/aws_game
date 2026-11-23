@@ -1676,7 +1676,7 @@ table.mpnet tr.bad td.st{color:var(--red)}
   .box.rep>h3{padding:0 4px 0 16px;font-size:15px}
   .box.rep>h3 .minbtn{min-height:44px;padding:0 10px;border-color:transparent;font-size:13px}
   .box.rep .btns{flex-wrap:nowrap;gap:8px;padding:8px 12px calc(8px + env(safe-area-inset-bottom))}
-  .box.rep .btns button{min-height:44px;padding:0 20px;white-space:nowrap}
+  .box.rep .btns button{min-height:44px;padding:4px 20px;white-space:normal;line-height:1.2;overflow-wrap:anywhere;text-align:center}   /* 英文、日文的按钮名比中文长：按钮里折行、按钮变高，不叠到隔壁 */
   .report{padding:16px 14px 6px}
   .report .rp-top{padding:40px 16px 18px}
   .report h2{gap:10px;font-size:32px}
@@ -2108,7 +2108,7 @@ table.mpnet tr.bad td.st{color:var(--red)}
 .box.verbox{max-width:600px;--vl:rgba(255,255,255,.14);--vl2:rgba(255,255,255,.08);--vm:#8b97a8;--vmono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d3dbe6;background-color:#0b111c;background-image:radial-gradient(560px 320px at 0% 0%,rgba(236,114,17,.2),transparent 62%),linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:auto,24px 24px,24px 24px;border:1px solid var(--vl);scrollbar-color:rgba(255,255,255,.25) transparent}
 .box.verbox h3{justify-content:flex-start;background:rgba(11,17,28,.92);color:#fff;border-bottom:1px solid var(--vl)}
 .box.verbox.cmds h3::before{content:'COMMANDS'}.box.verbox .ver-tip{margin:0;font-size:12.5px;color:var(--vm)}.box.verbox .ver-tip code{color:#ffb266}
-.ver-term dl.cmdl{grid-template-columns:max-content minmax(0,1fr);gap:4px 18px}.ver-term dl.cmdl code{font:inherit;color:#ffb266}.ver-term dl.cmdl code.al{color:#8b97a8}.ver-term dl.cmdl small{color:#5fb3ff;font-size:11.5px}.ver-term dl.cmdl small.gm{color:#8b97a8}.ver-term dl.cmdl small.ch{color:#ff8a8a}
+.ver-term dl.cmdl{grid-template-columns:max-content minmax(0,1fr);gap:4px 18px}.ver-term dl.cmdl code{font:inherit;color:#ffb266}.ver-term dl.cmdl code.al{color:#8b97a8}.ver-term dl.cmdl small{color:#5fb3ff;font-size:11.5px}.ver-term dl.cmdl small.gm{position:static;display:inline;min-width:0;padding:0;margin:0;border:0;border-radius:0;background:none;box-shadow:none;z-index:auto}.ver-term dl.cmdl small.gm{color:#8b97a8}.ver-term dl.cmdl small.ch{color:#ff8a8a}
 .box.verbox h3::before{content:'VERSION';margin-right:12px;padding:4px 7px;background:#ff9900;color:#16191f;font:800 11px/1 var(--vmono);letter-spacing:.14em}
 .box.verbox .btns{background:rgba(11,17,28,.92);border-top:1px solid var(--vl)}
 .box.verbox .btns button{border-radius:0}.box.verbox .btns button:not(.pri){background:transparent;border-color:var(--vl);color:#f3f6fa}.box.verbox .btns button:not(.pri):hover{border-color:#ff9900;color:#fff}
@@ -2134,7 +2134,7 @@ table.mpnet tr.bad td.st{color:var(--red)}
 .ver-links a:hover{border-color:#ff9900;color:#fff}.ver-links a:focus-visible{outline:2px solid #ff9900;outline-offset:2px}
 @media (pointer:coarse){.ver-links a{min-height:40px}}
 @media (max-width:480px){.ver-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.ver-stats li:nth-child(4){border-left:0}.ver-stats li:nth-child(n+4){border-top:1px solid var(--vl2)}.ver-h{flex-wrap:wrap;padding:14px}.ver-no{text-align:left}.ver-no b{font-size:32px}}
-.gfil{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0 6px}
+.gfil{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0 6px}.gfil .gf{max-width:100%}.gfil .gf select{max-width:min(60vw,240px);min-width:0;text-overflow:ellipsis}
 .gfil .gf{position:relative;display:inline-flex;align-items:center;height:34px;padding-left:14px;border:1px solid var(--line);border-radius:17px;background:var(--surface);font-size:13px;color:var(--mut);transition:border-color .15s,background-color .15s}
 .gfil .gf:hover{border-color:#7d8998}
 .gfil .gf>span{white-space:nowrap}.gfil .gf>span::after{content:'：'}
