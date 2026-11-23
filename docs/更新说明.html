@@ -49,7 +49,7 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   <h1>亚马逊云科技 User Group 云上大亨 · 这一轮改了什么</h1>
   <p>从「破产逻辑是不是有问题」开始，一路改到新角色、两个新开关、地狱模式和全套文档。每条改动后面写了为什么改；平衡数字都是用电脑玩家对打模拟出来的。</p>
   <nav>
-    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#r17">第十七轮</a><a href="#r18">第十八轮</a><a href="#r19">第十九轮</a><a href="#r20">第二十轮</a><a href="#r21">第二十一轮</a><a href="#r22">第二十二轮</a><a href="#r23">第二十三轮</a><a href="#todo">待定</a>
+    <a href="#bug">Bug 修复</a><a href="#rule">规则改动</a><a href="#role">角色与技能</a><a href="#speed">高速部署</a><a href="#reseller">代理商模式</a><a href="#hell">地狱模式</a><a href="#ui">界面</a><a href="#doc">文档</a><a href="#sim">模拟数据</a><a href="#r2">第二轮</a><a href="#r3">第三轮</a><a href="#r4">第四轮</a><a href="#r5">第五轮</a><a href="#r6">第六轮</a><a href="#r7">第七轮</a><a href="#r8">第八轮</a><a href="#r9">第九轮</a><a href="#r10">第十轮</a><a href="#r11">第十一轮</a><a href="#r12">第十二轮</a><a href="#r13">第十三轮</a><a href="#r14">第十四轮</a><a href="#r15">第十五轮</a><a href="#r16">第十六轮</a><a href="#r17">第十七轮</a><a href="#r18">第十八轮</a><a href="#r19">第十九轮</a><a href="#r20">第二十轮</a><a href="#r21">第二十一轮</a><a href="#r22">第二十二轮</a><a href="#r23">第二十三轮</a><a href="#r24">第二十四轮</a><a href="#todo">待定</a>
   </nav>
 </header>
 
@@ -955,8 +955,18 @@ footer{color:var(--mut);font-size:13px;text-align:center;margin-top:24px}
   </ul>
 </section>
 
+<section id="r24">
+  <h2><i>32</i>第二十四轮（11-23）：「我埋的卡」一览、电脑更会打、英日界面补漏</h2>
+  <ul>
+    <li><span class="tag ui">界面</span>「我埋的卡」一览：玩家卡上「你埋的卡」那一行点「查看全部」，或者对局菜单里点「我埋的卡」，列出埋在哪一格、哪张卡、效果、第几轮埋的；只有自己看得到。</li>
+    <li><span class="tag bug">BUG</span>电脑：不开高速部署时几乎不绑万能服务；付原价接手别人下线的服务、借 Session Manager 不留余钱；交易里把技能拿到的服务当 $0 卖、不算升级；User Group 抽 3 张总是拿第一张；Health 抵消窗不会用 7 点蓝绿部署和 Cost Explorer。模拟和正式游戏共用同一套掷骰前流程和维护窗口判断，电脑在掷骰前破产时模拟不再空转。</li>
+    <li><span class="tag bug">BUG</span>英文、日文界面里第二十三轮的版本标题和「我埋的卡」整块显示成中文（翻译写了，翻译表没重新生成）；现在并进翻译时自动重新生成，检查时没生成就报错。</li>
+    <li><span class="tag bug">BUG</span>手机上英文、日文的战报按钮名太长叠在一起；命令列表里的「对局中」小标签跑到屏幕角落；日文图鉴的色组筛选撑出横向滚动。</li>
+  </ul>
+</section>
+
 <section id="todo">
-  <h2><i>32</i>待定 / 已知问题</h2>
+  <h2><i>33</i>待定 / 已知问题</h2>
   <ul>
     <li>代理商在完整局（不限轮数约 16%）和地狱模式 15 轮（约 14%）偏弱，公平是 25%；各模式的数字见规则书第 32 节。</li>
     <li>模拟里的电脑不会刻意凑六大支柱，所以 Well-Architected 的达成率只能当下限看。</li>

@@ -5771,5 +5771,7 @@
  "埋下": "Buried",
  "你现在没有埋着的 Health 卡。": "You have no buried Health cards right now.",
  "我埋的卡（{$0}）": "My buried cards ({$0})",
- "查看全部": "View all"
+ "查看全部": "View all",
+ "第二十四轮": "Round 24",
+ "「我埋的卡」一览、电脑更会打、英日界面补漏": "My buried cards list, smarter computer players, English/Japanese fixes"
 }
